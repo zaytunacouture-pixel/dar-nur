@@ -296,6 +296,41 @@ footer{background:#0a160f;color:var(--cream);padding:64px 28px 34px}
 .foot-col a:hover{color:var(--gold)}
 .foot-bottom{max-width:1100px;margin:46px auto 0;padding-top:24px;border-top:1px solid rgba(200,168,75,.18);text-align:center;font-size:.78rem;color:rgba(244,239,228,.5);letter-spacing:.04em}
 
+
+/* ============ PRODUCT IMAGES ============ */
+.card{position:relative;overflow:hidden;transition:all .3s ease}
+.card-image{
+  width:100%;aspect-ratio:1;background:linear-gradient(135deg,var(--cream) 0%,#eee 100%);
+  display:flex;align-items:center;justify-content:center;margin-bottom:12px;
+  border-radius:8px;overflow:hidden;position:relative;
+}
+.card-image img{width:100%;height:100%;object-fit:cover;transition:transform .4s ease}
+.card:hover .card-image img{transform:scale(1.08)}
+.card-image.placeholder{color:var(--muted);font-size:2.5rem}
+
+/* ============ FEATURED PRODUCT ============ */
+.featured-product{
+  background:linear-gradient(135deg,var(--green) 0%,#0d2722 100%);
+  color:var(--cream);padding:90px 28px;margin:60px 0;
+}
+.featured-inner{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:70px;align-items:center}
+.featured-content h2{font-size:clamp(1.8rem,5vw,2.8rem);color:var(--cream);margin-bottom:24px}
+.featured-content p{font-size:1.1rem;line-height:1.8;margin-bottom:28px;color:rgba(244,239,228,.9)}
+.featured-highlights{list-style:none;margin:32px 0}
+.featured-highlights li{padding:10px 0;padding-left:28px;position:relative;font-size:1rem}
+.featured-highlights li:before{
+  content:"✓";position:absolute;left:0;color:var(--gold);font-weight:bold;
+}
+.featured-image{position:relative;border-radius:12px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.4)}
+.featured-image img{width:100%;display:block}
+.featured-cta{display:inline-block;margin-top:32px;padding:14px 36px;background:var(--gold);color:var(--green);font-family:'Cinzel';font-size:.85rem;letter-spacing:.12em;border-radius:4px;text-decoration:none;transition:all .3s;font-weight:600}
+.featured-cta:hover{background:var(--gold-light);transform:translateY(-2px)}
+
+@media(max-width:768px){
+  .featured-inner{grid-template-columns:1fr;gap:40px}
+  .featured-product{padding:60px 22px}
+}
+
 /* ============ RESPONSIVE ============ */
 @media(max-width:1024px){
   .grid,.family .grid{grid-template-columns:repeat(3,1fr)}
@@ -377,7 +412,28 @@ footer{background:#0a160f;color:var(--cream);padding:64px 28px 34px}
     </div>
   </section>
 
-  <section id="boutique">
+    <section class="featured-product">
+    <div class="featured-inner">
+      <div class="featured-content">
+        <div class="eyebrow" style="color:var(--gold);font-family:'Cinzel';font-size:.8rem;letter-spacing:.2em;text-transform:uppercase;margin-bottom:16px;">Le Cœur Historique de Dar Nūr</div>
+        <h2>Graines de Nigelle Al Baraka</h2>
+        <p>La nigelle éthiopienne premium, sélectionnée par nos soins pour sa pureté exceptionnelle et sa puissance naturelle. Chaque grain raconte une histoire d'authenticité, de savoir-faire ancestral et de confiance envers le produit de la nature.</p>
+        <ul class="featured-highlights">
+          <li>Origine directe Éthiopie — Sourcing responsable</li>
+          <li>Pureté 99.8% — Sans traitement chimique</li>
+          <li>Récolte fraîche 2025 — Saveur et puissance intactes</li>
+          <li>Sélection Al Baraka — Signification de "bénédiction"</li>
+        </ul>
+        <a href="#boutique" class="featured-cta" onclick="goCat('poudres')">Découvrir →</a>
+      </div>
+      <div class="featured-image">
+        <img src="assets/products/graines/grn-baraka-hero.webp" alt="Graines de Nigelle Al Baraka — Sélection Premium Dar Nūr"/>
+      </div>
+    </div>
+  </section>
+
+
+<section id="boutique">
     <div class="wrap">
       <div class="section-head">
         <div class="eyebrow">Notre collection</div>
@@ -482,6 +538,24 @@ const honeyPrice = (a,b,c)=>({type:"format",options:[["50 g",a],["200 g",b],["30
 const fixed = v=>({type:"fixed",value:v});
 
 /* ============ PRODUCTS ============ */
+// IMAGE MAPPING - Lier les produits à leurs images
+const PRODUCT_IMAGES = {
+  "grn-baraka": ["assets/products/graines/grn-baraka-hero.webp","assets/products/graines/grn-nigelle-premium.webp","assets/products/graines/grn-raw-1.webp"],
+  "grn-nigelle-baraka": ["assets/products/graines/grn-baraka-hero.webp","assets/products/graines/grn-nigelle-premium.webp"],
+  "miel-nigelle": ["assets/products/miels/miel-1.webp","assets/products/miels/miel-2.webp","assets/products/miels/miel-3.webp"],
+  "miel-aphrodisiaque": ["assets/products/miels/miel-2.webp","assets/products/miels/miel-3.webp"],
+  "gel-nigelle": ["assets/products/gelules/gelule-1.webp","assets/products/gelules/gelule-2.webp"],
+  "gel-valeriane": ["assets/products/gelules/gelule-2.webp","assets/products/gelules/gelule-3.webp"],
+  "hl-nigelle": ["assets/products/huiles/huile-1.webp","assets/products/huiles/huile-2.webp","assets/products/huiles/huile-3.webp"],
+  "hl-lavande": ["assets/products/huiles/huile-2.webp","assets/products/huiles/huile-3.webp"],
+  "pdr-nigelle": ["assets/products/poudres/poudre-1.webp","assets/products/poudres/poudre-2.webp","assets/products/poudres/poudre-3.webp"],
+  "pdr-gingembre-curcuma": ["assets/products/poudres/poudre-2.webp","assets/products/poudres/poudre-3.webp"],
+};
+function getProductImage(productId) {
+  const images = PRODUCT_IMAGES[productId];
+  return images ? images[0] : null;
+}
+
 const PRODUCTS = [
   /* ---------- MIELS ---------- */
   {id:"miel-nigelle",cat:"miels",name:"Miel de Nigelle",tagline:"L'or sombre des abeilles, marié à la graine bénie.",
@@ -986,13 +1060,17 @@ function renderFilters(){
 }
 function renderGrid(){
   const list = currentFilter==="all" ? PRODUCTS : PRODUCTS.filter(p=>p.cat===currentFilter);
-  document.getElementById("grid").innerHTML = list.map(p=>`
+  document.getElementById("grid").innerHTML = list.map(p=>{
+    const img = getProductImage(p.id);
+    return `
     <div class="card" onclick="showProduct('${p.id}')">
+      ${img ? `<div class="card-image"><img src="${img}" alt="${p.name}" loading="lazy"/></div>` : '<div class="card-image placeholder">📦</div>'}
       ${EMBLEMS[p.cat]}
       <div class="cat-tag">${CAT_LABELS[p.cat]}</div>
       <h3>${p.name}</h3>
       <div class="price">${p.price.type==='format'?`<small>dès</small> ${p.price.options[0][1]}€`:`${startPrice(p)}€`}</div>
-    </div>`).join("");
+    </div>`;
+  }).join("");
 }
 function setFilter(f){currentFilter=f;renderFilters();renderGrid();}
 function goCat(f){showHome();setFilter(f);setTimeout(()=>document.getElementById("boutique").scrollIntoView({behavior:"smooth"}),60);closeMenu();}
