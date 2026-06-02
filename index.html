@@ -69,58 +69,6 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 .divider .line.r{background:linear-gradient(90deg,var(--gold),transparent)}
 .divider svg{width:26px;height:26px;flex:none;color:var(--gold)}
 
-/* ============ LOGO STYLES ============ */
-.logo-header {
-  height: 50px;
-  width: auto;
-  object-fit: contain;
-  margin-right: 16px;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
-}
-
-.logo-hero {
-  height: 140px;
-  width: auto;
-  object-fit: contain;
-  margin-bottom: 24px;
-  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.15));
-}
-
-.footer-logo {
-  text-align: center;
-  margin-bottom: 24px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid rgba(200, 168, 75, 0.2);
-}
-
-.logo-footer {
-  height: 40px;
-  width: auto;
-  object-fit: contain;
-  opacity: 0.85;
-  transition: opacity 0.3s ease;
-}
-
-.logo-footer:hover {
-  opacity: 1;
-}
-
-@media(max-width:768px) {
-  .logo-header {
-    height: 40px;
-    margin-right: 12px;
-  }
-  
-  .logo-hero {
-    height: 100px;
-    margin-bottom: 20px;
-  }
-  
-  .logo-footer {
-    height: 35px;
-  }
-}
-
 /* ============ NAV ============ */
 header{
   position:sticky;top:0;z-index:100;
@@ -159,6 +107,8 @@ nav{
   background-size:200px;opacity:.5;
 }
 .hero-inner{position:relative;max-width:780px;margin:0 auto}
+.hero-mark{font-family:'Cinzel';font-size:clamp(2.2rem,6vw,4.2rem);line-height:1;color:var(--gold);letter-spacing:.18em;margin-bottom:14px;text-transform:uppercase;text-shadow:0 8px 28px rgba(0,0,0,.22)}
+.hero-mark-ar{font-family:'Cormorant Garamond';font-size:clamp(1.7rem,4vw,2.8rem);color:var(--gold-light);line-height:1;margin-bottom:28px}
 .hero .eyebrow{font-family:'Cinzel';font-size:.78rem;letter-spacing:.34em;text-transform:uppercase;color:var(--gold);margin-bottom:26px}
 .hero h1{font-size:clamp(2.1rem,5.5vw,3.7rem);line-height:1.18;color:var(--cream);font-weight:600}
 .hero .sub{font-family:'Cormorant Garamond';font-style:italic;font-size:clamp(1.2rem,2.6vw,1.65rem);color:var(--gold-light);margin:24px 0 40px;font-weight:500}
@@ -402,7 +352,6 @@ footer{background:#0a160f;color:var(--cream);padding:64px 28px 34px}
 
 <header>
   <nav>
-  <img src="logo-header.png" alt="Dar Nūr" class="logo-header"/>
     <div class="brand" onclick="showHome()">
       <span class="name">DAR NŪR</span>
       <span class="ar">دار النور</span>
@@ -423,7 +372,8 @@ footer{background:#0a160f;color:var(--cream);padding:64px 28px 34px}
   <section class="hero">
     <div class="hero-inner">
       <div class="eyebrow">Maison de produits naturels</div>
-      <img src="logo-hero.png" alt="Dar Nūr" class="logo-hero"/>
+      <div class="hero-mark" aria-label="Dar Nūr">DAR NŪR</div>
+      <div class="hero-mark-ar" aria-hidden="true">دار النور</div>
       <h1>Les trésors de la nature,<br/>livrés avec confiance</h1>
       <div class="sub">Sélectionnés avec soin — si Dieu le veut</div>
       <div class="divider hero-divider"><span class="line"></span><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 6.5L21 9l-5 4.2L17.8 21 12 17l-5.8 4 1.8-7.8L3 9l6.6-.5z"/></svg><span class="line r"></span></div>
@@ -490,12 +440,6 @@ footer{background:#0a160f;color:var(--cream);padding:64px 28px 34px}
 </div>
 
 <footer>
-  <div class="footer-logo">
-    <img src="logo-footer.png" alt="Dar Nūr" class="logo-footer"/>
-  </div>
-  <div class="footer-logo">
-    <img src="logo-footer.png" alt="Dar Nūr" class="logo-footer"/>
-  </div>
   <div class="foot-grid">
     <div class="foot-brand">
       <div class="name">DAR NŪR</div>
@@ -556,7 +500,7 @@ const fixed = v=>({type:"fixed",value:v});
 /* ============ PRODUCTS ============ */
 // IMAGE MAPPING - Lier les produits à leurs images
 const PRODUCT_IMAGES = {
-  "grn-baraka": ["grn-baraka-hero.webp","grn-nigelle-premium.webp","grn-raw-1.webp"],
+  "grn-baraka": ["grn-baraka-hero.webp","grn-nigelle-premium.webp","grn-raw-1.webp","grn-raw-2.webp"],
   "grn-nigelle-baraka": ["grn-baraka-hero.webp","grn-nigelle-premium.webp"],
   "miel-nigelle": ["miel-1.webp","miel-2.webp","miel-3.webp"],
   "miel-aphrodisiaque": ["miel-2.webp","miel-3.webp"],
@@ -566,6 +510,8 @@ const PRODUCT_IMAGES = {
   "hl-lavande": ["huile-2.webp","huile-3.webp"],
   "pdr-nigelle": ["poudre-1.webp","poudre-2.webp","poudre-3.webp"],
   "pdr-gingembre-curcuma": ["poudre-2.webp","poudre-3.webp"],
+  "br-nila": ["spray-nila-1.webp","spray-nila-2.webp"],
+  "br-apaisante": ["spray-aromatherapy.webp"],
 };
 function getProductImage(productId) {
   const images = PRODUCT_IMAGES[productId];
