@@ -69,6 +69,58 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 .divider .line.r{background:linear-gradient(90deg,var(--gold),transparent)}
 .divider svg{width:26px;height:26px;flex:none;color:var(--gold)}
 
+/* ============ LOGO STYLES ============ */
+.logo-header {
+  height: 50px;
+  width: auto;
+  object-fit: contain;
+  margin-right: 16px;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+}
+
+.logo-hero {
+  height: 140px;
+  width: auto;
+  object-fit: contain;
+  margin-bottom: 24px;
+  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.15));
+}
+
+.footer-logo {
+  text-align: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(200, 168, 75, 0.2);
+}
+
+.logo-footer {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+  opacity: 0.85;
+  transition: opacity 0.3s ease;
+}
+
+.logo-footer:hover {
+  opacity: 1;
+}
+
+@media(max-width:768px) {
+  .logo-header {
+    height: 40px;
+    margin-right: 12px;
+  }
+  
+  .logo-hero {
+    height: 100px;
+    margin-bottom: 20px;
+  }
+  
+  .logo-footer {
+    height: 35px;
+  }
+}
+
 /* ============ NAV ============ */
 header{
   position:sticky;top:0;z-index:100;
@@ -350,6 +402,7 @@ footer{background:#0a160f;color:var(--cream);padding:64px 28px 34px}
 
 <header>
   <nav>
+  <img src="logo-header.png" alt="Dar Nūr" class="logo-header"/>
     <div class="brand" onclick="showHome()">
       <span class="name">DAR NŪR</span>
       <span class="ar">دار النور</span>
@@ -370,6 +423,7 @@ footer{background:#0a160f;color:var(--cream);padding:64px 28px 34px}
   <section class="hero">
     <div class="hero-inner">
       <div class="eyebrow">Maison de produits naturels</div>
+      <img src="logo-hero.png" alt="Dar Nūr" class="logo-hero"/>
       <h1>Les trésors de la nature,<br/>livrés avec confiance</h1>
       <div class="sub">Sélectionnés avec soin — si Dieu le veut</div>
       <div class="divider hero-divider"><span class="line"></span><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 6.5L21 9l-5 4.2L17.8 21 12 17l-5.8 4 1.8-7.8L3 9l6.6-.5z"/></svg><span class="line r"></span></div>
@@ -436,6 +490,12 @@ footer{background:#0a160f;color:var(--cream);padding:64px 28px 34px}
 </div>
 
 <footer>
+  <div class="footer-logo">
+    <img src="logo-footer.png" alt="Dar Nūr" class="logo-footer"/>
+  </div>
+  <div class="footer-logo">
+    <img src="logo-footer.png" alt="Dar Nūr" class="logo-footer"/>
+  </div>
   <div class="foot-grid">
     <div class="foot-brand">
       <div class="name">DAR NŪR</div>
