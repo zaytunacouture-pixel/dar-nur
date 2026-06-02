@@ -308,29 +308,6 @@ footer{background:#0a160f;color:var(--cream);padding:64px 28px 34px}
 .card:hover .card-image img{transform:scale(1.08)}
 .card-image.placeholder{color:var(--muted);font-size:2.5rem}
 
-/* ============ FEATURED PRODUCT ============ */
-.featured-product{
-  background:linear-gradient(135deg,var(--green) 0%,#0d2722 100%);
-  color:var(--cream);padding:90px 28px;margin:60px 0;
-}
-.featured-inner{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:70px;align-items:center}
-.featured-content h2{font-size:clamp(1.8rem,5vw,2.8rem);color:var(--cream);margin-bottom:24px}
-.featured-content p{font-size:1.1rem;line-height:1.8;margin-bottom:28px;color:rgba(244,239,228,.9)}
-.featured-highlights{list-style:none;margin:32px 0}
-.featured-highlights li{padding:10px 0;padding-left:28px;position:relative;font-size:1rem}
-.featured-highlights li:before{
-  content:"✓";position:absolute;left:0;color:var(--gold);font-weight:bold;
-}
-.featured-image{position:relative;border-radius:12px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.4)}
-.featured-image img{width:100%;display:block}
-.featured-cta{display:inline-block;margin-top:32px;padding:14px 36px;background:var(--gold);color:var(--green);font-family:'Cinzel';font-size:.85rem;letter-spacing:.12em;border-radius:4px;text-decoration:none;transition:all .3s;font-weight:600}
-.featured-cta:hover{background:var(--gold-light);transform:translateY(-2px)}
-
-@media(max-width:768px){
-  .featured-inner{grid-template-columns:1fr;gap:40px}
-  .featured-product{padding:60px 22px}
-}
-
 /* ============ RESPONSIVE ============ */
 @media(max-width:1024px){
   .grid,.family .grid{grid-template-columns:repeat(3,1fr)}
@@ -412,28 +389,7 @@ footer{background:#0a160f;color:var(--cream);padding:64px 28px 34px}
     </div>
   </section>
 
-    <section class="featured-product">
-    <div class="featured-inner">
-      <div class="featured-content">
-        <div class="eyebrow" style="color:var(--gold);font-family:'Cinzel';font-size:.8rem;letter-spacing:.2em;text-transform:uppercase;margin-bottom:16px;">Le Cœur Historique de Dar Nūr</div>
-        <h2>Graines de Nigelle Al Baraka</h2>
-        <p>La nigelle éthiopienne premium, sélectionnée par nos soins pour sa pureté exceptionnelle et sa puissance naturelle. Chaque grain raconte une histoire d'authenticité, de savoir-faire ancestral et de confiance envers le produit de la nature.</p>
-        <ul class="featured-highlights">
-          <li>Origine directe Éthiopie — Sourcing responsable</li>
-          <li>Pureté 99.8% — Sans traitement chimique</li>
-          <li>Récolte fraîche 2025 — Saveur et puissance intactes</li>
-          <li>Sélection Al Baraka — Signification de "bénédiction"</li>
-        </ul>
-        <a href="#boutique" class="featured-cta" onclick="goCat('poudres')">Découvrir →</a>
-      </div>
-      <div class="featured-image">
-        <img src="grn-baraka-hero.webp" alt="Graines de Nigelle Al Baraka — Sélection Premium Dar Nūr"/>
-      </div>
-    </div>
-  </section>
-
-
-<section id="boutique">
+    <section id="boutique">
     <div class="wrap">
       <div class="section-head">
         <div class="eyebrow">Notre collection</div>
