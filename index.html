@@ -299,16 +299,19 @@ footer{background:#0a160f;color:var(--cream);padding:64px 28px 34px}
 .foot-bottom{max-width:1100px;margin:46px auto 0;padding-top:24px;border-top:1px solid rgba(200,168,75,.18);text-align:center;font-size:.78rem;color:rgba(244,239,228,.5);letter-spacing:.04em}
 
 
-/* ============ PRODUCT IMAGES ============ */
+/* ============ PRODUCT VISUALS ============ */
 .card{position:relative;overflow:hidden;transition:all .3s ease}
 .card-image{
-  width:100%;aspect-ratio:1;background:linear-gradient(135deg,var(--cream) 0%,#eee 100%);
+  width:100%;aspect-ratio:1;background:
+    radial-gradient(circle at 50% 42%,rgba(200,168,75,.2),transparent 34%),
+    linear-gradient(135deg,var(--cream) 0%,#efe7d6 100%);
   display:flex;align-items:center;justify-content:center;margin-bottom:12px;
-  border-radius:8px;overflow:hidden;position:relative;
+  border:1px solid var(--line);border-radius:8px;overflow:hidden;position:relative;
 }
-.card-image img{width:100%;height:100%;object-fit:cover;transition:transform .4s ease}
-.card:hover .card-image img{transform:scale(1.08)}
-.card-image.placeholder{color:var(--muted);font-size:2.5rem}
+.card-image::before,.card-image::after{content:"";position:absolute;border:1px solid rgba(200,168,75,.34);border-radius:50%}
+.card-image::before{width:62%;height:62%}
+.card-image::after{width:38%;height:38%;transform:rotate(45deg);border-radius:8px}
+.visual-initial{font-family:'Cinzel';font-size:clamp(2rem,5vw,3.2rem);line-height:1;color:var(--green);opacity:.86;position:relative;z-index:1}
 
 /* ============ RESPONSIVE ============ */
 @media(max-width:1024px){
@@ -498,26 +501,6 @@ const honeyPrice = (a,b,c)=>({type:"format",options:[["50 g",a],["200 g",b],["30
 const fixed = v=>({type:"fixed",value:v});
 
 /* ============ PRODUCTS ============ */
-// IMAGE MAPPING - Lier les produits à leurs images
-const PRODUCT_IMAGES = {
-  "grn-baraka": ["grn-baraka-hero.webp","grn-nigelle-premium.webp","grn-raw-1.webp","grn-raw-2.webp"],
-  "grn-nigelle-baraka": ["grn-baraka-hero.webp","grn-nigelle-premium.webp"],
-  "miel-nigelle": ["miel-1.webp","miel-2.webp","miel-3.webp"],
-  "miel-aphrodisiaque": ["miel-2.webp","miel-3.webp"],
-  "gel-nigelle": ["gelule-1.webp","gelule-2.webp"],
-  "gel-valeriane": ["gelule-2.webp","gelule-3.webp"],
-  "hl-nigelle": ["huile-1.webp","huile-2.webp","huile-3.webp"],
-  "hl-lavande": ["huile-2.webp","huile-3.webp"],
-  "pdr-nigelle": ["poudre-1.webp","poudre-2.webp","poudre-3.webp"],
-  "pdr-gingembre-curcuma": ["poudre-2.webp","poudre-3.webp"],
-  "br-nila": ["spray-nila-1.webp","spray-nila-2.webp"],
-  "br-apaisante": ["spray-aromatherapy.webp"],
-};
-function getProductImage(productId) {
-  const images = PRODUCT_IMAGES[productId];
-  return images ? images[0] : null;
-}
-
 const PRODUCTS = [
   /* ---------- MIELS ---------- */
   {id:"miel-nigelle",cat:"miels",name:"Miel de Nigelle",tagline:"L'or sombre des abeilles, marié à la graine bénie.",
@@ -1023,10 +1006,10 @@ function renderFilters(){
 function renderGrid(){
   const list = currentFilter==="all" ? PRODUCTS : PRODUCTS.filter(p=>p.cat===currentFilter);
   document.getElementById("grid").innerHTML = list.map(p=>{
-    const img = getProductImage(p.id);
+    const initial = p.name.trim().charAt(0);
     return `
     <div class="card" onclick="showProduct('${p.id}')">
-      ${img ? `<div class="card-image"><img src="${img}" alt="${p.name}" loading="lazy"/></div>` : '<div class="card-image placeholder">📦</div>'}
+      <div class="card-image" aria-hidden="true"><span class="visual-initial">${initial}</span></div>
       ${EMBLEMS[p.cat]}
       <div class="cat-tag">${CAT_LABELS[p.cat]}</div>
       <h3>${p.name}</h3>
