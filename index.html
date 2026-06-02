@@ -1,1370 +1,1178 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="google-site-verification" content="">
-    <title>Dar Nūr — Produits Naturels Premium | Miels, Huiles, Gélules</title>
-    <meta name="description" content="Dar Nūr propose des produits naturels 100% purs : miels artisanaux, huiles essentielles, gélules de plantes. Commandez via WhatsApp, livraison rapide.">
-
-    <!-- Open Graph -->
-    <meta property="og:title" content="Dar Nūr — Produits Naturels Premium">
-    <meta property="og:description" content="Miels artisanaux, huiles essentielles, gélules de plantes. Commandez sur WhatsApp.">
-    <meta property="og:url" content="https://dar-nur.fr">
-    <meta property="og:type" content="website">
-
-    <!-- Schema.org JSON-LD -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Store",
-      "name": "Dar Nūr",
-      "url": "https://dar-nur.fr",
-      "description": "Boutique de produits naturels premium — miels artisanaux, huiles essentielles, gélules de plantes",
-      "telephone": "+33749890322",
-      "email": "dar_nur_001@outlook.com",
-      "priceRange": "€€"
-    }
-    </script>
-
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital@0;1&family=Lora:wght@400;500;600&display=swap" rel="stylesheet">
-
-    <style>
-        :root {
-            --color-dark: #0d1f16;
-            --color-gold: #c8a84b;
-            --color-cream: #f4efe4;
-            --color-off-white: #faf8f3;
-            --color-text: #1a1a1a;
-            --color-light-gray: #e8e4dc;
-            --spacing-xs: 0.5rem;
-            --spacing-sm: 1rem;
-            --spacing-md: 1.5rem;
-            --spacing-lg: 2rem;
-            --spacing-xl: 3rem;
-            --spacing-2xl: 4rem;
-            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
-
-        body {
-            font-family: 'Lora', serif;
-            color: var(--color-text);
-            background-color: var(--color-off-white);
-            line-height: 1.6;
-        }
-
-        /* TYPOGRAPHY */
-        h1, h2, h3 {
-            font-family: 'Cinzel', serif;
-            font-weight: 600;
-            letter-spacing: 0.05em;
-        }
-
-        h1 {
-            font-size: 3rem;
-            margin-bottom: var(--spacing-lg);
-        }
-
-        h2 {
-            font-size: 2.25rem;
-            margin-bottom: var(--spacing-lg);
-            color: var(--color-dark);
-        }
-
-        h3 {
-            font-size: 1.5rem;
-            margin-bottom: var(--spacing-md);
-        }
-
-        p {
-            margin-bottom: var(--spacing-md);
-        }
-
-        .subtitle {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 1.5rem;
-            font-style: italic;
-            color: var(--color-gold);
-        }
-
-        .quote {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 1.25rem;
-            font-style: italic;
-            color: var(--color-dark);
-            border-left: 4px solid var(--color-gold);
-            padding-left: var(--spacing-lg);
-            margin: var(--spacing-lg) 0;
-        }
-
-        /* BUTTONS */
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: var(--spacing-sm) var(--spacing-lg);
-            background-color: var(--color-dark);
-            color: var(--color-gold);
-            border: 2px solid var(--color-dark);
-            border-radius: 4px;
-            text-decoration: none;
-            font-family: 'Cinzel', serif;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all var(--transition);
-            letter-spacing: 0.05em;
-        }
-
-        .btn:hover {
-            background-color: var(--color-gold);
-            color: var(--color-dark);
-        }
-
-        .btn-whatsapp {
-            background-color: var(--color-dark);
-            border-color: var(--color-dark);
-            color: var(--color-gold);
-            gap: var(--spacing-sm);
-        }
-
-        .btn-whatsapp:hover {
-            background-color: var(--color-gold);
-            color: var(--color-dark);
-        }
-
-        .btn-secondary {
-            background-color: transparent;
-            color: var(--color-dark);
-            border: 2px solid var(--color-dark);
-        }
-
-        .btn-secondary:hover {
-            background-color: var(--color-dark);
-            color: var(--color-off-white);
-        }
-
-        .btn-filter {
-            background-color: transparent;
-            color: var(--color-dark);
-            border: 2px solid var(--color-dark);
-            padding: var(--spacing-xs) var(--spacing-md);
-            font-size: 0.9rem;
-        }
-
-        .btn-filter.active {
-            background-color: var(--color-dark);
-            color: var(--color-gold);
-        }
-
-        /* HEADER & NAV */
-        header {
-            background-color: var(--color-off-white);
-            border-bottom: 2px solid var(--color-light-gray);
-            padding: var(--spacing-md) 0;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .header-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 var(--spacing-md);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-family: 'Cinzel', serif;
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--color-dark);
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-sm);
-        }
-
-        .logo-icon {
-            font-size: 1.8rem;
-        }
-
-        nav {
-            display: flex;
-            gap: var(--spacing-lg);
-        }
-
-        nav a {
-            color: var(--color-dark);
-            text-decoration: none;
-            font-family: 'Cinzel', serif;
-            font-size: 0.95rem;
-            transition: color var(--transition);
-            position: relative;
-        }
-
-        nav a::after {
-            content: '';
-            position: absolute;
-            bottom: -4px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background-color: var(--color-gold);
-            transition: width var(--transition);
-        }
-
-        nav a:hover::after {
-            width: 100%;
-        }
-
-        .burger-menu {
-            display: none;
-            flex-direction: column;
-            gap: 0.4rem;
-            cursor: pointer;
-            background: none;
-            border: none;
-        }
-
-        .burger-menu span {
-            width: 24px;
-            height: 2px;
-            background-color: var(--color-dark);
-            transition: all var(--transition);
-        }
-
-        @media (max-width: 768px) {
-            nav {
-                display: none;
-                position: absolute;
-                top: 100%;
-                left: 0;
-                right: 0;
-                flex-direction: column;
-                background-color: var(--color-off-white);
-                padding: var(--spacing-lg);
-                border-bottom: 2px solid var(--color-light-gray);
-                gap: var(--spacing-md);
-            }
-
-            nav.active {
-                display: flex;
-            }
-
-            .burger-menu {
-                display: flex;
-            }
-        }
-
-        /* HERO */
-        .hero {
-            background-color: var(--color-dark);
-            color: var(--color-gold);
-            padding: var(--spacing-2xl) var(--spacing-md);
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-            min-height: 600px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .hero::before {
-            content: '✦ ✦ ✦';
-            position: absolute;
-            font-size: 4rem;
-            opacity: 0.05;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            letter-spacing: 2rem;
-            z-index: 1;
-        }
-
-        .hero-content {
-            max-width: 800px;
-            position: relative;
-            z-index: 2;
-        }
-
-        .hero h1 {
-            color: var(--color-gold);
-            font-size: 2.8rem;
-            margin-bottom: var(--spacing-md);
-            line-height: 1.2;
-        }
-
-        .hero .subtitle {
-            font-size: 1.4rem;
-            margin-bottom: var(--spacing-xl);
-            color: var(--color-cream);
-        }
-
-        .hero-cta-group {
-            display: flex;
-            gap: var(--spacing-md);
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        /* SECTION LAYOUTS */
-        section {
-            padding: var(--spacing-2xl) var(--spacing-md);
-        }
-
-        .section-container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .section-title {
-            text-align: center;
-            margin-bottom: var(--spacing-2xl);
-            position: relative;
-        }
-
-        .section-title::after {
-            content: '';
-            display: block;
-            width: 60px;
-            height: 2px;
-            background-color: var(--color-gold);
-            margin: var(--spacing-md) auto 0;
-        }
-
-        .section-title .subtitle {
-            display: block;
-            margin-top: var(--spacing-md);
-        }
-
-        /* ABOUT SECTION */
-        .about {
-            background-color: var(--color-cream);
-        }
-
-        .about-content {
-            max-width: 800px;
-            margin: 0 auto;
-            text-align: center;
-        }
-
-        .about-content p {
-            font-size: 1.1rem;
-            line-height: 1.8;
-            color: var(--color-text);
-        }
-
-        .about-ornament {
-            font-size: 2rem;
-            color: var(--color-gold);
-            margin: var(--spacing-lg) 0;
-        }
-
-        /* CATALOG */
-        .catalog {
-            background-color: var(--color-off-white);
-        }
-
-        .filter-container {
-            display: flex;
-            gap: var(--spacing-sm);
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-bottom: var(--spacing-2xl);
-        }
-
-        .products-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: var(--spacing-xl);
-            margin-bottom: var(--spacing-xl);
-        }
-
-        .product-card {
-            background-color: var(--color-off-white);
-            border: 2px solid var(--color-light-gray);
-            border-radius: 8px;
-            padding: var(--spacing-lg);
-            cursor: pointer;
-            transition: all var(--transition);
-            text-decoration: none;
-            color: var(--color-text);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .product-card:hover {
-            border-color: var(--color-gold);
-            transform: translateY(-8px);
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
-        }
-
-        .product-image {
-            width: 100%;
-            height: 200px;
-            background: linear-gradient(135deg, var(--color-cream) 0%, var(--color-light-gray) 100%);
-            border-radius: 4px;
-            margin-bottom: var(--spacing-md);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 3rem;
-        }
-
-        .product-name {
-            font-family: 'Cinzel', serif;
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin-bottom: var(--spacing-sm);
-            color: var(--color-dark);
-        }
-
-        .product-info {
-            font-size: 0.9rem;
-            color: #999;
-            margin-bottom: var(--spacing-sm);
-            flex-grow: 1;
-        }
-
-        .product-price {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--color-gold);
-            margin-bottom: var(--spacing-md);
-            font-family: 'Cinzel', serif;
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        /* MODAL */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            animation: fadeIn 0.3s ease-out;
-        }
-
-        .modal.active {
-            display: flex;
-            align-items: flex-end;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
-        }
-
-        @keyframes slideUp {
-            from {
-                transform: translateY(100%);
-            }
-            to {
-                transform: translateY(0);
-            }
-        }
-
-        .modal-content {
-            background-color: var(--color-off-white);
-            width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-            border-radius: 16px 16px 0 0;
-            padding: var(--spacing-lg);
-            animation: slideUp 0.3s ease-out;
-        }
-
-        @media (min-width: 769px) {
-            .modal {
-                align-items: center;
-                justify-content: center;
-            }
-
-            .modal-content {
-                width: 90%;
-                max-width: 600px;
-                border-radius: 16px;
-                max-height: 90vh;
-            }
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: var(--spacing-lg);
-            border-bottom: 2px solid var(--color-light-gray);
-            padding-bottom: var(--spacing-md);
-        }
-
-        .modal-title {
-            font-family: 'Cinzel', serif;
-            font-size: 1.75rem;
-            color: var(--color-dark);
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--color-dark);
-            transition: color var(--transition);
-        }
-
-        .modal-close:hover {
-            color: var(--color-gold);
-        }
-
-        .modal-description {
-            margin-bottom: var(--spacing-lg);
-            line-height: 1.8;
-        }
-
-        .modal-benefits {
-            background-color: var(--color-cream);
-            padding: var(--spacing-md);
-            border-radius: 8px;
-            margin-bottom: var(--spacing-lg);
-        }
-
-        .modal-benefits h4 {
-            font-family: 'Cinzel', serif;
-            color: var(--color-dark);
-            margin-bottom: var(--spacing-sm);
-        }
-
-        .modal-benefits ul {
-            list-style: none;
-            padding-left: 0;
-        }
-
-        .modal-benefits li {
-            padding-left: var(--spacing-md);
-            position: relative;
-            margin-bottom: var(--spacing-sm);
-        }
-
-        .modal-benefits li::before {
-            content: '✓';
-            position: absolute;
-            left: 0;
-            color: var(--color-gold);
-            font-weight: bold;
-        }
-
-        .modal-options {
-            margin-bottom: var(--spacing-lg);
-        }
-
-        .modal-options h4 {
-            font-family: 'Cinzel', serif;
-            color: var(--color-dark);
-            margin-bottom: var(--spacing-md);
-        }
-
-        .size-selector, .variant-selector {
-            display: flex;
-            gap: var(--spacing-sm);
-            flex-wrap: wrap;
-            margin-bottom: var(--spacing-md);
-        }
-
-        .size-btn, .variant-btn {
-            padding: var(--spacing-sm) var(--spacing-md);
-            border: 2px solid var(--color-dark);
-            background-color: transparent;
-            color: var(--color-dark);
-            cursor: pointer;
-            border-radius: 4px;
-            font-family: 'Cinzel', serif;
-            font-size: 0.9rem;
-            transition: all var(--transition);
-        }
-
-        .size-btn:hover, .variant-btn:hover {
-            border-color: var(--color-gold);
-        }
-
-        .size-btn.selected, .variant-btn.selected {
-            background-color: var(--color-dark);
-            color: var(--color-gold);
-            border-color: var(--color-dark);
-        }
-
-        .modal-price {
-            font-size: 2rem;
-            font-family: 'Cinzel', serif;
-            color: var(--color-gold);
-            font-weight: 700;
-            margin-bottom: var(--spacing-lg);
-        }
-
-        .modal-footer {
-            display: flex;
-            gap: var(--spacing-md);
-            margin-top: var(--spacing-xl);
-        }
-
-        .modal-footer .btn {
-            flex: 1;
-        }
-
-        .modal-footer-mobile {
-            display: none;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background-color: var(--color-dark);
-            padding: var(--spacing-md);
-            z-index: 1001;
-        }
-
-        .modal-footer-mobile .btn {
-            width: 100%;
-        }
-
-        @media (max-width: 768px) {
-            .modal-footer {
-                display: none;
-            }
-
-            .modal-footer-mobile {
-                display: block;
-            }
-
-            .modal-content {
-                padding-bottom: 80px;
-            }
-        }
-
-        /* PAYMENT SECTION */
-        .payments {
-            background-color: var(--color-cream);
-        }
-
-        .payment-methods {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: var(--spacing-xl);
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-
-        .payment-card {
-            background-color: var(--color-off-white);
-            border: 2px solid var(--color-light-gray);
-            border-radius: 8px;
-            padding: var(--spacing-lg);
-            text-align: center;
-        }
-
-        .payment-icon {
-            font-size: 3rem;
-            margin-bottom: var(--spacing-md);
-        }
-
-        .payment-card h3 {
-            color: var(--color-dark);
-            margin-bottom: var(--spacing-md);
-        }
-
-        .payment-card p {
-            color: #666;
-            margin-bottom: var(--spacing-md);
-        }
-
-        .payment-card .btn {
-            width: 100%;
-        }
-
-        /* FOOTER */
-        footer {
-            background-color: var(--color-dark);
-            color: var(--color-cream);
-            padding: var(--spacing-2xl) var(--spacing-md);
-        }
-
-        .footer-content {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .footer-top {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: var(--spacing-xl);
-            margin-bottom: var(--spacing-2xl);
-            padding-bottom: var(--spacing-2xl);
-            border-bottom: 2px solid var(--color-gold);
-        }
-
-        .footer-section h4 {
-            font-family: 'Cinzel', serif;
-            color: var(--color-gold);
-            margin-bottom: var(--spacing-md);
-        }
-
-        .footer-section a {
-            color: var(--color-cream);
-            text-decoration: none;
-            display: block;
-            margin-bottom: var(--spacing-sm);
-            transition: color var(--transition);
-        }
-
-        .footer-section a:hover {
-            color: var(--color-gold);
-        }
-
-        .footer-logo {
-            font-family: 'Cinzel', serif;
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--color-gold);
-            margin-bottom: var(--spacing-md);
-        }
-
-        .footer-arabic {
-            font-family: 'Amiri', serif;
-            font-size: 1.25rem;
-            color: var(--color-gold);
-            text-align: center;
-            margin: var(--spacing-lg) 0;
-        }
-
-        .footer-bottom {
-            text-align: center;
-            padding-top: var(--spacing-lg);
-            border-top: 2px solid var(--color-gold);
-            color: #999;
-        }
-
-        .footer-links {
-            display: flex;
-            gap: var(--spacing-md);
-            justify-content: center;
-            margin-bottom: var(--spacing-md);
-            flex-wrap: wrap;
-        }
-
-        .footer-links a {
-            display: inline;
-            color: var(--color-cream);
-        }
-
-        /* RESPONSIVE */
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 2rem;
-            }
-
-            h2 {
-                font-size: 1.75rem;
-            }
-
-            .hero h1 {
-                font-size: 2rem;
-            }
-
-            .hero .subtitle {
-                font-size: 1.2rem;
-            }
-
-            .products-grid {
-                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-                gap: var(--spacing-md);
-            }
-
-            section {
-                padding: var(--spacing-xl) var(--spacing-md);
-            }
-
-            .payment-methods {
-                grid-template-columns: 1fr;
-            }
-
-            nav a {
-                font-size: 1.1rem;
-            }
-        }
-
-        /* UTILITIES */
-        .ornament {
-            text-align: center;
-            font-size: 1.5rem;
-            color: var(--color-gold);
-            margin: var(--spacing-lg) 0;
-        }
-
-        .text-center {
-            text-align: center;
-        }
-
-        .text-gold {
-            color: var(--color-gold);
-        }
-
-        .text-dark {
-            color: var(--color-dark);
-        }
-
-        .mb-lg {
-            margin-bottom: var(--spacing-lg);
-        }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<!-- Google Search Console — NE JAMAIS SUPPRIMER -->
+<meta name="google-site-verification" content="REMPLACER_PAR_VOTRE_VALEUR_EXISTANTE" />
+
+<title>Dar Nūr — Produits Naturels Premium | Miels, Huiles, Gélules</title>
+<meta name="description" content="Dar Nūr propose des produits naturels 100% purs : miels artisanaux, huiles essentielles, gélules de plantes. Commandez via WhatsApp, livraison rapide." />
+
+<meta property="og:title" content="Dar Nūr — Produits Naturels Premium" />
+<meta property="og:description" content="Miels artisanaux, huiles essentielles, gélules de plantes. Commandez sur WhatsApp." />
+<meta property="og:url" content="https://dar-nur.fr" />
+<meta property="og:type" content="website" />
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230d1f16'/%3E%3Ctext x='50' y='72' font-size='64' text-anchor='middle' fill='%23c8a84b' font-family='serif'%3Eن%3C/text%3E%3C/svg%3E" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Lora:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Store",
+  "name": "Dar Nūr",
+  "url": "https://dar-nur.fr",
+  "description": "Boutique de produits naturels premium — miels artisanaux, huiles essentielles, gélules de plantes",
+  "telephone": "+33749890322",
+  "email": "dar_nur_001@outlook.com",
+  "priceRange": "€€"
+}
+</script>
+
+<style>
+:root{
+  --green:#0d1f16;
+  --green-soft:#16301f;
+  --gold:#c8a84b;
+  --gold-light:#dcc079;
+  --cream:#f4efe4;
+  --offwhite:#faf8f3;
+  --ink:#1a1a1a;
+  --muted:#6b6256;
+  --line:rgba(200,168,75,.28);
+  --shadow:0 18px 50px -22px rgba(13,31,22,.45);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Lora',Georgia,serif;
+  background:var(--offwhite);
+  color:var(--ink);
+  line-height:1.7;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+h1,h2,h3,.cinzel{font-family:'Cinzel',serif;font-weight:600;letter-spacing:.04em}
+.cormorant{font-family:'Cormorant Garamond',serif}
+img{max-width:100%;display:block}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer;border:none;background:none}
+
+/* ============ ORNAMENTS ============ */
+.divider{display:flex;align-items:center;justify-content:center;gap:18px;margin:0 auto;max-width:340px}
+.divider .line{height:1px;flex:1;background:linear-gradient(90deg,transparent,var(--gold))}
+.divider .line.r{background:linear-gradient(90deg,var(--gold),transparent)}
+.divider svg{width:26px;height:26px;flex:none;color:var(--gold)}
+
+/* ============ NAV ============ */
+header{
+  position:sticky;top:0;z-index:100;
+  background:rgba(13,31,22,.97);
+  backdrop-filter:blur(8px);
+  border-bottom:1px solid rgba(200,168,75,.22);
+}
+nav{
+  max-width:1240px;margin:0 auto;padding:16px 28px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.brand{display:flex;flex-direction:column;line-height:1;cursor:pointer}
+.brand .name{font-family:'Cinzel';font-size:1.35rem;color:var(--cream);letter-spacing:.18em}
+.brand .ar{font-family:'Cormorant Garamond';font-size:1rem;color:var(--gold);letter-spacing:.05em;margin-top:3px}
+.nav-links{display:flex;gap:34px;align-items:center}
+.nav-links a{
+  font-family:'Cinzel';font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--cream);opacity:.82;transition:opacity .25s,color .25s;position:relative;padding:4px 0;
+}
+.nav-links a:hover{opacity:1;color:var(--gold)}
+.burger{display:none;flex-direction:column;gap:5px;padding:8px}
+.burger span{width:24px;height:2px;background:var(--gold);transition:.3s}
+
+/* ============ HERO ============ */
+.hero{
+  position:relative;
+  background:radial-gradient(120% 120% at 70% 10%,#1a3a26 0%,var(--green) 55%);
+  color:var(--cream);
+  padding:120px 28px 130px;
+  text-align:center;
+  overflow:hidden;
+}
+.hero::before{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='%23c8a84b' stroke-width='.6' opacity='.13'%3E%3Cpath d='M60 10 L75 45 L110 45 L82 68 L92 105 L60 82 L28 105 L38 68 L10 45 L45 45 Z'/%3E%3Ccircle cx='60' cy='60' r='38'/%3E%3C/g%3E%3C/svg%3E");
+  background-size:200px;opacity:.5;
+}
+.hero-inner{position:relative;max-width:780px;margin:0 auto}
+.hero .eyebrow{font-family:'Cinzel';font-size:.78rem;letter-spacing:.34em;text-transform:uppercase;color:var(--gold);margin-bottom:26px}
+.hero h1{font-size:clamp(2.1rem,5.5vw,3.7rem);line-height:1.18;color:var(--cream);font-weight:600}
+.hero .sub{font-family:'Cormorant Garamond';font-style:italic;font-size:clamp(1.2rem,2.6vw,1.65rem);color:var(--gold-light);margin:24px 0 40px;font-weight:500}
+.hero-divider{margin-bottom:42px}
+
+/* ============ BUTTONS ============ */
+.btn-wa{
+  display:inline-flex;align-items:center;gap:11px;
+  background:var(--gold);color:var(--green);
+  font-family:'Cinzel';font-size:.82rem;letter-spacing:.12em;text-transform:uppercase;font-weight:600;
+  padding:16px 34px;border-radius:2px;
+  transition:transform .25s,box-shadow .25s,background .25s;
+  box-shadow:0 10px 30px -10px rgba(200,168,75,.6);
+}
+.btn-wa:hover{transform:translateY(-2px);background:var(--gold-light);box-shadow:0 16px 38px -12px rgba(200,168,75,.7)}
+.btn-wa svg{width:19px;height:19px}
+.btn-wa.dark{background:var(--green);color:var(--gold)}
+.btn-wa.dark:hover{background:var(--green-soft)}
+
+/* ============ SECTIONS ============ */
+section{padding:90px 28px}
+.wrap{max-width:1240px;margin:0 auto}
+.section-head{text-align:center;margin-bottom:54px}
+.section-head .eyebrow{font-family:'Cinzel';font-size:.74rem;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);margin-bottom:14px}
+.section-head h2{font-size:clamp(1.8rem,4vw,2.6rem);color:var(--green)}
+.section-head p{font-family:'Cormorant Garamond';font-size:1.3rem;color:var(--muted);max-width:560px;margin:16px auto 0;font-style:italic}
+
+/* ============ STORY ============ */
+.story{background:var(--cream);position:relative}
+.story-inner{max-width:760px;margin:0 auto;text-align:center}
+.story .ar-big{font-family:'Cormorant Garamond';font-size:2.6rem;color:var(--gold);margin-bottom:8px}
+.story blockquote{
+  font-family:'Cormorant Garamond';font-size:clamp(1.25rem,2.5vw,1.6rem);
+  line-height:1.7;color:var(--green);font-style:italic;margin:30px 0;
+}
+.story blockquote::before{content:"“";font-size:2.4em;color:var(--gold);line-height:0;vertical-align:-.35em;margin-right:.05em}
+.story .signoff{font-family:'Cinzel';font-size:.8rem;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;margin-top:24px}
+
+/* ============ FILTERS ============ */
+.filters{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:46px}
+.filters button{
+  font-family:'Cinzel';font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;
+  padding:10px 20px;border:1px solid var(--line);border-radius:40px;color:var(--muted);
+  background:transparent;transition:.25s;
+}
+.filters button:hover{border-color:var(--gold);color:var(--green)}
+.filters button.active{background:var(--green);color:var(--gold);border-color:var(--green)}
+
+/* ============ PRODUCT GRID ============ */
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:26px}
+.card{
+  background:#fff;border:1px solid var(--line);border-radius:4px;
+  padding:30px 24px 26px;text-align:center;cursor:pointer;
+  transition:transform .3s,box-shadow .3s,border-color .3s;
+  display:flex;flex-direction:column;align-items:center;position:relative;overflow:hidden;
+}
+.card::after{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold-light),var(--gold));transform:scaleX(0);transform-origin:left;transition:transform .35s}
+.card:hover{transform:translateY(-6px);box-shadow:var(--shadow);border-color:var(--gold)}
+.card:hover::after{transform:scaleX(1)}
+.card .emblem{width:64px;height:64px;margin-bottom:18px;color:var(--green);opacity:.92}
+.card .cat-tag{font-family:'Cinzel';font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:10px}
+.card h3{font-size:1rem;color:var(--green);line-height:1.4;margin-bottom:14px;font-weight:500}
+.card .price{font-family:'Cormorant Garamond';font-size:1.45rem;color:var(--ink);font-weight:600;margin-top:auto}
+.card .price small{font-size:.8rem;color:var(--muted);font-style:italic}
+
+/* ============ PRODUCT PAGE ============ */
+#productView{display:none}
+.pp-hero{
+  background:radial-gradient(120% 130% at 75% 0%,#1a3a26,var(--green) 60%);
+  color:var(--cream);padding:54px 28px 64px;position:relative;overflow:hidden;
+}
+.pp-hero::before{
+  content:"";position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cg fill='none' stroke='%23c8a84b' stroke-width='.6' opacity='.1'%3E%3Ccircle cx='60' cy='60' r='40'/%3E%3Ccircle cx='60' cy='60' r='26'/%3E%3C/g%3E%3C/svg%3E");
+  background-size:180px;
+}
+.pp-hero-inner{max-width:1100px;margin:0 auto;position:relative;text-align:center}
+.breadcrumb{font-family:'Cinzel';font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:30px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.breadcrumb a{cursor:pointer;opacity:.85}
+.breadcrumb a:hover{opacity:1;text-decoration:underline}
+.breadcrumb span{opacity:.5}
+.pp-badge{display:inline-block;font-family:'Cinzel';font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--green);background:var(--gold);padding:6px 16px;border-radius:30px;margin-bottom:22px}
+.pp-hero h1{font-size:clamp(1.9rem,4.6vw,3.1rem);color:var(--cream);line-height:1.2}
+.pp-hero .tagline{font-family:'Cormorant Garamond';font-style:italic;font-size:clamp(1.15rem,2.4vw,1.5rem);color:var(--gold-light);margin-top:18px;max-width:620px;margin-left:auto;margin-right:auto}
+
+.pp-body{max-width:1100px;margin:0 auto;padding:70px 28px 40px;display:grid;grid-template-columns:1fr 1.25fr;gap:56px;align-items:start}
+.pp-visual{position:sticky;top:110px;background:var(--cream);border:1px solid var(--line);border-radius:6px;padding:48px;text-align:center;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.pp-visual .emblem{width:130px;height:130px;color:var(--green);margin-bottom:20px}
+.pp-visual .ribbon{font-family:'Cinzel';font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:10px 0;width:100%}
+
+.pp-content h2{font-size:1.05rem;color:var(--green);letter-spacing:.08em;margin:34px 0 14px;display:flex;align-items:center;gap:10px}
+.pp-content h2:first-child{margin-top:0}
+.pp-content h2::before{content:"";width:22px;height:1px;background:var(--gold)}
+.pp-content p{color:#3a3a3a;margin-bottom:14px}
+.pp-benefits{list-style:none;display:grid;gap:12px;margin:6px 0 10px}
+.pp-benefits li{display:flex;gap:12px;align-items:flex-start;color:#3a3a3a}
+.pp-benefits li::before{content:"";flex:none;width:8px;height:8px;margin-top:9px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 3px rgba(200,168,75,.18)}
+.pp-meta{display:flex;flex-wrap:wrap;gap:26px;margin-top:8px}
+.pp-meta div{flex:1;min-width:140px}
+.pp-meta .k{font-family:'Cinzel';font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:5px}
+.pp-meta .v{font-family:'Cormorant Garamond';font-size:1.15rem;color:var(--green)}
+
+/* order block */
+.order-box{
+  background:var(--cream);border:1px solid var(--gold);border-radius:6px;
+  padding:30px;margin-top:40px;box-shadow:var(--shadow);
+}
+.order-box .label{font-family:'Cinzel';font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.opt-row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:22px}
+.opt{
+  font-family:'Cinzel';font-size:.74rem;letter-spacing:.06em;
+  padding:11px 20px;border:1px solid var(--line);border-radius:3px;color:var(--green);background:#fff;transition:.2s;
+}
+.opt:hover{border-color:var(--gold)}
+.opt.sel{background:var(--green);color:var(--gold);border-color:var(--green)}
+.order-foot{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.order-price{font-family:'Cormorant Garamond';font-size:2.2rem;color:var(--green);font-weight:600;line-height:1}
+.order-price small{font-size:.9rem;color:var(--muted);font-style:italic;display:block;letter-spacing:.04em}
+
+/* dual panel: qualité / précautions */
+.dual-panel{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:30px}
+.panel{background:#fff;border:1px solid var(--line);border-radius:6px;padding:24px}
+.panel.warn{background:#fbf6ec}
+.panel-head{display:flex;align-items:center;gap:10px;font-family:'Cinzel';font-size:.82rem;letter-spacing:.06em;color:var(--green);margin-bottom:14px}
+.panel-head svg{width:20px;height:20px;color:var(--gold)}
+.panel.warn .panel-head svg{color:#b08828}
+.panel ul{list-style:none;display:grid;gap:9px}
+.panel li{position:relative;padding-left:18px;font-size:.92rem;color:#4a4a4a;line-height:1.5}
+.panel li::before{content:"";position:absolute;left:0;top:9px;width:6px;height:6px;border-radius:50%;background:var(--gold)}
+.panel.warn li::before{border-radius:1px;background:#c79a3a}
+
+/* engagement band */
+.engage{background:var(--green);color:var(--cream);padding:64px 28px}
+.engage-inner{display:grid;grid-template-columns:1fr 1.1fr;gap:50px;align-items:center}
+.engage-badges{display:grid;grid-template-columns:1fr 1fr;gap:26px}
+.badge{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+.badge svg{width:38px;height:38px;color:var(--gold)}
+.badge span{font-family:'Cinzel';font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--cream);opacity:.92}
+.engage-quote{border-left:2px solid var(--gold);padding-left:34px}
+.engage-quote p{font-family:'Cormorant Garamond';font-style:italic;font-size:1.5rem;line-height:1.5;color:var(--cream)}
+.engage-quote p::before{content:"“";color:var(--gold);font-size:1.6em;line-height:0;vertical-align:-.3em;margin-right:.04em}
+.engage-quote .signature{display:inline-block;font-family:'Cormorant Garamond';font-size:1.9rem;color:var(--gold);margin-top:14px;font-weight:600}
+
+@media(max-width:768px){
+  .dual-panel{grid-template-columns:1fr}
+  .engage{padding:48px 22px}
+  .engage-inner{grid-template-columns:1fr;gap:36px}
+  .engage-quote{padding-left:22px}
+  .engage-quote p{font-size:1.3rem}
+}
+
+/* same family */
+.family{background:var(--cream);padding:80px 28px}
+.family .grid{grid-template-columns:repeat(4,1fr)}
+
+/* mobile sticky bar */
+.mbar{
+  position:fixed;bottom:0;left:0;right:0;z-index:90;display:none;
+  background:rgba(13,31,22,.98);backdrop-filter:blur(8px);
+  padding:12px 18px;align-items:center;justify-content:space-between;gap:14px;
+  border-top:1px solid rgba(200,168,75,.3);
+}
+.mbar .p{font-family:'Cormorant Garamond';font-size:1.5rem;color:var(--cream);font-weight:600}
+.mbar .btn-wa{padding:13px 22px;font-size:.74rem}
+
+/* ============ PAYMENTS ============ */
+.pay{background:var(--green);color:var(--cream)}
+.pay .section-head h2{color:var(--cream)}
+.pay-grid{display:flex;gap:24px;justify-content:center;flex-wrap:wrap;max-width:760px;margin:0 auto}
+.pay-card{
+  flex:1;min-width:240px;background:rgba(255,255,255,.04);
+  border:1px solid rgba(200,168,75,.28);border-radius:6px;padding:34px;text-align:center;
+}
+.pay-card .ic{font-size:2rem;margin-bottom:14px}
+.pay-card h3{font-size:1rem;color:var(--gold);margin-bottom:10px}
+.pay-card p{font-family:'Cormorant Garamond';font-size:1.15rem;color:var(--cream);opacity:.9}
+.pay-card a{color:var(--gold-light);text-decoration:underline;text-underline-offset:3px}
+
+/* ============ FOOTER ============ */
+footer{background:#0a160f;color:var(--cream);padding:64px 28px 34px}
+.foot-grid{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:40px;align-items:start}
+.foot-brand .name{font-family:'Cinzel';font-size:1.6rem;letter-spacing:.16em;color:var(--cream)}
+.foot-brand .ar{font-family:'Cormorant Garamond';font-size:1.7rem;color:var(--gold);margin-top:4px}
+.foot-brand p{font-family:'Cormorant Garamond';font-style:italic;color:rgba(244,239,228,.7);margin-top:14px;max-width:280px}
+.foot-col h4{font-family:'Cinzel';font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
+.foot-col a,.foot-col p{display:block;color:rgba(244,239,228,.82);font-size:.92rem;margin-bottom:10px;transition:color .2s}
+.foot-col a:hover{color:var(--gold)}
+.foot-bottom{max-width:1100px;margin:46px auto 0;padding-top:24px;border-top:1px solid rgba(200,168,75,.18);text-align:center;font-size:.78rem;color:rgba(244,239,228,.5);letter-spacing:.04em}
+
+/* ============ RESPONSIVE ============ */
+@media(max-width:1024px){
+  .grid,.family .grid{grid-template-columns:repeat(3,1fr)}
+  .pp-body{grid-template-columns:1fr;gap:36px}
+  .pp-visual{position:static;aspect-ratio:auto;padding:38px;max-width:420px;margin:0 auto}
+}
+@media(max-width:768px){
+  .nav-links{
+    position:fixed;top:69px;right:0;width:74%;max-width:320px;height:calc(100vh - 69px);
+    background:var(--green);flex-direction:column;align-items:flex-start;gap:0;
+    padding:30px 32px;transform:translateX(100%);transition:transform .35s;border-left:1px solid rgba(200,168,75,.2);
+  }
+  .nav-links.open{transform:translateX(0)}
+  .nav-links a{padding:16px 0;width:100%;border-bottom:1px solid rgba(200,168,75,.12);font-size:.82rem}
+  .burger{display:flex}
+  .burger.x span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+  .burger.x span:nth-child(2){opacity:0}
+  .burger.x span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+  section{padding:64px 22px}
+  .hero{padding:88px 22px 96px}
+  .grid,.family .grid{grid-template-columns:repeat(2,1fr);gap:14px}
+  .card{padding:24px 16px 20px}
+  .card .emblem{width:52px;height:52px}
+  .mbar{display:flex}
+  .pp-body{padding:48px 22px 30px}
+  #productView.active .order-box{display:none} /* use mobile bar instead */
+}
+@media(max-width:480px){
+  .hero h1{font-size:1.85rem}
+  .section-head h2{font-size:1.6rem}
+  .grid,.family .grid{gap:11px}
+  .card h3{font-size:.86rem}
+  .card .price{font-size:1.2rem}
+  .foot-grid{grid-template-columns:1fr;gap:30px}
+  .pp-meta{flex-direction:column;gap:18px}
+}
+</style>
 </head>
 <body>
-    <!-- HEADER & NAVIGATION -->
-    <header>
-        <div class="header-content">
-            <a href="#" class="logo">
-                <span class="logo-icon">ن</span>
-                <span>DAR NŪR</span>
+
+<header>
+  <nav>
+    <div class="brand" onclick="showHome()">
+      <span class="name">DAR NŪR</span>
+      <span class="ar">دار النور</span>
+    </div>
+    <div class="nav-links" id="navLinks">
+      <a onclick="goCat('all')">Boutique</a>
+      <a onclick="goCat('miels')">Miels</a>
+      <a onclick="goCat('huiles')">Huiles</a>
+      <a onclick="goCat('vetements')">Vêtements</a>
+      <a onclick="showHome();setTimeout(()=>document.getElementById('histoire').scrollIntoView({behavior:'smooth'}),60)">Notre histoire</a>
+    </div>
+    <button class="burger" id="burger" onclick="toggleMenu()" aria-label="Menu"><span></span><span></span><span></span></button>
+  </nav>
+</header>
+
+<!-- ============ HOME VIEW ============ -->
+<main id="homeView">
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="eyebrow">Maison de produits naturels</div>
+      <h1>Les trésors de la nature,<br/>livrés avec confiance</h1>
+      <div class="sub">Sélectionnés avec soin — si Dieu le veut</div>
+      <div class="divider hero-divider"><span class="line"></span><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 6.5L21 9l-5 4.2L17.8 21 12 17l-5.8 4 1.8-7.8L3 9l6.6-.5z"/></svg><span class="line r"></span></div>
+      <a class="btn-wa" href="https://wa.me/33749890322?text=Bonjour%2C%20je%20découvre%20Dar%20N%C5%ABr%20et%20je%20souhaite%20commander" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.945C.16 5.335 5.495 0 12.05 0a11.82 11.82 0 018.413 3.488 11.82 11.82 0 013.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.86 9.86 0 001.512 5.26l-.999 3.648 3.985-1.607zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+        Commander sur WhatsApp
+      </a>
+    </div>
+  </section>
+
+  <section class="story" id="histoire">
+    <div class="story-inner">
+      <div class="ar-big">دار النور</div>
+      <div class="divider"><span class="line"></span><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="4"/></svg><span class="line r"></span></div>
+      <blockquote id="storyText"></blockquote>
+      <div class="signoff">— Youcef, fondateur de Dar Nūr</div>
+    </div>
+  </section>
+
+  <section id="boutique">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow">Notre collection</div>
+        <h2>La Boutique</h2>
+        <p>Chaque produit est une porte ouverte vers un savoir transmis depuis des générations.</p>
+      </div>
+      <div class="filters" id="filters"></div>
+      <div class="grid" id="grid"></div>
+    </div>
+  </section>
+
+  <section class="pay">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow">Simple & sûr</div>
+        <h2>Paiements acceptés</h2>
+      </div>
+      <div class="pay-grid">
+        <div class="pay-card">
+          <div class="ic">💳</div>
+          <h3>Revolut</h3>
+          <p>Paiement instantané et sécurisé<br/><a href="https://revolut.me/youcefkir" target="_blank" rel="noopener">revolut.me/youcefkir</a></p>
+        </div>
+        <div class="pay-card">
+          <div class="ic">💵</div>
+          <h3>Espèces</h3>
+          <p>Réglez à la livraison,<br/>en toute simplicité</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ============ PRODUCT VIEW ============ -->
+<div id="productView"></div>
+
+<!-- ============ MOBILE BAR ============ -->
+<div class="mbar" id="mbar">
+  <div class="p" id="mbarPrice"></div>
+  <a class="btn-wa" id="mbarBtn" target="_blank" rel="noopener">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.945C.16 5.335 5.495 0 12.05 0a11.82 11.82 0 018.413 3.488 11.82 11.82 0 013.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.86 9.86 0 001.512 5.26l-.999 3.648 3.985-1.607zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+    Commander
+  </a>
+</div>
+
+<footer>
+  <div class="foot-grid">
+    <div class="foot-brand">
+      <div class="name">DAR NŪR</div>
+      <div class="ar">دار النور</div>
+      <p>La Maison de la Lumière. Des trésors naturels, présentés avec sincérité et soin.</p>
+    </div>
+    <div class="foot-col">
+      <h4>Contact</h4>
+      <a href="https://wa.me/33749890322" target="_blank" rel="noopener">WhatsApp · 07 49 89 03 22</a>
+      <a href="mailto:dar_nur_001@outlook.com">dar_nur_001@outlook.com</a>
+      <a href="https://instagram.com/dar.nur.officiel" target="_blank" rel="noopener">@dar.nur.officiel</a>
+      <a href="https://revolut.me/youcefkir" target="_blank" rel="noopener">Revolut · @youcefkir</a>
+    </div>
+    <div class="foot-col">
+      <h4>Informations</h4>
+      <a>Mentions légales</a>
+      <a>Politique de confidentialité</a>
+      <a>Conditions générales de vente</a>
+    </div>
+  </div>
+  <div class="foot-bottom">© 2025 Dar Nūr — Tous droits réservés</div>
+</footer>
+
+<script>
+/* ============================================================
+   DAR NŪR — données produits + logique SPA
+   ============================================================ */
+
+const STORY = "Dar Nūr est née d'une rencontre. Un jour, quelqu'un m'a ouvert la porte d'un monde que je ne connaissais pas encore — celui des remèdes naturels transmis de génération en génération, ancrés dans notre tradition et notre foi. En découvrant ces produits, j'ai compris quelque chose de simple : ces trésors existent depuis des siècles, mais beaucoup de gens autour de moi n'y ont jamais accès. Pas parce qu'ils n'en veulent pas — mais parce que personne ne les leur a présentés. C'est devenu ma mission.";
+
+const WA = "https://wa.me/33749890322?text=";
+
+/* ---- SVG emblems by category ---- */
+const EMBLEMS = {
+  miels:`<svg class="emblem" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20 14h24l-3 8H23z"/><path d="M22 22h20v26a4 4 0 01-4 4H26a4 4 0 01-4-4z"/><path d="M32 30v8m-5-4h10" stroke-linecap="round"/><circle cx="32" cy="44" r="2.4" fill="currentColor" stroke="none"/></svg>`,
+  gelules:`<svg class="emblem" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="14" y="26" width="36" height="14" rx="7"/><path d="M32 26v14"/><path d="M20 33h-4m32 0h4" stroke-linecap="round"/></svg>`,
+  poudres:`<svg class="emblem" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M24 12h16v6l-2 2v6H26v-6l-2-2z"/><path d="M24 26h16v22a4 4 0 01-4 4H28a4 4 0 01-4-4z"/><path d="M30 36c-3 2-3 6 0 8m4-8c3 2 3 6 0 8" stroke-linecap="round"/></svg>`,
+  huiles:`<svg class="emblem" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M28 12h8v6h-8z"/><path d="M27 18h10l2 6v24a4 4 0 01-4 4H29a4 4 0 01-4-4V24z"/><path d="M32 30c-3 3-5 6-5 9a5 5 0 0010 0c0-3-2-6-5-9z" fill="currentColor" stroke="none" opacity=".85"/></svg>`,
+  brumes:`<svg class="emblem" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="26" y="22" width="12" height="30" rx="3"/><path d="M28 22v-6h8v6"/><path d="M40 16h6m-6 5h8m-8 5h6" stroke-linecap="round"/><path d="M30 34h4m-4 6h4" stroke-linecap="round" opacity=".6"/></svg>`,
+  qamis:`<svg class="emblem" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M24 14l8 4 8-4 8 6-5 6v26H21V26l-5-6z"/><path d="M32 18v34" opacity=".5"/></svg>`,
+  vetements:`<svg class="emblem" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M32 12c-4 0-7 2-7 5l-9 5 4 8 5-2v22h14V31l5 2 4-8-9-5c0-3-3-5-7-5z"/></svg>`
+};
+
+const CAT_LABELS = {
+  miels:"Miel artisanal", gelules:"Gélules végétales", poudres:"Poudre & graine",
+  huiles:"Huile pure", brumes:"Brume & soin", qamis:"Qamis saoudien", vetements:"Couture femme"
+};
+
+const FILTERS = [
+  ["all","Tous"],["miels","Miels"],["gelules","Gélules"],["poudres","Poudres & Graines"],
+  ["huiles","Huiles"],["brumes","Brumes"],["qamis","Qamis"],["vetements","Vêtements"]
+];
+
+/* helper builders */
+const honeyPrice = (a,b,c)=>({type:"format",options:[["50 g",a],["200 g",b],["300 g",c]]});
+const fixed = v=>({type:"fixed",value:v});
+
+/* ============ PRODUCTS ============ */
+const PRODUCTS = [
+  /* ---------- MIELS ---------- */
+  {id:"miel-nigelle",cat:"miels",name:"Miel de Nigelle",tagline:"L'or sombre des abeilles, marié à la graine bénie.",
+   desc:["Un miel généreux enrichi de nigelle, cette petite graine noire que l'on surnomme depuis toujours « la graine de la bénédiction ». Ensemble, ils forment une préparation chaleureuse, à la fois douce et profonde.","Chaque cuillère est pensée comme un geste du quotidien : au réveil, dans une tisane du soir, ou simplement savourée telle quelle."],
+   benefits:["Soutient les défenses naturelles","Source naturelle d'énergie","Apaise la gorge en hiver","Allié des matins fatigués"],
+   compo:"Miel naturel & graines de Nigelle (Nigella sativa)",prov:"Préparation artisanale",
+   uso:"Une cuillère à café le matin, pure ou dans une boisson tiède.",price:honeyPrice("9,99","24,99","34,99")},
+
+  {id:"miel-aphrodisiaque",cat:"miels",name:"Miel Aphrodisiaque",tagline:"Une préparation noble, héritée des traditions du désert.",
+   desc:["Un assemblage précieux de miel et de plantes réputées pour la vitalité, transmis dans les cultures orientales depuis des générations.","Un produit d'exception, à offrir ou à savourer dans les moments qui comptent."],
+   benefits:["Soutient la vitalité et l'énergie","Tonifiant naturel","Préparation riche et concentrée","Tradition orientale"],
+   compo:"Miel naturel & mélange de plantes vivifiantes",prov:"Préparation artisanale",
+   uso:"Une cuillère par jour, idéalement le matin.",price:honeyPrice("19,99","44,99","59,99")},
+
+  {id:"miel-rose-siberie",cat:"miels",name:"Miel Rose de Sibérie",tagline:"La douceur d'une rose venue du grand froid.",
+   desc:["Un miel délicat aux notes florales, inspiré des roses qui fleurissent dans les terres rudes de Sibérie. Sa texture fine et son parfum subtil en font un véritable plaisir.","Parfait pour adoucir une journée ou accompagner un thé."],
+   benefits:["Notes florales raffinées","Réconfort et douceur","Texture fine et soyeuse","Parfait pour le thé"],
+   compo:"Miel naturel aromatisé à la rose",prov:"Préparation artisanale",
+   uso:"À déguster pure ou dans une boisson chaude.",price:honeyPrice("14,99","34,99","44,99")},
+
+  {id:"miel-spiruline",cat:"miels",name:"Miel Spiruline",tagline:"La force verte de la mer rencontre la douceur du miel.",
+   desc:["Un mariage surprenant entre le miel et la spiruline, cette micro-algue d'un vert profond reconnue pour sa richesse nutritionnelle.","Une cuillère qui réveille, idéale pour bien commencer la journée."],
+   benefits:["Riche en nutriments","Soutient l'énergie au quotidien","Allié des sportifs","Coup de fouet naturel"],
+   compo:"Miel naturel & spiruline",prov:"Préparation artisanale",
+   uso:"Une cuillère le matin pour démarrer la journée.",price:honeyPrice("14,99","34,99","44,99")},
+
+  {id:"miel-gingembre-curcuma",cat:"miels",name:"Miel Gingembre Curcuma",tagline:"La chaleur des racines dorées dans un écrin de miel.",
+   desc:["Le gingembre et le curcuma, deux racines précieuses des traditions orientales, infusées dans un miel doux et réconfortant.","Une préparation chaleureuse, parfaite quand les températures baissent."],
+   benefits:["Réchauffe et réconforte","Soutient la digestion","Antioxydant naturel","Idéal en hiver"],
+   compo:"Miel naturel, gingembre & curcuma",prov:"Préparation artisanale",
+   uso:"Une cuillère dans une infusion chaude.",price:honeyPrice("9,99","24,99","34,99")},
+
+  {id:"miel-hibiscus-zamzam",cat:"miels",name:"Miel Hibiscus Nigelle Zamzam",tagline:"Un assemblage rare, pensé comme une offrande.",
+   desc:["Hibiscus, nigelle et une inspiration puisée dans la pureté — un miel singulier au caractère affirmé et au parfum envoûtant.","Une création pour ceux qui cherchent l'exception."],
+   benefits:["Assemblage unique","Riche en antioxydants","Parfum profond et floral","Préparation soignée"],
+   compo:"Miel naturel, hibiscus & nigelle",prov:"Préparation artisanale",
+   uso:"À savourer pure pour en apprécier toutes les notes.",price:honeyPrice("9,99","24,99","34,99")},
+
+  {id:"miel-moringa-nigelle",cat:"miels",name:"Miel Moringa Nigelle",tagline:"L'arbre de vie et la graine bénie, réunis.",
+   desc:["Le moringa, surnommé « l'arbre de vie » pour sa richesse, s'unit à la nigelle dans ce miel nourrissant et équilibré.","Une préparation pleine de générosité, à intégrer dans la routine quotidienne."],
+   benefits:["Riche en vitamines et minéraux","Soutient la vitalité","Équilibre du quotidien","Naturellement nourrissant"],
+   compo:"Miel naturel, moringa & nigelle",prov:"Préparation artisanale",
+   uso:"Une cuillère par jour, matin ou soir.",price:honeyPrice("9,99","24,99","34,99")},
+
+  {id:"miel-gingembre-fenugrec",cat:"miels",name:"Miel Gingembre Fenugrec",tagline:"Deux trésors de l'herboristerie dans une même cuillère.",
+   desc:["Le gingembre tonifiant et le fenugrec nourrissant, enrobés dans un miel doux. Une association traditionnelle appréciée depuis longtemps.","Réconfortant et fortifiant à la fois."],
+   benefits:["Tonifiant naturel","Soutient l'appétit et l'énergie","Réchauffe le corps","Tradition herboriste"],
+   compo:"Miel naturel, gingembre & fenugrec",prov:"Préparation artisanale",
+   uso:"Une cuillère le matin ou dans une boisson chaude.",price:honeyPrice("9,99","24,99","34,99")},
+
+  {id:"miel-aubepine",cat:"miels",name:"Miel d'Aubépine",tagline:"La sérénité d'une fleur ancienne.",
+   desc:["Un miel récolté sur les fleurs d'aubépine, à la douceur apaisante et au parfum délicat.","Idéal le soir, pour un moment de calme avant le repos."],
+   benefits:["Favorise la détente","Douceur apaisante","Parfait avant le coucher","Notes florales subtiles"],
+   compo:"Miel d'aubépine naturel",prov:"Préparation artisanale",
+   uso:"Une cuillère le soir, dans une tisane.",price:honeyPrice("9,99","24,99","34,99")},
+
+  {id:"miel-costus-nigelle",cat:"miels",name:"Miel Costus Indien Nigelle",tagline:"La racine vénérée d'Orient, dans un miel d'exception.",
+   desc:["Le costus indien, plante employée depuis des siècles dans les traditions orientales, s'allie à la nigelle dans cette préparation singulière.","Un miel au caractère affirmé pour les connaisseurs."],
+   benefits:["Soutient les défenses naturelles","Tradition orientale ancestrale","Allié digestif et respiratoire","Assemblage précieux"],
+   compo:"Miel naturel, costus indien & nigelle",prov:"Préparation artisanale",
+   uso:"Une cuillère par jour, de préférence le matin.",price:honeyPrice("9,99","24,99","34,99")},
+
+  {id:"miel-sidr-jujubier",cat:"miels",name:"Miel Sidr de Jujubier",tagline:"Le miel le plus noble des terres arides.",
+   desc:["Issu des fleurs du jujubier (Sidr), ce miel est l'un des plus réputés au monde pour sa rareté et sa richesse. Sa texture épaisse et son goût profond en font un trésor.","Un miel d'exception, à savourer avec respect."],
+   benefits:["Miel rare et prestigieux","Texture épaisse et riche","Goût profond et caractéristique","Très recherché"],
+   compo:"Miel de Sidr (fleurs de jujubier)",prov:"Préparation artisanale",
+   uso:"À déguster pure pour apprécier sa noblesse.",price:honeyPrice("9,99","24,99","34,99")},
+
+  {id:"miel-fraise-russie",cat:"miels",name:"Miel de Fraise de Russie",tagline:"La gourmandise d'un fruit d'été, capturée à jamais.",
+   desc:["Un miel délicieusement fruité aux arômes de fraise, qui ravira petits et grands. Sa douceur naturelle évoque les vergers gorgés de soleil.","Le plaisir simple d'une cuillère réconfortante."],
+   benefits:["Arômes fruités gourmands","Apprécié des enfants","Douceur naturelle","Parfait sur les tartines"],
+   compo:"Miel naturel aromatisé à la fraise",prov:"Préparation artisanale",
+   uso:"Sur du pain, dans un yaourt ou pure.",price:honeyPrice("9,99","24,99","34,99")},
+
+  {id:"miel-shilajit",cat:"miels",name:"Miel Noir de Shilajit",tagline:"La résine des montagnes, scellée dans le miel.",
+   desc:["Le shilajit, cette résine minérale précieuse récoltée en haute montagne, enrichit ce miel noir au caractère intense et minéral.","Une préparation rare pour ceux qui recherchent le plus concentré."],
+   benefits:["Riche en minéraux","Soutient l'énergie et la vitalité","Préparation concentrée","Tradition de haute montagne"],
+   compo:"Miel naturel & shilajit",prov:"Préparation artisanale",
+   uso:"Une petite cuillère par jour suffit.",price:honeyPrice("14,99","34,99","44,99")},
+
+  {id:"miel-blanc-kirghizistan",cat:"miels",name:"Miel Blanc du Kirghizistan",tagline:"La pureté crémeuse des hauts plateaux.",
+   desc:["Un miel d'une blancheur naturelle et d'une texture crémeuse exceptionnelle, récolté sur les prairies d'altitude du Kirghizistan.","Sa finesse en bouche est incomparable — un véritable délice."],
+   benefits:["Texture crémeuse unique","Couleur blanche naturelle","Saveur délicate","Récolté en altitude"],
+   compo:"Miel blanc naturel des hauts plateaux",prov:"Préparation artisanale",
+   uso:"À tartiner ou à savourer à la cuillère.",price:honeyPrice("9,99","24,99","34,99")},
+
+  /* ---------- GÉLULES ---------- */
+  {id:"gel-nigelle",cat:"gelules",name:"Gélules de Nigelle",tagline:"La graine bénie, à portée de main.",
+   desc:["La nigelle (Nigella sativa) sous une forme pratique et dosée. Une manière simple d'intégrer cette graine traditionnelle à votre quotidien.","60 gélules végétales, sans additifs chimiques."],
+   benefits:["Soutient les défenses naturelles","Pratique et dosé","Sans additifs chimiques","Gélules végétales"],
+   compo:"Poudre de Nigelle (Nigella sativa)",prov:"Éthiopie",
+   uso:"1 à 2 gélules par jour avec un verre d'eau.",price:fixed("14,99")},
+
+  {id:"gel-valeriane",cat:"gelules",name:"Gélules de Valériane",tagline:"La plante du calme et des nuits paisibles.",
+   desc:["La valériane, employée depuis l'Antiquité pour favoriser la détente et le repos. Une alliée précieuse des soirées agitées.","60 gélules végétales, sans additifs chimiques."],
+   benefits:["Favorise la détente","Soutient un sommeil paisible","Apaise les tensions","Gélules végétales"],
+   compo:"Poudre de Valériane",prov:"Europe",
+   uso:"1 à 2 gélules le soir avant le coucher.",price:fixed("14,99")},
+
+  {id:"gel-termis",cat:"gelules",name:"Gélules de Termis",tagline:"La légumineuse nourrissante des terres méditerranéennes.",
+   desc:["Le termis (lupin), riche en protéines végétales, traditionnellement consommé dans de nombreuses cultures pour son apport nutritionnel.","60 gélules végétales, sans additifs chimiques."],
+   benefits:["Riche en protéines végétales","Soutient l'équilibre nutritionnel","Allié de la masse musculaire","Gélules végétales"],
+   compo:"Poudre de Termis (Lupinus albus)",prov:"Afrique de l'Ouest",
+   uso:"1 à 2 gélules par jour.",price:fixed("14,99")},
+
+  {id:"gel-macca",cat:"gelules",name:"Gélules de Macca",tagline:"La racine d'énergie venue des Andes.",
+   desc:["La maca, racine péruvienne réputée pour sa capacité à soutenir l'énergie et la vitalité, cultivée en haute altitude.","60 gélules végétales, sans additifs chimiques."],
+   benefits:["Soutient l'énergie et l'endurance","Combat la fatigue","Tradition andine","Gélules végétales"],
+   compo:"Poudre de Maca",prov:"Pérou",
+   uso:"1 à 2 gélules par jour, le matin.",price:fixed("14,99")},
+
+  {id:"gel-spiruline",cat:"gelules",name:"Gélules de Spiruline",tagline:"Le concentré vert de la nature.",
+   desc:["La spiruline, micro-algue parmi les plus riches en nutriments, sous forme de gélules pratiques pour un usage quotidien.","60 gélules végétales, sans additifs chimiques."],
+   benefits:["Riche en nutriments","Soutient l'énergie","Source de protéines","Gélules végétales"],
+   compo:"Poudre de Spiruline",prov:"Chine",
+   uso:"1 à 2 gélules par jour.",price:fixed("14,99")},
+
+  {id:"gel-fenugrec",cat:"gelules",name:"Gélules de Fenugrec",tagline:"La graine fortifiante des traditions anciennes.",
+   desc:["Le fenugrec, employé depuis des millénaires pour ses vertus nourrissantes et fortifiantes.","60 gélules végétales, sans additifs chimiques."],
+   benefits:["Soutient l'appétit","Fortifiant naturel","Tradition millénaire","Gélules végétales"],
+   compo:"Poudre de Fenugrec",prov:"Inde",
+   uso:"1 à 2 gélules par jour.",price:fixed("14,99")},
+
+  {id:"gel-chardon",cat:"gelules",name:"Gélules de Chardon Marie",tagline:"Le gardien du foie, reconnu des herboristes.",
+   desc:["Le chardon-Marie, plante traditionnellement associée au soutien de la fonction hépatique et à la détoxification naturelle.","60 gélules végétales, sans additifs chimiques."],
+   benefits:["Soutient la fonction hépatique","Favorise la détoxification","Riche en antioxydants","Gélules végétales"],
+   compo:"Poudre de Chardon-Marie (Silybum marianum)",prov:"Europe",
+   uso:"1 à 2 gélules par jour.",price:fixed("14,99")},
+
+  {id:"gel-ashwaganda",cat:"gelules",name:"Gélules d'Ashwaganda",tagline:"La racine de l'équilibre, joyau de l'Ayurveda.",
+   desc:["L'ashwagandha, plante adaptogène emblématique de la médecine ayurvédique, réputée pour aider le corps à faire face au stress du quotidien.","60 gélules végétales, sans additifs chimiques."],
+   benefits:["Aide à gérer le stress","Soutient l'équilibre","Plante adaptogène","Gélules végétales"],
+   compo:"Poudre d'Ashwagandha",prov:"Inde",
+   uso:"1 à 2 gélules par jour.",price:fixed("14,99")},
+
+  {id:"gel-gingembre-curcuma",cat:"gelules",name:"Gélules de Gingembre Curcuma",tagline:"Les racines dorées, concentrées et pratiques.",
+   desc:["Le duo gingembre-curcuma, reconnu pour ses propriétés antioxydantes et son soutien à la digestion, sous forme de gélules.","60 gélules végétales, sans additifs chimiques."],
+   benefits:["Soutient la digestion","Antioxydant naturel","Réchauffe le corps","Gélules végétales"],
+   compo:"Poudre de Gingembre & Curcuma",prov:"Inde",
+   uso:"1 à 2 gélules par jour.",price:fixed("14,99")},
+
+  {id:"gel-moringa",cat:"gelules",name:"Gélules de Moringa",tagline:"L'arbre de vie en capsule.",
+   desc:["Le moringa, surnommé « l'arbre de vie », concentre vitamines et minéraux dans ses feuilles, ici sous forme pratique.","60 gélules végétales, sans additifs chimiques."],
+   benefits:["Riche en vitamines et minéraux","Soutient la vitalité","Combat la fatigue","Gélules végétales"],
+   compo:"Poudre de feuilles de Moringa",prov:"Inde",
+   uso:"1 à 2 gélules par jour.",price:fixed("14,99")},
+
+  {id:"gel-costus",cat:"gelules",name:"Gélules de Costus Indien",tagline:"La racine vénérée d'Orient, simplifiée.",
+   desc:["Le costus indien, plante employée depuis des siècles dans les traditions orientales pour ses usages digestifs et respiratoires.","60 gélules végétales, sans additifs chimiques."],
+   benefits:["Soutient les défenses naturelles","Allié digestif et respiratoire","Tradition orientale","Gélules végétales"],
+   compo:"Poudre de Costus Indien (Saussurea costus)",prov:"Inde",
+   uso:"1 à 2 gélules par jour.",price:fixed("14,99")},
+
+  {id:"gel-aphrodisiaque",cat:"gelules",name:"Gélules Aphrodisiaques",tagline:"Un mélange vivifiant, hérité des traditions.",
+   desc:["Une formule concentrée de plantes traditionnellement réputées pour soutenir la vitalité et l'énergie.","60 gélules végétales, sans additifs chimiques."],
+   benefits:["Soutient la vitalité","Tonifiant naturel","Formule concentrée","Gélules végétales"],
+   compo:"Mélange de plantes vivifiantes",prov:"Sélection spécialisée",
+   uso:"1 à 2 gélules par jour.",price:fixed("19,99")},
+
+  /* ---------- POUDRES & GRAINES ---------- */
+  {id:"pdr-gingembre-curcuma",cat:"poudres",name:"Poudre de Gingembre-Curcuma",tagline:"Deux racines, mille usages.",
+   desc:["Un mélange 100% naturel de gingembre et curcuma, traditionnellement utilisé pour soutenir la vitalité et le bien-être général.","Polyvalente : dans un jus, un plat, ou même en masque."],
+   benefits:["Stimule la digestion","Renforce l'immunité","Effet anti-inflammatoire naturel","Antioxydant puissant"],
+   compo:"Gingembre (Zingiber officinale) & Curcuma (Curcuma longa)",prov:"Inde",
+   uso:"1 à 2 cuillères à café par jour, dans un jus ou un plat.",price:fixed("4,99")},
+
+  {id:"pdr-clou-girofle",cat:"poudres",name:"Poudre de Clou de Girofle",tagline:"L'épice aromatique aux mille vertus.",
+   desc:["Une poudre riche en composés naturels, traditionnellement utilisée pour ses propriétés aromatiques et son soutien au bien-être.","Précieuse en cuisine comme en soin."],
+   benefits:["Renforce les défenses naturelles","Soulage les douleurs dentaires","Rafraîchit l'haleine","Favorise la digestion"],
+   compo:"Clou de Girofle (Syzygium aromaticum)",prov:"Madagascar",
+   uso:"1/2 à 1 cuillère à café par jour.",price:fixed("4,99")},
+
+  {id:"pdr-romarin",cat:"poudres",name:"Poudre de Romarin",tagline:"La plante de la mémoire et de la vigueur.",
+   desc:["Une poudre riche en antioxydants naturels comme l'acide rosmarinique, plante emblématique de la Méditerranée.","Idéale en cuisine ou en masque capillaire."],
+   benefits:["Stimule la pousse des cheveux","Améliore mémoire et concentration","Riche en antioxydants","Soutient l'immunité"],
+   compo:"Romarin (Rosmarinus officinalis)",prov:"Maroc",
+   uso:"1 à 2 cuillères à café par jour ou en masque.",price:fixed("4,99")},
+
+  {id:"pdr-nigelle",cat:"poudres",name:"Poudre de Nigelle",tagline:"La graine bénie, finement moulue.",
+   desc:["La nigelle sous forme de poudre, traditionnellement utilisée pour soutenir la vitalité et le bien-être général.","À ajouter à vos plats ou en soin pour la peau et les cheveux."],
+   benefits:["Renforce les défenses naturelles","Favorise une bonne digestion","Santé de la peau et des cheveux","Soutient la vitalité"],
+   compo:"Poudre de Nigelle (Nigella sativa)",prov:"Égypte",
+   uso:"1/2 à 1 cuillère à café par jour.",price:fixed("4,99")},
+
+  {id:"pdr-termis",cat:"poudres",name:"Poudre de Termis",tagline:"La force protéinée du lupin.",
+   desc:["Une poudre obtenue à partir de graines de lupin, légumineuse riche en protéines traditionnellement consommée dans certaines cultures.","Idéale le matin pour un apport énergétique."],
+   benefits:["Riche en protéines végétales","Favorise une bonne digestion","Réduit la fatigue","Source de nutriments essentiels"],
+   compo:"Graines de Termis (Lupinus albus)",prov:"Méditerranée / Afrique du Nord",
+   uso:"1 à 2 cuillères à café dans l'eau, le lait ou un smoothie.",price:fixed("4,99")},
+
+  {id:"pdr-psyllium",cat:"poudres",name:"Poudre de Psyllium",tagline:"La fibre douce qui prend soin du transit.",
+   desc:["Des fibres naturelles issues des téguments de psyllium, reconnues pour leur capacité à absorber l'eau et soutenir le transit intestinal.","Une alliée du confort digestif au quotidien."],
+   benefits:["Favorise la régularité du transit","Aide à soulager la constipation","Procure une sensation de satiété","Source de fibres solubles"],
+   compo:"Téguments de Psyllium (Plantago ovata)",prov:"Inde",
+   uso:"1 à 2 cuillères à café dans un grand verre d'eau.",price:fixed("4,99")},
+
+  {id:"pdr-costus",cat:"poudres",name:"Poudre de Costus Indien",tagline:"La racine sacrée des traditions d'Orient.",
+   desc:["Une poudre issue de la racine de costus indien, plante utilisée depuis des siècles dans les traditions orientales pour ses usages digestifs et respiratoires.","Un trésor de l'herboristerie ancienne."],
+   benefits:["Renforce le système immunitaire","Combat la fatigue","Favorise la détoxification","Soutient la digestion"],
+   compo:"Racine de Costus Indien (Saussurea costus)",prov:"Inde / Asie",
+   uso:"1 à 2 cuillères à café par jour, le matin.",price:fixed("6,99")},
+
+  {id:"pdr-moringa",cat:"poudres",name:"Poudre de Moringa",tagline:"L'arbre de vie, en poudre verte.",
+   desc:["Une poudre issue des feuilles de moringa, plante tropicale reconnue pour sa richesse en vitamines, minéraux et nutriments essentiels.","Un concentré de nature à intégrer à vos boissons."],
+   benefits:["Renforce le système immunitaire","Combat la fatigue","Riche en vitamines et minéraux","Soutient la digestion"],
+   compo:"Feuilles de Moringa (Moringa oleifera)",prov:"Afrique / Asie",
+   uso:"1 à 2 cuillères à café dans l'eau, un jus ou un smoothie.",price:fixed("4,99")},
+
+  {id:"grn-lavande",cat:"poudres",name:"Graine de Lavande",tagline:"Le parfum apaisant des champs de Provence.",
+   desc:["Des graines issues de la lavande, plante aromatique reconnue pour son parfum apaisant et ses usages traditionnels en infusion.","Idéale le soir pour favoriser la détente."],
+   benefits:["Favorise la détente et la relaxation","Améliore la qualité du sommeil","Apaise le stress","Parfum naturel agréable"],
+   compo:"Graines de Lavande (Lavandula)",prov:"France / Méditerranée",
+   uso:"1 à 2 cuillères à café à infuser, idéalement le soir.",price:fixed("4,99")},
+
+  {id:"grn-chia",cat:"poudres",name:"Graine de Chia",tagline:"Les petites graines au grand pouvoir.",
+   desc:["Petites graines issues de la plante salvia hispanica, appréciées pour leur richesse en fibres, oméga-3 et nutriments essentiels.","Parfaites dans un yaourt, un smoothie ou un pudding."],
+   benefits:["Favorise le transit intestinal","Soutient la digestion","Riche en fibres et oméga-3","Effet rassasiant doux"],
+   compo:"Graines de Chia (Salvia hispanica)",prov:"Amérique Latine / Mexique",
+   uso:"1 à 2 cuillères à café dans l'eau, le lait ou un smoothie.",price:fixed("4,99")},
+
+  {id:"grn-kirikou",cat:"poudres",name:"Graine de Kirikou",tagline:"Le secret d'herboristerie venu d'Afrique de l'Ouest.",
+   desc:["Une graine traditionnelle utilisée en herboristerie pour soutenir la digestion et le transit intestinal.","À concasser puis mélanger dans un yaourt ou une compote."],
+   benefits:["Soutient la digestion","Favorise un bon transit","Réduit les ballonnements","Tradition herboriste"],
+   compo:"Graine de Kirikou (Piliostigma reticulatum)",prov:"Afrique de l'Ouest",
+   uso:"2 graines par jour, concassées, le soir avant le coucher.",price:fixed("11,99")},
+
+  {id:"grn-fenouil",cat:"poudres",name:"Graine de Fenouil",tagline:"La douceur anisée qui apaise le ventre.",
+   desc:["Des graines aromatiques issues du fenouil, plante méditerranéenne reconnue pour son goût légèrement sucré et ses bienfaits digestifs.","À infuser après les repas ou à mâcher."],
+   benefits:["Soutient la digestion","Réduit les ballonnements","Apaise les inconforts digestifs","Rafraîchit l'haleine"],
+   compo:"Graines de Fenouil (Foeniculum vulgare)",prov:"Méditerranée / Europe",
+   uso:"1 à 2 cuillères à café à infuser après les repas.",price:fixed("4,99")},
+
+  {id:"grn-gomme-arabique",cat:"poudres",name:"Gomme Arabique",tagline:"La résine douce du Sahel, prébiotique naturel.",
+   desc:["Une résine naturelle issue de l'acacia, traditionnellement utilisée pour ses propriétés adoucissantes et digestives.","À dissoudre dans une boisson tiède ou un yaourt."],
+   benefits:["Apaise et protège les muqueuses","Soutient la digestion","Favorise un bon transit","Source de fibres prébiotiques"],
+   compo:"Gomme Arabique (Acacia senegal)",prov:"Afrique / Sahel",
+   uso:"1 à 2 cuillères à café dissoutes dans l'eau tiède.",price:fixed("4,99")},
+
+  {id:"grn-oliban",cat:"poudres",name:"Oliban (Louban Dhakar)",tagline:"L'encens sacré que l'on mâche depuis des millénaires.",
+   desc:["Une résine naturelle aromatique, traditionnellement utilisée dans certaines cultures pour ses usages bien-être et digestifs.","À mâcher directement pour un moment de sérénité."],
+   benefits:["Soutient la digestion","Favorise le confort digestif","Contribue à la détente","Sensation de calme et de sérénité"],
+   compo:"Résine d'Oliban (Boswellia carterii)",prov:"Sénégal / Sahel",
+   uso:"1 à 3 grains par jour, à mâcher, idéalement le soir.",price:fixed("7,99")},
+
+  {id:"grn-baraka",cat:"poudres",name:"Graine Noir (Baraka)",tagline:"La graine de la bénédiction, dans sa forme la plus pure.",
+   desc:["Des graines naturelles traditionnelles savamment consommées pour soutenir la vitalité et le bien-être général. La nigelle dans toute sa noblesse.","À avaler avec de l'eau ou à ajouter à vos plats : miel, yaourt, jus."],
+   benefits:["Soutient le système immunitaire","Favorise la vitalité et l'énergie","Aide à la digestion","Riche en antioxydants naturels"],
+   compo:"Graine de Nigelle (Nigella sativa)",prov:"Moyen-Orient / Asie",
+   uso:"1 à 2 cuillères à café par jour, le matin ou avant les repas.",price:fixed("7,99")},
+
+  {id:"grn-chardon",cat:"poudres",name:"Graine de Chardon",tagline:"L'allié du foie, connu des herboristes.",
+   desc:["Des graines issues du chardon-Marie, plante reconnue dans les traditions herboristes pour son action sur le foie.","À infuser dans de l'eau chaude ou à mâcher."],
+   benefits:["Soutient la fonction hépatique","Aide à protéger le foie","Favorise la détoxification naturelle","Riche en antioxydants"],
+   compo:"Graines de Chardon-Marie (Silybum marianum)",prov:"Méditerranée / Europe",
+   uso:"1 à 2 cuillères à café à infuser après les repas.",price:fixed("4,99")},
+
+  {id:"grn-nigelle-baraka",cat:"poudres",name:"Graines de Nigelle Al Baraka",tagline:"Le cœur historique de Dar Nūr.",
+   desc:["Les graines de nigelle pure, celles par lesquelles tout a commencé. « Al Baraka » — la bénédiction. Une graine vénérée dans toutes les traditions.","À consommer le matin, pure ou intégrée à vos préparations."],
+   benefits:["Soutient les défenses naturelles","Favorise la vitalité","Aide à la digestion","La graine de la bénédiction"],
+   compo:"Graines de Nigelle (Nigella sativa)",prov:"Éthiopie",
+   uso:"1 cuillère à café par jour, pure ou avec du miel.",price:fixed("7,99")},
+
+  /* ---------- HUILES ---------- */
+  {id:"hl-gingembre",cat:"huiles",name:"Huile de Gingembre",tagline:"La chaleur de la racine en quelques gouttes.",
+   desc:["Une huile naturelle obtenue à partir du gingembre, réputée pour ses propriétés réchauffantes et tonifiantes.","100% naturelle et biologique, sans paraben ni silicone."],
+   benefits:["Réchauffe et tonifie","Apaise les tensions musculaires","Stimulante naturelle","100% naturelle"],
+   compo:"Huile de Gingembre",prov:"Sélection spécialisée",
+   uso:"En massage ou en application locale.",price:fixed("9,99")},
+
+  {id:"hl-eucalyptus",cat:"huiles",name:"Huile d'Eucalyptus",tagline:"Le souffle frais des grandes forêts.",
+   desc:["Une huile aux notes fraîches et purifiantes, traditionnellement appréciée pour le confort respiratoire.","100% naturelle et biologique, sans paraben ni silicone."],
+   benefits:["Sensation de fraîcheur","Soutient le confort respiratoire","Purifiante","100% naturelle"],
+   compo:"Huile d'Eucalyptus",prov:"Sélection spécialisée",
+   uso:"En diffusion ou en massage dilué.",price:fixed("11,99")},
+
+  {id:"hl-oliban",cat:"huiles",name:"Huile d'Oliban",tagline:"L'encens précieux, sous forme d'huile.",
+   desc:["L'oliban (encens) en huile, traditionnellement employé pour ses vertus apaisantes et son parfum noble.","100% naturelle et biologique, sans paraben ni silicone."],
+   benefits:["Apaisante","Parfum noble et profond","Favorise la détente","100% naturelle"],
+   compo:"Huile d'Oliban (Boswellia)",prov:"Sélection spécialisée",
+   uso:"En massage ou en soin de la peau.",price:fixed("12,99")},
+
+  {id:"hl-nigelle",cat:"huiles",name:"Huile de Nigelle",tagline:"L'huile bénie, joyau des soins ancestraux.",
+   desc:["L'huile de nigelle pressée à partir de la graine bénie, l'un des soins les plus réputés des traditions orientales.","100% naturelle et biologique, sans paraben ni silicone."],
+   benefits:["Nourrit la peau et les cheveux","Soutient les défenses naturelles","Polyvalente","100% naturelle"],
+   compo:"Huile de Nigelle (Nigella sativa)",prov:"Sélection spécialisée",
+   uso:"En soin de la peau, des cheveux ou par voie orale.",price:fixed("12,99")},
+
+  {id:"hl-fenugrec",cat:"huiles",name:"Huile de Fenugrec",tagline:"Le secret nourrissant des traditions.",
+   desc:["Une huile issue du fenugrec, traditionnellement utilisée pour nourrir la peau et les cheveux.","100% naturelle et biologique, sans paraben ni silicone."],
+   benefits:["Nourrit en profondeur","Soin capillaire","Fortifiante","100% naturelle"],
+   compo:"Huile de Fenugrec",prov:"Sélection spécialisée",
+   uso:"En massage du cuir chevelu ou de la peau.",price:fixed("9,99")},
+
+  {id:"hl-costus",cat:"huiles",name:"Huile de Costus Indien",tagline:"La racine d'Orient, en huile précieuse.",
+   desc:["L'huile de costus indien, plante employée depuis des siècles dans les traditions orientales.","100% naturelle et biologique, sans paraben ni silicone."],
+   benefits:["Tradition orientale","Usage polyvalent","Apaisante","100% naturelle"],
+   compo:"Huile de Costus Indien (Saussurea costus)",prov:"Sélection spécialisée",
+   uso:"En application locale ou en massage.",price:fixed("9,99")},
+
+  {id:"hl-pepins-raisin",cat:"huiles",name:"Huile de Pépins de Raisins",tagline:"La légèreté soyeuse pour la peau.",
+   desc:["Une huile fine et légère, riche en antioxydants, idéale comme base de soin pour la peau et les cheveux.","100% naturelle et biologique, sans paraben ni silicone."],
+   benefits:["Texture légère et soyeuse","Riche en antioxydants","Hydrate sans graisser","100% naturelle"],
+   compo:"Huile de Pépins de Raisins",prov:"Sélection spécialisée",
+   uso:"En soin du visage et du corps.",price:fixed("9,99")},
+
+  {id:"hl-menthe-poivree",cat:"huiles",name:"Huile de Menthe Poivrée",tagline:"La fraîcheur vive qui réveille les sens.",
+   desc:["Une huile à la fraîcheur intense, traditionnellement appréciée pour son effet tonifiant et rafraîchissant.","100% naturelle et biologique, sans paraben ni silicone."],
+   benefits:["Effet rafraîchissant intense","Tonifiante","Apaise les tensions","100% naturelle"],
+   compo:"Huile de Menthe Poivrée",prov:"Sélection spécialisée",
+   uso:"En massage dilué ou en diffusion.",price:fixed("9,99")},
+
+  {id:"hl-lavande",cat:"huiles",name:"Huile de Lavande",tagline:"Le calme de la Provence en flacon.",
+   desc:["Une huile au parfum apaisant de lavande, traditionnellement associée à la détente et au repos.","100% naturelle et biologique, sans paraben ni silicone."],
+   benefits:["Favorise la détente","Parfum apaisant","Soin de la peau","100% naturelle"],
+   compo:"Huile de Lavande (Lavandula)",prov:"Sélection spécialisée",
+   uso:"En massage ou quelques gouttes sur l'oreiller.",price:fixed("9,99")},
+
+  {id:"hl-figue-barbarie",cat:"huiles",name:"Huile de Figue de Barbarie",tagline:"L'or rare du désert pour une peau éclatante.",
+   desc:["Une huile précieuse et rare, extraite des pépins de figue de barbarie, réputée pour ses vertus anti-âge.","100% naturelle et biologique, sans paraben ni silicone."],
+   benefits:["Anti-âge naturel","Riche en antioxydants","Régénère la peau","Huile précieuse et rare"],
+   compo:"Huile de Figue de Barbarie",prov:"Sélection spécialisée",
+   uso:"Quelques gouttes sur le visage, matin ou soir.",price:fixed("9,99")},
+
+  {id:"hl-clou-girofle",cat:"huiles",name:"Huile de Clou de Girofle",tagline:"L'épice chaude aux vertus reconnues.",
+   desc:["Une huile aromatique issue du clou de girofle, traditionnellement utilisée pour le confort buccal et dentaire.","100% naturelle et biologique, sans paraben ni silicone."],
+   benefits:["Confort dentaire","Propriétés purifiantes","Parfum chaud et épicé","100% naturelle"],
+   compo:"Huile de Clou de Girofle (Syzygium aromaticum)",prov:"Sélection spécialisée",
+   uso:"En application locale diluée.",price:fixed("9,99")},
+
+  {id:"hl-arthrose",cat:"huiles",name:"Huile Arthrose Polyarthrite",tagline:"Un baume pensé pour le confort articulaire.",
+   desc:["Une synergie d'huiles traditionnellement utilisée en massage pour soulager les articulations et apporter du confort au quotidien.","100% naturelle et biologique, sans paraben ni silicone."],
+   benefits:["Confort articulaire","Apaise les tensions","Synergie de plantes","100% naturelle"],
+   compo:"Mélange d'huiles pour le confort articulaire",prov:"Sélection spécialisée",
+   uso:"En massage sur les zones concernées.",price:fixed("14,99")},
+
+  {id:"hl-rose-blanc",cat:"huiles",name:"Huile de Rose Blanc",tagline:"La délicatesse florale pour les peaux sensibles.",
+   desc:["Une huile douce aux notes de rose blanche, idéale pour apaiser et illuminer les peaux délicates.","100% naturelle et biologique, sans paraben ni silicone."],
+   benefits:["Apaise les peaux sensibles","Illumine le teint","Parfum floral délicat","100% naturelle"],
+   compo:"Huile de Rose Blanche",prov:"Sélection spécialisée",
+   uso:"Quelques gouttes sur le visage.",price:fixed("9,99")},
+
+  {id:"hl-rose",cat:"huiles",name:"Huile de Rose",tagline:"L'élixir de beauté intemporel.",
+   desc:["Une huile précieuse à la rose, symbole de beauté et de raffinement depuis l'Antiquité, pour nourrir et sublimer la peau.","100% naturelle et biologique, sans paraben ni silicone."],
+   benefits:["Nourrit et régénère","Parfum envoûtant","Sublime la peau","100% naturelle"],
+   compo:"Huile de Rose",prov:"Sélection spécialisée",
+   uso:"En soin du visage, matin ou soir.",price:fixed("9,99")},
+
+  {id:"hl-citron",cat:"huiles",name:"Huile de Citron",tagline:"L'éclat vivifiant des agrumes.",
+   desc:["Une huile fraîche et tonifiante issue du citron, traditionnellement appréciée pour son parfum vif et purifiant.","100% naturelle et biologique, sans paraben ni silicone."],
+   benefits:["Tonifiante et vivifiante","Purifiante","Parfum frais d'agrumes","100% naturelle"],
+   compo:"Huile de Citron",prov:"Sélection spécialisée",
+   uso:"En diffusion ou en soin dilué.",price:fixed("9,99")},
+
+  {id:"hl-menthe-pouliot",cat:"huiles",name:"Huile de Menthe Pouliot",tagline:"La menthe sauvage aux notes puissantes.",
+   desc:["Une huile à la fraîcheur prononcée issue de la menthe pouliot, traditionnellement utilisée pour son parfum intense.","100% naturelle et biologique, sans paraben ni silicone."],
+   benefits:["Fraîcheur intense","Parfum puissant","Tonifiante","100% naturelle"],
+   compo:"Huile de Menthe Pouliot",prov:"Sélection spécialisée",
+   uso:"En diffusion ou en massage dilué.",price:fixed("9,99")},
+
+  /* ---------- BRUMES ---------- */
+  {id:"br-nila",cat:"brumes",name:"Spray Nila",tagline:"La fraîcheur de la rose de Nila et du citron.",
+   desc:["Une brume rafraîchissante à base d'eau de rose de Nila et de citron, pour réveiller et illuminer la peau à tout moment.","Préparation artisanale, flacon spray de 100 mL."],
+   benefits:["Rafraîchit instantanément","Illumine le teint","Parfum délicat","Préparation artisanale"],
+   compo:"Eau de rose de Nila & citron",prov:"Préparation artisanale",
+   uso:"Vaporiser sur le visage à 20 cm, ne pas rincer.",price:fixed("19,99")},
+
+  {id:"br-sublimante",cat:"brumes",name:"Brume Sublimante Rose & Argan",tagline:"Un soin précieux pour sublimer votre beauté.",
+   desc:["Une brume naturelle précieuse à base d'eau de rose, d'huile d'argan et de rose d'Arabie, qui hydrate, illumine et adoucit la peau.","Un soin délicat pour sublimer votre beauté au quotidien. Flacon spray de 100 mL."],
+   benefits:["Illumine et hydrate la peau","Protège et adoucit l'épiderme","Prévient le vieillissement cutané","Délicat parfum floral"],
+   compo:"Eau de rose, huile d'argan, rose d'Arabie",prov:"Préparation artisanale",
+   uso:"Vaporiser sur le visage ou le corps à 20 cm, ne pas rincer.",price:fixed("19,99")},
+
+  {id:"br-eau-rose",cat:"brumes",name:"Eau de Rose Pur",tagline:"La fraîcheur et la pureté à l'état naturel.",
+   desc:["Une brume florale 100% naturelle, obtenue par distillation délicate des pétales de rose. Elle rafraîchit, tonifie et illumine la peau.","Un soin doux et polyvalent pour le visage, le cou et tous les types de peau. Sans alcool, sans colorant, sans conservateur."],
+   benefits:["Rafraîchit et tonifie la peau","Apaise les irritations et rougeurs","Hydrate et équilibre le pH","Convient à tous les types de peau"],
+   compo:"Distillation de pétales de rose — sans alcool, sans colorant, sans conservateur",prov:"Préparation artisanale",
+   uso:"Vaporiser ou appliquer au coton matin et soir, sans rincer.",price:fixed("5,99")},
+
+  {id:"br-apaisante",cat:"brumes",name:"Spray Apaisante aux Plantes Sacrées",tagline:"Une brume raffinée pour le calme et l'harmonie.",
+   desc:["Une brume aux plantes sacrées, conçue pour apaiser, rafraîchir et purifier la peau. Un soin naturel pour une sensation de calme et de bien-être.","À base de Rose d'Oliban, Gomme Arabique et Lavande. Sans alcool, sans colorant. Flacon spray de 100 mL."],
+   benefits:["Rafraîchit, apaise et purifie","Calme et réduit les tensions","Sublime et hydrate le teint","Délicat parfum relaxant"],
+   compo:"Rose d'Oliban, Gomme Arabique, Lavande, eau florale — sans alcool, sans colorant",prov:"Préparation artisanale",
+   uso:"Vaporiser à 20 cm de la peau, yeux fermés, à tout moment.",price:fixed("19,99")},
+
+  /* ---------- QAMIS ---------- */
+  {id:"qms-blanc",cat:"qamis",name:"Qamis Saoudien Blanc",tagline:"L'élégance épurée du blanc, intemporelle.",
+   desc:["Un qamis saoudien d'une coupe raffinée, dans un blanc pur et lumineux. Pensé pour allier confort, dignité et modernité.","Couture artisanale, tissu soigné. Disponible en plusieurs tailles."],
+   benefits:["Coupe saoudienne raffinée","Tissu confortable et respirant","Blanc pur et lumineux","Idéal pour les grandes occasions"],
+   compo:"Qamis saoudien — couture artisanale",prov:"Confection soignée",
+   uso:"Précisez votre taille lors de la commande.",
+   price:{type:"size",options:[["M","69,99"],["L","69,99"],["XL","69,99"],["XXL","69,99"]]}},
+
+  {id:"qms-bleu-ciel",cat:"qamis",name:"Qamis Saoudien Bleu Ciel",tagline:"La douceur d'un ciel clair, portée avec grâce.",
+   desc:["Un qamis saoudien dans un bleu ciel délicat, frais et lumineux. Une coupe élégante pour se distinguer avec sobriété.","Couture artisanale, tissu soigné. Disponible en plusieurs tailles."],
+   benefits:["Teinte bleu ciel élégante","Coupe saoudienne raffinée","Tissu confortable et respirant","Style frais et distingué"],
+   compo:"Qamis saoudien — couture artisanale",prov:"Confection soignée",
+   uso:"Précisez votre taille lors de la commande.",
+   price:{type:"size",options:[["M","69,99"],["L","69,99"],["XL","69,99"],["XXL","69,99"]]}},
+
+  {id:"qms-gris",cat:"qamis",name:"Qamis Saoudien Gris Foncé",tagline:"La sobriété affirmée du gris profond.",
+   desc:["Un qamis saoudien dans un gris foncé élégant, parfait pour un style sobre et moderne au quotidien comme aux occasions.","Couture artisanale, tissu soigné. Disponible en plusieurs tailles."],
+   benefits:["Gris foncé moderne","Coupe saoudienne raffinée","Tissu confortable","Polyvalent et élégant"],
+   compo:"Qamis saoudien — couture artisanale",prov:"Confection soignée",
+   uso:"Précisez votre taille lors de la commande.",
+   price:{type:"size",options:[["M","69,99"],["L","69,99"],["XL","69,99"],["XXL","69,99"]]}},
+
+  {id:"qms-marron",cat:"qamis",name:"Qamis Saoudien Marron",tagline:"La chaleur terreuse d'un marron noble.",
+   desc:["Un qamis saoudien dans un marron chaleureux et raffiné, pour une allure naturelle et distinguée.","Couture artisanale, tissu soigné. Disponible en plusieurs tailles."],
+   benefits:["Marron chaleureux et noble","Coupe saoudienne raffinée","Tissu confortable","Allure naturelle et distinguée"],
+   compo:"Qamis saoudien — couture artisanale",prov:"Confection soignée",
+   uso:"Précisez votre taille lors de la commande.",
+   price:{type:"size",options:[["M","69,99"],["L","69,99"],["XL","69,99"],["XXL","69,99"]]}},
+
+  /* ---------- VÊTEMENTS FEMMES ---------- */
+  {id:"vt-layali-blanc",cat:"vetements",name:"Ensemble Layali Blanc",tagline:"La pureté lumineuse pour les jours d'exception.",
+   desc:["Un ensemble Layali dans un blanc éclatant, à la coupe fluide et raffinée. Pensé pour allier pudeur, élégance et modernité.","Couture artisanale élaborée au Maroc, dans le respect du savoir-faire traditionnel."],
+   benefits:["Coupe fluide et élégante","Blanc lumineux et raffiné","Couture artisanale marocaine","Pudeur et modernité"],
+   compo:"Ensemble Layali — couture artisanale",prov:"Maroc",
+   uso:"Précisez votre taille lors de la commande.",price:fixed("124,99")},
+
+  {id:"vt-layali-doree",cat:"vetements",name:"Ensemble Layali Dorée",tagline:"L'éclat de l'or pour briller en toute pudeur.",
+   desc:["Un ensemble Layali dans un doré somptueux qui capte la lumière. La pièce idéale pour les grandes occasions et les célébrations.","Couture artisanale élaborée au Maroc, dans le respect du savoir-faire traditionnel."],
+   benefits:["Doré somptueux et lumineux","Coupe fluide et élégante","Couture artisanale marocaine","Parfait pour les célébrations"],
+   compo:"Ensemble Layali — couture artisanale",prov:"Maroc",
+   uso:"Précisez votre taille lors de la commande.",price:fixed("124,99")},
+
+  {id:"vt-layali-noir",cat:"vetements",name:"Ensemble Layali Noir",tagline:"L'élégance absolue du noir intemporel.",
+   desc:["Un ensemble Layali dans un noir profond et raffiné, à la coupe fluide. L'intemporel par excellence, élégant en toute circonstance.","Couture artisanale élaborée au Maroc, dans le respect du savoir-faire traditionnel."],
+   benefits:["Noir profond et intemporel","Coupe fluide et raffinée","Couture artisanale marocaine","Élégant en toute occasion"],
+   compo:"Ensemble Layali — couture artisanale",prov:"Maroc",
+   uso:"Précisez votre taille lors de la commande.",price:fixed("124,99")},
+
+  {id:"vt-nissah-blanc",cat:"vetements",name:"Ensemble Nissah Mastoura Blanc",tagline:"La grâce immaculée d'un blanc pur.",
+   desc:["Un ensemble Nissah Mastoura blanc, couvrant et élégant, pensé pour la pudeur et le confort au quotidien comme pour la prière.","Couture artisanale élaborée au Maroc, dans le respect du savoir-faire traditionnel."],
+   benefits:["Couvrant et pudique","Blanc pur et lumineux","Confortable au quotidien","Couture artisanale marocaine"],
+   compo:"Ensemble Nissah Mastoura — couture artisanale",prov:"Maroc",
+   uso:"Précisez votre taille lors de la commande.",price:fixed("59,99")},
+
+  {id:"vt-nissah-bleu",cat:"vetements",name:"Ensemble Nissah Mastoura Bleu",tagline:"La sérénité d'un bleu profond.",
+   desc:["Un ensemble Nissah Mastoura dans un bleu élégant et apaisant, couvrant et confortable.","Couture artisanale élaborée au Maroc, dans le respect du savoir-faire traditionnel."],
+   benefits:["Bleu élégant et apaisant","Couvrant et pudique","Confortable au quotidien","Couture artisanale marocaine"],
+   compo:"Ensemble Nissah Mastoura — couture artisanale",prov:"Maroc",
+   uso:"Précisez votre taille lors de la commande.",price:fixed("59,99")},
+
+  {id:"vt-nissah-bordeaux",cat:"vetements",name:"Ensemble Nissah Mastoura Bordeaux",tagline:"La richesse chaleureuse du bordeaux.",
+   desc:["Un ensemble Nissah Mastoura dans un bordeaux profond et raffiné, couvrant et élégant.","Couture artisanale élaborée au Maroc, dans le respect du savoir-faire traditionnel."],
+   benefits:["Bordeaux profond et raffiné","Couvrant et pudique","Confortable au quotidien","Couture artisanale marocaine"],
+   compo:"Ensemble Nissah Mastoura — couture artisanale",prov:"Maroc",
+   uso:"Précisez votre taille lors de la commande.",price:fixed("59,99")},
+
+  {id:"vt-nissah-noir",cat:"vetements",name:"Ensemble Nissah Mastoura Noir",tagline:"L'intemporel par excellence.",
+   desc:["Un ensemble Nissah Mastoura noir, couvrant et élégant, qui convient à toutes les circonstances.","Couture artisanale élaborée au Maroc, dans le respect du savoir-faire traditionnel."],
+   benefits:["Noir intemporel","Couvrant et pudique","Confortable au quotidien","Couture artisanale marocaine"],
+   compo:"Ensemble Nissah Mastoura — couture artisanale",prov:"Maroc",
+   uso:"Précisez votre taille lors de la commande.",price:fixed("59,99")},
+
+  {id:"vt-nissah-vert",cat:"vetements",name:"Ensemble Nissah Mastoura Vert Sapin",tagline:"La profondeur apaisante de la forêt.",
+   desc:["Un ensemble Nissah Mastoura dans un vert sapin profond et naturel, couvrant et élégant.","Couture artisanale élaborée au Maroc, dans le respect du savoir-faire traditionnel."],
+   benefits:["Vert sapin profond et naturel","Couvrant et pudique","Confortable au quotidien","Couture artisanale marocaine"],
+   compo:"Ensemble Nissah Mastoura — couture artisanale",prov:"Maroc",
+   uso:"Précisez votre taille lors de la commande.",price:fixed("59,99")},
+
+  {id:"vt-nissah-violet",cat:"vetements",name:"Ensemble Nissah Mastoura Violet",tagline:"La noblesse délicate du violet.",
+   desc:["Un ensemble Nissah Mastoura dans un violet profond et raffiné, couvrant et élégant.","Couture artisanale élaborée au Maroc, dans le respect du savoir-faire traditionnel."],
+   benefits:["Violet profond et raffiné","Couvrant et pudique","Confortable au quotidien","Couture artisanale marocaine"],
+   compo:"Ensemble Nissah Mastoura — couture artisanale",prov:"Maroc",
+   uso:"Précisez votre taille lors de la commande.",price:fixed("59,99")},
+
+  {id:"vt-nissah-kaki",cat:"vetements",name:"Ensemble Nissah Moustara Kaki",tagline:"La sobriété naturelle du kaki.",
+   desc:["Un ensemble Nissah Moustara dans un kaki naturel et élégant, couvrant et confortable pour le quotidien.","Couture artisanale élaborée au Maroc, dans le respect du savoir-faire traditionnel."],
+   benefits:["Kaki naturel et sobre","Couvrant et pudique","Confortable au quotidien","Couture artisanale marocaine"],
+   compo:"Ensemble Nissah Moustara — couture artisanale",prov:"Maroc",
+   uso:"Précisez votre taille lors de la commande.",price:fixed("59,99")}
+];
+
+/* ============ STATE ============ */
+let currentFilter = "all";
+let activeProduct = null;
+let activeOption = 0;
+
+/* ============ HELPERS ============ */
+function startPrice(p){
+  if(p.price.type==="fixed") return p.price.value;
+  return p.price.options[0][1];
+}
+function priceLabel(p){
+  if(p.price.type==="fixed") return `${p.price.value}€`;
+  if(p.price.type==="format") return `dès ${p.price.options[0][1]}€`;
+  return `${p.price.options[0][1]}€`;
+}
+function waLink(name,opt,price){
+  let t = `Bonjour, je souhaite commander : ${name}`;
+  if(opt) t += ` — ${opt}`;
+  t += ` — ${price}€`;
+  return WA + encodeURIComponent(t);
+}
+
+/* ============ RENDER HOME ============ */
+function renderFilters(){
+  document.getElementById("filters").innerHTML = FILTERS.map(([k,l])=>
+    `<button class="${k===currentFilter?'active':''}" onclick="setFilter('${k}')">${l}</button>`).join("");
+}
+function renderGrid(){
+  const list = currentFilter==="all" ? PRODUCTS : PRODUCTS.filter(p=>p.cat===currentFilter);
+  document.getElementById("grid").innerHTML = list.map(p=>`
+    <div class="card" onclick="showProduct('${p.id}')">
+      ${EMBLEMS[p.cat]}
+      <div class="cat-tag">${CAT_LABELS[p.cat]}</div>
+      <h3>${p.name}</h3>
+      <div class="price">${p.price.type==='format'?`<small>dès</small> ${p.price.options[0][1]}€`:`${startPrice(p)}€`}</div>
+    </div>`).join("");
+}
+function setFilter(f){currentFilter=f;renderFilters();renderGrid();}
+function goCat(f){showHome();setFilter(f);setTimeout(()=>document.getElementById("boutique").scrollIntoView({behavior:"smooth"}),60);closeMenu();}
+
+/* ============ RENDER PRODUCT PAGE ============ */
+function showProduct(id){
+  const p = PRODUCTS.find(x=>x.id===id);
+  if(!p) return;
+  activeProduct = p; activeOption = 0;
+  const hasOptions = p.price.type!=="fixed";
+  const optLabel = p.price.type==="format" ? "Choisissez votre format" : (p.price.type==="size" ? "Choisissez votre taille" : "");
+
+  const family = PRODUCTS.filter(x=>x.cat===p.cat && x.id!==p.id).slice(0,4);
+
+  const isConsumable = ["miels","gelules","poudres","huiles"].includes(p.cat);
+  const isBrume = p.cat==="brumes";
+  const isWear = p.cat==="qamis" || p.cat==="vetements";
+
+  // Qualité panel (left) — varies slightly by type
+  const qualite = isWear
+    ? ["Couture artisanale soignée","Tissu sélectionné avec exigence","Finitions de qualité premium"]
+    : ["Produit 100% naturel","Sélection rigoureuse Dar Nūr","Non traité chimiquement"];
+
+  // Right panel: Précautions (consommables/brumes) OU Entretien & taille (vêtements)
+  const rightTitle = isWear ? "Entretien & taille" : "Précautions";
+  const rightItems = isWear
+    ? ["Lavage délicat recommandé, à l'eau froide","Repassage à température modérée","Taille confirmée avec vous sur WhatsApp avant l'envoi"]
+    : (isBrume
+        ? ["Usage externe uniquement, éviter le contour des yeux","Produit artisanal : couleur et parfum peuvent varier selon les lots","À conserver dans un endroit sec et à l'abri de la lumière"]
+        : ["Déconseillé aux femmes enceintes et allaitantes","Ne remplace pas un traitement médical","À conserver dans un endroit sec et à l'abri de la lumière"]);
+
+  const usageTitle = isWear ? "Le mot de la maison" : "Conseils d'usage";
+
+  document.getElementById("productView").innerHTML = `
+    <section class="pp-hero">
+      <div class="pp-hero-inner">
+        <div class="breadcrumb">
+          <a onclick="showHome()">Dar Nūr</a><span>›</span>
+          <a onclick="goCat('${p.cat}')">${CAT_LABELS[p.cat]}</a><span>›</span>
+          <span style="color:var(--cream)">${p.name}</span>
+        </div>
+        <div class="pp-badge">${CAT_LABELS[p.cat]}</div>
+        <h1>${p.name}</h1>
+        <div class="tagline">${p.tagline}</div>
+      </div>
+    </section>
+
+    <div class="pp-body">
+      <div class="pp-visual">
+        ${EMBLEMS[p.cat]}
+        <div class="ribbon">Dar Nūr · دار النور</div>
+      </div>
+      <div class="pp-content">
+        ${p.desc.map(d=>`<p>${d}</p>`).join("")}
+        <h2>Bienfaits</h2>
+        <ul class="pp-benefits">${p.benefits.map(b=>`<li>${b}</li>`).join("")}</ul>
+        <h2>Le produit</h2>
+        <div class="pp-meta">
+          <div><div class="k">Composition</div><div class="v">${p.compo}</div></div>
+          <div><div class="k">Provenance</div><div class="v">${p.prov}</div></div>
+        </div>
+        <h2>${usageTitle}</h2>
+        <p>${p.uso}</p>
+
+        <div class="dual-panel">
+          <div class="panel">
+            <div class="panel-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2l2 4 4 .5-3 3 .8 4.5L12 16l-3.8 2 .8-4.5-3-3 4-.5z"/></svg>Qualité</div>
+            <ul>${qualite.map(q=>`<li>${q}</li>`).join("")}</ul>
+          </div>
+          <div class="panel warn">
+            <div class="panel-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3l9 16H3z"/><path d="M12 10v4M12 17h.01" stroke-linecap="round"/></svg>${rightTitle}</div>
+            <ul>${rightItems.map(r=>`<li>${r}</li>`).join("")}</ul>
+          </div>
+        </div>
+
+        <div class="order-box">
+          ${hasOptions?`<div class="label">${optLabel}</div>
+            <div class="opt-row" id="optRow">
+              ${p.price.options.map((o,i)=>`<button class="opt ${i===0?'sel':''}" onclick="selectOption(${i})">${o[0]}</button>`).join("")}
+            </div>`:""}
+          <div class="order-foot">
+            <div class="order-price"><span id="ppPrice">${startPrice(p)}€</span>${p.price.type==='format'?`<small id="ppFmt">${p.price.options[0][0]}</small>`:(p.price.type==='size'?`<small id="ppFmt">Taille ${p.price.options[0][0]}</small>`:`<small>Livraison rapide</small>`)}</div>
+            <a class="btn-wa" id="ppBtn" href="${waLink(p.name, hasOptions?p.price.options[0][0]:'', startPrice(p))}" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.945C.16 5.335 5.495 0 12.05 0a11.82 11.82 0 018.413 3.488 11.82 11.82 0 013.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.86 9.86 0 001.512 5.26l-.999 3.648 3.985-1.607zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+              Commander
             </a>
-            <nav id="nav">
-                <a href="#produits">Produits</a>
-                <a href="#histoire">Notre histoire</a>
-                <a href="#paiements">Paiements</a>
-                <a href="#contact">Contact</a>
-            </nav>
-            <button class="burger-menu" id="burgerMenu">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
+          </div>
         </div>
-    </header>
-
-    <!-- HERO SECTION -->
-    <section class="hero">
-        <div class="hero-content">
-            <h1>Les trésors de la nature, livrés avec confiance</h1>
-            <p class="subtitle">Produits 100% naturels — Sélectionnés avec soin, si Dieu le veut</p>
-            <div class="hero-cta-group">
-                <a href="https://wa.me/33749890322?text=Bonjour%20Dar%20Nûr%2C%20je%20souhaite%20découvrir%20vos%20produits" class="btn btn-whatsapp" target="_blank">
-                    <span>💬</span>
-                    <span>Commander sur WhatsApp</span>
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <!-- ABOUT SECTION -->
-    <section class="about" id="histoire">
-        <div class="section-container">
-            <div class="section-title">
-                <h2>Notre histoire</h2>
-            </div>
-            <div class="about-content">
-                <p>Dar Nūr est née d'une rencontre. Un jour, quelqu'un m'a ouvert la porte d'un monde que je ne connaissais pas encore — celui des remèdes naturels transmis de génération en génération, ancrés dans notre tradition et notre foi.</p>
-
-                <div class="ornament">✦ ✦ ✦</div>
-
-                <p>En découvrant ces produits, j'ai compris quelque chose de simple : ces trésors existent depuis des siècles, mais beaucoup de gens autour de moi n'y ont jamais accès. Pas parce qu'ils n'en veulent pas — mais parce que personne ne les leur a présentés.</p>
-
-                <p class="quote">« C'est devenu ma mission. »</p>
-
-                <p>Chaque produit Dar Nūr est sélectionné avec soin, sourcé directement auprès de producteurs de confiance, et présenté avec respect. Nous ne vendons pas des marchandises — nous restaurons un lien entre vous et la nature, entre vous et votre bien-être, entre vous et vos racines.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- CATALOG SECTION -->
-    <section class="catalog" id="produits">
-        <div class="section-container">
-            <div class="section-title">
-                <h2>Notre catalogue</h2>
-                <span class="subtitle">Produits sélectionnés avec respect</span>
-            </div>
-
-            <!-- FILTERS -->
-            <div class="filter-container">
-                <button class="btn-filter active" data-filter="tous">Tous</button>
-                <button class="btn-filter" data-filter="miels">Miels</button>
-                <button class="btn-filter" data-filter="gelules">Gélules</button>
-                <button class="btn-filter" data-filter="poudres">Poudres & Graines</button>
-                <button class="btn-filter" data-filter="huiles">Huiles</button>
-                <button class="btn-filter" data-filter="brumes">Brumes & Soins</button>
-                <button class="btn-filter" data-filter="hommes">Qamis Hommes</button>
-                <button class="btn-filter" data-filter="femmes">Vêtements Femmes</button>
-            </div>
-
-            <!-- PRODUCTS GRID -->
-            <div class="products-grid" id="productsGrid">
-                <!-- Les produits seront insérés par JavaScript -->
-            </div>
-        </div>
-    </section>
-
-    <!-- PAYMENTS SECTION -->
-    <section class="payments" id="paiements">
-        <div class="section-container">
-            <div class="section-title">
-                <h2>Paiements acceptés</h2>
-                <span class="subtitle">Sécurisé et rapide</span>
-            </div>
-
-            <div class="payment-methods">
-                <div class="payment-card">
-                    <div class="payment-icon">💳</div>
-                    <h3>Revolut</h3>
-                    <p>Paiement instantané et sécurisé en ligne</p>
-                    <a href="https://revolut.me/youcefkir" class="btn btn-whatsapp" target="_blank">
-                        <span>Payer sur Revolut</span>
-                    </a>
-                </div>
-                <div class="payment-card">
-                    <div class="payment-icon">💵</div>
-                    <h3>Espèces</h3>
-                    <p>À la livraison — aucune surcharge</p>
-                    <a href="https://wa.me/33749890322?text=Je%20souhaite%20payer%20en%20espèces%20à%20la%20livraison" class="btn btn-whatsapp" target="_blank">
-                        <span>Commander</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- FOOTER -->
-    <footer id="contact">
-        <div class="footer-content">
-            <div class="footer-top">
-                <div class="footer-section">
-                    <div class="footer-logo">DAR NŪR</div>
-                    <div class="footer-arabic">دار النور</div>
-                    <p>La Maison de la Lumière — Produits naturels premium</p>
-                </div>
-
-                <div class="footer-section">
-                    <h4>📞 Contact</h4>
-                    <a href="tel:+33749890322">WhatsApp: 07 49 89 03 22</a>
-                    <a href="mailto:dar_nur_001@outlook.com">Email: dar_nur_001@outlook.com</a>
-                    <a href="https://instagram.com/dar.nur.officiel" target="_blank">Instagram: @dar.nur.officiel</a>
-                </div>
-
-                <div class="footer-section">
-                    <h4>💳 Paiement</h4>
-                    <a href="https://revolut.me/youcefkir" target="_blank">Revolut: revolut.me/youcefkir</a>
-                    <a href="#">Espèces à la livraison</a>
-                </div>
-
-                <div class="footer-section">
-                    <h4>Légal</h4>
-                    <a href="#">Mentions légales</a>
-                    <a href="#">Politique de confidentialité</a>
-                    <a href="#">Conditions générales</a>
-                </div>
-            </div>
-
-            <div class="footer-bottom">
-                <div class="footer-links">
-                    <a href="#">Mentions légales</a>
-                    <span>|</span>
-                    <a href="#">Politique de confidentialité</a>
-                    <span>|</span>
-                    <a href="#">CGV</a>
-                </div>
-                <p>&copy; 2025 Dar Nūr — Tous droits réservés</p>
-            </div>
-        </div>
-    </footer>
-
-    <!-- MODAL -->
-    <div class="modal" id="productModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title" id="modalTitle">Produit</h2>
-                <button class="modal-close" id="modalClose">✕</button>
-            </div>
-
-            <div id="modalBody">
-                <!-- Contenu dynamique -->
-            </div>
-
-            <div class="modal-footer">
-                <a href="#" class="btn btn-whatsapp" id="modalWhatsappBtn" target="_blank">
-                    <span>💬</span>
-                    <span>Commander sur WhatsApp</span>
-                </a>
-            </div>
-        </div>
+      </div>
     </div>
 
-    <div class="modal-footer-mobile" id="mobileFooter">
-        <a href="#" class="btn btn-whatsapp" id="mobileWhatsappBtn" style="width: 100%;" target="_blank">
-            <span>💬</span>
-            <span>Commander sur WhatsApp</span>
-        </a>
-    </div>
+    <section class="engage">
+      <div class="wrap engage-inner">
+        <div class="engage-badges">
+          <div class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3c2 3 6 4 6 9a6 6 0 01-12 0c0-5 4-6 6-9z"/></svg><span>100% Naturel</span></div>
+          <div class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="6"/><path d="M16 16l4 4" stroke-linecap="round"/></svg><span>Sélection rigoureuse</span></div>
+          <div class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l2.4 6.5L21 9l-5 4.2L17.8 21 12 17l-5.8 4 1.8-7.8L3 9l6.6-.5z"/></svg><span>Qualité premium</span></div>
+          <div class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12l4 4 10-10" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Satisfaction garantie</span></div>
+        </div>
+        <div class="engage-quote">
+          <p>Un retour aux remèdes ancestraux, avec un savoir-faire authentique. Des produits choisis avec exigence, pour une qualité pure,</p>
+          <span class="signature">si Dieu le veut</span>
+        </div>
+      </div>
+    </section>
 
-    <script>
-        // PRODUCTS DATABASE
-        const products = {
-            miels: [
-                { id: 'm1', name: 'Miel de Nigelle', emoji: '🍯', sizes: [
-                    { size: '50g', price: 9.99 },
-                    { size: '200g', price: 24.99 },
-                    { size: '300g', price: 34.99 }
-                ], description: 'Miel artisanal infusé de graines de nigelle, reconnu depuis l\'Antiquité pour ses propriétés revitalisantes. Un goût unique, légèrement épicé et naturellement sucré.', benefits: ['Renforce l\'immunité', 'Apaise la toux', 'Riche en antioxydants', 'Énergie naturelle'], origin: 'Récolte premium — Sélection directe' },
-                { id: 'm2', name: 'Miel Aphrodisiaque', emoji: '💛', sizes: [
-                    { size: '50g', price: 19.99 },
-                    { size: '200g', price: 44.99 },
-                    { size: '300g', price: 59.99 }
-                ], description: 'Miel raffiné enrichi de plantes toniques ancestrales. Composition secrète inspirée des traditions royales, pour une vitalité retrouvée.', benefits: ['Rédynamisant', 'Améliore la vitalité', 'Composition exclusive', 'Saveur délicate'], origin: 'Recette artisanale exclusive' },
-                { id: 'm3', name: 'Miel Rose de Sibérie', emoji: '🌹', sizes: [
-                    { size: '50g', price: 14.99 },
-                    { size: '200g', price: 34.99 },
-                    { size: '300g', price: 44.99 }
-                ], description: 'Miel transparent infusé de rose sauvage de Sibérie. Délicat et floral, il apaise le corps et l\'esprit avec ses vertus apaisantes inégalées.', benefits: ['Apaise les tensions', 'Saveur florale unique', 'Anti-inflammatoire naturel', 'Sommeil réparateur'], origin: 'Fleurs sauvages de Sibérie' },
-                { id: 'm4', name: 'Miel Spiruline', emoji: '🌊', sizes: [
-                    { size: '50g', price: 14.99 },
-                    { size: '200g', price: 34.99 },
-                    { size: '300g', price: 44.99 }
-                ], description: 'Miel premium mélangé à la spiruline biologique, l\'algue miraculeuse riche en protéines et minéraux. Idéal pour athletes et chercheurs de vitalité.', benefits: ['Riche en protéines', 'Booste l\'énergie', 'Antioxydant puissant', 'Régénération cellulaire'], origin: 'Spiruline certifiée biologique' },
-                { id: 'm5', name: 'Miel Gingembre Curcuma', emoji: '🌱', sizes: [
-                    { size: '50g', price: 9.99 },
-                    { size: '200g', price: 24.99 },
-                    { size: '300g', price: 34.99 }
-                ], description: 'Miel sucré infusé du gingembre tonique et de la curcuma dorée. Formule anti-inflammatoire naturelle pour un corps en harmonie.', benefits: ['Réduit l\'inflammation', 'Réchauffe le corps', 'Digestion facilitée', 'Goût épicé subtil'], origin: 'Inde — Agriculture traditionnelle' },
-                { id: 'm6', name: 'Miel Hibiscus Nigelle Zamzam', emoji: '🌺', sizes: [
-                    { size: '50g', price: 9.99 },
-                    { size: '200g', price: 24.99 },
-                    { size: '300g', price: 34.99 }
-                ], description: 'Miel sacré combinant l\'hibiscus rouge, les graines de nigelle bénites et l\'eau de Zamzam. Un nectar de bénédiction et de santé.', benefits: ['Protège le cœur', 'Purifie le corps', 'Honore la tradition', 'Goût floral riche'], origin: 'Mélange bénit traditionnel' },
-                { id: 'm7', name: 'Miel Moringa Nigelle', emoji: '🌿', sizes: [
-                    { size: '50g', price: 9.99 },
-                    { size: '200g', price: 24.99 },
-                    { size: '300g', price: 34.99 }
-                ], description: 'Miel enrichi de moringa — l\'arbre miraculeux d\'Afrique — et de nigelle. Nutrition complète en un pot.', benefits: ['Nutrit complet', 'Renforce les os', 'Éclat naturel', 'Saveur légère'], origin: 'Afrique — Récolte durable' },
-                { id: 'm8', name: 'Miel Gingembre Fenugrec', emoji: '🫓', sizes: [
-                    { size: '50g', price: 9.99 },
-                    { size: '200g', price: 24.99 },
-                    { size: '300g', price: 34.99 }
-                ], description: 'Miel réchauffant au gingembre frais et au fenugrec riche. Fortifiant naturel pour les périodes difficiles.', benefits: ['Réchauffe le corps', 'Lactation naturelle', 'Muscles renforcés', 'Goût épicé chaleureux'], origin: 'Inde — Fenugrec premium' },
-                { id: 'm9', name: 'Miel d\'Aubépine', emoji: '🍃', sizes: [
-                    { size: '50g', price: 9.99 },
-                    { size: '200g', price: 24.99 },
-                    { size: '300g', price: 34.99 }
-                ], description: 'Miel floral délicat à base de fleurs d\'aubépine, excellent pour le cœur et l\'équilibre émotionnel.', benefits: ['Soutient le cœur', 'Calme l\'anxiété', 'Sommeil paisible', 'Saveur douce'], origin: 'France — Aubépine sauvage' },
-                { id: 'm10', name: 'Miel Costus Indien Nigelle', emoji: '👑', sizes: [
-                    { size: '50g', price: 9.99 },
-                    { size: '200g', price: 24.99 },
-                    { size: '300g', price: 34.99 }
-                ], description: 'Miel royal associant le costus indien prestigieux à la nigelle bénite. Prestige et efficacité réunies.', benefits: ['Cicatrisation rapide', 'Peau lumineuse', 'Composition royale', 'Goût noble et riche'], origin: 'Inde & Moyen-Orient' },
-                { id: 'm11', name: 'Miel Sidr de Jujubier', emoji: '🏜️', sizes: [
-                    { size: '50g', price: 9.99 },
-                    { size: '200g', price: 24.99 },
-                    { size: '300g', price: 34.99 }
-                ], description: 'Miel blanc et rare du jujubier, arbre béni dans les traditions. Doux, cristallin, léger.', benefits: ['Miel bénit', 'Saveur cristalline', 'Cicatrisant puissant', 'Énergie pure'], origin: 'Yémen — Jujubier sauvage' },
-                { id: 'm12', name: 'Miel de Fraise de Russie', emoji: '🍓', sizes: [
-                    { size: '50g', price: 9.99 },
-                    { size: '200g', price: 24.99 },
-                    { size: '300g', price: 34.99 }
-                ], description: 'Miel finement infusé de fraises sauvages de Russie. Léger, fruité, délicieux.', benefits: ['Goût fruité délicat', 'Riche en vitamine C', 'Antioxydant naturel', 'Saveur enfantine'], origin: 'Russie — Fraises sauvages' },
-                { id: 'm13', name: 'Miel Noir de Shilajit', emoji: '⚫', sizes: [
-                    { size: '50g', price: 14.99 },
-                    { size: '200g', price: 34.99 },
-                    { size: '300g', price: 44.99 }
-                ], description: 'Miel foncé enrichi du shilajit ancien de l\'Himalaya. Minéralisant complet, vitalité maximale.', benefits: ['Minéraux rares', 'Énergie extrême', 'Rajeunit le corps', 'Goût minéral unique'], origin: 'Himalaya — Shilajit ancestral' },
-                { id: 'm14', name: 'Miel Blanc du Kirghizistan', emoji: '❄️', sizes: [
-                    { size: '50g', price: 9.99 },
-                    { size: '200g', price: 24.99 },
-                    { size: '300g', price: 34.99 }
-                ], description: 'Miel blanc pur des hautes montagne du Kirghizistan. Cristallin, léger, subtil.', benefits: ['Miel blanc rare', 'Cristallin et pur', 'Anti-microbien naturel', 'Légèreté garantie'], origin: 'Kirghizistan — Montagnes pures' }
-            ],
-            gelules: [
-                { id: 'g1', name: 'Gélules de Nigelle (Éthiopie)', emoji: '⚫', sizes: [{ size: '60 gélules', price: 14.99 }], description: 'Gélules végétales remplies de poudre de nigelle pure d\'Éthiopie. Pratique et efficace.', benefits: ['Immunité renforcée', 'Facile à consommer', 'Digestion naturelle', '100% végétal'], origin: 'Éthiopie — Graine authentique' },
-                { id: 'g2', name: 'Gélules de Valériane (Europe)', emoji: '🌼', sizes: [{ size: '60 gélules', price: 14.99 }], description: 'Gélules de valériane premium pour un sommeil naturel et profond.', benefits: ['Sommeil réparateur', 'Apaise les nerfs', 'Anti-stress naturel', 'Concentration améliée'], origin: 'Europe — Valériane sauvage' },
-                { id: 'g3', name: 'Gélules de Termis (Afrique de l\'Ouest)', emoji: '🌾', sizes: [{ size: '60 gélules', price: 14.99 }], description: 'Gélules de termis, la graine magique africaine de force et d\'endurance.', benefits: ['Force musculaire', 'Endurance augmentée', 'Fortifiant naturel', 'Énergie durable'], origin: 'Afrique de l\'Ouest — Graine rare' },
-                { id: 'g4', name: 'Gélules de Macca (Pérou)', emoji: '🌶️', sizes: [{ size: '60 gélules', price: 14.99 }], description: 'Gélules de Maca péruvien, la racine tonique des Andes.', benefits: ['Vitalité sexuelle', 'Endurance physique', 'Équilibre hormonal', 'Énergie vitale'], origin: 'Pérou — Racine andine' },
-                { id: 'g5', name: 'Gélules de Spiruline (Chine)', emoji: '🌊', sizes: [{ size: '60 gélules', price: 14.99 }], description: 'Gélules de spiruline biologique, super-aliment complet.', benefits: ['Protéines complètes', 'Énergie pure', 'Détox naturelle', 'Cheveux renforcés'], origin: 'Chine — Spiruline certifiée' },
-                { id: 'g6', name: 'Gélules de Fenugrec (Inde)', emoji: '🌱', sizes: [{ size: '60 gélules', price: 14.99 }], description: 'Gélules de fenugrec indien pour force et nutrition.', benefits: ['Renforce les muscles', 'Lactation naturelle', 'Régulation glycémique', 'Saveur de céleri'], origin: 'Inde — Fenugrec premium' },
-                { id: 'g7', name: 'Gélules de Chardon Marie (Europe)', emoji: '🫐', sizes: [{ size: '60 gélules', price: 14.99 }], description: 'Gélules de Chardon Marie pour la santé hépatique complète.', benefits: ['Détoxifie le foie', 'Protège le foie', 'Peau claire', 'Digestion saine'], origin: 'Europe — Chardon sauvage' },
-                { id: 'g8', name: 'Gélules de Ashwaganda (Inde)', emoji: '🧘', sizes: [{ size: '60 gélules', price: 14.99 }], description: 'Gélules d\'Ashwaganda indien, plante adaptogène puissante.', benefits: ['Réduit le stress', 'Sommeil profond', 'Immunity boost', 'Sérénité mentale'], origin: 'Inde — Ashwaganda sauvage' },
-                { id: 'g9', name: 'Gélules de Gingembre Curcuma (Inde)', emoji: '🌱', sizes: [{ size: '60 gélules', price: 14.99 }], description: 'Gélules du duo anti-inflammatoire : Gingembre + Curcuma.', benefits: ['Réduit l\'inflammation', 'Articulations souples', 'Digestion légère', 'Anti-douleur naturel'], origin: 'Inde — Plantes premium' },
-                { id: 'g10', name: 'Gélules de Moringa (Inde)', emoji: '🌿', sizes: [{ size: '60 gélules', price: 14.99 }], description: 'Gélules de Moringa complet pour nutrition intégrale.', benefits: ['77 minéraux essentiels', 'Énergie maximale', 'Peau radieuse', 'Nutrition végétale'], origin: 'Inde — Moringa bio' },
-                { id: 'g11', name: 'Gélules de Costus Indien (Inde)', emoji: '👑', sizes: [{ size: '60 gélules', price: 14.99 }], description: 'Gélules du Costus prestigieux pour beauté et cicatrisation.', benefits: ['Cicatrisation rapide', 'Peau parfaite', 'Composition royale', 'Beauté naturelle'], origin: 'Inde — Costus authentique' },
-                { id: 'g12', name: 'Gélules Aphrodisiaques', emoji: '💛', sizes: [{ size: '60 gélules', price: 19.99 }], description: 'Formule secrète gélulée pour vitalité et passion retrouvées.', benefits: ['Vitalité accrue', 'Passion intensifiée', 'Confiance augmentée', 'Composition exclusive'], origin: 'Recette ancestrale exclusive' }
-            ],
-            poudres: [
-                { id: 'p1', name: 'Poudre de Gingembre-Curcuma', emoji: '🌱', origin: 'Inde', sizes: [{ size: '50g', price: 4.99 }], description: 'Poudre anti-inflammatoire combinant gingembre chaud et curcuma doré.', benefits: ['Anti-inflammatoire', 'Digestion facilitée', 'Articulations souples', 'Goût épicé'] },
-                { id: 'p2', name: 'Poudre de Clou de Girofle', emoji: '🌶️', origin: 'Madagascar', sizes: [{ size: '50g', price: 4.99 }], description: 'Poudre de clou de girofle de Madagascar, épice noble et analgésique.', benefits: ['Anti-douleur naturel', 'Antibactérien', 'Haleine fraîche', 'Goût intense'] },
-                { id: 'p3', name: 'Poudre de Romarin', emoji: '🌿', origin: 'Maroc', sizes: [{ size: '50g', price: 4.99 }], description: 'Poudre de romarin marocain pour circulation et mémoire.', benefits: ['Améliore la mémoire', 'Stimule la circulation', 'Tonique naturel', 'Herbe noble'] },
-                { id: 'p4', name: 'Poudre de Nigelle', emoji: '⚫', origin: 'Égypte', sizes: [{ size: '50g', price: 4.99 }], description: 'Poudre fine de nigelle égyptienne, moulue fraîchement.', benefits: ['Immunité maximale', 'Remède complet', 'Saveur authentique', 'Pur et simple'] },
-                { id: 'p5', name: 'Poudre de Termis', emoji: '🌾', origin: 'Méditerranée / Afrique du Nord', sizes: [{ size: '50g', price: 4.99 }], description: 'Poudre de termis, la graine magique pour force et énergie.', benefits: ['Renforce les muscles', 'Énergie durable', 'Fortifiant rare', 'Goût naturel'] },
-                { id: 'p6', name: 'Poudre de Psyllium', emoji: '🌊', origin: 'Inde', sizes: [{ size: '50g', price: 4.99 }], description: 'Poudre de psyllium pour transit intestinal régulier.', benefits: ['Digestion saine', 'Transit régulier', 'Fibre naturelle', 'Bien-être intestinal'] },
-                { id: 'p7', name: 'Poudre de Costus Indien', emoji: '👑', origin: 'Inde / Asie', sizes: [{ size: '50g', price: 6.99 }], description: 'Poudre précieuse de Costus indien pour beauté et cicatrisation.', benefits: ['Peau radieuse', 'Cicatrisation rapide', 'Composition royale', 'Beauté naturelle'] },
-                { id: 'p8', name: 'Poudre de Moringa', emoji: '🌿', origin: 'Afrique / Asie', sizes: [{ size: '50g', price: 4.99 }], description: 'Poudre complète de Moringa, superfood africain.', benefits: ['Nutrition intégrale', 'Énergie maximale', 'Saine minéralité', 'Vert vibrant'] },
-                { id: 'p9', name: 'Graine de Lavande', emoji: '💜', origin: 'France / Méditerranée', sizes: [{ size: '50g', price: 4.99 }], description: 'Graines de lavande violette pour apaisement et bien-être.', benefits: ['Apaise le corps', 'Sommeil paisible', 'Anti-stress', 'Parfum floral'] },
-                { id: 'p10', name: 'Graine de Chia', emoji: '⚫', origin: 'Amérique Latine / Mexique', sizes: [{ size: '50g', price: 4.99 }], description: 'Graines de Chia riches en oméga-3 et fibres.', benefits: ['Oméga-3 complet', 'Énergie durable', 'Cœur protégé', 'Fibre naturelle'] },
-                { id: 'p11', name: 'Graine de Kirikou', emoji: '⚫', origin: 'Afrique de l\'Ouest', sizes: [{ size: '50g', price: 11.99 }], description: 'Graine rare et puissante de Kirikou pour force extrême.', benefits: ['Force extrême', 'Graine rare', 'Pouvoir ancestral', 'Énergie minimale'] },
-                { id: 'p12', name: 'Graine de Fenouil', emoji: '🌾', origin: 'Méditerranée / Europe', sizes: [{ size: '50g', price: 4.99 }], description: 'Graines de fenouil pour digestion légère et respiration claire.', benefits: ['Digestion facile', 'Respiration claire', 'Lactation naturelle', 'Goût anisé'] },
-                { id: 'p13', name: 'Gomme Arabique', emoji: '🌳', origin: 'Afrique / Sahel', sizes: [{ size: '50g', price: 4.99 }], description: 'Gomme Arabique naturelle, liant traditionnel et probiotique.', benefits: ['Probiotique naturel', 'Digestion saine', 'Cicatrisant', 'Saveur neutre'] },
-                { id: 'p14', name: 'Oliban / Louban Dhakar', emoji: '🕌', origin: 'Afrique de l\'Ouest (Sénégal/Sahel)', sizes: [{ size: '50g', price: 7.99 }], description: 'Oliban sacré de Dhakar, résine pour spiritualité et bien-être.', benefits: ['Nettoyage spirituel', 'Respiration claire', 'Méditation profonde', 'Parfum noble'] },
-                { id: 'p15', name: 'Graine Noir (Baraka / Nigelle)', emoji: '⚫', origin: 'Moyen-Orient / Asie', sizes: [{ size: '50g', price: 7.99 }], description: 'Graine noire bénite pour remède universel.', benefits: ['Remède universel', 'Bénédiction Divine', 'Saveur authentique', 'Puissance complète'] },
-                { id: 'p16', name: 'Graine de Chardon', emoji: '🌳', origin: 'Méditerranée / Europe', sizes: [{ size: '50g', price: 4.99 }], description: 'Graine de Chardon Marie pour foie sain et éclatant.', benefits: ['Foie protégé', 'Peau radieuse', 'Détox naturelle', 'Graine dorée'] },
-                { id: 'p17', name: 'Graines de Nigelle Al Baraka', emoji: '⚫', origin: 'Éthiopie', sizes: [{ size: '50g', price: 7.99 }], description: 'Graines pures de Nigelle Al Baraka d\'Éthiopie.', benefits: ['Pureté garantie', 'Authenticité assurée', 'Remède complet', 'Qualité premium'] }
-            ],
-            huiles: [
-                { id: 'h1', name: 'Huile de Gingembre', emoji: '🌶️', sizes: [{ size: '30 mL', price: 9.99 }], description: 'Huile de massage infusée de gingembre frais, chauffante et énergisante.', benefits: ['Réchauffe le corps', 'Circulation stimulée', 'Muscles apaisés', 'Goût épicé'] },
-                { id: 'h2', name: 'Huile d\'Eucalyptus', emoji: '🌿', sizes: [{ size: '30 mL', price: 11.99 }], description: 'Huile essentielle d\'eucalyptus pur pour respiration libre.', benefits: ['Respiration claire', 'Sinus apaisés', 'Fraîcheur mentale', 'Anti-tussif'] },
-                { id: 'h3', name: 'Huile d\'Oliban', emoji: '🕌', sizes: [{ size: '30 mL', price: 12.99 }], description: 'Huile précieuse d\'oliban pour spiritualité et éclat de peau.', benefits: ['Méditation profonde', 'Peau rajunie', 'Anti-âge naturel', 'Parfum sacré'] },
-                { id: 'h4', name: 'Huile de Nigelle', emoji: '⚫', sizes: [{ size: '30 mL', price: 12.99 }], description: 'Huile pure de Nigelle pour santé intégrale.', benefits: ['Santé complète', 'Peau radieuse', 'Cheveux forts', 'Immunité boost'] },
-                { id: 'h5', name: 'Huile de Fenugrec', emoji: '🌾', sizes: [{ size: '30 mL', price: 9.99 }], description: 'Huile de Fenugrec pour cheveux et peau rayonnants.', benefits: ['Cheveux brillants', 'Peau douce', 'Lactation stimulée', 'Beauté naturelle'] },
-                { id: 'h6', name: 'Huile de Costus Indien', emoji: '👑', sizes: [{ size: '30 mL', price: 9.99 }], description: 'Huile royale de Costus pour beauté extrême.', benefits: ['Peau lisse', 'Cicatrisation rapide', 'Composition royale', 'Beauté absolue'] },
-                { id: 'h7', name: 'Huile de Pépins de Raisins', emoji: '🍇', sizes: [{ size: '30 mL', price: 9.99 }], description: 'Huile légère de pépins de raisins pour peaux mixtes.', benefits: ['Peau légère', 'Anti-brillant', 'Antioxydant naturel', 'Finition mate'] },
-                { id: 'h8', name: 'Huile de Menthe Poivrée', emoji: '💚', sizes: [{ size: '30 mL', price: 9.99 }], description: 'Huile de Menthe poivrée pour fraîcheur et vitalité.', benefits: ['Respiration fraîche', 'Esprit clair', 'Circulation stimulée', 'Goût menthe'] },
-                { id: 'h9', name: 'Huile de Lavande', emoji: '💜', sizes: [{ size: '30 mL', price: 9.99 }], description: 'Huile de Lavande pure pour sommeil et apaisement.', benefits: ['Sommeil profond', 'Apaise les tensions', 'Peau saine', 'Parfum floral'] },
-                { id: 'h10', name: 'Huile de Figue de Barbarie', emoji: '🌵', sizes: [{ size: '30 mL', price: 9.99 }], description: 'Huile rare de Figue de Barbarie, élixir du désert.', benefits: ['Peau hydratée', 'Anti-âge complet', 'Élixir rare', 'Beauté désertique'] },
-                { id: 'h11', name: 'Huile de Clou de Girofle', emoji: '🌶️', sizes: [{ size: '30 mL', price: 9.99 }], description: 'Huile analgésique de Clou de Girofle.', benefits: ['Anti-douleur naturel', 'Anti-inflammatoire', 'Antibactérien', 'Goût intense'] },
-                { id: 'h12', name: 'Huile Arthrose Polyarthrite', emoji: '🦴', sizes: [{ size: '30 mL', price: 14.99 }], description: 'Huile de massage spécialisée pour articulations souples.', benefits: ['Articulations libérées', 'Mobilité retrouvée', 'Douleurs apaisées', 'Formule exclusive'] },
-                { id: 'h13', name: 'Huile de Rose Blanc', emoji: '🤍', sizes: [{ size: '30 mL', price: 9.99 }], description: 'Huile de Rose Blanche délicate et apaisante.', benefits: ['Peau douce', 'Apaisement émotionnel', 'Beauté intérieure', 'Parfum blanc'] },
-                { id: 'h14', name: 'Huile de Rose', emoji: '🌹', sizes: [{ size: '30 mL', price: 9.99 }], description: 'Huile de Rose rouge pour amour et féminité.', benefits: ['Beauté radieuse', 'Émotions équilibrées', 'Peau éclatante', 'Parfum floral'] },
-                { id: 'h15', name: 'Huile de Citron', emoji: '🍋', sizes: [{ size: '30 mL', price: 9.99 }], description: 'Huile légère de Citron pour peau lumineuse.', benefits: ['Peau lumineuse', 'Anti-taches sombres', 'Énergisant', 'Parfum citronné'] },
-                { id: 'h16', name: 'Huile de Menthe Pouliot', emoji: '💚', sizes: [{ size: '30 mL', price: 9.99 }], description: 'Huile de Menthe Pouliot pour digestion et vitalité.', benefits: ['Digestion facilitée', 'Vitalité accrue', 'Insectifuge naturel', 'Fraîcheur subtile'] }
-            ],
-            brumes: [
-                { id: 'b1', name: 'Spray Nila', emoji: '💫', sizes: [{ size: '100 mL', price: 19.99 }], description: 'Eau de rose de Nila et citron — spray revitalisant pour le visage.', benefits: ['Revitalise la peau', 'Fraîcheur instantanée', 'Hydratation légère', 'Goût citronné'] },
-                { id: 'b2', name: 'Brume Sublimante Rose & Argan', emoji: '🌹', sizes: [{ size: '100 mL', price: 19.99 }], description: 'Brume précieuse eau de rose, huile d\'argan et rose d\'Arabie.', benefits: ['Beauté sublime', 'Hydratation riche', 'Parfum noble', 'Peau respire'] },
-                { id: 'b3', name: 'Eau de Rose Pur', emoji: '🌹', sizes: [{ size: '100 mL', price: 5.99 }], description: 'Eau de rose pure distillée, sans alcool ni additif.', benefits: ['Pureté absolue', 'Hydratation légère', 'Anti-inflammatoire', 'Usage universel'] },
-                { id: 'b4', name: 'Spray Apaisante aux Plantes Sacrées', emoji: '🕌', sizes: [{ size: '100 mL', price: 19.99 }], description: 'Brume avec Rose d\'Oliban, Gomme Arabique et Lavande sacrée.', benefits: ['Apaise profondément', 'Spiritualité', 'Parfum sacré', 'Paix retrouvée'] }
-            ],
-            hommes: [
-                { id: 'qm1', name: 'Qamis Saoudien', emoji: '🤍', colors: ['Blanc', 'Bleu Ciel', 'Gris Foncé', 'Marron'], sizes: [
-                    { size: 'M', price: 69.99 },
-                    { size: 'L', price: 69.99 },
-                    { size: 'XL', price: 69.99 },
-                    { size: 'XXL', price: 69.99 }
-                ], description: 'Qamis saoudien traditionnel, coupe généreuse et confortable. Tissu premium 100% coton, respirant et doux.', benefits: ['Confort maximal', 'Tradition honorée', 'Coupe généreuse', 'Qualité premium'] }
-            ],
-            femmes: [
-                { id: 'qf1', name: 'Ensemble Layali Blanc', emoji: '🤍', sizes: [{ size: 'Unique', price: 124.99 }], description: 'Ensemble élégant Layali blanc — abaya raffinée avec voile assorti.', benefits: ['Élégance classique', 'Tissu premium', 'Couture impeccable', 'Tradition moderne'] },
-                { id: 'qf2', name: 'Ensemble Layali Dorée', emoji: '✨', sizes: [{ size: 'Unique', price: 124.99 }], description: 'Ensemble Layali doré avec motifs délicats.', benefits: ['Éclat doré', 'Couture raffinée', 'Composition précieuse', 'Beauté royale'] },
-                { id: 'qf3', name: 'Ensemble Layali Noir', emoji: '⚫', sizes: [{ size: 'Unique', price: 124.99 }], description: 'Ensemble Layali noir intemporel et chic.', benefits: ['Élégance noire', 'Intemporel', 'Couture parfaite', 'Classicisme'] },
-                { id: 'qf4', name: 'Ensemble Nissah Mastoura Blanc', emoji: '🤍', sizes: [{ size: 'Unique', price: 59.99 }], description: 'Ensemble Nissah Mastoura blanc pour pudeur et grâce.', benefits: ['Pudeur honorée', 'Grâce douce', 'Coupe parfaite', 'Confort assuré'] },
-                { id: 'qf5', name: 'Ensemble Nissah Mastoura Bleu', emoji: '💙', sizes: [{ size: 'Unique', price: 59.99 }], description: 'Ensemble Nissah Mastoura bleu ciel.', benefits: ['Bleu serein', 'Féminité douce', 'Couture délicate', 'Confort'] },
-                { id: 'qf6', name: 'Ensemble Nissah Mastoura Bordeaux', emoji: '💜', sizes: [{ size: 'Unique', price: 59.99 }], description: 'Ensemble Nissah Mastoura bordeaux raffiné.', benefits: ['Couleur noble', 'Beauté sombre', 'Couture précise', 'Élégance'] },
-                { id: 'qf7', name: 'Ensemble Nissah Mastoura Noir', emoji: '⚫', sizes: [{ size: 'Unique', price: 59.99 }], description: 'Ensemble Nissah Mastoura noir classique.', benefits: ['Noir intemporel', 'Simplicité noble', 'Couture parfaite', 'Universalité'] },
-                { id: 'qf8', name: 'Ensemble Nissah Mastoura Vert Sapin', emoji: '🌲', sizes: [{ size: 'Unique', price: 59.99 }], description: 'Ensemble Nissah Mastoura vert sapin naturel.', benefits: ['Vert naturel', 'Lien à la nature', 'Couture douce', 'Harmonie'] },
-                { id: 'qf9', name: 'Ensemble Nissah Mastoura Violet', emoji: '💜', sizes: [{ size: 'Unique', price: 59.99 }], description: 'Ensemble Nissah Mastoura violet mystique.', benefits: ['Violet royal', 'Mystique douce', 'Couture fine', 'Beauté unique'] },
-                { id: 'qf10', name: 'Ensemble Nissah Moustara Kaki', emoji: '🌾', sizes: [{ size: 'Unique', price: 59.99 }], description: 'Ensemble Nissah Moustara kaki neutre.', benefits: ['Kaki naturel', 'Discrétion élégante', 'Couture subtile', 'Intemporel'] }
-            ]
-        };
+    ${family.length?`<section class="family">
+      <div class="wrap">
+        <div class="section-head"><div class="eyebrow">À découvrir aussi</div><h2>Dans la même famille</h2></div>
+        <div class="grid">
+          ${family.map(f=>`<div class="card" onclick="showProduct('${f.id}')">
+            ${EMBLEMS[f.cat]}<div class="cat-tag">${CAT_LABELS[f.cat]}</div>
+            <h3>${f.name}</h3>
+            <div class="price">${f.price.type==='format'?`<small>dès</small> ${f.price.options[0][1]}€`:`${startPrice(f)}€`}</div>
+          </div>`).join("")}
+        </div>
+      </div>
+    </section>`:""}
+  `;
 
-        // FLATTENED PRODUCTS FOR FILTERING
-        let allProducts = [];
-        Object.entries(products).forEach(([category, items]) => {
-            items.forEach(product => {
-                allProducts.push({ ...product, category });
-            });
-        });
+  document.getElementById("homeView").style.display="none";
+  document.getElementById("productView").style.display="block";
+  updateMobileBar();
+  window.scrollTo(0,0);
+}
 
-        // DOM ELEMENTS
-        const productsGrid = document.getElementById('productsGrid');
-        const filterBtns = document.querySelectorAll('.btn-filter');
-        const productModal = document.getElementById('productModal');
-        const modalClose = document.getElementById('modalClose');
-        const burgerMenu = document.getElementById('burgerMenu');
-        const nav = document.getElementById('nav');
+function selectOption(i){
+  activeOption=i;
+  const p=activeProduct;
+  document.querySelectorAll("#optRow .opt").forEach((b,idx)=>b.classList.toggle("sel",idx===i));
+  const price=p.price.options[i][1];
+  const opt=p.price.options[i][0];
+  document.getElementById("ppPrice").textContent=price+"€";
+  const fmt=document.getElementById("ppFmt");
+  if(fmt) fmt.textContent = p.price.type==='size'?`Taille ${opt}`:opt;
+  document.getElementById("ppBtn").href=waLink(p.name,opt,price);
+  updateMobileBar();
+}
 
-        // RENDER PRODUCTS
-        function renderProducts(filter = 'tous') {
-            productsGrid.innerHTML = '';
+function updateMobileBar(){
+  const p=activeProduct; if(!p) return;
+  const hasOpt=p.price.type!=="fixed";
+  const price=hasOpt?p.price.options[activeOption][1]:p.price.value;
+  const opt=hasOpt?p.price.options[activeOption][0]:"";
+  document.getElementById("mbarPrice").textContent=price+"€";
+  document.getElementById("mbarBtn").href=waLink(p.name,opt,price);
+}
 
-            const filtered = filter === 'tous'
-                ? allProducts
-                : allProducts.filter(p => p.category === filter);
+/* ============ NAV ============ */
+function showHome(){
+  document.getElementById("productView").style.display="none";
+  document.getElementById("homeView").style.display="block";
+  activeProduct=null;
+  closeMenu();
+  window.scrollTo(0,0);
+}
+function toggleMenu(){
+  document.getElementById("navLinks").classList.toggle("open");
+  document.getElementById("burger").classList.toggle("x");
+}
+function closeMenu(){
+  document.getElementById("navLinks").classList.remove("open");
+  document.getElementById("burger").classList.remove("x");
+}
 
-            filtered.forEach(product => {
-                const card = document.createElement('div');
-                card.className = 'product-card';
-                card.onclick = () => openModal(product);
+/* mobile bar visibility: only on product view */
+const _origShowProduct=showProduct, _origShowHome=showHome;
 
-                const basePrice = product.sizes[0].price;
+/* ============ INIT ============ */
+document.getElementById("storyText").textContent=STORY;
+renderFilters();
+renderGrid();
 
-                card.innerHTML = `
-                    <div class="product-image">${product.emoji}</div>
-                    <h3 class="product-name">${product.name}</h3>
-                    <p class="product-info">${product.category === 'hommes' || product.category === 'femmes' ? 'Vêtement artisanal' : 'Produit naturel'}</p>
-                    <p class="product-price">${basePrice.toFixed(2)}€</p>
-                `;
+/* show/hide mobile bar based on view */
+const mbar=document.getElementById("mbar");
+function syncBar(){ mbar.style.display = (activeProduct && window.innerWidth<=768) ? "flex" : "none"; }
+window.addEventListener("resize",syncBar);
+const obs=new MutationObserver(syncBar);
+obs.observe(document.getElementById("productView"),{attributes:true,attributeFilter:["style"]});
 
-                productsGrid.appendChild(card);
-            });
-        }
-
-        // FILTER FUNCTIONALITY
-        filterBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                filterBtns.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                renderProducts(btn.dataset.filter);
-            });
-        });
-
-        // MODAL FUNCTIONS
-        function openModal(product) {
-            const modalTitle = document.getElementById('modalTitle');
-            const modalBody = document.getElementById('modalBody');
-            const modalWhatsappBtn = document.getElementById('modalWhatsappBtn');
-            const mobileWhatsappBtn = document.getElementById('mobileWhatsappBtn');
-
-            modalTitle.textContent = product.name;
-
-            let sizeHtml = '';
-            if (product.sizes && product.sizes.length > 0) {
-                sizeHtml = `
-                    <div class="modal-options">
-                        <h4>Format / Taille</h4>
-                        <div class="size-selector">
-                            ${product.sizes.map((size, idx) => `
-                                <button class="size-btn ${idx === 0 ? 'selected' : ''}" data-price="${size.price}">
-                                    ${size.size}
-                                </button>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-            }
-
-            let colorHtml = '';
-            if (product.colors) {
-                colorHtml = `
-                    <div class="modal-options">
-                        <h4>Couleur</h4>
-                        <div class="variant-selector">
-                            ${product.colors.map((color, idx) => `
-                                <button class="variant-btn ${idx === 0 ? 'selected' : ''}" data-color="${color}">
-                                    ${color}
-                                </button>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-            }
-
-            let benefitsHtml = '';
-            if (product.benefits) {
-                benefitsHtml = `
-                    <div class="modal-benefits">
-                        <h4>Bienfaits</h4>
-                        <ul>
-                            ${product.benefits.map(b => `<li>${b}</li>`).join('')}
-                        </ul>
-                    </div>
-                `;
-            }
-
-            const originHtml = product.origin ? `<p><strong>Provenance :</strong> ${product.origin}</p>` : '';
-
-            const basePrice = product.sizes[0].price;
-
-            modalBody.innerHTML = `
-                <p class="modal-description">${product.description}</p>
-                ${originHtml}
-                ${benefitsHtml}
-                ${colorHtml}
-                ${sizeHtml}
-                <p class="modal-price" id="modalPrice">${basePrice.toFixed(2)}€</p>
-            `;
-
-            // SIZE/VARIANT SELECTION LOGIC
-            const sizeBtns = modalBody.querySelectorAll('.size-btn');
-            const variantBtns = modalBody.querySelectorAll('.variant-btn');
-            let selectedSize = product.sizes[0].size;
-            let selectedColor = product.colors ? product.colors[0] : null;
-
-            sizeBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    sizeBtns.forEach(b => b.classList.remove('selected'));
-                    btn.classList.add('selected');
-                    selectedSize = btn.textContent;
-                    document.getElementById('modalPrice').textContent = parseFloat(btn.dataset.price).toFixed(2) + '€';
-                    updateWhatsappLinks(product, selectedSize, selectedColor);
-                });
-            });
-
-            variantBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    variantBtns.forEach(b => b.classList.remove('selected'));
-                    btn.classList.add('selected');
-                    selectedColor = btn.dataset.color;
-                    updateWhatsappLinks(product, selectedSize, selectedColor);
-                });
-            });
-
-            updateWhatsappLinks(product, selectedSize, selectedColor);
-            productModal.classList.add('active');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function updateWhatsappLinks(product, size, color) {
-            const message = color
-                ? `Bonjour, je souhaite commander : ${product.name} (${color}) - ${size}`
-                : `Bonjour, je souhaite commander : ${product.name} - ${size}`;
-
-            const encodedMessage = encodeURIComponent(message);
-            const whatsappUrl = `https://wa.me/33749890322?text=${encodedMessage}`;
-
-            document.getElementById('modalWhatsappBtn').href = whatsappUrl;
-            document.getElementById('mobileWhatsappBtn').href = whatsappUrl;
-        }
-
-        function closeModal() {
-            productModal.classList.remove('active');
-            document.body.style.overflow = 'auto';
-        }
-
-        modalClose.addEventListener('click', closeModal);
-
-        productModal.addEventListener('click', (e) => {
-            if (e.target === productModal) closeModal();
-        });
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') closeModal();
-        });
-
-        // BURGER MENU
-        burgerMenu.addEventListener('click', () => {
-            nav.classList.toggle('active');
-        });
-
-        nav.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', () => {
-                nav.classList.remove('active');
-            });
-        });
-
-        // INITIAL RENDER
-        renderProducts();
-    </script>
+</script>
 </body>
 </html>
