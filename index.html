@@ -427,7 +427,7 @@ footer{background:#0a160f;color:var(--cream);padding:64px 28px 34px}
         <a href="#boutique" class="featured-cta" onclick="goCat('poudres')">Découvrir →</a>
       </div>
       <div class="featured-image">
-        <img src="assets/products/graines/grn-baraka-hero.webp" alt="Graines de Nigelle Al Baraka — Sélection Premium Dar Nūr"/>
+        <img src="grn-baraka-hero.webp" alt="Graines de Nigelle Al Baraka — Sélection Premium Dar Nūr"/>
       </div>
     </div>
   </section>
@@ -540,16 +540,16 @@ const fixed = v=>({type:"fixed",value:v});
 /* ============ PRODUCTS ============ */
 // IMAGE MAPPING - Lier les produits à leurs images
 const PRODUCT_IMAGES = {
-  "grn-baraka": ["assets/products/graines/grn-baraka-hero.webp","assets/products/graines/grn-nigelle-premium.webp","assets/products/graines/grn-raw-1.webp"],
-  "grn-nigelle-baraka": ["assets/products/graines/grn-baraka-hero.webp","assets/products/graines/grn-nigelle-premium.webp"],
-  "miel-nigelle": ["assets/products/miels/miel-1.webp","assets/products/miels/miel-2.webp","assets/products/miels/miel-3.webp"],
-  "miel-aphrodisiaque": ["assets/products/miels/miel-2.webp","assets/products/miels/miel-3.webp"],
-  "gel-nigelle": ["assets/products/gelules/gelule-1.webp","assets/products/gelules/gelule-2.webp"],
-  "gel-valeriane": ["assets/products/gelules/gelule-2.webp","assets/products/gelules/gelule-3.webp"],
-  "hl-nigelle": ["assets/products/huiles/huile-1.webp","assets/products/huiles/huile-2.webp","assets/products/huiles/huile-3.webp"],
-  "hl-lavande": ["assets/products/huiles/huile-2.webp","assets/products/huiles/huile-3.webp"],
-  "pdr-nigelle": ["assets/products/poudres/poudre-1.webp","assets/products/poudres/poudre-2.webp","assets/products/poudres/poudre-3.webp"],
-  "pdr-gingembre-curcuma": ["assets/products/poudres/poudre-2.webp","assets/products/poudres/poudre-3.webp"],
+  "grn-baraka": ["grn-baraka-hero.webp","grn-nigelle-premium.webp","grn-raw-1.webp"],
+  "grn-nigelle-baraka": ["grn-baraka-hero.webp","grn-nigelle-premium.webp"],
+  "miel-nigelle": ["miel-1.webp","miel-2.webp","miel-3.webp"],
+  "miel-aphrodisiaque": ["miel-2.webp","miel-3.webp"],
+  "gel-nigelle": ["gelule-1.webp","gelule-2.webp"],
+  "gel-valeriane": ["gelule-2.webp","gelule-3.webp"],
+  "hl-nigelle": ["huile-1.webp","huile-2.webp","huile-3.webp"],
+  "hl-lavande": ["huile-2.webp","huile-3.webp"],
+  "pdr-nigelle": ["poudre-1.webp","poudre-2.webp","poudre-3.webp"],
+  "pdr-gingembre-curcuma": ["poudre-2.webp","poudre-3.webp"],
 };
 function getProductImage(productId) {
   const images = PRODUCT_IMAGES[productId];
