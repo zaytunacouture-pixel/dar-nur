@@ -117,6 +117,12 @@ nav{
 .hero .sub{font-family:'Cormorant Garamond';font-style:italic;font-size:clamp(1.2rem,2.6vw,1.65rem);color:var(--gold-light);margin:24px 0 40px;font-weight:500}
 .hero-divider{margin-bottom:42px}
 
+/* ============ TRUST BAR ============ */
+.trust-bar{background:#fff;border-bottom:1px solid var(--line);padding:22px 28px}
+.trust-list{max-width:980px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.trust-item{display:flex;align-items:center;justify-content:center;gap:10px;text-align:center;font-family:'Cinzel';font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--green)}
+.trust-item svg{width:20px;height:20px;color:var(--gold);flex:none}
+
 /* ============ BUTTONS ============ */
 .btn-wa{
   display:inline-flex;align-items:center;gap:11px;
@@ -150,6 +156,15 @@ section{padding:90px 28px}
 .story blockquote::before{content:"“";font-size:2.4em;color:var(--gold);line-height:0;vertical-align:-.35em;margin-right:.05em}
 .story .signoff{font-family:'Cinzel';font-size:.8rem;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;margin-top:24px}
 
+/* ============ ABOUT ============ */
+.about{background:var(--offwhite)}
+.about-box{max-width:900px;margin:0 auto;text-align:center}
+.about-box p{color:#3a3a3a;margin:0 auto 18px;max-width:760px}
+.about-points{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:34px}
+.about-point{background:#fff;border:1px solid var(--line);border-radius:4px;padding:24px 18px}
+.about-point h3{font-size:.86rem;color:var(--green);margin-bottom:8px}
+.about-point p{font-size:.92rem;color:var(--muted);margin:0}
+
 /* ============ FILTERS ============ */
 .filters{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:46px}
 .filters button{
@@ -176,6 +191,14 @@ section{padding:90px 28px}
 .card h3{font-size:1rem;color:var(--green);line-height:1.4;margin-bottom:14px;font-weight:500}
 .card .price{font-family:'Cormorant Garamond';font-size:1.45rem;color:var(--ink);font-weight:600;margin-top:auto}
 .card .price small{font-size:.8rem;color:var(--muted);font-style:italic}
+.card-actions{margin-top:18px;width:100%}
+.btn-product-wa{
+  display:inline-flex;align-items:center;justify-content:center;width:100%;
+  background:var(--green);color:var(--gold);
+  font-family:'Cinzel';font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;font-weight:600;
+  padding:11px 14px;border-radius:2px;transition:background .25s,color .25s,transform .25s;
+}
+.btn-product-wa:hover{background:var(--green-soft);color:var(--gold-light);transform:translateY(-1px)}
 
 /* ============ PRODUCT PAGE ============ */
 #productView{display:none}
@@ -343,6 +366,8 @@ footer{background:#0a160f;color:var(--cream);padding:64px 28px 34px}
   .burger.x span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
   section{padding:64px 22px}
   .hero{padding:88px 22px 96px}
+  .trust-list,.about-points{grid-template-columns:1fr}
+  .trust-item{justify-content:flex-start;text-align:left}
   .grid,.family .grid{grid-template-columns:repeat(2,1fr);gap:14px}
   .card{padding:24px 16px 20px}
   .card .emblem{width:52px;height:52px}
@@ -401,12 +426,39 @@ footer{background:#0a160f;color:var(--cream);padding:64px 28px 34px}
     </div>
   </section>
 
+  <div class="trust-bar" aria-label="Engagements Dar Nūr">
+    <div class="trust-list">
+      <div class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3l2 4 4 .5-3 3 .8 4.5L12 17l-3.8 2 .8-4.5-3-3 4-.5z"/></svg><span>Produits sélectionnés avec soin</span></div>
+      <div class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 7h11v10H3z"/><path d="M14 10h4l3 3v4h-7z"/><circle cx="7" cy="18" r="1.8"/><circle cx="18" cy="18" r="1.8"/></svg><span>Livraison rapide</span></div>
+      <div class="trust-item"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.945C.16 5.335 5.495 0 12.05 0a11.82 11.82 0 018.413 3.488 11.82 11.82 0 013.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24z"/></svg><span>Service client WhatsApp</span></div>
+    </div>
+  </div>
+
   <section class="story" id="histoire">
     <div class="story-inner">
       <div class="ar-big">دار النور</div>
       <div class="divider"><span class="line"></span><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="4"/></svg><span class="line r"></span></div>
       <blockquote id="storyText"></blockquote>
       <div class="signoff">— Youcef, fondateur de Dar Nūr</div>
+    </div>
+  </section>
+
+  <section class="about" id="qui-sommes-nous">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow">Qui sommes-nous</div>
+        <h2>Une maison attentive aux produits naturels</h2>
+        <p>Dar Nūr sélectionne des produits utiles, authentiques et faciles à commander.</p>
+      </div>
+      <div class="about-box">
+        <p>Notre objectif est simple : proposer une boutique claire, sérieuse et humaine, où chaque produit est présenté avec sincérité avant d’être recommandé.</p>
+        <p>Nous privilégions une sélection progressive, des échanges directs sur WhatsApp et un accompagnement simple pour aider chaque client à choisir le produit adapté à son besoin.</p>
+        <div class="about-points">
+          <div class="about-point"><h3>Sélection</h3><p>Des références choisies avec attention, selon leur intérêt et leur qualité.</p></div>
+          <div class="about-point"><h3>Conseil</h3><p>Un contact direct pour répondre aux questions avant la commande.</p></div>
+          <div class="about-point"><h3>Confiance</h3><p>Une relation simple, transparente et suivie après l’achat.</p></div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -1145,6 +1197,9 @@ function renderGrid(){
       <div class="cat-tag">${CAT_LABELS[p.cat]}</div>
       <h3>${p.name}</h3>
       <div class="price">${p.price.type==='format'?`<small>dès</small> ${p.price.options[0][1]}€`:`${startPrice(p)}€`}</div>
+      <div class="card-actions">
+        <a class="btn-product-wa" href="${waLink(p.name, p.price.type==='format'?p.price.options[0][0]:'', startPrice(p))}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Commander sur WhatsApp</a>
+      </div>
     </div>`;
   }).join("");
 }
@@ -1261,6 +1316,9 @@ function showProduct(id){
             ${EMBLEMS[f.cat]}<div class="cat-tag">${CAT_LABELS[f.cat]}</div>
             <h3>${f.name}</h3>
             <div class="price">${f.price.type==='format'?`<small>dès</small> ${f.price.options[0][1]}€`:`${startPrice(f)}€`}</div>
+            <div class="card-actions">
+              <a class="btn-product-wa" href="${waLink(f.name, f.price.type==='format'?f.price.options[0][0]:'', startPrice(f))}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Commander sur WhatsApp</a>
+            </div>
           </div>`).join("")}
         </div>
       </div>
