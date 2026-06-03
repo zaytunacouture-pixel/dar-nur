@@ -14,6 +14,17 @@
 <meta property="og:description" content="Miels artisanaux, huiles essentielles, gélules de plantes. Commandez sur WhatsApp." />
 <meta property="og:url" content="https://dar-nur.fr" />
 <meta property="og:type" content="website" />
+<meta property="og:image" content="https://dar-nur.fr/logo-dar-nur.png" />
+<meta property="og:image:width" content="512" />
+<meta property="og:image:height" content="512" />
+
+<!-- Twitter Card Tags for better social sharing -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Dar Nūr — Produits Naturels Premium" />
+<meta name="twitter:description" content="Miels artisanaux, huiles essentielles, gélules de plantes. Commandez sur WhatsApp." />
+<meta name="twitter:image" content="https://dar-nur.fr/logo-dar-nur.png" />
+
+<link rel="canonical" href="https://dar-nur.fr" id="canonicalLink" />
 
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230d1f16'/%3E%3Ctext x='50' y='72' font-size='64' text-anchor='middle' fill='%23c8a84b' font-family='serif'%3Eن%3C/text%3E%3C/svg%3E" />
 
@@ -266,6 +277,7 @@ section{padding:90px 28px}
 /* same family */
 .family{background:var(--cream);padding:80px 28px}
 .family .grid{grid-template-columns:repeat(4,1fr)}
+.family .grid[style*="grid-template-columns:repeat(3"]{grid-template-columns:repeat(3,1fr)!important}
 
 /* mobile sticky bar */
 .mbar{
@@ -326,6 +338,7 @@ footer{background:#0a160f;color:var(--cream);padding:64px 28px 34px}
 /* ============ RESPONSIVE ============ */
 @media(max-width:1024px){
   .grid,.family .grid{grid-template-columns:repeat(3,1fr)}
+  .family .grid[style*="grid-template-columns:repeat(3"]{grid-template-columns:repeat(2,1fr)!important}
   .pp-body{grid-template-columns:1fr;gap:36px}
   .pp-visual{position:static;aspect-ratio:auto;padding:38px;max-width:420px;margin:0 auto}
 }
@@ -344,6 +357,7 @@ footer{background:#0a160f;color:var(--cream);padding:64px 28px 34px}
   section{padding:64px 22px}
   .hero{padding:88px 22px 96px}
   .grid,.family .grid{grid-template-columns:repeat(2,1fr);gap:14px}
+  .family .grid[style*="grid-template-columns:repeat(3"]{grid-template-columns:repeat(2,1fr)!important;gap:14px}
   .card{padding:24px 16px 20px}
   .card .emblem{width:52px;height:52px}
   .mbar{display:flex}
@@ -391,7 +405,7 @@ footer{background:#0a160f;color:var(--cream);padding:64px 28px 34px}
       <img src="logo-dar-nur.png" alt="Logo Dar Nūr" class="hero-logo-img"/>
       <div class="hero-mark" aria-label="Dar Nūr">DAR NŪR</div>
       <div class="hero-mark-ar" aria-hidden="true">دار النور</div>
-      <h1>Les trésors de la nature,<br/>livrés avec confiance</h1>
+      <h1>Dar Nūr — Les trésors de la nature,<br/>livrés avec confiance</h1>
       <div class="sub">Sélectionnés avec soin — si Dieu le veut</div>
       <div class="divider hero-divider"><span class="line"></span><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 6.5L21 9l-5 4.2L17.8 21 12 17l-5.8 4 1.8-7.8L3 9l6.6-.5z"/></svg><span class="line r"></span></div>
       <a class="btn-wa" href="https://wa.me/33749890322?text=Bonjour%2C%20je%20découvre%20Dar%20N%C5%ABr%20et%20je%20souhaite%20commander" target="_blank" rel="noopener">
@@ -407,6 +421,77 @@ footer{background:#0a160f;color:var(--cream);padding:64px 28px 34px}
       <div class="divider"><span class="line"></span><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="4"/></svg><span class="line r"></span></div>
       <blockquote id="storyText"></blockquote>
       <div class="signoff">— Youcef, fondateur de Dar Nūr</div>
+    </div>
+  </section>
+
+  <section class="about-us" id="about" style="padding:88px 28px;background:var(--cream)">
+    <div class="wrap" style="max-width:900px;margin:0 auto">
+      <div class="section-head">
+        <div class="eyebrow">Notre engagement</div>
+        <h2>Qui sommes-nous ?</h2>
+      </div>
+
+      <!-- About Youcef (Founder) -->
+      <div style="display:grid;grid-template-columns:1fr 1.2fr;gap:50px;align-items:center;margin-bottom:80px">
+        <div style="text-align:center">
+          <div style="width:180px;height:180px;margin:0 auto 20px;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:4rem;font-weight:600">ي</div>
+          <h3 style="font-family:'Cinzel';font-size:1.2rem;color:var(--green);margin-bottom:8px">Youcef</h3>
+          <p style="color:var(--muted);font-style:italic">Fondateur de Dar Nūr</p>
+        </div>
+        <div style="text-align:left">
+          <p style="font-size:1.08rem;line-height:1.8;color:var(--ink);margin-bottom:16px">Dar Nūr est née d'une passion simple : rendre accessible à tous les trésors naturels transmis de génération en génération. En tant que fondateur, j'ai fait le choix de la transparence absolue et de la qualité sans compromis.</p>
+          <p style="font-size:1.08rem;line-height:1.8;color:var(--ink);margin-bottom:16px">Chaque produit que nous proposons est sélectionné avec soin, présenté avec sincérité et choisi selon des critères de qualité exigeants. Je crois que la confiance se gagne par l'authenticité, pas par la publicité.</p>
+          <p style="font-size:1.08rem;line-height:1.8;color:var(--ink)">Notre mission : offrir à chacun l'accès à des remèdes naturels purs, avec un service client à l'écoute, disponible sur WhatsApp.</p>
+        </div>
+      </div>
+
+      <!-- Trust Badges -->
+      <div style="background:#fff;border:1px solid var(--line);border-radius:8px;padding:48px;margin-bottom:80px">
+        <h3 style="text-align:center;font-family:'Cinzel';font-size:1.15rem;color:var(--green);margin-bottom:40px">Nos engagements qualité</h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:30px;text-align:center">
+          <div>
+            <div style="font-size:2.5rem;margin-bottom:12px">🌿</div>
+            <h4 style="font-family:'Cinzel';font-size:0.95rem;color:var(--green);margin-bottom:10px;letter-spacing:.08em;text-transform:uppercase">100% Produits Naturels</h4>
+            <p style="color:var(--muted);font-size:0.95rem">Aucun additif chimique, aucun traitement agressif. Pureté garantie.</p>
+          </div>
+          <div>
+            <div style="font-size:2.5rem;margin-bottom:12px">✋</div>
+            <h4 style="font-family:'Cinzel';font-size:0.95rem;color:var(--green);margin-bottom:10px;letter-spacing:.08em;text-transform:uppercase">Sélection Rigoureuse</h4>
+            <p style="color:var(--muted);font-size:0.95rem">Chaque produit est testé et approuvé personnellement avant la vente.</p>
+          </div>
+          <div>
+            <div style="font-size:2.5rem;margin-bottom:12px">⚡</div>
+            <h4 style="font-family:'Cinzel';font-size:0.95rem;color:var(--green);margin-bottom:10px;letter-spacing:.08em;text-transform:uppercase">Livraison Rapide</h4>
+            <p style="color:var(--muted);font-size:0.95rem">Expédition rapide et suivi de commande via WhatsApp.</p>
+          </div>
+          <div>
+            <div style="font-size:2.5rem;margin-bottom:12px">💬</div>
+            <h4 style="font-family:'Cinzel';font-size:0.95rem;color:var(--green);margin-bottom:10px;letter-spacing:.08em;text-transform:uppercase">Support Client Direct</h4>
+            <p style="color:var(--muted);font-size:0.95rem">Questions ? Contactez-moi directement sur WhatsApp, réponse garantie.</p>
+          </div>
+          <div>
+            <div style="font-size:2.5rem;margin-bottom:12px">📖</div>
+            <h4 style="font-family:'Cinzel';font-size:0.95rem;color:var(--green);margin-bottom:10px;letter-spacing:.08em;text-transform:uppercase">Transmission du Savoir</h4>
+            <p style="color:var(--muted);font-size:0.95rem">Chaque produit vient avec des conseils d'usage traditionnels.</p>
+          </div>
+          <div>
+            <div style="font-size:2.5rem;margin-bottom:12px">🤝</div>
+            <h4 style="font-family:'Cinzel';font-size:0.95rem;color:var(--green);margin-bottom:10px;letter-spacing:.08em;text-transform:uppercase">Authenticité Totale</h4>
+            <p style="color:var(--muted);font-size:0.95rem">Pas de marketing agressif. Juste des produits de qualité et honnêteté.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Testimonials/Reviews Section -->
+      <div style="text-align:center">
+        <h3 style="font-family:'Cinzel';font-size:1.2rem;color:var(--green);margin-bottom:12px;letter-spacing:.08em;text-transform:uppercase">Avis Clients</h3>
+        <p style="color:var(--muted);font-size:1rem;margin-bottom:24px">Soyez parmi les premiers à partager votre expérience Dar Nūr</p>
+        <p style="color:var(--ink);font-size:1.08rem;line-height:1.8">Les premiers clients de Dar Nūr posent les fondations de notre réputation. Nous invitons chacun à partager son avis — c'est comme cela que nous grandissons ensemble.</p>
+        <a class="btn-wa" href="https://wa.me/33749890322?text=Bonjour%2C%20j%27aimerais%20partager%20mon%20avis%20sur%20les%20produits%20Dar%20N%C5%ABr" target="_blank" rel="noopener" style="margin-top:24px">
+          <svg viewBox="0 0 24 24" fill="currentColor" style="width:19px;height:19px"><path d="M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.945C.16 5.335 5.495 0 12.05 0a11.82 11.82 0 018.413 3.488 11.82 11.82 0 013.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.86 9.86 0 001.512 5.26l-.999 3.648 3.985-1.607zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+          Partager mon avis
+        </a>
+      </div>
     </div>
   </section>
 
@@ -510,6 +595,52 @@ const FILTERS = [
   ["all","Tous"],["miels","Miels"],["gelules","Gélules"],["poudres","Poudres & Graines"],
   ["huiles","Huiles"],["brumes","Brumes"],["qamis","Qamis"],["vetements","Vêtements"]
 ];
+
+/* ---- COMPLEMENTARY PRODUCTS FOR INTERNAL LINKING ---- */
+/* Maps product IDs to complementary product IDs for cross-category recommendations */
+const COMPLEMENTS = {
+  /* Miels → Gélules, Huiles, Poudres */
+  "miel-nigelle": ["gel-nigelle", "hl-nigelle", "pdr-nigelle", "grn-baraka"],
+  "miel-aphrodisiaque": ["gel-aphrodisiaque", "hl-costus"],
+  "miel-gingembre-curcuma": ["gel-gingembre-curcuma", "pdr-gingembre-curcuma"],
+  "miel-hibiscus-zamzam": ["gel-valériane", "grn-oliban"],
+  "miel-moringa-nigelle": ["gel-moringa", "pdr-moringa"],
+  "miel-gingembre-fenugrec": ["gel-fenugrec", "hl-fenugrec"],
+  "miel-costus-nigelle": ["gel-costus", "pdr-costus"],
+
+  /* Gélules → Huiles, Poudres, Miels */
+  "gel-nigelle": ["hl-nigelle", "pdr-nigelle", "miel-nigelle"],
+  "gel-valeriane": ["hl-lavande", "grn-lavande"],
+  "gel-spiruline": ["miel-spiruline", "pdr-moringa"],
+  "gel-gingembre-curcuma": ["pdr-gingembre-curcuma", "miel-gingembre-curcuma"],
+  "gel-chardon": ["pdr-costus"],
+  "gel-moringa": ["pdr-moringa", "miel-moringa-nigelle"],
+
+  /* Huiles → Poudres, Gélules, Brumes */
+  "hl-nigelle": ["pdr-nigelle", "gel-nigelle", "br-nila"],
+  "hl-gingembre": ["pdr-gingembre-curcuma", "gel-gingembre-curcuma"],
+  "hl-lavande": ["grn-lavande", "gel-valeriane"],
+  "hl-menthe-poivree": ["br-apaisante"],
+  "hl-costus": ["pdr-costus", "gel-costus"],
+
+  /* Poudres → Huiles, Gélules, Brumes */
+  "pdr-nigelle": ["hl-nigelle", "gel-nigelle"],
+  "pdr-gingembre-curcuma": ["gel-gingembre-curcuma", "hl-gingembre"],
+  "pdr-moringa": ["gel-moringa", "miel-moringa-nigelle"],
+  "grn-lavande": ["hl-lavande", "gel-valeriane"],
+
+  /* Brumes → Huiles, Gélules */
+  "br-nila": ["hl-nigelle", "pdr-nila"],
+  "br-apaisante": ["hl-menthe-poivree", "gel-valeriane"]
+};
+
+function getComplementaryProducts(productId, limit = 3) {
+  const complementIds = COMPLEMENTS[productId] || [];
+  return complementIds
+    .map(id => PRODUCTS.find(p => p.id === id))
+    .filter(p => p !== undefined)
+    .slice(0, limit);
+}
 
 /* helper builders */
 const honeyPrice = (a,b,c)=>({type:"format",options:[["50 g",a],["200 g",b],["300 g",c]]});
@@ -1122,9 +1253,13 @@ function priceLabel(p){
   return `${p.price.options[0][1]}€`;
 }
 function waLink(name,opt,price){
-  let t = `Bonjour, je souhaite commander : ${name}`;
-  if(opt) t += ` — ${opt}`;
-  t += ` — ${price}€`;
+  let t = `As-salâm 'alaykoum,\nJe souhaite commander :\n\n`;
+  t += `Produit : ${name}`;
+  if(opt) t += `\nVarante : ${opt}`;
+  t += `\nPrix : ${price}€\n\n`;
+  t += `Mes informations :\n`;
+  t += `Nom complet : \nAdresse complète : \nCode postal : \nVille : \nTéléphone : \n\n`;
+  t += `Merci de traiter ma demande.`;
   return WA + encodeURIComponent(t);
 }
 
@@ -1152,10 +1287,121 @@ function setFilter(f){currentFilter=f;renderFilters();renderGrid();}
 function goCat(f){showHome();setFilter(f);setTimeout(()=>document.getElementById("boutique").scrollIntoView({behavior:"smooth"}),60);closeMenu();}
 
 /* ============ RENDER PRODUCT PAGE ============ */
+function updatePageMetadata(product){
+  // Update title tag
+  document.title = `${product.name} — Dar Nūr | ${CAT_LABELS[product.cat]}`;
+
+  // Update meta description
+  const metaDesc = document.querySelector("meta[name='description']");
+  if(metaDesc) metaDesc.setAttribute("content", `${product.name} — Dar Nūr. ${product.tagline}. À partir de ${product.price.type==='format'?product.price.options[0][1]:product.price.value}€. Commandez sur WhatsApp.`);
+
+  // Update canonical link
+  const canonicalLink = document.getElementById("canonicalLink");
+  if(canonicalLink) canonicalLink.href = `https://dar-nur.fr#${product.id}`;
+
+  // Update OG tags
+  const ogTitle = document.querySelector("meta[property='og:title']");
+  if(ogTitle) ogTitle.setAttribute("content", `${product.name} — Dar Nūr`);
+
+  const ogDesc = document.querySelector("meta[property='og:description']");
+  if(ogDesc) ogDesc.setAttribute("content", product.tagline);
+
+  const ogUrl = document.querySelector("meta[property='og:url']");
+  if(ogUrl) ogUrl.setAttribute("content", `https://dar-nur.fr#${product.id}`);
+
+  // Update OG image (always set, either to product image or logo)
+  const ogImage = document.querySelector("meta[property='og:image']");
+  const productImg = getProductCardImage(product.id);
+  const imageUrl = productImg ? `https://dar-nur.fr/${productImg}` : "https://dar-nur.fr/logo-dar-nur.png";
+  if(ogImage){
+    ogImage.setAttribute("content", imageUrl);
+  } else {
+    const newOgImage = document.createElement("meta");
+    newOgImage.setAttribute("property", "og:image");
+    newOgImage.setAttribute("content", imageUrl);
+    document.head.appendChild(newOgImage);
+  }
+
+  // Update og:image dimensions
+  let ogImageWidth = document.querySelector("meta[property='og:image:width']");
+  if(ogImageWidth){
+    ogImageWidth.setAttribute("content", productImg ? "1200" : "512");
+  } else {
+    ogImageWidth = document.createElement("meta");
+    ogImageWidth.setAttribute("property", "og:image:width");
+    ogImageWidth.setAttribute("content", productImg ? "1200" : "512");
+    document.head.appendChild(ogImageWidth);
+  }
+
+  let ogImageHeight = document.querySelector("meta[property='og:image:height']");
+  if(ogImageHeight){
+    ogImageHeight.setAttribute("content", productImg ? "630" : "512");
+  } else {
+    ogImageHeight = document.createElement("meta");
+    ogImageHeight.setAttribute("property", "og:image:height");
+    ogImageHeight.setAttribute("content", productImg ? "630" : "512");
+    document.head.appendChild(ogImageHeight);
+  }
+
+  // Update Twitter Card tags for product sharing
+  const twitterTitle = document.querySelector("meta[name='twitter:title']");
+  if(twitterTitle) twitterTitle.setAttribute("content", `${product.name} — Dar Nūr`);
+
+  const twitterDesc = document.querySelector("meta[name='twitter:description']");
+  if(twitterDesc) twitterDesc.setAttribute("content", product.tagline);
+
+  const twitterImage = document.querySelector("meta[name='twitter:image']");
+  if(twitterImage) twitterImage.setAttribute("content", imageUrl);
+
+  // Update Product Schema.org JSON-LD
+  let productSchema = document.getElementById("productSchema");
+  if(!productSchema){
+    productSchema = document.createElement("script");
+    productSchema.id = "productSchema";
+    productSchema.type = "application/ld+json";
+    document.head.appendChild(productSchema);
+  }
+
+  const price = product.price.type === 'format' ? product.price.options[0][1] : product.price.value;
+  const schemaData = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": product.name,
+    "description": product.tagline,
+    "brand": {
+      "@type": "Brand",
+      "name": "Dar Nūr"
+    },
+    "price": price,
+    "priceCurrency": "EUR",
+    "availability": "https://schema.org/InStock",
+    "image": productImg ? `https://dar-nur.fr/${productImg}` : "https://dar-nur.fr/logo-dar-nur.png",
+    "category": CAT_LABELS[product.cat],
+    "url": `https://dar-nur.fr#${product.id}`
+  };
+
+  productSchema.textContent = JSON.stringify(schemaData);
+}
+
+function updateHomeMetadata(){
+  document.title = "Dar Nūr — Produits Naturels Premium | Miels, Huiles, Gélules";
+  const metaDesc = document.querySelector("meta[name='description']");
+  if(metaDesc) metaDesc.setAttribute("content", "Dar Nūr propose des produits naturels 100% purs : miels artisanaux, huiles essentielles, gélules de plantes. Commandez via WhatsApp, livraison rapide.");
+  const canonicalLink = document.getElementById("canonicalLink");
+  if(canonicalLink) canonicalLink.href = "https://dar-nur.fr";
+  const ogTitle = document.querySelector("meta[property='og:title']");
+  if(ogTitle) ogTitle.setAttribute("content", "Dar Nūr — Produits Naturels Premium");
+  const ogDesc = document.querySelector("meta[property='og:description']");
+  if(ogDesc) ogDesc.setAttribute("content", "Miels artisanaux, huiles essentielles, gélules de plantes. Commandez sur WhatsApp.");
+  const ogUrl = document.querySelector("meta[property='og:url']");
+  if(ogUrl) ogUrl.setAttribute("content", "https://dar-nur.fr");
+}
+
 function showProduct(id){
   const p = PRODUCTS.find(x=>x.id===id);
   if(!p) return;
   activeProduct = p; activeOption = 0;
+  updatePageMetadata(p);
   const hasOptions = p.price.type!=="fixed";
   const optLabel = p.price.type==="format" ? "Choisissez votre format" : (p.price.type==="size" ? "Choisissez votre taille" : "");
 
@@ -1241,10 +1487,9 @@ function showProduct(id){
     <section class="engage">
       <div class="wrap engage-inner">
         <div class="engage-badges">
-          <div class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3c2 3 6 4 6 9a6 6 0 01-12 0c0-5 4-6 6-9z"/></svg><span>100% Naturel</span></div>
-          <div class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="6"/><path d="M16 16l4 4" stroke-linecap="round"/></svg><span>Sélection rigoureuse</span></div>
-          <div class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l2.4 6.5L21 9l-5 4.2L17.8 21 12 17l-5.8 4 1.8-7.8L3 9l6.6-.5z"/></svg><span>Qualité premium</span></div>
-          <div class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12l4 4 10-10" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Satisfaction garantie</span></div>
+          <div class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2l2.4 6.5L21 9l-5 4.2L17.8 21 12 17l-5.8 4 1.8-7.8L3 9l6.6-.5z"/></svg><span>Produits sélectionnés avec soin</span></div>
+          <div class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 10c0-7-9-13-9-13S3 3 3 10a9 9 0 0018 0z"/><path d="M9 10l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Livraison rapide & sécurisée</span></div>
+          <div class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/><path d="M12 3v2m0 14v2M21 12h-2M5 12H3M5.63 5.63l1.41 1.41M17 17l1.41 1.41M5.63 18.37l1.41-1.41M17 7l1.41-1.41"/></svg><span>Service client WhatsApp</span></div>
         </div>
         <div class="engage-quote">
           <p>Un retour aux remèdes ancestraux, avec un savoir-faire authentique. Des produits choisis avec exigence, pour une qualité pure,</p>
@@ -1265,6 +1510,22 @@ function showProduct(id){
         </div>
       </div>
     </section>`:""}
+
+    ${(()=>{
+      const complements = getComplementaryProducts(p.id, 3);
+      return complements.length ? `<section class="family">
+      <div class="wrap">
+        <div class="section-head"><div class="eyebrow">Complément parfait</div><h2>Produits complémentaires</h2></div>
+        <div class="grid" style="grid-template-columns:repeat(3,1fr)">
+          ${complements.map(c=>`<div class="card" onclick="showProduct('${c.id}')" title="Découvrir ${c.name}">
+            ${EMBLEMS[c.cat]}<div class="cat-tag">${CAT_LABELS[c.cat]}</div>
+            <h3>${c.name}</h3>
+            <div class="price">${c.price.type==='format'?`<small>dès</small> ${c.price.options[0][1]}€`:`${startPrice(c)}€`}</div>
+          </div>`).join("")}
+        </div>
+      </div>
+    </section>` : "";
+    })()}
   `;
 
   document.getElementById("homeView").style.display="none";
@@ -1297,6 +1558,7 @@ function updateMobileBar(){
 
 /* ============ NAV ============ */
 function showHome(){
+  updateHomeMetadata();
   document.getElementById("productView").style.display="none";
   document.getElementById("homeView").style.display="block";
   activeProduct=null;
