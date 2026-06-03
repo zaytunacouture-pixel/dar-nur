@@ -1,0 +1,15 @@
+# Dar Nūr — robots.txt
+# Allow search engines to crawl all public pages
+
+User-agent: *
+Allow: /
+Allow: /index.html
+Allow: /logo-dar-nur.png
+Allow: /*.webp
+Allow: /*.jpg
+Allow: /*.png
+Allow: /sitemap.xml
+Disallow:
+
+# Reference to sitemap
+Sitemap: https://dar-nur.fr/sitemap.xml

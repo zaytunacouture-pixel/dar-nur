@@ -17,12 +17,16 @@
 <meta property="og:image" content="https://dar-nur.fr/logo-dar-nur.png" />
 <meta property="og:image:width" content="512" />
 <meta property="og:image:height" content="512" />
+<meta property="og:image:alt" content="Dar Nūr — Produits Naturels Premium" />
+<meta property="og:site_name" content="Dar Nūr" />
+<meta property="og:locale" content="fr_FR" />
 
 <!-- Twitter Card Tags for better social sharing -->
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="Dar Nūr — Produits Naturels Premium" />
 <meta name="twitter:description" content="Miels artisanaux, huiles essentielles, gélules de plantes. Commandez sur WhatsApp." />
 <meta name="twitter:image" content="https://dar-nur.fr/logo-dar-nur.png" />
+<meta name="twitter:url" content="https://dar-nur.fr" />
 
 <link rel="canonical" href="https://dar-nur.fr" id="canonicalLink" />
 
@@ -1493,9 +1497,25 @@ function updatePageMetadata(product){
   // Update title tag
   document.title = `${product.name} — Dar Nūr | ${CAT_LABELS[product.cat]}`;
 
-  // Update meta description
+  // Build price display string based on actual price type present in data
+  let priceStr = '';
+  if(product.price.type === 'format' && product.price.options && product.price.options.length > 0) {
+    priceStr = `À partir de ${product.price.options[0][1]} €`;
+  } else if(product.price.type === 'size' && product.price.options && product.price.options.length > 0) {
+    priceStr = `À partir de ${product.price.options[0][1]} €`;
+  } else if(product.price.type === 'fixed' && product.price.value) {
+    priceStr = `${product.price.value} €`;
+  }
+
+  // Update meta description (target: 150-160 characters)
   const metaDesc = document.querySelector("meta[name='description']");
-  if(metaDesc) metaDesc.setAttribute("content", `${product.name} — Dar Nūr. ${product.tagline}. À partir de ${product.price.type==='format'?product.price.options[0][1]:product.price.value}€. Commandez sur WhatsApp.`);
+  if(metaDesc) {
+    let description = `${product.name} — Dar Nūr. ${product.tagline}`;
+    if(priceStr) description += `. ${priceStr}`;
+    description += `. Commandez sur WhatsApp.`;
+    if(description.length > 160) description = description.substring(0, 157) + '...';
+    metaDesc.setAttribute("content", description);
+  }
 
   // Update canonical link
   const canonicalLink = document.getElementById("canonicalLink");
@@ -1545,6 +1565,12 @@ function updatePageMetadata(product){
     document.head.appendChild(ogImageHeight);
   }
 
+  // Update og:image:alt
+  const ogImageAlt = document.querySelector("meta[property='og:image:alt']");
+  if(ogImageAlt) ogImageAlt.setAttribute("content", product.name);
+
+  // og:site_name and og:locale are static in <head> — no dynamic update needed
+
   // Update Twitter Card tags for product sharing
   const twitterTitle = document.querySelector("meta[name='twitter:title']");
   if(twitterTitle) twitterTitle.setAttribute("content", `${product.name} — Dar Nūr`);
@@ -1555,6 +1581,10 @@ function updatePageMetadata(product){
   const twitterImage = document.querySelector("meta[name='twitter:image']");
   if(twitterImage) twitterImage.setAttribute("content", imageUrl);
 
+  // Update twitter:url
+  const twitterUrl = document.querySelector("meta[name='twitter:url']");
+  if(twitterUrl) twitterUrl.setAttribute("content", `https://dar-nur.fr#${product.id}`);
+
   // Update Product Schema.org JSON-LD
   let productSchema = document.getElementById("productSchema");
   if(!productSchema){
@@ -1564,7 +1594,6 @@ function updatePageMetadata(product){
     document.head.appendChild(productSchema);
   }
 
-  const price = product.price.type === 'format' ? product.price.options[0][1] : product.price.value;
   const schemaData = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -1574,13 +1603,27 @@ function updatePageMetadata(product){
       "@type": "Brand",
       "name": "Dar Nūr"
     },
-    "price": price,
-    "priceCurrency": "EUR",
-    "availability": "https://schema.org/InStock",
     "image": productImg ? `https://dar-nur.fr/${productImg}` : "https://dar-nur.fr/logo-dar-nur.png",
     "category": CAT_LABELS[product.cat],
     "url": `https://dar-nur.fr#${product.id}`
   };
+
+  // Add price offer only using data actually present in the product object
+  let schemaPrice = null;
+  if(product.price.type === 'format' && product.price.options && product.price.options.length > 0) {
+    schemaPrice = product.price.options[0][1].replace(',', '.');
+  } else if(product.price.type === 'size' && product.price.options && product.price.options.length > 0) {
+    schemaPrice = product.price.options[0][1].replace(',', '.');
+  } else if(product.price.type === 'fixed' && product.price.value) {
+    schemaPrice = product.price.value.replace(',', '.');
+  }
+  if(schemaPrice) {
+    schemaData.offers = {
+      "@type": "Offer",
+      "priceCurrency": "EUR",
+      "price": schemaPrice
+    };
+  }
 
   productSchema.textContent = JSON.stringify(schemaData);
 }
@@ -1591,12 +1634,33 @@ function updateHomeMetadata(){
   if(metaDesc) metaDesc.setAttribute("content", "Dar Nūr propose des produits naturels 100% purs : miels artisanaux, huiles essentielles, gélules de plantes. Commandez via WhatsApp, livraison rapide.");
   const canonicalLink = document.getElementById("canonicalLink");
   if(canonicalLink) canonicalLink.href = "https://dar-nur.fr";
+  // Reset OG tags
   const ogTitle = document.querySelector("meta[property='og:title']");
   if(ogTitle) ogTitle.setAttribute("content", "Dar Nūr — Produits Naturels Premium");
   const ogDesc = document.querySelector("meta[property='og:description']");
   if(ogDesc) ogDesc.setAttribute("content", "Miels artisanaux, huiles essentielles, gélules de plantes. Commandez sur WhatsApp.");
   const ogUrl = document.querySelector("meta[property='og:url']");
   if(ogUrl) ogUrl.setAttribute("content", "https://dar-nur.fr");
+  const ogImage = document.querySelector("meta[property='og:image']");
+  if(ogImage) ogImage.setAttribute("content", "https://dar-nur.fr/logo-dar-nur.png");
+  const ogImageWidth = document.querySelector("meta[property='og:image:width']");
+  if(ogImageWidth) ogImageWidth.setAttribute("content", "512");
+  const ogImageHeight = document.querySelector("meta[property='og:image:height']");
+  if(ogImageHeight) ogImageHeight.setAttribute("content", "512");
+  const ogImageAlt = document.querySelector("meta[property='og:image:alt']");
+  if(ogImageAlt) ogImageAlt.setAttribute("content", "Dar Nūr — Produits Naturels Premium");
+  // Reset Twitter Card tags
+  const twitterTitle = document.querySelector("meta[name='twitter:title']");
+  if(twitterTitle) twitterTitle.setAttribute("content", "Dar Nūr — Produits Naturels Premium");
+  const twitterDesc = document.querySelector("meta[name='twitter:description']");
+  if(twitterDesc) twitterDesc.setAttribute("content", "Miels artisanaux, huiles essentielles, gélules de plantes. Commandez sur WhatsApp.");
+  const twitterImage = document.querySelector("meta[name='twitter:image']");
+  if(twitterImage) twitterImage.setAttribute("content", "https://dar-nur.fr/logo-dar-nur.png");
+  const twitterUrl = document.querySelector("meta[name='twitter:url']");
+  if(twitterUrl) twitterUrl.setAttribute("content", "https://dar-nur.fr");
+  // Remove product-specific schema when returning to home
+  const productSchema = document.getElementById("productSchema");
+  if(productSchema) productSchema.remove();
 }
 
 function showProduct(id){
