@@ -315,7 +315,13 @@ footer{background:#0a160f;color:var(--cream);padding:64px 28px 34px}
 .card-image::before,.card-image::after{content:"";position:absolute;border:1px solid rgba(200,168,75,.34);border-radius:50%}
 .card-image::before{width:62%;height:62%}
 .card-image::after{width:38%;height:38%;transform:rotate(45deg);border-radius:8px}
+.card-image.has-photo{background:var(--cream)}
+.card-image.has-photo::before,.card-image.has-photo::after{display:none}
+.card-image.has-photo img{width:100%;height:100%;object-fit:cover;transition:transform .4s ease}
+.card:hover .card-image.has-photo img{transform:scale(1.05)}
 .visual-initial{font-family:'Cinzel';font-size:clamp(2rem,5vw,3.2rem);line-height:1;color:var(--green);opacity:.86;position:relative;z-index:1}
+.pp-visual.has-photo{padding:18px;background:#f6f0e3}
+.pp-product-img{width:100%;height:100%;object-fit:contain;border-radius:4px}
 
 /* ============ RESPONSIVE ============ */
 @media(max-width:1024px){
@@ -508,6 +514,16 @@ const FILTERS = [
 /* helper builders */
 const honeyPrice = (a,b,c)=>({type:"format",options:[["50 g",a],["200 g",b],["300 g",c]]});
 const fixed = v=>({type:"fixed",value:v});
+
+const PRODUCT_IMAGES = {
+  "grn-baraka": ["grn-baraka-hero.webp"],
+  "grn-nigelle-baraka": ["grn-nigelle-premium.webp"],
+  "br-nila": ["spray-nila-1.webp","spray-nila-2.webp"],
+  "br-apaisante": ["spray-aromatherapy.webp"]
+};
+const getProductImages = id=>PRODUCT_IMAGES[id] || [];
+const getProductCardImage = id=>getProductImages(id)[0] || null;
+const getProductDetailImage = id=>getProductImages(id)[1] || getProductImages(id)[0] || null;
 
 /* ============ PRODUCTS ============ */
 const PRODUCTS = [
@@ -766,11 +782,11 @@ const PRODUCTS = [
    compo:"Graines de Chardon-Marie (Silybum marianum)",prov:"Méditerranée / Europe",
    uso:"1 à 2 cuillères à café à infuser après les repas.",price:fixed("4,99")},
 
-  {id:"grn-nigelle-baraka",cat:"poudres",name:"Graines de Nigelle Al Baraka",tagline:"Le cœur historique de Dar Nūr.",
-   desc:["Les graines de nigelle pure, celles par lesquelles tout a commencé. « Al Baraka » — la bénédiction. Une graine vénérée dans toutes les traditions.","À consommer le matin, pure ou intégrée à vos préparations."],
-   benefits:["Soutient les défenses naturelles","Favorise la vitalité","Aide à la digestion","La graine de la bénédiction"],
-   compo:"Graines de Nigelle (Nigella sativa)",prov:"Éthiopie",
-   uso:"1 cuillère à café par jour, pure ou avec du miel.",price:fixed("7,99")},
+  {id:"grn-nigelle-baraka",cat:"poudres",name:"Graine de Nigelle",tagline:"La graine classique, pure et naturelle.",
+   desc:["Des graines de nigelle 100% naturelles, traditionnellement utilisées pour soutenir la vitalité et le bien-être général.","Une version simple et accessible de la graine de nigelle, à intégrer facilement au quotidien."],
+   benefits:["Soutient les défenses naturelles","Aide à la digestion","Riche en antioxydants naturels","Produit pur"],
+   compo:"Graines de Nigelle (Nigella sativa)",prov:"Moyen-Orient / Asie",
+   uso:"1 à 2 cuillères à café par jour, à avaler avec de l'eau ou à ajouter à vos plats.",price:fixed("4,99")},
 
   /* ---------- HUILES ---------- */
   {id:"hl-gingembre",cat:"huiles",name:"Huile de Gingembre",tagline:"La chaleur de la racine en quelques gouttes.",
@@ -1016,9 +1032,10 @@ function renderGrid(){
   const list = currentFilter==="all" ? PRODUCTS : PRODUCTS.filter(p=>p.cat===currentFilter);
   document.getElementById("grid").innerHTML = list.map(p=>{
     const initial = p.name.trim().charAt(0);
+    const img = getProductCardImage(p.id);
     return `
     <div class="card" onclick="showProduct('${p.id}')">
-      <div class="card-image" aria-hidden="true"><span class="visual-initial">${initial}</span></div>
+      ${img ? `<div class="card-image has-photo"><img src="${img}" alt="${p.name}" loading="lazy"/></div>` : `<div class="card-image" aria-hidden="true"><span class="visual-initial">${initial}</span></div>`}
       ${EMBLEMS[p.cat]}
       <div class="cat-tag">${CAT_LABELS[p.cat]}</div>
       <h3>${p.name}</h3>
@@ -1042,6 +1059,7 @@ function showProduct(id){
   const isConsumable = ["miels","gelules","poudres","huiles"].includes(p.cat);
   const isBrume = p.cat==="brumes";
   const isWear = p.cat==="qamis" || p.cat==="vetements";
+  const detailImg = getProductDetailImage(p.id);
 
   // Qualité panel (left) — varies slightly by type
   const qualite = isWear
@@ -1073,9 +1091,8 @@ function showProduct(id){
     </section>
 
     <div class="pp-body">
-      <div class="pp-visual">
-        ${EMBLEMS[p.cat]}
-        <div class="ribbon">Dar Nūr · دار النور</div>
+      <div class="pp-visual${detailImg ? ' has-photo' : ''}">
+        ${detailImg ? `<img src="${detailImg}" alt="${p.name}" class="pp-product-img"/>` : `${EMBLEMS[p.cat]}<div class="ribbon">Dar Nūr · دار النور</div>`}
       </div>
       <div class="pp-content">
         ${p.desc.map(d=>`<p>${d}</p>`).join("")}
