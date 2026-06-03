@@ -391,7 +391,7 @@ footer{background:#0a160f;color:var(--cream);padding:64px 28px 34px}
 <header>
   <nav>
     <div class="brand" onclick="showHome()">
-      <img src="logo-dar-nur.png" alt="Logo Dar Nūr" class="brand-logo"/>
+      <img src="logo-dar-nur.webp" alt="Logo Dar Nūr" class="brand-logo"/>
       <div class="brand-text">
         <span class="name">DAR NŪR</span>
         <span class="ar">دار النور</span>
@@ -413,7 +413,7 @@ footer{background:#0a160f;color:var(--cream);padding:64px 28px 34px}
   <section class="hero">
     <div class="hero-inner">
       <div class="eyebrow">Maison de produits naturels</div>
-      <img src="logo-dar-nur.png" alt="Logo Dar Nūr" class="hero-logo-img"/>
+      <img src="logo-dar-nur.webp" alt="Logo Dar Nūr" class="hero-logo-img"/>
       <div class="hero-mark" aria-label="Dar Nūr">DAR NŪR</div>
       <div class="hero-mark-ar" aria-hidden="true">دار النور</div>
       <h1>Les trésors de la nature,<br/>livrés avec confiance</h1>
@@ -446,13 +446,12 @@ footer{background:#0a160f;color:var(--cream);padding:64px 28px 34px}
   <section class="about" id="qui-sommes-nous">
     <div class="wrap">
       <div class="section-head">
-        <div class="eyebrow">Qui sommes-nous</div>
-        <h2>Une maison attentive aux produits naturels</h2>
-        <p>Dar Nūr sélectionne des produits utiles, authentiques et faciles à commander.</p>
+        <div class="eyebrow">Dar Nūr</div>
+        <h2>Qui sommes-nous ?</h2>
+        <p>Une maison engagée dans une sélection naturelle, sérieuse et de qualité.</p>
       </div>
       <div class="about-box">
-        <p>Notre objectif est simple : proposer une boutique claire, sérieuse et humaine, où chaque produit est présenté avec sincérité avant d’être recommandé.</p>
-        <p>Nous privilégions une sélection progressive, des échanges directs sur WhatsApp et un accompagnement simple pour aider chaque client à choisir le produit adapté à son besoin.</p>
+        <p>Dar Nūr sélectionne avec soin des produits naturels et de qualité, avec une attention particulière portée à l'authenticité, à la traçabilité et à la satisfaction des clients.</p>
         <div class="about-points">
           <div class="about-point"><h3>Sélection</h3><p>Des références choisies avec attention, selon leur intérêt et leur qualité.</p></div>
           <div class="about-point"><h3>Conseil</h3><p>Un contact direct pour répondre aux questions avant la commande.</p></div>
@@ -511,7 +510,7 @@ footer{background:#0a160f;color:var(--cream);padding:64px 28px 34px}
 <footer>
   <div class="foot-grid">
     <div class="foot-brand">
-      <img src="logo-dar-nur.png" alt="Logo Dar Nūr" class="footer-logo-img"/>
+      <img src="logo-dar-nur.webp" alt="Logo Dar Nūr" class="footer-logo-img"/>
       <div class="name">DAR NŪR</div>
       <div class="ar">دار النور</div>
       <p>La Maison de la Lumière. Des trésors naturels, présentés avec sincérité et soin.</p>
@@ -1173,10 +1172,18 @@ function priceLabel(p){
   if(p.price.type==="format") return `dès ${p.price.options[0][1]}€`;
   return `${p.price.options[0][1]}€`;
 }
-function waLink(name,opt,price){
-  let t = `Bonjour, je souhaite commander : ${name}`;
-  if(opt) t += ` — ${opt}`;
-  t += ` — ${price}€`;
+function waLink(name){
+  const t = `As-salâm 'alaykoum, je souhaite commander :
+
+Produit : ${name}
+
+Nom :
+Adresse complète :
+Ville :
+Code postal :
+Téléphone :
+
+BarakAllahu fik.`;
   return WA + encodeURIComponent(t);
 }
 
