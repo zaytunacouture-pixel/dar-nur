@@ -119,7 +119,7 @@ nav{
 
 /* ============ TRUST BAR ============ */
 .trust-bar{background:#fff;border-bottom:1px solid var(--line);padding:22px 28px}
-.trust-list{max-width:980px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.trust-list{max-width:1120px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
 .trust-item{display:flex;align-items:center;justify-content:center;gap:10px;text-align:center;font-family:'Cinzel';font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--green)}
 .trust-item svg{width:20px;height:20px;color:var(--gold);flex:none}
 
@@ -164,6 +164,21 @@ section{padding:90px 28px}
 .about-point{background:#fff;border:1px solid var(--line);border-radius:4px;padding:24px 18px}
 .about-point h3{font-size:.86rem;color:var(--green);margin-bottom:8px}
 .about-point p{font-size:.92rem;color:var(--muted);margin:0}
+
+/* ============ CUSTOMER INFO ============ */
+.customer-info{background:var(--offwhite)}
+.info-grid,.faq-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.info-card,.faq-item,.review-empty{
+  background:#fff;border:1px solid var(--line);border-radius:4px;padding:26px 22px;
+}
+.info-card h3,.faq-item h3{font-size:.86rem;color:var(--green);margin-bottom:10px}
+.info-card p,.faq-item p,.review-empty p{font-size:.94rem;color:var(--muted);margin:0}
+.faq{background:var(--cream)}
+.reviews{background:var(--offwhite)}
+.reviews-inner{max-width:760px;margin:0 auto;text-align:center}
+.review-empty{margin-bottom:26px}
+.footer-trust{max-width:1100px;margin:36px auto 0;padding-top:24px;border-top:1px solid rgba(200,168,75,.18);display:flex;flex-wrap:wrap;gap:14px 28px;justify-content:center}
+.footer-trust span{font-family:'Cinzel';font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(244,239,228,.72)}
 
 /* ============ FILTERS ============ */
 .filters{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:46px}
@@ -366,7 +381,7 @@ footer{background:#0a160f;color:var(--cream);padding:64px 28px 34px}
   .burger.x span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
   section{padding:64px 22px}
   .hero{padding:88px 22px 96px}
-  .trust-list,.about-points{grid-template-columns:1fr}
+  .trust-list,.about-points,.info-grid,.faq-grid{grid-template-columns:1fr}
   .trust-item{justify-content:flex-start;text-align:left}
   .grid,.family .grid{grid-template-columns:repeat(2,1fr);gap:14px}
   .card{padding:24px 16px 20px}
@@ -428,9 +443,10 @@ footer{background:#0a160f;color:var(--cream);padding:64px 28px 34px}
 
   <div class="trust-bar" aria-label="Engagements Dar Nūr">
     <div class="trust-list">
-      <div class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3l2 4 4 .5-3 3 .8 4.5L12 17l-3.8 2 .8-4.5-3-3 4-.5z"/></svg><span>Produits sélectionnés avec soin</span></div>
-      <div class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 7h11v10H3z"/><path d="M14 10h4l3 3v4h-7z"/><circle cx="7" cy="18" r="1.8"/><circle cx="18" cy="18" r="1.8"/></svg><span>Livraison rapide</span></div>
+      <div class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 7h11v10H3z"/><path d="M14 10h4l3 3v4h-7z"/><circle cx="7" cy="18" r="1.8"/><circle cx="18" cy="18" r="1.8"/></svg><span>Livraison rapide en France</span></div>
+      <div class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><path d="M7 15h4" stroke-linecap="round"/></svg><span>Paiement sécurisé</span></div>
       <div class="trust-item"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.945C.16 5.335 5.495 0 12.05 0a11.82 11.82 0 018.413 3.488 11.82 11.82 0 013.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24z"/></svg><span>Service client WhatsApp</span></div>
+      <div class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3l2 4 4 .5-3 3 .8 4.5L12 17l-3.8 2 .8-4.5-3-3 4-.5z"/></svg><span>Produits sélectionnés avec soin</span></div>
     </div>
   </div>
 
@@ -470,6 +486,53 @@ footer{background:#0a160f;color:var(--cream);padding:64px 28px 34px}
       </div>
       <div class="filters" id="filters"></div>
       <div class="grid" id="grid"></div>
+    </div>
+  </section>
+
+  <section class="customer-info" id="commande-livraison">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow">Commande & livraison</div>
+        <h2>Commander en toute simplicité</h2>
+        <p>Un parcours direct, clair et accompagné sur WhatsApp.</p>
+      </div>
+      <div class="info-grid">
+        <div class="info-card"><h3>Comment commander</h3><p>Choisissez votre produit, cliquez sur le bouton WhatsApp, puis complétez vos informations de livraison.</p></div>
+        <div class="info-card"><h3>Délais de livraison</h3><p>Les commandes sont préparées avec soin et expédiées rapidement en France.</p></div>
+        <div class="info-card"><h3>Paiement accepté</h3><p>Paiement sécurisé via Revolut ou règlement en espèces selon les modalités confirmées avec vous.</p></div>
+        <div class="info-card"><h3>Contact WhatsApp</h3><p>Le service client reste disponible pour répondre aux questions avant et après la commande.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="faq" id="faq">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow">Questions fréquentes</div>
+        <h2>FAQ</h2>
+        <p>Les réponses essentielles avant de commander.</p>
+      </div>
+      <div class="faq-grid">
+        <div class="faq-item"><h3>Comment commander ?</h3><p>Chaque fiche produit et chaque carte disposent d’un bouton WhatsApp prérempli pour lancer la commande.</p></div>
+        <div class="faq-item"><h3>Quels sont les délais de livraison ?</h3><p>Les délais sont confirmés au moment de la commande selon le produit et l’adresse de livraison.</p></div>
+        <div class="faq-item"><h3>Quels moyens de paiement acceptez-vous ?</h3><p>Dar Nūr accepte notamment Revolut et les espèces, selon les modalités validées ensemble.</p></div>
+        <div class="faq-item"><h3>Comment vous contacter ?</h3><p>Le contact principal se fait sur WhatsApp au 07 49 89 03 22.</p></div>
+        <div class="faq-item"><h3>Comment suivre ma commande ?</h3><p>Le suivi et les informations utiles sont communiqués directement via WhatsApp après validation.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="reviews" id="avis-clients">
+    <div class="wrap reviews-inner">
+      <div class="section-head">
+        <div class="eyebrow">Confiance</div>
+        <h2>Avis de nos clients</h2>
+        <p>Les avis réels seront ajoutés progressivement après les prochaines commandes.</p>
+      </div>
+      <div class="review-empty">
+        <p>Cet espace est prévu pour accueillir les futurs retours clients authentiques de Dar Nūr.</p>
+      </div>
+      <a class="btn-wa" href="https://wa.me/33749890322?text=As-sal%C3%A2m%20%27alaykoum%2C%0AJe%20souhaite%20partager%20mon%20avis%20concernant%20ma%20commande%20Dar%20N%C5%ABr." target="_blank" rel="noopener">Laisser un avis</a>
     </div>
   </section>
 
@@ -528,6 +591,12 @@ footer{background:#0a160f;color:var(--cream);padding:64px 28px 34px}
 <a href="confidentialite.html">Politique de confidentialité</a>
 <a href="cgv.html">Conditions générales de vente</a>
     </div>
+  </div>
+  <div class="footer-trust">
+    <span>Service client WhatsApp</span>
+    <span>Paiement sécurisé</span>
+    <span>Livraison rapide</span>
+    <span>Produits naturels sélectionnés avec soin</span>
   </div>
   <div class="foot-bottom">© 2025 Dar Nūr — Tous droits réservés</div>
 </footer>
