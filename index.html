@@ -1242,6 +1242,128 @@ const PRODUCTS = [
    uso:"Précisez votre taille lors de la commande.",price:fixed("59,99")}
 ];
 
+/* Corrections fournisseur — informations produit uniquement, sans modification visuelle. */
+const SUPPLIER_DEFAULTS = {
+  miels: {
+    poids:"50 g, 200 g, 300 g",
+    precautions:["Produit artisanal : la couleur, la texture et l'intensité peuvent varier selon les lots.","Ne remplace pas un traitement médical.","À conserver dans un endroit sec et à l'abri de la lumière."]
+  },
+  gelules: {
+    contenance:"60 gélules",
+    precautions:["Complément alimentaire : ne remplace pas une alimentation variée et équilibrée.","Ne pas dépasser la dose recommandée.","Déconseillé aux femmes enceintes ou allaitantes.","Tenir hors de portée des enfants.","À conserver dans un endroit sec et frais."]
+  },
+  poudres: {
+    poids:"50 g",
+    precautions:["Déconseillé aux femmes enceintes et allaitantes.","Ne remplace pas un traitement médical.","À conserver dans un endroit sec et à l'abri de la lumière."]
+  },
+  huiles: {
+    contenance:"30 mL",
+    precautions:["Usage externe uniquement sauf indication contraire.","Toujours diluer avant application sur la peau.","Éviter le contact avec les yeux.","Sans additifs ni conservateurs, sans paraben ni silicone.","Non testée sur les animaux."]
+  },
+  brumes: {
+    contenance:"100 mL",
+    precautions:["Usage externe uniquement, éviter le contour des yeux.","Produit artisanal : couleur, texture et intensité peuvent varier selon les lots.","À conserver à l'abri de la chaleur et de la lumière."]
+  }
+};
+
+PRODUCTS.push(
+  {id:"miel-cactus",cat:"miels",name:"Miel de Cactus",tagline:"Pureté et résistance dans un miel rare.",
+   desc:["Un miel rare et précieux, élaboré à partir des fleurs de cactus, réputées pour leurs bienfaits exceptionnels.","Riche en nutriments et antioxydants, il aide à renforcer l'organisme et à maintenir l'équilibre au quotidien."],
+   benefits:["Riche en antioxydants naturels","Renforce le système immunitaire","Aide à l'équilibre digestif","Soutient l'énergie et la vitalité"],
+   compo:"Miel pur, poudre de cactus, préparation artisanale",prov:"Préparé artisanalement par Rayève Naturals, inspiré des traditions naturelles et des savoirs ancestraux",
+   uso:"1 à 2 cuillères à café par jour, le matin à jeun ou en journée. Peut être consommé seul ou dilué dans une boisson tiède.",price:honeyPrice("9,99","24,99","34,99")}
+);
+
+const SUPPLIER_PATCHES = {
+  "br-sublimante": {
+    compo:"Eau de rose, huile d'argan, rose d'Arabie",
+    prov:"Préparé artisanalement par Rayève Naturals, inspiré des traditions naturelles et des savoirs ancestraux",
+    uso:"Vaporiser sur le visage ou le corps à environ 20 cm. Fermer les yeux lors de l'application, secouer avant emploi et ne pas rincer."
+  },
+  "br-eau-rose": {
+    compo:"Eau de rose (distillation de pétales de rose), sans alcool, sans colorant, sans conservateur, 100% naturel",
+    prov:"Préparé artisanalement par Rayève Naturals, inspiré des traditions naturelles et des savoirs ancestraux",
+    uso:"Vaporiser sur le visage ou le corps à tout moment de la journée. Appliquer matin et soir à l'aide d'un coton sur le visage et le cou, puis laisser pénétrer sans rincer."
+  },
+  "br-apaisante": {
+    compo:"Rose d'Oliban, Gomme Arabique, Lavande, eau florale, excipients naturels, sans alcool, sans colorant",
+    prov:"Préparé artisanalement par Rayève Naturals, inspiré des traditions naturelles et des savoirs ancestraux",
+    uso:"Vaporiser sur le visage ou le corps à tout moment de la journée, à environ 20 cm de la peau. Fermer les yeux lors de l'application et secouer avant emploi."
+  },
+  "br-nila": {
+    compo:"Eau de rose de Nila, eau de citron, sans alcool, sans colorant, sans conservateur, 100% d'ingrédients d'origine naturelle",
+    prov:"Préparé artisanalement par Rayève Naturals, inspiré des traditions naturelles et des savoirs ancestraux",
+    uso:"Vaporiser sur le visage ou le corps à tout moment de la journée. Utiliser après le nettoyage pour tonifier la peau, avant le maquillage pour un teint frais, ou comme brume rafraîchissante."
+  },
+
+  "miel-aubepine": {compo:"Miel pur, poudre d'aubépine, préparation artisanale",uso:"1 à 2 cuillères à café par jour, le matin à jeun ou en journée. Peut être consommé seul ou dilué dans une boisson tiède."},
+  "miel-sidr-jujubier": {compo:"Miel pur, poudre de Sidr de Jujubier, préparation artisanale",uso:"1 à 2 cuillères à café par jour, le matin à jeun ou en journée. Peut être consommé seul ou dilué dans une boisson tiède."},
+  "miel-hibiscus-zamzam": {compo:"Miel de fleurs, fleurs d'hibiscus, nigelle, préparation artisanale incluant l'eau de Zamzam",uso:"1 à 2 cuillères à café par jour, le matin à jeun ou en journée. Peut être consommé seul ou dilué dans une boisson tiède."},
+  "miel-gingembre-curcuma": {compo:"Miel pur, gingembre, curcuma, préparation artisanale",uso:"1 à 2 cuillères à café par jour, le matin à jeun ou en journée. Peut être consommé seul ou dilué dans une boisson tiède."},
+  "miel-aphrodisiaque": {compo:"Gelée royale, propolis, ginseng, ashwagandha, moringa, costus, shilajit, spiruline, hibiscus, miel pur",uso:"1 à 2 cuillères à café par jour, le matin à jeun ou en journée. Peut être consommé seul ou dilué dans une boisson tiède."},
+  "miel-blanc-kirghizistan": {compo:"Miel blanc du Kirghizistan, préparation artisanale",uso:"1 à 2 cuillères à café par jour, le matin à jeun ou en journée. Peut être consommé seul ou dilué dans une boisson tiède."},
+  "miel-nigelle": {compo:"Miel pur, poudre de nigelle, graines de nigelle, préparation artisanale",uso:"1 à 2 cuillères à café par jour, le matin à jeun ou en journée. Peut être consommé seul ou dilué dans une boisson tiède."},
+  "miel-moringa-nigelle": {compo:"Miel pur, poudre de moringa, graines de nigelle, préparation artisanale",uso:"1 à 2 cuillères à café par jour, le matin à jeun ou en journée. Peut être consommé seul ou dilué dans une boisson tiède."},
+  "miel-costus-nigelle": {compo:"Miel pur, poudre de Costus Indien, graines de nigelle, préparation artisanale",uso:"1 à 2 cuillères à café par jour, le matin à jeun ou en journée. Peut être consommé seul ou dilué dans une boisson tiède."},
+  "miel-fraise-russie": {compo:"Miel pur, fraise de Russie, préparation artisanale",uso:"1 à 2 cuillères à café par jour, le matin à jeun ou en journée. Peut être consommé seul ou dilué dans une boisson tiède."},
+  "miel-gingembre-fenugrec": {compo:"Miel pur, gingembre, fenugrec, préparation artisanale",uso:"1 à 2 cuillères à café par jour, le matin à jeun ou en journée. Peut être consommé seul ou dilué dans une boisson tiède."},
+  "miel-rose-siberie": {compo:"Miel rose de Sibérie, préparation artisanale",uso:"1 à 2 cuillères à café par jour, le matin à jeun ou en journée. Peut être consommé seul ou dilué dans une boisson tiède."},
+  "miel-spiruline": {compo:"Miel de printemps, spiruline",uso:"1 à 2 cuillères à café par jour, le matin à jeun ou en journée. Peut être consommé seul ou dilué dans une boisson tiède."},
+
+  "gel-macca": {name:"Gélules de Macca",compo:"100% poudre de Macca (racine), gélules végétales, sans additifs chimiques",prov:"Pérou",uso:"Prendre 2 à 3 gélules par jour avec un grand verre d'eau, de préférence le matin ou avant les repas. Cure recommandée : 1 à 2 mois."},
+  "gel-aphrodisiaque": {compo:"Mélange de plantes naturelles reconnues pour leurs propriétés stimulantes, gélules végétales, sans additifs chimiques",uso:"Prendre 2 gélules par jour avec un grand verre d'eau, de préférence le matin ou avant l'effort. Cure recommandée : 1 à 2 mois."},
+  "gel-chardon": {compo:"100% poudre de Chardon Marie (graines), gélules végétales, sans additifs chimiques",prov:"Europe",uso:"Prendre 2 à 3 gélules par jour avec un grand verre d'eau, de préférence le matin ou avant un repas. Cure recommandée : 1 à 2 mois."},
+  "gel-valeriane": {compo:"100% poudre de Valériane (racine), gélules végétales, sans additifs chimiques",prov:"Europe",uso:"Prendre 2 à 3 gélules par jour avec un grand verre d'eau, de préférence le soir 30 minutes avant le coucher. Cure recommandée : 1 à 2 mois."},
+  "gel-nigelle": {compo:"100% poudre de Nigelle (graines de cumin noir), gélules végétales, sans additifs chimiques",prov:"Éthiopie",uso:"Prendre 2 à 3 gélules par jour avec un grand verre d'eau, de préférence le matin ou avant les repas. Cure recommandée : 1 à 3 mois."},
+  "gel-costus": {compo:"100% poudre de Costus Indien (feuilles et racines), gélules végétales, sans additifs chimiques",prov:"Inde",uso:"Prendre 2 à 3 gélules par jour avec un grand verre d'eau, de préférence le matin ou avant l'effort. Cure recommandée : 1 à 2 mois."},
+  "gel-ashwaganda": {name:"Gélules d'Ashwaganda",compo:"100% poudre d'Ashwaganda (racines), gélules végétales, sans additifs chimiques",prov:"Inde",uso:"Prendre 2 à 3 gélules par jour avec un grand verre d'eau, de préférence le matin ou avant l'effort. Cure recommandée : 1 à 2 mois."},
+  "gel-gingembre-curcuma": {compo:"100% poudre de gingembre et de curcuma, gélules végétales, sans additifs chimiques",prov:"Inde",uso:"Prendre 2 à 3 gélules par jour avec un grand verre d'eau, de préférence le matin ou avant les repas. Cure recommandée : 1 à 2 mois."},
+  "gel-fenugrec": {compo:"100% poudre de Fenugrec (graines), gélules végétales, sans additifs chimiques",prov:"Inde",uso:"Prendre 2 à 3 gélules par jour avec un grand verre d'eau, de préférence le matin ou avant les repas. Cure recommandée : 1 à 2 mois."},
+  "gel-spiruline": {compo:"100% poudre de Spiruline (Arthrospira platensis), gélules végétales, sans additifs chimiques",prov:"Chine",uso:"Prendre 2 à 3 gélules par jour avec un grand verre d'eau, de préférence le matin ou avant les repas. Cure recommandée : 1 à 2 mois."},
+  "gel-termis": {compo:"100% poudre de Termis (graine), gélules végétales, sans additifs chimiques",prov:"Afrique de l'Ouest",uso:"Prendre 2 à 3 gélules par jour avec un grand verre d'eau, de préférence le matin ou avant les repas. Cure recommandée : 1 à 2 mois."},
+  "gel-moringa": {compo:"100% poudre de Moringa oleifera (feuilles), gélules végétales, sans additifs chimiques",prov:"Inde",uso:"Prendre 2 à 4 gélules par jour avec un grand verre d'eau, de préférence le matin. Cure recommandée : 1 à 3 mois."},
+
+  "pdr-gingembre-curcuma": {compo:"Mélange 100% naturel de Gingembre (Zingiber officinale) et Curcuma (Curcuma longa), sans additifs, sans conservateurs, produit pur",uso:"1 à 2 cuillères à café par jour. À ajouter dans un jus, un smoothie ou un plat. Usage externe possible en masque naturel."},
+  "pdr-clou-girofle": {compo:"100% poudre de Clou de Girofle (Syzygium aromaticum), sans additifs, sans conservateurs, produit pur",uso:"1/2 à 1 cuillère à café par jour. À ajouter dans un jus, un smoothie ou un plat. Usage externe possible en bain de bouche dilué."},
+  "pdr-romarin": {compo:"100% poudre de Romarin (Rosmarinus officinalis), sans additifs, sans conservateurs, produit pur",uso:"1 à 2 cuillères à café par jour. À ajouter dans un jus, un smoothie ou un plat. Usage externe possible en masque capillaire."},
+  "pdr-nigelle": {compo:"100% poudre de Nigelle (Nigella sativa), sans additifs, sans conservateurs, produit pur",prov:"Égypte",uso:"1/2 à 1 cuillère à café par jour. À ajouter dans un jus, un smoothie ou un plat. Usage externe possible en masque capillaire ou sur la peau."},
+  "pdr-termis": {compo:"100% graines de termis (Lupinus albus), sans additifs, sans conservateurs, produit pur",uso:"1 à 2 cuillères à café par jour, à mélanger dans de l'eau, du lait ou un smoothie. Idéal le matin pour un apport énergétique."},
+  "pdr-psyllium": {compo:"100% téguments de psyllium (Plantago ovata), sans additifs, sans conservateurs, produit pur",uso:"1 à 2 cuillères à café par jour, à mélanger dans de l'eau ou un grand verre d'eau. À prendre avant les repas de préférence."},
+  "pdr-costus": {compo:"Poudre issue de la racine de costus indien (Saussurea costus), sans additifs, sans conservateurs, produit pur",uso:"1 à 2 cuillères à café par jour. À mélanger dans de l'eau, un jus ou un smoothie. Idéal le matin ou avant les repas."},
+  "pdr-moringa": {compo:"100% feuilles de moringa (Moringa oleifera), sans additifs, sans conservateurs, produit pur",uso:"1 à 2 cuillères à café par jour, à mélanger dans de l'eau, un jus ou un smoothie. Idéal le matin ou avant les repas."},
+  "grn-lavande": {compo:"100% graines de Lavande (Lavandula), sans additifs, sans conservateurs, produit pur",uso:"1 à 2 cuillères à café par jour, à infuser dans de l'eau. Idéal le soir pour favoriser la détente."},
+  "grn-chia": {prov:"Amérique Latine / Mexique",uso:"1 à 2 cuillères à café par jour, à mélanger dans de l'eau, du lait ou un smoothie. Idéal le matin ou le soir selon les besoins."},
+  "grn-kirikou": {uso:"2 graines par jour, à concasser puis mélanger dans un yaourt ou une compote. À consommer de préférence le soir avant le coucher."},
+  "grn-fenouil": {uso:"1 à 2 cuillères à café par jour, à infuser dans de l'eau chaude après les repas ou à mâcher. Idéal le matin ou après les repas."},
+  "grn-gomme-arabique": {uso:"1 à 2 cuillères à café par jour, à dissoudre dans de l'eau tiède, une tisane, un jus ou un yaourt. Idéal le matin ou avant les repas."},
+  "grn-oliban": {prov:"Afrique de l'Ouest (Sénégal / Sahel)",uso:"1 à 3 grains par jour, à mâcher directement. Peut aussi être consommé après les repas, idéal le soir pour un moment de détente."},
+  "grn-baraka": {name:"Graine Noire (Baraka)",uso:"1 à 2 cuillères à café par jour, à avaler avec de l'eau ou à ajouter dans vos plats (miel, yaourt, jus). Idéal le matin ou avant les repas."},
+  "grn-chardon": {uso:"1 à 2 cuillères à café par jour, à infuser dans de l'eau chaude après les repas ou à mâcher. Idéal le matin ou après les repas."},
+  "grn-nigelle-baraka": {uso:"1 à 2 cuillères à café par jour, à avaler avec de l'eau ou à ajouter à vos plats."},
+
+  "hl-gingembre": {uso:"Diluer dans une huile végétale et masser l'abdomen pour soulager les ballonnements, la constipation ou les nausées. Peut aussi s'utiliser en massage tonifiant ou en soin capillaire."},
+  "hl-eucalyptus": {uso:"Utiliser en diffusion pour assainir l'air ambiant, ou diluer dans une huile végétale pour masser le thorax, le front et les sinus."},
+  "hl-oliban": {uso:"Appliquer quelques gouttes sur peau propre en soin visage ou corps, diluer en massage, diffuser pour créer une ambiance apaisante ou appliquer localement sur les imperfections."},
+  "hl-nigelle": {uso:"Appliquer quelques gouttes sur le visage ou le corps et masser délicatement. Peut aussi s'utiliser sur le cuir chevelu et les longueurs, ou en massage sur les zones sensibles."},
+  "hl-fenugrec": {uso:"Appliquer sur le cuir chevelu, masser le buste ou les zones à tonifier, appliquer sur la barbe, les ongles ou en diffusion pour un moment de bien-être."},
+  "hl-costus": {uso:"Diluer dans une huile végétale pour massage, soin de la peau ou soin des cheveux. Peut aussi s'utiliser en diffusion ou en inhalation selon les besoins."},
+  "hl-pepins-raisin": {uso:"Appliquer quelques gouttes matin et soir sur une peau propre. Peut s'utiliser sur le corps, dans les gommages, sur les cheveux ou sur les ongles."},
+  "hl-menthe-poivree": {uso:"Toujours diluer avant application. Utiliser en massage sur les tempes, le ventre ou le corps, en inhalation, en diffusion ou dans un bain relaxant."},
+  "hl-lavande": {uso:"Utiliser en diffusion, diluée en soin de la peau, dans un bain relaxant, ou déposer 1 à 2 gouttes sur l'oreiller ou le drap avant le coucher."},
+  "hl-figue-barbarie": {uso:"Appliquer quelques gouttes sur le visage propre, sur le corps, les cheveux ou les ongles pour nourrir, réparer et apporter douceur."},
+  "hl-clou-girofle": {uso:"Toujours diluer avant application. Utiliser en soin buccal localisé, en soins cutanés, en diffusion ou en massage des zones fatiguées ou douloureuses."},
+  "hl-arthrose": {uso:"Appliquer en massage circulaire sur la zone concernée 2 à 3 fois par jour. Peut être utilisée en complément d'un bain chaud. Usage externe uniquement, éviter le contact avec les yeux."},
+  "hl-rose-blanc": {uso:"Appliquer quelques gouttes sur le visage propre, sur le corps ou sur les longueurs et pointes des cheveux pour apporter douceur et brillance."},
+  "hl-rose": {uso:"Appliquer quelques gouttes sur le visage propre, utiliser en soin ciblé sur les taches ou rougeurs, ou sur le corps pour nourrir et hydrater les peaux sèches et sensibles."},
+  "hl-citron": {uso:"Utiliser en soin de la peau dilué dans une huile végétale ou en massage. Quelques gouttes en diffusion permettent de purifier l'air."},
+  "hl-menthe-pouliot": {uso:"Diluer dans une huile végétale pour massage du ventre ou du corps. Peut aussi s'utiliser en diffusion ou en usage externe dilué en évitant le contact avec les yeux."}
+};
+
+PRODUCTS.forEach(p=>{
+  const defaults = SUPPLIER_DEFAULTS[p.cat] || {};
+  Object.assign(p, defaults, SUPPLIER_PATCHES[p.id] || {});
+});
+
 /* ============ STATE ============ */
 let currentFilter = "all";
 let activeProduct = null;
@@ -1322,11 +1444,17 @@ function showProduct(id){
   const rightTitle = isWear ? "Entretien & taille" : "Précautions";
   const rightItems = isWear
     ? ["Lavage délicat recommandé, à l'eau froide","Repassage à température modérée","Taille confirmée avec vous sur WhatsApp avant l'envoi"]
-    : (isBrume
+    : (p.precautions || (isBrume
         ? ["Usage externe uniquement, éviter le contour des yeux","Produit artisanal : couleur et parfum peuvent varier selon les lots","À conserver dans un endroit sec et à l'abri de la lumière"]
-        : ["Déconseillé aux femmes enceintes et allaitantes","Ne remplace pas un traitement médical","À conserver dans un endroit sec et à l'abri de la lumière"]);
+        : ["Déconseillé aux femmes enceintes et allaitantes","Ne remplace pas un traitement médical","À conserver dans un endroit sec et à l'abri de la lumière"]));
 
   const usageTitle = isWear ? "Le mot de la maison" : "Conseils d'usage";
+  const productMeta = [
+    ["Composition", p.compo],
+    p.poids ? ["Poids", p.poids] : null,
+    p.contenance ? ["Contenance", p.contenance] : null,
+    ["Provenance", p.prov]
+  ].filter(Boolean);
 
   document.getElementById("productView").innerHTML = `
     <section class="pp-hero">
@@ -1352,8 +1480,7 @@ function showProduct(id){
         <ul class="pp-benefits">${p.benefits.map(b=>`<li>${b}</li>`).join("")}</ul>
         <h2>Le produit</h2>
         <div class="pp-meta">
-          <div><div class="k">Composition</div><div class="v">${p.compo}</div></div>
-          <div><div class="k">Provenance</div><div class="v">${p.prov}</div></div>
+          ${productMeta.map(([k,v])=>`<div><div class="k">${k}</div><div class="v">${v}</div></div>`).join("")}
         </div>
         <h2>${usageTitle}</h2>
         <p>${p.uso}</p>
