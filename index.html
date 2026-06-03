@@ -361,6 +361,11 @@ footer{background:#0a160f;color:var(--cream);padding:64px 28px 34px}
 .visual-initial{font-family:'Cinzel';font-size:clamp(2rem,5vw,3.2rem);line-height:1;color:var(--green);opacity:.86;position:relative;z-index:1}
 .pp-visual.has-photo{padding:18px;background:#f6f0e3}
 .pp-product-img{width:100%;height:100%;object-fit:contain;border-radius:4px}
+.pp-gallery{display:grid;gap:12px}
+.pp-thumbs{display:grid;grid-template-columns:repeat(auto-fit,minmax(64px,1fr));gap:10px}
+.pp-thumb{aspect-ratio:1;border:1px solid var(--line);border-radius:4px;background:#f6f0e3;padding:4px;cursor:pointer}
+.pp-thumb img{width:100%;height:100%;object-fit:cover;border-radius:3px;display:block}
+.pp-thumb.active{border-color:var(--gold)}
 
 /* ============ RESPONSIVE ============ */
 @media(max-width:1024px){
@@ -653,32 +658,32 @@ const PRODUCT_IMAGES = {
   "pdr-nila": ["poudre-nila-1.webp"],
   "br-nila": ["spray-nila-1.webp","spray-nila-2.webp"],
   "br-apaisante": ["spray-aromatherapy.webp"],
-  "qms-blanc": ["maison-rayeve-qamis-saoudien-blanc.jpg"],
-  "qms-bleu-ciel": ["maison-rayeve-qamis-saoudien-bleu-ciel.jpg"],
-  "qms-gris": ["maison-rayeve-qamis-saoudien-gris-fonce.jpg"],
-  "qms-marron": ["maison-rayeve-qamis-saoudien-marron.jpg"],
-  "vt-abaya-nouha-gris-argente": ["maison-rayeve-abaya-nouha-gris-argente.jpg"],
-  "vt-abaya-nouha-noir-dentelle": ["maison-rayeve-abaya-nouha-noir-dentelle.jpg"],
-  "vt-abaya-nouha-bleu-ciel": ["maison-rayeve-abaya-nouha-bleu-ciel.jpg"],
-  "vt-abaya-nouha-rose-marrone": ["maison-rayeve-abaya-nouha-rose-marrone.jpg"],
-  "vt-aicha-vert-sapin": ["maison-rayeve-ensemble-aicha-vert-sapin.jpg"],
-  "vt-aicha-orange": ["maison-rayeve-ensemble-aicha-orange.jpg"],
-  "vt-aicha-violet": ["maison-rayeve-ensemble-aicha-violet.jpg"],
-  "vt-aicha-bordeaux": ["maison-rayeve-ensemble-aicha-bordeaux.jpg"],
-  "vt-aicha-blanc": ["maison-rayeve-ensemble-aicha-blanc.jpg"],
-  "vt-aicha-noir": ["maison-rayeve-ensemble-aicha-noir.jpg"],
-  "vt-aicha-kaki": ["maison-rayeve-ensemble-aicha-kaki.jpg"],
-  "vt-layali-beige": ["maison-rayeve-ensemble-layali-beige.jpg"],
-  "vt-layali-blanc": ["maison-rayeve-ensemble-layali-blanc.jpg"],
-  "vt-layali-doree": ["maison-rayeve-ensemble-layali-doree.jpg"],
-  "vt-layali-noir": ["maison-rayeve-ensemble-layali-noir.jpg"],
-  "vt-nissah-blanc": ["maison-rayeve-ensemble-nissah-mastoura-blanc.jpg"],
-  "vt-nissah-bleu": ["maison-rayeve-ensemble-nissah-mastoura-bleu.jpg"],
-  "vt-nissah-bordeaux": ["maison-rayeve-ensemble-nissah-mastoura-bordeaux.jpg"],
-  "vt-nissah-noir": ["maison-rayeve-ensemble-nissah-mastoura-noir.jpg"],
-  "vt-nissah-vert": ["maison-rayeve-ensemble-nissah-mastoura-vert-sapin.jpg"],
-  "vt-nissah-violet": ["maison-rayeve-ensemble-nissah-mastoura-violet.jpg"],
-  "vt-nissah-kaki": ["maison-rayeve-ensemble-nissah-moustara-kaki.jpg"]
+  "qms-blanc": ["maison-rayeve-qamis-saoudien-blanc.jpg","assets/mode/produits/qms-blanc/qms-blanc-02.jpg","assets/mode/produits/qms-blanc/qms-blanc-03.jpg","assets/mode/produits/qms-blanc/qms-blanc-04.jpg","assets/mode/produits/qms-blanc/qms-blanc-05.jpg","assets/mode/produits/qms-blanc/qms-blanc-06.jpg","assets/mode/produits/qms-blanc/qms-blanc-07.jpg"],
+  "qms-bleu-ciel": ["maison-rayeve-qamis-saoudien-bleu-ciel.jpg","assets/mode/produits/qms-bleu-ciel/qms-bleu-ciel-02.jpg","assets/mode/produits/qms-bleu-ciel/qms-bleu-ciel-03.jpg","assets/mode/produits/qms-bleu-ciel/qms-bleu-ciel-04.jpg","assets/mode/produits/qms-bleu-ciel/qms-bleu-ciel-05.jpg"],
+  "qms-gris": ["maison-rayeve-qamis-saoudien-gris-fonce.jpg","assets/mode/produits/qms-gris/qms-gris-02.jpg","assets/mode/produits/qms-gris/qms-gris-03.jpg","assets/mode/produits/qms-gris/qms-gris-04.jpg"],
+  "qms-marron": ["maison-rayeve-qamis-saoudien-marron.jpg","assets/mode/produits/qms-marron/qms-marron-02.jpg","assets/mode/produits/qms-marron/qms-marron-03.jpg","assets/mode/produits/qms-marron/qms-marron-04.jpg","assets/mode/produits/qms-marron/qms-marron-05.jpg","assets/mode/produits/qms-marron/qms-marron-06.jpg"],
+  "vt-abaya-nouha-gris-argente": ["maison-rayeve-abaya-nouha-gris-argente.jpg","assets/mode/produits/vt-abaya-nouha-gris-argente/vt-abaya-nouha-gris-argente-02.jpg","assets/mode/produits/vt-abaya-nouha-gris-argente/vt-abaya-nouha-gris-argente-03.jpg","assets/mode/produits/vt-abaya-nouha-gris-argente/vt-abaya-nouha-gris-argente-04.jpg","assets/mode/produits/vt-abaya-nouha-gris-argente/vt-abaya-nouha-gris-argente-05.jpg","assets/mode/produits/vt-abaya-nouha-gris-argente/vt-abaya-nouha-gris-argente-06.jpg"],
+  "vt-abaya-nouha-noir-dentelle": ["maison-rayeve-abaya-nouha-noir-dentelle.jpg","assets/mode/produits/vt-abaya-nouha-noir-dentelle/vt-abaya-nouha-noir-dentelle-02.jpg","assets/mode/produits/vt-abaya-nouha-noir-dentelle/vt-abaya-nouha-noir-dentelle-03.jpg","assets/mode/produits/vt-abaya-nouha-noir-dentelle/vt-abaya-nouha-noir-dentelle-04.jpg","assets/mode/produits/vt-abaya-nouha-noir-dentelle/vt-abaya-nouha-noir-dentelle-05.jpg"],
+  "vt-abaya-nouha-bleu-ciel": ["maison-rayeve-abaya-nouha-bleu-ciel.jpg","assets/mode/produits/vt-abaya-nouha-bleu-ciel/vt-abaya-nouha-bleu-ciel-02.jpg","assets/mode/produits/vt-abaya-nouha-bleu-ciel/vt-abaya-nouha-bleu-ciel-03.jpg","assets/mode/produits/vt-abaya-nouha-bleu-ciel/vt-abaya-nouha-bleu-ciel-04.jpg"],
+  "vt-abaya-nouha-rose-marrone": ["maison-rayeve-abaya-nouha-rose-marrone.jpg","assets/mode/produits/vt-abaya-nouha-rose-marrone/vt-abaya-nouha-rose-marrone-02.jpg","assets/mode/produits/vt-abaya-nouha-rose-marrone/vt-abaya-nouha-rose-marrone-03.jpg","assets/mode/produits/vt-abaya-nouha-rose-marrone/vt-abaya-nouha-rose-marrone-04.jpg"],
+  "vt-aicha-vert-sapin": ["maison-rayeve-ensemble-aicha-vert-sapin.jpg","assets/mode/produits/vt-aicha-vert-sapin/vt-aicha-vert-sapin-02.jpg","assets/mode/produits/vt-aicha-vert-sapin/vt-aicha-vert-sapin-03.jpg","assets/mode/produits/vt-aicha-vert-sapin/vt-aicha-vert-sapin-04.jpg","assets/mode/produits/vt-aicha-vert-sapin/vt-aicha-vert-sapin-05.jpg"],
+  "vt-aicha-orange": ["maison-rayeve-ensemble-aicha-orange.jpg","assets/mode/produits/vt-aicha-orange/vt-aicha-orange-02.jpg","assets/mode/produits/vt-aicha-orange/vt-aicha-orange-03.jpg","assets/mode/produits/vt-aicha-orange/vt-aicha-orange-04.jpg","assets/mode/produits/vt-aicha-orange/vt-aicha-orange-05.jpg"],
+  "vt-aicha-violet": ["maison-rayeve-ensemble-aicha-violet.jpg","assets/mode/produits/vt-aicha-violet/vt-aicha-violet-02.jpg","assets/mode/produits/vt-aicha-violet/vt-aicha-violet-03.jpg","assets/mode/produits/vt-aicha-violet/vt-aicha-violet-04.jpg","assets/mode/produits/vt-aicha-violet/vt-aicha-violet-05.jpg"],
+  "vt-aicha-bordeaux": ["maison-rayeve-ensemble-aicha-bordeaux.jpg","assets/mode/produits/vt-aicha-bordeaux/vt-aicha-bordeaux-02.jpg","assets/mode/produits/vt-aicha-bordeaux/vt-aicha-bordeaux-03.jpg","assets/mode/produits/vt-aicha-bordeaux/vt-aicha-bordeaux-04.jpg","assets/mode/produits/vt-aicha-bordeaux/vt-aicha-bordeaux-05.jpg"],
+  "vt-aicha-blanc": ["maison-rayeve-ensemble-aicha-blanc.jpg","assets/mode/produits/vt-aicha-blanc/vt-aicha-blanc-02.jpg","assets/mode/produits/vt-aicha-blanc/vt-aicha-blanc-03.jpg","assets/mode/produits/vt-aicha-blanc/vt-aicha-blanc-04.jpg"],
+  "vt-aicha-noir": ["maison-rayeve-ensemble-aicha-noir.jpg","assets/mode/produits/vt-aicha-noir/vt-aicha-noir-02.jpg","assets/mode/produits/vt-aicha-noir/vt-aicha-noir-03.jpg","assets/mode/produits/vt-aicha-noir/vt-aicha-noir-04.jpg"],
+  "vt-aicha-kaki": ["maison-rayeve-ensemble-aicha-kaki.jpg","assets/mode/produits/vt-aicha-kaki/vt-aicha-kaki-02.jpg","assets/mode/produits/vt-aicha-kaki/vt-aicha-kaki-03.jpg","assets/mode/produits/vt-aicha-kaki/vt-aicha-kaki-04.jpg","assets/mode/produits/vt-aicha-kaki/vt-aicha-kaki-05.jpg"],
+  "vt-layali-beige": ["maison-rayeve-ensemble-layali-beige.jpg","assets/mode/produits/vt-layali-beige/vt-layali-beige-02.jpg","assets/mode/produits/vt-layali-beige/vt-layali-beige-03.jpg","assets/mode/produits/vt-layali-beige/vt-layali-beige-04.jpg","assets/mode/produits/vt-layali-beige/vt-layali-beige-05.jpg","assets/mode/produits/vt-layali-beige/vt-layali-beige-06.jpg"],
+  "vt-layali-blanc": ["maison-rayeve-ensemble-layali-blanc.jpg","assets/mode/produits/vt-layali-blanc/vt-layali-blanc-02.jpg","assets/mode/produits/vt-layali-blanc/vt-layali-blanc-03.jpg","assets/mode/produits/vt-layali-blanc/vt-layali-blanc-04.jpg","assets/mode/produits/vt-layali-blanc/vt-layali-blanc-05.jpg"],
+  "vt-layali-doree": ["maison-rayeve-ensemble-layali-doree.jpg","assets/mode/produits/vt-layali-doree/vt-layali-doree-02.jpg","assets/mode/produits/vt-layali-doree/vt-layali-doree-03.jpg","assets/mode/produits/vt-layali-doree/vt-layali-doree-04.jpg"],
+  "vt-layali-noir": ["maison-rayeve-ensemble-layali-noir.jpg","assets/mode/produits/vt-layali-noir/vt-layali-noir-02.jpg","assets/mode/produits/vt-layali-noir/vt-layali-noir-03.jpg","assets/mode/produits/vt-layali-noir/vt-layali-noir-04.jpg","assets/mode/produits/vt-layali-noir/vt-layali-noir-05.jpg"],
+  "vt-nissah-blanc": ["maison-rayeve-ensemble-nissah-mastoura-blanc.jpg","assets/mode/produits/vt-nissah-blanc/vt-nissah-blanc-02.jpg","assets/mode/produits/vt-nissah-blanc/vt-nissah-blanc-03.jpg","assets/mode/produits/vt-nissah-blanc/vt-nissah-blanc-04.jpg","assets/mode/produits/vt-nissah-blanc/vt-nissah-blanc-05.jpg"],
+  "vt-nissah-bleu": ["maison-rayeve-ensemble-nissah-mastoura-bleu.jpg","assets/mode/produits/vt-nissah-bleu/vt-nissah-bleu-02.jpg","assets/mode/produits/vt-nissah-bleu/vt-nissah-bleu-03.jpg","assets/mode/produits/vt-nissah-bleu/vt-nissah-bleu-04.jpg","assets/mode/produits/vt-nissah-bleu/vt-nissah-bleu-05.jpg","assets/mode/produits/vt-nissah-bleu/vt-nissah-bleu-06.jpg"],
+  "vt-nissah-bordeaux": ["maison-rayeve-ensemble-nissah-mastoura-bordeaux.jpg","assets/mode/produits/vt-nissah-bordeaux/vt-nissah-bordeaux-02.jpg","assets/mode/produits/vt-nissah-bordeaux/vt-nissah-bordeaux-03.jpg","assets/mode/produits/vt-nissah-bordeaux/vt-nissah-bordeaux-04.jpg","assets/mode/produits/vt-nissah-bordeaux/vt-nissah-bordeaux-05.jpg","assets/mode/produits/vt-nissah-bordeaux/vt-nissah-bordeaux-06.jpg"],
+  "vt-nissah-noir": ["maison-rayeve-ensemble-nissah-mastoura-noir.jpg","assets/mode/produits/vt-nissah-noir/vt-nissah-noir-02.jpg","assets/mode/produits/vt-nissah-noir/vt-nissah-noir-03.jpg","assets/mode/produits/vt-nissah-noir/vt-nissah-noir-04.jpg","assets/mode/produits/vt-nissah-noir/vt-nissah-noir-05.jpg","assets/mode/produits/vt-nissah-noir/vt-nissah-noir-06.jpg"],
+  "vt-nissah-vert": ["maison-rayeve-ensemble-nissah-mastoura-vert-sapin.jpg","assets/mode/produits/vt-nissah-vert/vt-nissah-vert-02.jpg","assets/mode/produits/vt-nissah-vert/vt-nissah-vert-03.jpg","assets/mode/produits/vt-nissah-vert/vt-nissah-vert-04.jpg","assets/mode/produits/vt-nissah-vert/vt-nissah-vert-05.jpg"],
+  "vt-nissah-violet": ["maison-rayeve-ensemble-nissah-mastoura-violet.jpg","assets/mode/produits/vt-nissah-violet/vt-nissah-violet-02.jpg","assets/mode/produits/vt-nissah-violet/vt-nissah-violet-03.jpg","assets/mode/produits/vt-nissah-violet/vt-nissah-violet-04.jpg","assets/mode/produits/vt-nissah-violet/vt-nissah-violet-05.jpg"],
+  "vt-nissah-kaki": ["maison-rayeve-ensemble-nissah-moustara-kaki.jpg","assets/mode/produits/vt-nissah-kaki/vt-nissah-kaki-02.jpg","assets/mode/produits/vt-nissah-kaki/vt-nissah-kaki-03.jpg","assets/mode/produits/vt-nissah-kaki/vt-nissah-kaki-04.jpg","assets/mode/produits/vt-nissah-kaki/vt-nissah-kaki-05.jpg"]
 };
 const getProductImages = id=>PRODUCT_IMAGES[id] || [];
 const getProductCardImage = id=>getProductImages(id)[0] || null;
@@ -1415,6 +1420,13 @@ function renderGrid(){
 }
 function setFilter(f){currentFilter=f;renderFilters();renderGrid();}
 function goCat(f){showHome();setFilter(f);setTimeout(()=>document.getElementById("boutique").scrollIntoView({behavior:"smooth"}),60);closeMenu();}
+function setProductGalleryImage(btn, src){
+  const img = document.getElementById("ppGalleryMain");
+  if(!img) return;
+  img.src = src;
+  btn.parentElement.querySelectorAll(".pp-thumb").forEach(x=>x.classList.remove("active"));
+  btn.classList.add("active");
+}
 
 /* ============ RENDER PRODUCT PAGE ============ */
 function showProduct(id){
@@ -1429,7 +1441,11 @@ function showProduct(id){
   const isConsumable = ["miels","gelules","poudres","huiles"].includes(p.cat);
   const isBrume = p.cat==="brumes";
   const isWear = p.cat==="qamis" || p.cat==="vetements";
-  const detailImg = getProductDetailImage(p.id);
+  const productImages = getProductImages(p.id);
+  const detailImg = productImages[0] || null;
+  const galleryThumbs = isWear && productImages.length > 1
+    ? `<div class="pp-thumbs">${productImages.map((img,i)=>`<button class="pp-thumb ${i===0?'active':''}" type="button" onclick="setProductGalleryImage(this,'${img}')"><img src="${img}" alt="${p.name}" loading="lazy"/></button>`).join("")}</div>`
+    : "";
 
   // Qualité panel (left) — varies slightly by type
   const qualite = isWear
@@ -1467,8 +1483,11 @@ function showProduct(id){
     </section>
 
     <div class="pp-body">
+      <div class="pp-gallery">
       <div class="pp-visual${detailImg ? ' has-photo' : ''}">
-        ${detailImg ? `<img src="${detailImg}" alt="${p.name}" class="pp-product-img"/>` : `${EMBLEMS[p.cat]}<div class="ribbon">Dar Nūr · دار النور</div>`}
+        ${detailImg ? `<img src="${detailImg}" alt="${p.name}" class="pp-product-img" id="ppGalleryMain"/>` : `${EMBLEMS[p.cat]}<div class="ribbon">Dar Nūr · دار النور</div>`}
+      </div>
+      ${galleryThumbs}
       </div>
       <div class="pp-content">
         ${p.desc.map(d=>`<p>${d}</p>`).join("")}
