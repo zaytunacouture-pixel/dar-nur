@@ -900,7 +900,7 @@ const PRODUCTS = [
    compo:"Poudre de Chardon-Marie (Silybum marianum)",prov:"Europe",
    uso:"1 à 2 gélules par jour.",price:fixed("14,99")},
 
-  {id:"gel-ashwaganda",cat:"gelules",name:"Gélules d'Ashwaganda",tagline:"La racine de l'équilibre, joyau de l'Ayurveda.",
+  {id:"gel-ashwaganda",cat:"gelules",name:"Gélules d'Ashwagandha",tagline:"La racine de l'équilibre, joyau de l'Ayurveda.",
    desc:["L'ashwagandha, plante adaptogène emblématique de la médecine ayurvédique, réputée pour aider le corps à faire face au stress du quotidien.","60 gélules végétales, sans additifs chimiques."],
    benefits:["Aide à gérer le stress","Soutient l'équilibre","Plante adaptogène","Gélules végétales"],
    compo:"Poudre d'Ashwagandha",prov:"Inde",
@@ -1317,10 +1317,10 @@ const PRODUCTS = [
    compo:"Ensemble Nissah Mastoura — couture artisanale",prov:"Maroc",
    uso:"Précisez votre taille lors de la commande.",price:fixed("59,99")},
 
-  {id:"vt-nissah-kaki",cat:"vetements",name:"Ensemble Nissah Moustara Kaki",tagline:"La sobriété naturelle du kaki.",
-   desc:["Un ensemble Nissah Moustara dans un kaki naturel et élégant, couvrant et confortable pour le quotidien.","Couture artisanale élaborée au Maroc, dans le respect du savoir-faire traditionnel."],
+  {id:"vt-nissah-kaki",cat:"vetements",name:"Ensemble Nissah Mastoura Kaki",tagline:"La sobriété naturelle du kaki.",
+   desc:["Un ensemble Nissah Mastoura dans un kaki naturel et élégant, couvrant et confortable pour le quotidien.","Couture artisanale élaborée au Maroc, dans le respect du savoir-faire traditionnel."],
    benefits:["Kaki naturel et sobre","Couvrant et pudique","Confortable au quotidien","Couture artisanale marocaine"],
-   compo:"Ensemble Nissah Moustara — couture artisanale",prov:"Maroc",
+   compo:"Ensemble Nissah Mastoura — couture artisanale",prov:"Maroc",
    uso:"Précisez votre taille lors de la commande.",price:fixed("59,99")}
 ];
 
@@ -1398,7 +1398,7 @@ const SUPPLIER_PATCHES = {
   "gel-valeriane": {compo:"100% poudre de Valériane (racine), gélules végétales, sans additifs chimiques",prov:"Europe",uso:"Prendre 2 à 3 gélules par jour avec un grand verre d'eau, de préférence le soir 30 minutes avant le coucher. Cure recommandée : 1 à 2 mois."},
   "gel-nigelle": {compo:"100% poudre de Nigelle (graines de cumin noir), gélules végétales, sans additifs chimiques",prov:"Éthiopie",uso:"Prendre 2 à 3 gélules par jour avec un grand verre d'eau, de préférence le matin ou avant les repas. Cure recommandée : 1 à 3 mois."},
   "gel-costus": {compo:"100% poudre de Costus Indien (feuilles et racines), gélules végétales, sans additifs chimiques",prov:"Inde",uso:"Prendre 2 à 3 gélules par jour avec un grand verre d'eau, de préférence le matin ou avant l'effort. Cure recommandée : 1 à 2 mois."},
-  "gel-ashwaganda": {name:"Gélules d'Ashwaganda",compo:"100% poudre d'Ashwaganda (racines), gélules végétales, sans additifs chimiques",prov:"Inde",uso:"Prendre 2 à 3 gélules par jour avec un grand verre d'eau, de préférence le matin ou avant l'effort. Cure recommandée : 1 à 2 mois."},
+  "gel-ashwaganda": {name:"Gélules d'Ashwagandha",compo:"100% poudre d'Ashwagandha (racines), gélules végétales, sans additifs chimiques",prov:"Inde",uso:"Prendre 2 à 3 gélules par jour avec un grand verre d'eau, de préférence le matin ou avant l'effort. Cure recommandée : 1 à 2 mois."},
   "gel-gingembre-curcuma": {compo:"100% poudre de gingembre et de curcuma, gélules végétales, sans additifs chimiques",prov:"Inde",uso:"Prendre 2 à 3 gélules par jour avec un grand verre d'eau, de préférence le matin ou avant les repas. Cure recommandée : 1 à 2 mois."},
   "gel-fenugrec": {compo:"100% poudre de Fenugrec (graines), gélules végétales, sans additifs chimiques",prov:"Inde",uso:"Prendre 2 à 3 gélules par jour avec un grand verre d'eau, de préférence le matin ou avant les repas. Cure recommandée : 1 à 2 mois."},
   "gel-spiruline": {compo:"100% poudre de Spiruline (Arthrospira platensis), gélules végétales, sans additifs chimiques",prov:"Chine",uso:"Prendre 2 à 3 gélules par jour avec un grand verre d'eau, de préférence le matin ou avant les repas. Cure recommandée : 1 à 2 mois."},
@@ -1475,6 +1475,22 @@ Téléphone :
 BarakAllahu fik.`;
   return WA + encodeURIComponent(t);
 }
+function waLinkWear(name, size){
+  const sizeText = size ? `Taille : ${size}` : `Taille : `;
+  const t = `As-salâm 'alaykoum, je souhaite commander :
+
+Produit : ${name}
+${sizeText}
+
+Nom :
+Adresse complète :
+Ville :
+Code postal :
+Téléphone :
+
+BarakAllahu fik.`;
+  return WA + encodeURIComponent(t);
+}
 
 /* ============ RENDER HOME ============ */
 function renderFilters(){
@@ -1492,7 +1508,7 @@ function renderGrid(){
       <h3>${p.name}</h3>
       <div class="price">${p.price.type==='format'?`<small>dès</small> ${p.price.options[0][1]}€`:`${startPrice(p)}€`}</div>
       <div class="card-actions">
-        <a class="btn-product-wa" href="${waLink(p.name, p.price.type==='format'?p.price.options[0][0]:'', startPrice(p))}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Commander sur WhatsApp</a>
+        <a class="btn-product-wa" href="${(p.cat==='qamis'||p.cat==='vetements') ? waLinkWear(p.name, p.price.type==='size'?p.price.options[0][0]:'') : waLink(p.name, p.price.type==='format'?p.price.options[0][0]:'', startPrice(p))}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Commander sur WhatsApp</a>
       </div>
     </div>`;
   }).join("");
@@ -1710,7 +1726,8 @@ function showProduct(id){
         ? ["Usage externe uniquement, éviter le contour des yeux","Produit artisanal : couleur et parfum peuvent varier selon les lots","À conserver dans un endroit sec et à l'abri de la lumière"]
         : ["Déconseillé aux femmes enceintes et allaitantes","Ne remplace pas un traitement médical","À conserver dans un endroit sec et à l'abri de la lumière"]));
 
-  const usageTitle = isWear ? "Le mot de la maison" : "Conseils d'usage";
+  const usageTitle = isWear ? "Informations de commande" : "Conseils d'usage";
+  const usageContent = isWear ? "Précisez votre taille lors de votre commande WhatsApp. La taille sera confirmée avec vous avant l'envoi." : p.uso;
   const productMeta = [
     ["Composition", p.compo],
     p.poids ? ["Poids", p.poids] : null,
@@ -1741,14 +1758,14 @@ function showProduct(id){
       </div>
       <div class="pp-content">
         ${p.desc.map(d=>`<p>${d}</p>`).join("")}
-        <h2>Bienfaits</h2>
+        <h2>${isWear ? 'Points forts' : 'Bienfaits'}</h2>
         <ul class="pp-benefits">${p.benefits.map(b=>`<li>${b}</li>`).join("")}</ul>
         <h2>Le produit</h2>
         <div class="pp-meta">
           ${productMeta.map(([k,v])=>`<div><div class="k">${k}</div><div class="v">${v}</div></div>`).join("")}
         </div>
         <h2>${usageTitle}</h2>
-        <p>${p.uso}</p>
+        <p>${usageContent}</p>
 
         <div class="dual-panel">
           <div class="panel">
@@ -1768,7 +1785,7 @@ function showProduct(id){
             </div>`:""}
           <div class="order-foot">
             <div class="order-price"><span id="ppPrice">${startPrice(p)}€</span>${p.price.type==='format'?`<small id="ppFmt">${p.price.options[0][0]}</small>`:(p.price.type==='size'?`<small id="ppFmt">Taille ${p.price.options[0][0]}</small>`:`<small>Livraison rapide</small>`)}</div>
-            <a class="btn-wa" id="ppBtn" href="${waLink(p.name, hasOptions?p.price.options[0][0]:'', startPrice(p))}" target="_blank" rel="noopener">
+            <a class="btn-wa" id="ppBtn" href="${isWear ? waLinkWear(p.name, hasOptions?p.price.options[0][0]:'') : waLink(p.name, hasOptions?p.price.options[0][0]:'', startPrice(p))}" target="_blank" rel="noopener">
               <svg viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.945C.16 5.335 5.495 0 12.05 0a11.82 11.82 0 018.413 3.488 11.82 11.82 0 013.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.86 9.86 0 001.512 5.26l-.999 3.648 3.985-1.607zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
               Commander
             </a>
@@ -1785,8 +1802,9 @@ function showProduct(id){
           <div class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/><path d="M12 3v2m0 14v2M21 12h-2M5 12H3M5.63 5.63l1.41 1.41M17 17l1.41 1.41M5.63 18.37l1.41-1.41M17 7l1.41-1.41"/></svg><span>Service client WhatsApp</span></div>
         </div>
         <div class="engage-quote">
-          <p>Un retour aux remèdes ancestraux, avec un savoir-faire authentique. Des produits choisis avec exigence, pour une qualité pure,</p>
-          <span class="signature">si Dieu le veut</span>
+          ${isWear
+            ? `<p>Des pièces sélectionnées avec soin, alliant élégance, pudeur et qualité de confection. Un choix exigeant, pour une garde-robe qui vous ressemble,</p><span class="signature">si Dieu le veut</span>`
+            : `<p>Un retour aux remèdes ancestraux, avec un savoir-faire authentique. Des produits choisis avec exigence, pour une qualité pure,</p><span class="signature">si Dieu le veut</span>`}
         </div>
       </div>
     </section>
@@ -1801,7 +1819,7 @@ function showProduct(id){
             <h3>${f.name}</h3>
             <div class="price">${f.price.type==='format'?`<small>dès</small> ${f.price.options[0][1]}€`:`${startPrice(f)}€`}</div>
             <div class="card-actions">
-              <a class="btn-product-wa" href="${waLink(f.name, f.price.type==='format'?f.price.options[0][0]:'', startPrice(f))}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Commander sur WhatsApp</a>
+              <a class="btn-product-wa" href="${(f.cat==='qamis'||f.cat==='vetements') ? waLinkWear(f.name, f.price.type==='size'?f.price.options[0][0]:'') : waLink(f.name, f.price.type==='format'?f.price.options[0][0]:'', startPrice(f))}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Commander sur WhatsApp</a>
             </div>
           </div>`}).join("")}
         </div>
@@ -1841,7 +1859,8 @@ function selectOption(i){
   document.getElementById("ppPrice").textContent=price+"€";
   const fmt=document.getElementById("ppFmt");
   if(fmt) fmt.textContent = p.price.type==='size'?`Taille ${opt}`:opt;
-  document.getElementById("ppBtn").href=waLink(p.name,opt,price);
+  const isWear = p.cat==="qamis"||p.cat==="vetements";
+  document.getElementById("ppBtn").href = isWear ? waLinkWear(p.name,opt) : waLink(p.name,opt,price);
   updateMobileBar();
 }
 
@@ -1851,7 +1870,8 @@ function updateMobileBar(){
   const price=hasOpt?p.price.options[activeOption][1]:p.price.value;
   const opt=hasOpt?p.price.options[activeOption][0]:"";
   document.getElementById("mbarPrice").textContent=price+"€";
-  document.getElementById("mbarBtn").href=waLink(p.name,opt,price);
+  const isWear = p.cat==="qamis"||p.cat==="vetements";
+  document.getElementById("mbarBtn").href = isWear ? waLinkWear(p.name,opt) : waLink(p.name,opt,price);
 }
 
 /* ============ NAV ============ */
