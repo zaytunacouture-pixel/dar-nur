@@ -887,6 +887,12 @@ const PRODUCTS = [
    compo:"Miel blanc naturel des hauts plateaux",prov:"Préparation artisanale",
    uso:"À tartiner ou à savourer à la cuillère.",price:honeyPrice("9,99","24,99","34,99")},
 
+  {id:"miel-cactus",cat:"miels",name:"Miel de Cactus",tagline:"Pureté et résistance dans un miel rare.",
+   desc:["Un miel rare et précieux, élaboré à partir des fleurs de cactus, réputées pour leurs bienfaits exceptionnels.","Riche en nutriments et antioxydants, il aide à renforcer l'organisme et à maintenir l'équilibre au quotidien."],
+   benefits:["Riche en antioxydants naturels","Renforce le système immunitaire","Aide à l'équilibre digestif","Soutient l'énergie et la vitalité"],
+   compo:"Miel pur, poudre de cactus, préparation artisanale",prov:"Préparé artisanalement par Rayève Naturals, inspiré des traditions naturelles et des savoirs ancestraux",
+   uso:"1 à 2 cuillères à café par jour, le matin à jeun ou en journée. Peut être consommé seul ou dilué dans une boisson tiède.",price:honeyPrice("9,99","24,99","34,99")},
+
   /* ---------- GÉLULES ---------- */
   {id:"gel-nigelle",cat:"gelules",name:"Gélules de Nigelle",tagline:"La graine bénie, à portée de main.",
    desc:["La nigelle (Nigella sativa) sous une forme pratique et dosée. Une manière simple d'intégrer cette graine traditionnelle à votre quotidien.","60 gélules végétales, sans additifs chimiques."],
@@ -1377,14 +1383,6 @@ const SUPPLIER_DEFAULTS = {
     precautions:["Usage externe uniquement, éviter le contour des yeux.","Produit artisanal : couleur, texture et intensité peuvent varier selon les lots.","À conserver à l'abri de la chaleur et de la lumière."]
   }
 };
-
-PRODUCTS.push(
-  {id:"miel-cactus",cat:"miels",name:"Miel de Cactus",tagline:"Pureté et résistance dans un miel rare.",
-   desc:["Un miel rare et précieux, élaboré à partir des fleurs de cactus, réputées pour leurs bienfaits exceptionnels.","Riche en nutriments et antioxydants, il aide à renforcer l'organisme et à maintenir l'équilibre au quotidien."],
-   benefits:["Riche en antioxydants naturels","Renforce le système immunitaire","Aide à l'équilibre digestif","Soutient l'énergie et la vitalité"],
-   compo:"Miel pur, poudre de cactus, préparation artisanale",prov:"Préparé artisanalement par Rayève Naturals, inspiré des traditions naturelles et des savoirs ancestraux",
-   uso:"1 à 2 cuillères à café par jour, le matin à jeun ou en journée. Peut être consommé seul ou dilué dans une boisson tiède.",price:honeyPrice("9,99","24,99","34,99")}
-);
 
 const SUPPLIER_PATCHES = {
   "br-sublimante": {
