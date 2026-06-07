@@ -224,6 +224,17 @@ Source de référence : `mockups/miel-nigelle-label-v4.html` + `mockups/logo-gol
 - **Filet doré unique**
 - **Structure générale** (disque, positions, espacements, tailles)
 
+## Règle de découpe des noms (validée — application gamme)
+
+Le nom suit la hiérarchie V4 (mot-héros à 74 px). Pour les noms longs :
+- conserver la taille héroïque **74 px** autant que possible ;
+- préférer le **passage du héros sur 2 lignes** plutôt qu'une réduction de taille ;
+- réduction de taille en **dernier recours** uniquement, minime (jamais sous ~58 px).
+
+Exemples validés : `GINGEMBRE / CURCUMA` · `HIBISCUS / NIGELLE ZAMZAM` · `COSTUS INDIEN / NIGELLE` · `BLANC DU / KIRGHIZISTAN`.
+
+Déclinaison des 14 miels (SVG vectoriels) : dossier `mockups/labels-v4/`.
+
 ---
 
 *Fin de la Charte Packaging Dar Nūr v1 — référence officielle figée.*

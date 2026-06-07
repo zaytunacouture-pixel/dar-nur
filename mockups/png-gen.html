@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+<meta charset="UTF-8"/>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>body{margin:0;background:#cfcabd;display:flex;flex-wrap:wrap;gap:8px;padding:10px;}canvas{width:150px;height:150px;background:#fff2;}</style>
+</head><body>
+<script>
+const P=[
+ {id:"miel-nigelle",minor:"MIEL DE",hero:["NIGELLE"],prov:"PRÉPARÉ EN FRANCE",bg:"#0d1f16",fg:"#f4efe4"},
+ {id:"miel-aphrodisiaque",minor:"MIEL",hero:["APHRODISIAQUE"],prov:"PRÉPARÉ EN FRANCE",bg:"#0d1f16",fg:"#f4efe4"},
+ {id:"miel-spiruline",minor:"MIEL",hero:["SPIRULINE"],prov:"PRÉPARÉ EN FRANCE",bg:"#0d1f16",fg:"#f4efe4"},
+ {id:"miel-gingembre-curcuma",minor:"MIEL",hero:["GINGEMBRE","CURCUMA"],prov:"PRÉPARÉ EN FRANCE",bg:"#0d1f16",fg:"#f4efe4"},
+ {id:"miel-hibiscus-zamzam",minor:"MIEL",hero:["HIBISCUS","NIGELLE ZAMZAM"],prov:"PRÉPARÉ EN FRANCE",bg:"#0d1f16",fg:"#f4efe4"},
+ {id:"miel-moringa-nigelle",minor:"MIEL",hero:["MORINGA","NIGELLE"],prov:"PRÉPARÉ EN FRANCE",bg:"#0d1f16",fg:"#f4efe4"},
+ {id:"miel-gingembre-fenugrec",minor:"MIEL",hero:["GINGEMBRE","FENUGREC"],prov:"PRÉPARÉ EN FRANCE",bg:"#0d1f16",fg:"#f4efe4"},
+ {id:"miel-aubepine",minor:"MIEL D'",hero:["AUBÉPINE"],prov:"PRÉPARÉ EN FRANCE",bg:"#0d1f16",fg:"#f4efe4"},
+ {id:"miel-costus-nigelle",minor:"MIEL",hero:["COSTUS INDIEN","NIGELLE"],prov:"PRÉPARÉ EN FRANCE",bg:"#0d1f16",fg:"#f4efe4"},
+ {id:"miel-sidr-jujubier",minor:"MIEL",hero:["SIDR DE","JUJUBIER"],prov:"PRÉPARÉ EN FRANCE",bg:"#0d1f16",fg:"#f4efe4"},
+ {id:"miel-rose-siberie",minor:"MIEL",hero:["ROSE DE","SIBÉRIE"],prov:"SÉLECTIONNÉ PAR DAR NŪR",bg:"#0d1f16",fg:"#f4efe4"},
+ {id:"miel-blanc-kirghizistan",minor:"MIEL",hero:["BLANC DU","KIRGHIZISTAN"],prov:"SÉLECTIONNÉ PAR DAR NŪR",bg:"#f4efe4",fg:"#0d1f16"},
+ {id:"miel-fraise-russie",minor:"MIEL DE",hero:["FRAISE"],prov:"SÉLECTIONNÉ PAR DAR NŪR",bg:"#0d1f16",fg:"#f4efe4"},
+ {id:"miel-shilajit",minor:"MIEL",hero:["NOIR DE","SHILAJIT"],prov:"SÉLECTIONNÉ PAR DAR NŪR",bg:"#0d1f16",fg:"#f4efe4"},
+];
+const logo=new Image(); logo.src="logo-gold.png";
+function draw(ctx,p){
+  ctx.clearRect(0,0,1000,1000);
+  ctx.beginPath();ctx.arc(500,500,500,0,7);ctx.closePath();ctx.fillStyle=p.bg;ctx.fill();
+  const g=ctx.createLinearGradient(0,0,0,1000);g.addColorStop(0,"#dcc079");g.addColorStop(.5,"#c8a84b");g.addColorStop(1,"#b9963c");
+  ctx.beginPath();ctx.arc(500,500,472,0,7);ctx.strokeStyle=g;ctx.lineWidth=2.5;ctx.globalAlpha=.92;ctx.stroke();ctx.globalAlpha=1;
+  ctx.drawImage(logo,369,92,262,262);
+  ctx.textAlign="center";ctx.textBaseline="alphabetic";ctx.fillStyle=p.fg;
+  const two=p.hero.length===2;
+  ctx.letterSpacing="5px";ctx.font="500 26px Cinzel";ctx.fillText(p.minor,500,two?502:506);
+  const ys= two?[564,632]:[590]; const sizes=[];
+  p.hero.forEach((line,k)=>{
+    let fs=74;ctx.letterSpacing="4.5px";ctx.font=`600 ${fs}px Cinzel`;
+    let w=ctx.measureText(line).width;
+    if(w>720){fs=Math.max(58,74*720/w);ctx.font=`600 ${fs.toFixed(1)}px Cinzel`;}
+    sizes.push(Math.round(fs)); ctx.fillText(line,500,ys[k]);
+  });
+  ctx.letterSpacing="4px";ctx.font="500 20px Cinzel";ctx.fillText(p.prov,500,720);
+  ctx.letterSpacing="4.5px";ctx.font="500 26px Cinzel";ctx.fillText("200 g",500,772);
+  return sizes;
+}
+window.__assets={}; window.__meta=[]; window.__ids=P.map(p=>p.id);
+window.__render=async function(){
+  await document.fonts.ready; await new Promise(r=>setTimeout(r,200));
+  if(!logo.complete) await new Promise(r=>{logo.onload=r;});
+  await new Promise(r=>setTimeout(r,150));
+  for(const p of P){
+    const c=document.createElement('canvas');c.width=1000;c.height=1000;
+    const ctx=c.getContext('2d');
+    const sizes=draw(ctx,p);
+    document.body.appendChild(c);
+    const url=c.toDataURL('image/png');
+    window.__assets[p.id]=url;
+    window.__meta.push({id:p.id, hero:p.hero, sizes, bytesB64:url.length-22});
+  }
+  return window.__meta.map(m=>({id:m.id, sizes:m.sizes.join('/'), kb:Math.round(m.bytesB64*0.75/1024)}));
+};
+window.addEventListener('load', async()=>{
+  try{ await window.__render(); }catch(e){}
+  const b=document.createElement('button');
+  b.textContent='⬇ Télécharger les 14 PNG (1000 px)';
+  b.style='position:fixed;top:10px;right:10px;z-index:9;padding:12px 16px;font:600 14px sans-serif;cursor:pointer;background:#0d1f16;color:#f4efe4;border:1px solid #c8a84b;border-radius:6px;';
+  b.onclick=async()=>{ for(const id of window.__ids){ const a=document.createElement('a'); a.href=window.__assets[id]; a.download=id+'.png'; document.body.appendChild(a); a.click(); a.remove(); await new Promise(r=>setTimeout(r,350)); } };
+  document.body.appendChild(b);
+});
+</script>
+</body></html>
