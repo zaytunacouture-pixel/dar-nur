@@ -177,4 +177,53 @@ ingrédients, quantité nette, DDM, n° de lot, **nom + adresse de Dar Nūr**
 
 ---
 
+# PILOTE OFFICIEL VALIDÉ — Miel de Nigelle (V4)
+
+> **Version FIGÉE. Référence visuelle officielle Dar Nūr pour les miels.**
+> Validée le 2026-06-07. Les explorations graphiques sur ce pilote sont closes
+> (plus de variantes V5, V6…). Logo, hiérarchie, tailles, espacements, couleurs
+> et polices ne sont plus modifiés.
+
+## Valeurs verrouillées (gabarit Ø 1000 px)
+
+| Élément | Valeur figée |
+|---|---|
+| Disque | Ø 1000 px |
+| Fond | `#0d1f16` (vert maison, mat) |
+| Filet doré | **unique** · rayon 472 · or `#dcc079 → #c8a84b → #b9963c` · 1,5 px (impression) |
+| Logo officiel (foil or) | `logo-gold.png` · **x 369 · y 92 · 262 × 262** |
+| MIEL DE | **y 506** · Cinzel 500 · 26 px · interlettre 5 · crème `#f4efe4` |
+| NIGELLE | **y 590 · 74 px** · Cinzel 600 · interlettre 4,5 · crème `#f4efe4` |
+| PRÉPARÉ EN FRANCE | **y 720** · Cinzel 500 · 20 px · interlettre 4 · crème `#f4efe4` |
+| 200 g | **y 772** · Cinzel 500 · 26 px · interlettre 4,5 · crème `#f4efe4` |
+
+**Hiérarchie figée :** ① NIGELLE (héros absolu) · ② Logo Dar Nūr · ③ Provenance + poids.
+
+**Logo en dorure foil :** le logo officiel est appliqué en **or monochrome (foil)** —
+déclinaison sombre canonique : aucun élément retiré, aucune forme redessinée,
+proportions exactes ; seule la couleur est unifiée au ton or du sceau.
+
+Source de référence : `mockups/miel-nigelle-label-v4.html` + `mockups/logo-gold.png`.
+
+## Principe de normalisation
+
+> **« Toute nouvelle étiquette Dar Nūr devra être une déclinaison de cette
+> architecture et non une nouvelle création. »**
+
+## Éléments VARIABLES (par produit)
+
+- **Nom du produit**
+- **Provenance** (« PRÉPARÉ EN FRANCE » / « SÉLECTIONNÉ PAR DAR NŪR »)
+- **Couleur de fond** *si nécessaire* (vert maison `#0d1f16` par défaut · ivoire `#f4efe4` pour les miels « Blanc »)
+
+## Éléments FIXES (jamais modifiés)
+
+- **Logo** (officiel, foil or — taille et position figées)
+- **Hiérarchie** (① produit · ② logo · ③ faits)
+- **Typographie** (Cinzel + texte crème, or réservé au logo/filet)
+- **Filet doré unique**
+- **Structure générale** (disque, positions, espacements, tailles)
+
+---
+
 *Fin de la Charte Packaging Dar Nūr v1 — référence officielle figée.*
