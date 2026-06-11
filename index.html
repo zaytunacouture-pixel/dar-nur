@@ -1843,7 +1843,7 @@ function showProduct(id){
   const isWear = p.cat==="qamis" || p.cat==="vetements";
   const productImages = getProductImages(p.id);
   const detailImg = productImages[0] || null;
-  const galleryThumbs = isWear && productImages.length > 1
+  const galleryThumbs = productImages.length > 1
     ? `<div class="pp-thumbs">${productImages.map((img,i)=>`<button class="pp-thumb ${i===0?'active':''}" type="button" onclick="setProductGalleryImage(this,'${img}')"><img src="${img}" alt="${p.name}" loading="lazy"/></button>`).join("")}</div>`
     : "";
 
