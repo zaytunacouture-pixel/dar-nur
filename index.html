@@ -811,7 +811,7 @@ const PRODUCT_IMAGES = {
   "miel-spiruline": ["assets/produits-ia/miel-spiruline/miel-spiruline-1.webp"],
   "miel-gingembre-curcuma": ["assets/produits-ia/miel-gingembre-curcuma/miel-gingembre-curcuma-1.webp","assets/produits-ia/miel-gingembre-curcuma/miel-gingembre-curcuma-2.webp"],
   "miel-hibiscus-zamzam": ["assets/produits-ia/miel-hibiscus-zamzam/miel-hibiscus-zamzam-1.webp","assets/produits-ia/miel-hibiscus-zamzam/miel-hibiscus-zamzam-2.webp"],
-  "miel-moringa-nigelle": ["assets/produits-ia/miel-moringa-nigelle/miel-moringa-nigelle-2.webp"],
+  "miel-moringa-nigelle": ["assets/produits-ia/miel-moringa-nigelle/miel-moringa-nigelle-1.webp","assets/produits-ia/miel-moringa-nigelle/miel-moringa-nigelle-2.webp"],
   "miel-gingembre-fenugrec": ["assets/produits-ia/miel-gingembre-fenugrec/miel-gingembre-fenugrec-2.webp"],
   "miel-aubepine": ["assets/produits-ia/miel-aubepine/miel-aubepine-1.webp","assets/produits-ia/miel-aubepine/miel-aubepine-2.webp"],
   "miel-costus-nigelle": ["assets/produits-ia/miel-costus-nigelle/miel-costus-nigelle-2.webp"],
@@ -900,6 +900,26 @@ const PRODUCT_IMAGES = {
 const getProductImages = id=>PRODUCT_IMAGES[id] || [];
 const getProductCardImage = id=>getProductImages(id)[0] || null;
 const getProductDetailImage = id=>getProductImages(id)[1] || getProductImages(id)[0] || null;
+
+// Pour les miels : image principale liée au format choisi (50 g / 200 g / 300 g).
+// Si un format n'a pas d'image dédiée, l'image principale ne change pas (fallback).
+const PRODUCT_FORMAT_IMAGES = {
+  "miel-nigelle": {"50 g":"assets/produits-ia/miel-nigelle/miel-nigelle-2.webp","200 g":"assets/produits-ia/miel-nigelle/miel-nigelle-1.webp"},
+  "miel-aphrodisiaque": {"50 g":"assets/produits-ia/miel-aphrodisiaque/miel-aphrodisiaque-2.webp","200 g":"assets/produits-ia/miel-aphrodisiaque/miel-aphrodisiaque-1.webp"},
+  "miel-rose-siberie": {"50 g":"assets/produits-ia/miel-rose-siberie/miel-rose-siberie-2.webp"},
+  "miel-spiruline": {"50 g":"assets/produits-ia/miel-spiruline/miel-spiruline-1.webp"},
+  "miel-gingembre-curcuma": {"50 g":"assets/produits-ia/miel-gingembre-curcuma/miel-gingembre-curcuma-2.webp","200 g":"assets/produits-ia/miel-gingembre-curcuma/miel-gingembre-curcuma-1.webp"},
+  "miel-hibiscus-zamzam": {"50 g":"assets/produits-ia/miel-hibiscus-zamzam/miel-hibiscus-zamzam-2.webp","200 g":"assets/produits-ia/miel-hibiscus-zamzam/miel-hibiscus-zamzam-1.webp"},
+  "miel-moringa-nigelle": {"50 g":"assets/produits-ia/miel-moringa-nigelle/miel-moringa-nigelle-2.webp","200 g":"assets/produits-ia/miel-moringa-nigelle/miel-moringa-nigelle-1.webp"},
+  "miel-gingembre-fenugrec": {"50 g":"assets/produits-ia/miel-gingembre-fenugrec/miel-gingembre-fenugrec-2.webp"},
+  "miel-aubepine": {"50 g":"assets/produits-ia/miel-aubepine/miel-aubepine-2.webp","200 g":"assets/produits-ia/miel-aubepine/miel-aubepine-1.webp"},
+  "miel-costus-nigelle": {"50 g":"assets/produits-ia/miel-costus-nigelle/miel-costus-nigelle-2.webp"},
+  "miel-sidr-jujubier": {"50 g":"assets/produits-ia/miel-sidr-jujubier/miel-sidr-jujubier-2.webp","200 g":"assets/produits-ia/miel-sidr-jujubier/miel-sidr-jujubier-1.webp"},
+  "miel-fraise-russie": {"50 g":"assets/produits-ia/miel-fraise-russie/miel-fraise-russie-2.webp"},
+  "miel-shilajit": {"200 g":"assets/produits-ia/miel-shilajit/miel-shilajit-1.webp"},
+  "miel-blanc-kirghizistan": {"50 g":"assets/produits-ia/miel-blanc-kirghizistan/miel-blanc-kirghizistan-2.webp","200 g":"assets/produits-ia/miel-blanc-kirghizistan/miel-blanc-kirghizistan-1.webp"},
+  "miel-cactus": {"50 g":"assets/produits-ia/miel-cactus/miel-cactus-1.webp"}
+};
 
 /* ============ PRODUCTS ============ */
 const PRODUCTS = [
@@ -1842,9 +1862,12 @@ function showProduct(id){
   const isBrume = p.cat==="brumes";
   const isWear = p.cat==="qamis" || p.cat==="vetements";
   const productImages = getProductImages(p.id);
-  const detailImg = productImages[0] || null;
+  const formatImages = PRODUCT_FORMAT_IMAGES[p.id];
+  const initialFormatImg = (formatImages && hasOptions) ? formatImages[p.price.options[0][0]] : null;
+  const detailImg = initialFormatImg || productImages[0] || null;
+  const activeImgIdx = Math.max(0, productImages.indexOf(detailImg));
   const galleryThumbs = productImages.length > 1
-    ? `<div class="pp-thumbs">${productImages.map((img,i)=>`<button class="pp-thumb ${i===0?'active':''}" type="button" onclick="setProductGalleryImage(this,'${img}')"><img src="${img}" alt="${p.name}" loading="lazy"/></button>`).join("")}</div>`
+    ? `<div class="pp-thumbs">${productImages.map((img,i)=>`<button class="pp-thumb ${i===activeImgIdx?'active':''}" type="button" onclick="setProductGalleryImage(this,'${img}')"><img src="${img}" alt="${p.name}" loading="lazy"/></button>`).join("")}</div>`
     : "";
 
   // Qualité panel (left) — varies slightly by type
@@ -1996,7 +2019,23 @@ function selectOption(i){
   const fmt=document.getElementById("ppFmt");
   if(fmt) fmt.textContent = p.price.type==='size'?`Taille ${opt}`:opt;
   document.getElementById("ppBtn").href = waLink(p, opt, price);
+  updateFormatImage(p, opt);
   updateMobileBar();
+}
+
+// Change l'image principale pour qu'elle corresponde au format sélectionné.
+// Si aucune image n'existe pour ce format, l'image actuelle est conservée.
+function updateFormatImage(p, formatLabel){
+  const map = PRODUCT_FORMAT_IMAGES[p.id];
+  if(!map) return;
+  const src = map[formatLabel];
+  if(!src) return;
+  const main = document.getElementById("ppGalleryMain");
+  if(main) main.src = src;
+  document.querySelectorAll(".pp-thumb").forEach(t=>{
+    const img = t.querySelector("img");
+    t.classList.toggle("active", !!img && img.getAttribute("src")===src);
+  });
 }
 
 function updateMobileBar(){
