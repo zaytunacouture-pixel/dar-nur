@@ -315,7 +315,7 @@ section{padding:90px 28px}
   background:var(--cream);border:1px solid var(--gold);border-radius:6px;
   padding:30px;margin-top:40px;box-shadow:var(--shadow);
 }
-.order-box .label{font-family:'Cinzel';font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.order-box .label,.pp-format-select .label{font-family:'Cinzel';font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
 .opt-row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:22px}
 .opt{
   font-family:'Cinzel';font-size:.74rem;letter-spacing:.06em;
@@ -422,6 +422,8 @@ footer{background:#0a160f;color:var(--cream);padding:46px 28px 26px}
 .pp-visual.has-photo{padding:18px;background:#f6f0e3}
 .pp-product-img{width:100%;height:100%;object-fit:contain;border-radius:4px}
 .pp-gallery{display:grid;gap:12px}
+.pp-format-select{background:var(--cream);border:1px solid var(--line);border-radius:6px;padding:18px}
+.pp-format-select .opt-row{margin-bottom:0}
 .pp-thumbs{display:grid;grid-template-columns:repeat(auto-fit,minmax(64px,1fr));gap:10px}
 .pp-thumb{aspect-ratio:1;border:1px solid var(--line);border-radius:4px;background:#f6f0e3;padding:4px;cursor:pointer}
 .pp-thumb img{width:100%;height:100%;object-fit:cover;border-radius:3px;display:block}
@@ -457,7 +459,6 @@ footer{background:#0a160f;color:var(--cream);padding:46px 28px 26px}
   .mbar{display:flex}
   .pp-body{padding:48px 22px 30px}
   #productView.active .order-box{display:none} /* use mobile bar instead */
-  .pp-thumbs{display:none}
 }
 @media(max-width:480px){
   .hero h1{font-size:1.85rem}
@@ -1867,7 +1868,7 @@ function showProduct(id){
   const initialFormatImg = (formatImages && hasOptions) ? formatImages[p.price.options[0][0]] : null;
   const detailImg = initialFormatImg || productImages[0] || null;
   const activeImgIdx = Math.max(0, productImages.indexOf(detailImg));
-  const galleryThumbs = productImages.length > 1
+  const galleryThumbs = (isWear && productImages.length > 1)
     ? `<div class="pp-thumbs">${productImages.map((img,i)=>`<button class="pp-thumb ${i===activeImgIdx?'active':''}" type="button" onclick="setProductGalleryImage(this,'${img}')"><img src="${img}" alt="${p.name}" loading="lazy"/></button>`).join("")}</div>`
     : "";
 
@@ -1915,6 +1916,12 @@ function showProduct(id){
         ${detailImg ? `<img src="${detailImg}" alt="${p.name}" class="pp-product-img" id="ppGalleryMain"/>` : `<img src="logo-dar-nur.png" alt="Dar Nūr" class="pp-logo-ph"/><div class="ribbon">Dar Nūr · دار النور</div>`}
       </div>
       ${galleryThumbs}
+      ${(!isWear && hasOptions)?`<div class="pp-format-select">
+        <div class="label">${optLabel}</div>
+        <div class="opt-row" id="optRow">
+          ${p.price.options.map((o,i)=>`<button class="opt ${i===0?'sel':''}" onclick="selectOption(${i})">${o[0]}</button>`).join("")}
+        </div>
+      </div>`:""}
       </div>
       <div class="pp-content">
         ${p.desc.map(d=>`<p>${d}</p>`).join("")}
@@ -1939,7 +1946,7 @@ function showProduct(id){
         </div>
 
         <div class="order-box">
-          ${hasOptions?`<div class="label">${optLabel}</div>
+          ${(isWear && hasOptions)?`<div class="label">${optLabel}</div>
             <div class="opt-row" id="optRow">
               ${p.price.options.map((o,i)=>`<button class="opt ${i===0?'sel':''}" onclick="selectOption(${i})">${o[0]}</button>`).join("")}
             </div>`:""}
