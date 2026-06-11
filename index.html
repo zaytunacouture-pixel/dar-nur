@@ -1878,7 +1878,7 @@ function showProduct(id){
   const initialFormatImg = (formatImages && hasOptions) ? formatImages[p.price.options[0][0]] : null;
   const detailImg = initialFormatImg || productImages[0] || null;
   const activeImgIdx = Math.max(0, productImages.indexOf(detailImg));
-  const galleryThumbs = (isWear && productImages.length > 1)
+  const galleryThumbs = ((isWear || isBrume) && productImages.length > 1)
     ? `<div class="pp-thumbs">${productImages.map((img,i)=>`<button class="pp-thumb ${i===activeImgIdx?'active':''}" type="button" onclick="setProductGalleryImage(this,'${img}')"><img src="${img}" alt="${p.name}" loading="lazy"/></button>`).join("")}</div>`
     : "";
 
