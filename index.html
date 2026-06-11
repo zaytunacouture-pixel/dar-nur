@@ -140,6 +140,35 @@ nav{
 .burger{display:none;flex-direction:column;gap:5px;padding:8px}
 .burger span{width:24px;height:2px;background:var(--gold);transition:.3s}
 
+/* ============ DROPDOWNS ============ */
+.nav-dropdown{position:relative;display:flex;align-items:center}
+.nav-dropdown-toggle{display:flex;align-items:center;gap:6px;cursor:pointer}
+.dropdown-arrow{font-size:.6rem;transition:transform .25s;display:inline-block}
+.nav-dropdown-toggle:hover .dropdown-arrow{color:var(--gold)}
+.nav-dropdown-menu{
+  position:absolute;top:calc(100% + 12px);left:0;
+  display:none;flex-direction:column;gap:0;
+  background:rgba(13,31,22,.98);border:1px solid rgba(200,168,75,.22);border-radius:2px;
+  backdrop-filter:blur(8px);min-width:180px;box-shadow:0 12px 32px -12px rgba(0,0,0,.4);
+  padding:12px 0;z-index:101;
+}
+.nav-dropdown-menu.active{display:flex}
+.nav-dropdown:hover > .nav-dropdown-menu{display:flex}
+.nav-dropdown-menu a{
+  padding:12px 20px;font-size:.72rem;border:none;
+  color:var(--cream);opacity:.8;transition:all .2s;
+  border-left:3px solid transparent;
+}
+.nav-dropdown-menu a:hover{opacity:1;color:var(--gold);border-left-color:var(--gold);background:rgba(200,168,75,.06)}
+@media(max-width:768px){
+  .nav-dropdown:hover > .nav-dropdown-menu{display:none}
+  .nav-dropdown-menu{position:static;background:rgba(200,168,75,.08);border:none;box-shadow:none;backdrop-filter:none;min-width:auto;padding:0;margin-top:8px;border-left:3px solid rgba(200,168,75,.22);display:none}
+  .nav-dropdown-menu.active{display:flex}
+  .nav-dropdown-menu a{padding:10px 0 10px 16px;border-left:none;background:none}
+  .nav-dropdown-menu a:hover{background:none;border-left:none;opacity:1}
+  .nav-dropdown-toggle .dropdown-arrow{display:inline-block;transition:transform .25s}
+}
+
 /* ============ HERO ============ */
 .hero{
   position:relative;
@@ -498,10 +527,27 @@ footer{background:#0a160f;color:var(--cream);padding:46px 28px 26px}
     </div>
     <div class="nav-links" id="navLinks">
       <a onclick="goCat('all')">Boutique</a>
-      <a onclick="goCat('miels')">Miels</a>
-      <a onclick="goCat('huiles')">Huiles</a>
-      <a onclick="goCat('vetements')">Mode</a>
-      <a onclick="showHome();setTimeout(()=>document.getElementById('histoire').scrollIntoView({behavior:'smooth'}),60)">Notre histoire</a>
+
+      <div class="nav-dropdown">
+        <a class="nav-dropdown-toggle" onclick="toggleDropdown(event, 'well-being')">Bien-être<span class="dropdown-arrow">▾</span></a>
+        <div class="nav-dropdown-menu" id="well-being">
+          <a onclick="goCat('miels');closeDropdowns()">Miels</a>
+          <a onclick="goCat('gelules');closeDropdowns()">Gélules</a>
+          <a onclick="goCat('poudres');closeDropdowns()">Poudres &amp; Graines</a>
+          <a onclick="goCat('huiles');closeDropdowns()">Huiles</a>
+          <a onclick="goCat('brumes');closeDropdowns()">Brumes</a>
+        </div>
+      </div>
+
+      <div class="nav-dropdown">
+        <a class="nav-dropdown-toggle" onclick="toggleDropdown(event, 'mode')">Mode<span class="dropdown-arrow">▾</span></a>
+        <div class="nav-dropdown-menu" id="mode">
+          <a onclick="goCat('qamis');closeDropdowns()">Qamis</a>
+          <a onclick="goCat('vetements');closeDropdowns()">Abayas</a>
+        </div>
+      </div>
+
+      <a onclick="showHome();setTimeout(()=>document.getElementById('histoire').scrollIntoView({behavior:'smooth'}),60);closeDropdowns()">Notre histoire</a>
     </div>
     <button class="burger" id="burger" onclick="toggleMenu()" aria-label="Menu"><span></span><span></span><span></span></button>
   </nav>
@@ -2080,6 +2126,17 @@ function showHome(){
 function toggleMenu(){
   document.getElementById("navLinks").classList.toggle("open");
   document.getElementById("burger").classList.toggle("x");
+}
+function toggleDropdown(event, dropdownId){
+  event.preventDefault();
+  const dropdown = document.getElementById(dropdownId);
+  const isDesktop = window.innerWidth > 768;
+  if(isDesktop){return;}
+  dropdown.classList.toggle("active");
+  event.currentTarget.querySelector(".dropdown-arrow").style.transform = dropdown.classList.contains("active") ? "rotate(0deg)" : "rotate(180deg)";
+}
+function closeDropdowns(){
+  document.querySelectorAll(".nav-dropdown-menu.active").forEach(d => d.classList.remove("active"));
 }
 function closeMenu(){
   document.getElementById("navLinks").classList.remove("open");
