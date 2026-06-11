@@ -423,7 +423,8 @@ footer{background:#0a160f;color:var(--cream);padding:46px 28px 26px}
 .pp-product-img{width:100%;height:100%;object-fit:contain;border-radius:4px}
 .pp-gallery{display:grid;gap:12px}
 .pp-format-select{background:var(--cream);border:1px solid var(--line);border-radius:6px;padding:18px}
-.pp-format-select .opt-row{margin-bottom:0}
+.pp-format-select .opt-row{margin-bottom:14px}
+.format-price{font-family:'Cormorant Garamond';font-size:1.8rem;color:var(--green);font-weight:600}
 .pp-thumbs{display:grid;grid-template-columns:repeat(auto-fit,minmax(64px,1fr));gap:10px}
 .pp-thumb{aspect-ratio:1;border:1px solid var(--line);border-radius:4px;background:#f6f0e3;padding:4px;cursor:pointer}
 .pp-thumb img{width:100%;height:100%;object-fit:cover;border-radius:3px;display:block}
@@ -434,7 +435,7 @@ footer{background:#0a160f;color:var(--cream);padding:46px 28px 26px}
   .grid,.family .grid{grid-template-columns:repeat(3,1fr)}
   .family .grid[style*="grid-template-columns:repeat(3"]{grid-template-columns:repeat(2,1fr)!important}
   .pp-body{grid-template-columns:1fr;gap:36px}
-  .pp-visual{position:static;aspect-ratio:auto;padding:38px;max-width:420px;margin:0 auto}
+  .pp-visual{position:static;aspect-ratio:1;padding:38px;max-width:420px;margin:0 auto}
 }
 @media(max-width:768px){
   .nav-links{
@@ -1921,6 +1922,7 @@ function showProduct(id){
         <div class="opt-row" id="optRow">
           ${p.price.options.map((o,i)=>`<button class="opt ${i===0?'sel':''}" onclick="selectOption(${i})">${o[0]}</button>`).join("")}
         </div>
+        <div class="format-price"><span id="ppFormatPrice">${p.price.options[0][1]}€</span></div>
       </div>`:""}
       </div>
       <div class="pp-content">
@@ -2026,6 +2028,8 @@ function selectOption(i){
   document.getElementById("ppPrice").textContent=price+"€";
   const fmt=document.getElementById("ppFmt");
   if(fmt) fmt.textContent = p.price.type==='size'?`Taille ${opt}`:opt;
+  const formatPrice=document.getElementById("ppFormatPrice");
+  if(formatPrice) formatPrice.textContent = price+"€";
   document.getElementById("ppBtn").href = waLink(p, opt, price);
   updateFormatImage(p, opt);
   updateMobileBar();
