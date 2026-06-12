@@ -2,15 +2,121 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Politique de confidentialité - Dar Nûr</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Politique de confidentialité - Dar Nūr</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Lora:wght@400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --green: #0d1f16;
+  --gold: #c8a84b;
+  --cream: #f4efe4;
+  --ink: #1a1a1a;
+  --muted: #6b6256;
+  --line: rgba(200,168,75,.28);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; overflow-x: hidden; }
+body {
+  font-family: 'Lora', Georgia, serif;
+  background: var(--cream);
+  color: var(--ink);
+  line-height: 1.6;
+}
+header {
+  background: #fff;
+  border-bottom: 1px solid var(--line);
+  padding: 16px 28px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+header a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--green);
+  text-decoration: none;
+  font-family: 'Cinzel', serif;
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition: color 0.25s;
+}
+header a:hover {
+  color: var(--gold);
+}
+main {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 60px 28px;
+}
+h1 {
+  font-family: 'Cinzel', serif;
+  font-size: 2rem;
+  color: var(--green);
+  margin-bottom: 40px;
+  letter-spacing: 0.08em;
+}
+p {
+  margin-bottom: 24px;
+  color: #3a3a3a;
+}
+p strong {
+  color: var(--green);
+  font-weight: 600;
+}
+a:not(header a) {
+  color: var(--gold);
+  text-decoration: none;
+}
+a:not(header a):hover {
+  text-decoration: underline;
+}
+@media (max-width: 768px) {
+  header { padding: 12px 22px; }
+  main { padding: 40px 22px; }
+  h1 { font-size: 1.5rem; margin-bottom: 30px; }
+}
+/* ============ FOOTER ============ */
+footer{background:#0a160f;color:var(--cream);padding:46px 28px 26px}
+.foot-grid{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:30px;align-items:start}
+.foot-brand .name{font-family:'Cinzel';font-size:1.6rem;letter-spacing:.16em;color:var(--cream)}
+.foot-brand .ar{font-family:'Cormorant Garamond';font-size:1.7rem;color:var(--gold);margin-top:4px}
+.footer-logo-img{width:92px;height:auto;border-radius:6px;border:1px solid rgba(200,168,75,.22);margin-bottom:16px;opacity:.94}
+.foot-brand p{font-family:'Cormorant Garamond';font-style:italic;color:rgba(244,239,228,.7);margin-top:10px;max-width:280px;display:none}
+.foot-col h4{font-family:'Cinzel';font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
+.foot-col a{display:block;color:rgba(244,239,228,.82);font-size:.92rem;margin-bottom:7px;transition:color .2s;text-decoration:none}
+.foot-col a:hover{color:var(--gold);text-decoration:underline}
+.footer-trust{max-width:1100px;margin:26px auto 0;padding-top:18px;border-top:1px solid rgba(200,168,75,.18);display:flex;flex-wrap:wrap;gap:10px 22px;justify-content:center}
+.footer-trust span{font-family:'Cinzel';font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(244,239,228,.72)}
+.foot-bottom{max-width:1100px;margin:28px auto 0;padding-top:16px;border-top:1px solid rgba(200,168,75,.18);text-align:center;font-size:.78rem;color:rgba(244,239,228,.5);letter-spacing:.04em}
+@media(max-width:768px){
+  footer{padding:28px 22px 18px}
+  .foot-grid{grid-template-columns:1fr;gap:18px}
+  .foot-brand .name{font-size:1.3rem}
+  .foot-brand .ar{font-size:1.4rem}
+  .footer-logo-img{width:72px;margin-bottom:12px}
+  .foot-col h4{font-size:.66rem;margin-bottom:10px}
+  .foot-col a{font-size:.86rem;margin-bottom:5px}
+  .footer-trust{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;margin-top:14px;padding-top:14px}
+  .footer-trust span{font-size:.62rem}
+}
+</style>
 </head>
 
 <body>
 
+<header>
+  <a href="index.html">← Retour à Dar Nūr</a>
+</header>
+
+<main>
 <h1>Politique de confidentialité</h1>
 
 <p>
-Dar Nûr respecte la confidentialité des données personnelles de ses visiteurs.
+Dar Nūr respecte la confidentialité des données personnelles de ses visiteurs.
 </p>
 
 <p>
@@ -26,6 +132,33 @@ Aucune donnée personnelle n'est vendue ou cédée à des tiers.
 Pour toute question concernant vos données personnelles :
 dar_nur_001@outlook.com
 </p>
+</main>
+
+<footer>
+  <div class="foot-grid">
+    <div class="foot-brand">
+      <img src="logo-dar-nur.png" alt="Logo Dar Nūr" class="footer-logo-img"/>
+      <div class="name">DAR NŪR</div>
+      <div class="ar">دار النور</div>
+    </div>
+    <div class="foot-col">
+      <h4>Contact</h4>
+      <a href="https://wa.me/33749890322" target="_blank" rel="noopener">WhatsApp · 07 49 89 03 22</a>
+      <a href="mailto:dar_nur_001@outlook.com">dar_nur_001@outlook.com</a>
+    </div>
+    <div class="foot-col">
+      <h4>Informations</h4>
+      <a href="mentions-legales.html">Mentions légales</a>
+      <a href="confidentialite.html">Politique de confidentialité</a>
+      <a href="cgv.html">Conditions générales de vente</a>
+    </div>
+  </div>
+  <div class="footer-trust">
+    <span>Service client WhatsApp</span>
+    <span>Paiement sécurisé</span>
+  </div>
+  <div class="foot-bottom">© 2026 Dar Nūr — Tous droits réservés</div>
+</footer>
 
 </body>
 </html>
