@@ -167,6 +167,7 @@ nav{
   .nav-dropdown-menu a{padding:10px 0 10px 16px;border-left:none;background:none}
   .nav-dropdown-menu a:hover{background:none;border-left:none;opacity:1}
   .nav-dropdown-toggle .dropdown-arrow{display:inline-block;transition:transform .25s}
+  body.menu-open::after{content:"";position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.4);z-index:95;transition:opacity .35s}
 }
 
 /* ============ HERO ============ */
@@ -470,7 +471,7 @@ footer{background:#0a160f;color:var(--cream);padding:46px 28px 26px}
   .nav-links{
     position:fixed;top:69px;right:0;width:74%;max-width:320px;height:calc(100vh - 69px);
     background:var(--green);flex-direction:column;align-items:flex-start;gap:0;
-    padding:30px 32px;transform:translateX(100%);transition:transform .35s;border-left:1px solid rgba(200,168,75,.2);
+    padding:30px 32px;transform:translateX(100%);transition:transform .35s;border-left:1px solid rgba(200,168,75,.2);z-index:96;
   }
   .nav-links.open{transform:translateX(0)}
   .nav-links a{padding:16px 0;width:100%;border-bottom:1px solid rgba(200,168,75,.12);font-size:.82rem}
@@ -2126,6 +2127,7 @@ function showHome(){
 function toggleMenu(){
   document.getElementById("navLinks").classList.toggle("open");
   document.getElementById("burger").classList.toggle("x");
+  document.body.classList.toggle("menu-open");
 }
 function toggleDropdown(event, dropdownId){
   event.preventDefault();
@@ -2141,7 +2143,16 @@ function closeDropdowns(){
 function closeMenu(){
   document.getElementById("navLinks").classList.remove("open");
   document.getElementById("burger").classList.remove("x");
+  document.body.classList.remove("menu-open");
 }
+/* Close menu on backdrop click */
+document.addEventListener("click",function(e){
+  const navLinks=document.getElementById("navLinks");
+  const burger=document.getElementById("burger");
+  if(navLinks.classList.contains("open") && !navLinks.contains(e.target) && !burger.contains(e.target)){
+    closeMenu();
+  }
+});
 
 /* mobile bar visibility: only on product view */
 const _origShowProduct=showProduct, _origShowHome=showHome;
