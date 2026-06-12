@@ -2142,7 +2142,11 @@ function toggleDropdown(event, dropdownId){
   const dropdown = document.getElementById(dropdownId);
   const isDesktop = window.innerWidth > 768;
   if(isDesktop){return;}
-  dropdown.classList.toggle("active");
+  const isCurrentlyActive = dropdown.classList.contains("active");
+  closeDropdowns();
+  if(!isCurrentlyActive){
+    dropdown.classList.add("active");
+  }
   event.currentTarget.querySelector(".dropdown-arrow").style.transform = dropdown.classList.contains("active") ? "rotate(0deg)" : "rotate(180deg)";
 }
 function closeDropdowns(){
