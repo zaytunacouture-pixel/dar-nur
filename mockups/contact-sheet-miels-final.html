@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Dar Nūr — Planche FINALE V4 (14 miels, noms 2 lignes)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  body{margin:0;background:#cfcabd;font-family:'Cinzel',serif;padding:22px;}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px 16px;max-width:760px;margin:auto;}
+  .cell{display:flex;flex-direction:column;align-items:center;gap:5px;}
+  .lab{width:230px;height:230px;filter:drop-shadow(0 10px 20px rgba(0,0,0,.25));}
+  .cap{font-size:11px;letter-spacing:.3px;color:#2f2f2a;text-align:center;font-family:sans-serif;line-height:1.25;}
+  .warn{color:#a23;font-weight:700;}
+  .ok{color:#2a6e3f;font-weight:700;}
+</style>
+</head>
+<body>
+<div class="grid" id="grid"></div>
+<script>
+const DATA=[
+ {name:'Miel de Nigelle', fam:'France', minor:'MIEL DE', hero:['NIGELLE'], prov:'PRÉPARÉ EN FRANCE', bg:'#0d1f16', fg:'#f4efe4'},
+ {name:'Miel Aphrodisiaque', fam:'France', minor:'MIEL', hero:['APHRODISIAQUE'], prov:'PRÉPARÉ EN FRANCE', bg:'#0d1f16', fg:'#f4efe4'},
+ {name:'Miel Spiruline', fam:'France', minor:'MIEL', hero:['SPIRULINE'], prov:'PRÉPARÉ EN FRANCE', bg:'#0d1f16', fg:'#f4efe4'},
+ {name:'Miel Gingembre Curcuma', fam:'France', minor:'MIEL', hero:['GINGEMBRE','CURCUMA'], prov:'PRÉPARÉ EN FRANCE', bg:'#0d1f16', fg:'#f4efe4'},
+ {name:'Miel Hibiscus Nigelle Zamzam', fam:'France', minor:'MIEL', hero:['HIBISCUS','NIGELLE ZAMZAM'], prov:'PRÉPARÉ EN FRANCE', bg:'#0d1f16', fg:'#f4efe4'},
+ {name:'Miel Moringa Nigelle', fam:'France', minor:'MIEL', hero:['MORINGA','NIGELLE'], prov:'PRÉPARÉ EN FRANCE', bg:'#0d1f16', fg:'#f4efe4'},
+ {name:'Miel Gingembre Fenugrec', fam:'France', minor:'MIEL', hero:['GINGEMBRE','FENUGREC'], prov:'PRÉPARÉ EN FRANCE', bg:'#0d1f16', fg:'#f4efe4'},
+ {name:"Miel d'Aubépine", fam:'France', minor:"MIEL D'", hero:['AUBÉPINE'], prov:'PRÉPARÉ EN FRANCE', bg:'#0d1f16', fg:'#f4efe4'},
+ {name:'Miel Costus Indien Nigelle', fam:'France', minor:'MIEL', hero:['COSTUS INDIEN','NIGELLE'], prov:'PRÉPARÉ EN FRANCE', bg:'#0d1f16', fg:'#f4efe4'},
+ {name:'Miel Sidr de Jujubier', fam:'France', minor:'MIEL', hero:['SIDR DE','JUJUBIER'], prov:'PRÉPARÉ EN FRANCE', bg:'#0d1f16', fg:'#f4efe4'},
+ {name:'Miel Rose de Sibérie', fam:'Importé', minor:'MIEL', hero:['ROSE DE','SIBÉRIE'], prov:'SÉLECTIONNÉ PAR DAR NŪR', bg:'#0d1f16', fg:'#f4efe4'},
+ {name:'Miel Blanc du Kirghizistan', fam:'Importé', minor:'MIEL', hero:['BLANC DU','KIRGHIZISTAN'], prov:'SÉLECTIONNÉ PAR DAR NŪR', bg:'#f4efe4', fg:'#0d1f16'},
+ {name:'Miel de Fraise', fam:'Importé', minor:'MIEL DE', hero:['FRAISE'], prov:'SÉLECTIONNÉ PAR DAR NŪR', bg:'#0d1f16', fg:'#f4efe4'},
+ {name:'Miel Noir de Shilajit', fam:'Importé', minor:'MIEL', hero:['NOIR DE','SHILAJIT'], prov:'SÉLECTIONNÉ PAR DAR NŪR', bg:'#0d1f16', fg:'#f4efe4'},
+];
+const grid=document.getElementById('grid');
+DATA.forEach((d,i)=>{
+  let heroSvg='';
+  if(d.hero.length===1){
+    heroSvg=`<text class="maj" data-i="${i}" x="500" y="590" text-anchor="middle" fill="${d.fg}" font-weight="600" font-size="74" letter-spacing="4.5">${d.hero[0]}</text>`;
+  } else {
+    heroSvg=`<text class="maj" data-i="${i}" x="500" y="564" text-anchor="middle" fill="${d.fg}" font-weight="600" font-size="74" letter-spacing="4.5">${d.hero[0]}</text>
+             <text class="maj" data-i="${i}" x="500" y="632" text-anchor="middle" fill="${d.fg}" font-weight="600" font-size="74" letter-spacing="4.5">${d.hero[1]}</text>`;
+  }
+  const minorY = d.hero.length===2 ? 502 : 506;
+  const cell=document.createElement('div'); cell.className='cell';
+  cell.innerHTML=`
+  <svg class="lab" viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg">
+    <defs><linearGradient id="g${i}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#dcc079"/><stop offset="0.5" stop-color="#c8a84b"/><stop offset="1" stop-color="#b9963c"/>
+    </linearGradient></defs>
+    <circle cx="500" cy="500" r="500" fill="${d.bg}"/>
+    <circle cx="500" cy="500" r="472" fill="none" stroke="url(#g${i})" stroke-width="2.5" opacity="0.92"/>
+    <image href="logo-gold.png" x="369" y="92" width="262" height="262"/>
+    <text x="500" y="${minorY}" text-anchor="middle" fill="${d.fg}" font-weight="500" font-size="26" letter-spacing="5">${d.minor}</text>
+    ${heroSvg}
+    <text x="500" y="720" text-anchor="middle" fill="${d.fg}" font-weight="500" font-size="20" letter-spacing="4">${d.prov}</text>
+    <text x="500" y="772" text-anchor="middle" fill="${d.fg}" font-weight="500" font-size="26" letter-spacing="4.5">200 g</text>
+  </svg>
+  <div class="cap" id="cap${i}"><b>${d.name}</b><br>${d.fam}</div>`;
+  grid.appendChild(cell);
+});
+document.querySelectorAll('text').forEach(t=>t.setAttribute('font-family','Cinzel, serif'));
+(async()=>{
+  await document.fonts.ready; await new Promise(r=>setTimeout(r,350));
+  const MAXW=720; const reduced={};
+  document.querySelectorAll('.maj').forEach(el=>{
+    const w=el.getComputedTextLength();
+    if(w>MAXW){ const fs=Math.max(58, 74*MAXW/w); el.setAttribute('font-size', fs.toFixed(1)); const i=el.dataset.i; reduced[i]=Math.round(fs); }
+  });
+  DATA.forEach((d,i)=>{
+    const cap=document.getElementById('cap'+i);
+    const lines = d.hero.length;
+    const tag = reduced[i] ? `<span class="warn">${lines} ligne(s) · héros ${reduced[i]} px</span>` : `<span class="ok">${lines===2?'2 lignes':'1 ligne'} · 74 px</span>`;
+    cap.innerHTML += '<br>'+tag;
+  });
+  window.__done=true;
+})();
+</script>
+</body>
+</html>

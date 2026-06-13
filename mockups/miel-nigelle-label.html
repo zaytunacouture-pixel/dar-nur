@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Dar Nūr — Étiquette Miel de Nigelle (maquette charte v1)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+  html,body{margin:0;height:100%;}
+  body{
+    background:radial-gradient(circle at 50% 38%, #efece4 0%, #e4e0d6 60%, #d8d3c6 100%);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Cinzel',serif;
+  }
+  .stage{padding:60px;}
+  .label{
+    width:560px;height:560px;
+    filter:drop-shadow(0 30px 60px rgba(0,0,0,.28));
+  }
+  /* hot-foil gold gradient for emblem + wordmark */
+</style>
+</head>
+<body>
+<div class="stage">
+  <svg class="label" viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#dcc079"/>
+        <stop offset="0.5" stop-color="#c8a84b"/>
+        <stop offset="1" stop-color="#b9963c"/>
+      </linearGradient>
+    </defs>
+
+    <!-- CHAMP : disque vert profond -->
+    <circle cx="500" cy="500" r="500" fill="#0d1f16"/>
+
+    <!-- FILET DORÉ UNIQUE (r 472, fin) -->
+    <circle cx="500" cy="500" r="472" fill="none" stroke="url(#gold)" stroke-width="2.5" opacity="0.92"/>
+
+    <!-- ===== TIER ① LA MAISON ===== -->
+    <!-- Emblème simplifié : étoile à 8 branches + arche (mihrab) + نور -->
+    <g fill="url(#gold)" stroke="none">
+      <!-- étoile khatim (2 carrés superposés) au sommet -->
+      <rect x="485" y="145" width="30" height="30" transform="rotate(0 500 160)"/>
+      <rect x="485" y="145" width="30" height="30" transform="rotate(45 500 160)"/>
+    </g>
+    <!-- arche pointée (mihrab), contour or -->
+    <path d="M440 334 L440 254 A126 126 0 0 1 500 198 A126 126 0 0 1 560 254 L560 334"
+          fill="none" stroke="url(#gold)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <line x1="440" y1="334" x2="560" y2="334" stroke="url(#gold)" stroke-width="3" stroke-linecap="round"/>
+    <!-- calligraphie نور -->
+    <text x="500" y="300" text-anchor="middle" fill="url(#gold)"
+          font-family="Amiri, serif" font-size="58" font-weight="700">نور</text>
+
+    <!-- DAR NŪR (wordmark, or) -->
+    <text x="500" y="388" text-anchor="middle" fill="url(#gold)"
+          font-family="Cinzel, serif" font-weight="600" font-size="32" letter-spacing="8">DAR NŪR</text>
+
+    <!-- ===== TIER ② LE PRODUIT (héros absolu) ===== -->
+    <text x="500" y="506" text-anchor="middle" fill="#f4efe4"
+          font-family="Cinzel, serif" font-weight="500" font-size="26" letter-spacing="5">MIEL DE</text>
+    <text x="500" y="590" text-anchor="middle" fill="#f4efe4"
+          font-family="Cinzel, serif" font-weight="600" font-size="74" letter-spacing="4.5">NIGELLE</text>
+
+    <!-- ===== TIER ③ LES FAITS ===== -->
+    <text x="500" y="706" text-anchor="middle" fill="#f4efe4"
+          font-family="Cinzel, serif" font-weight="500" font-size="17" letter-spacing="2">PRÉPARÉ EN FRANCE</text>
+    <text x="500" y="760" text-anchor="middle" fill="#f4efe4"
+          font-family="Cinzel, serif" font-weight="500" font-size="26" letter-spacing="4.5">200 g</text>
+  </svg>
+</div>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+<meta charset="UTF-8"/>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>body{margin:0;background:#777;display:flex;gap:10px;padding:10px;}canvas{height:780px;box-shadow:0 6px 24px rgba(0,0,0,.4);}</style>
+</head><body>
+<canvas id="out" width="1080" height="1441"></canvas>
+<script>
+// V2 : étiquette +4% (LR 212->220), reflet verre renforcé, moitié haute éclaircie
+const W=1080,H=1441, LCX=540, LCY=838, LR=220, TH=0.62;
+const S=1000;
+const logo=new Image(); logo.src="logo-gold.png";
+const photo=new Image(); photo.src="../assets/rayeve-instagram-miels/originals/miel-nigelle-instagram.webp";
+
+function drawLabel(ctx){
+  ctx.clearRect(0,0,S,S);
+  ctx.beginPath();ctx.arc(500,500,500,0,7);ctx.fillStyle="#0d1f16";ctx.fill();
+  const g=ctx.createLinearGradient(0,0,0,1000);g.addColorStop(0,"#dcc079");g.addColorStop(.5,"#c8a84b");g.addColorStop(1,"#b9963c");
+  ctx.beginPath();ctx.arc(500,500,472,0,7);ctx.strokeStyle=g;ctx.lineWidth=2.5;ctx.globalAlpha=.92;ctx.stroke();ctx.globalAlpha=1;
+  ctx.drawImage(logo,369,92,262,262);
+  ctx.textAlign="center";ctx.textBaseline="alphabetic";ctx.fillStyle="#f4efe4";
+  ctx.letterSpacing="5px";ctx.font="500 26px Cinzel";ctx.fillText("MIEL DE",500,506);
+  ctx.letterSpacing="4.5px";ctx.font="600 74px Cinzel";ctx.fillText("NIGELLE",500,590);
+  ctx.letterSpacing="4px";ctx.font="500 20px Cinzel";ctx.fillText("PRÉPARÉ EN FRANCE",500,720);
+  ctx.letterSpacing="4.5px";ctx.font="500 26px Cinzel";ctx.fillText("200 g",500,772);
+}
+
+function gradeLabel(lc){
+  const ctx=lc.getContext('2d');
+  // dégradé de luminosité (haut-gauche clair -> bas-droite sombre) — top légèrement adouci
+  let lg=ctx.createLinearGradient(120,120,920,980);
+  lg.addColorStop(0,"rgba(255,238,190,0.48)");lg.addColorStop(.5,"rgba(255,255,255,0)");lg.addColorStop(1,"rgba(0,0,0,0.42)");
+  ctx.globalCompositeOperation="soft-light";ctx.fillStyle=lg;ctx.fillRect(0,0,S,S);
+  // *** moitié supérieure éclaircie (corps, pas le rim) ***
+  let uh=ctx.createLinearGradient(0,150,0,560);
+  uh.addColorStop(0,"rgba(255,247,220,0.36)");uh.addColorStop(1,"rgba(255,247,220,0)");
+  ctx.globalCompositeOperation="soft-light";ctx.fillStyle=uh;ctx.fillRect(0,0,S,S);
+  // dominante chaude globale
+  ctx.globalCompositeOperation="soft-light";ctx.fillStyle="rgba(214,150,40,0.30)";ctx.fillRect(0,0,S,S);
+  // *** reflet principal du verre RENFORCÉ (bande spéculaire verticale) ***
+  let sp=ctx.createLinearGradient(285,0,585,0);
+  sp.addColorStop(0,"rgba(255,250,232,0)");sp.addColorStop(.5,"rgba(255,250,232,0.5)");sp.addColorStop(1,"rgba(255,250,232,0)");
+  ctx.globalCompositeOperation="screen";ctx.fillStyle=sp;ctx.fillRect(240,30,420,940);
+  // glint doré sur le logo
+  let gl=ctx.createRadialGradient(470,180,10,470,180,150);
+  gl.addColorStop(0,"rgba(255,240,200,0.55)");gl.addColorStop(1,"rgba(255,240,200,0)");
+  ctx.globalCompositeOperation="screen";ctx.fillStyle=gl;ctx.fillRect(0,0,S,S);
+  // assombrissement des bords (galbe)
+  let ed=ctx.createRadialGradient(500,500,320,500,500,500);
+  ed.addColorStop(0,"rgba(0,0,0,0)");ed.addColorStop(1,"rgba(0,0,0,0.45)");
+  ctx.globalCompositeOperation="multiply";ctx.fillStyle=ed;ctx.fillRect(0,0,S,S);
+  // re-clip au disque
+  ctx.globalCompositeOperation="destination-in";ctx.beginPath();ctx.arc(500,500,500,0,7);ctx.fillStyle="#fff";ctx.fill();
+  ctx.globalCompositeOperation="source-over";
+}
+
+function run(){
+  const out=document.getElementById('out'); const ctx=out.getContext('2d');
+  ctx.drawImage(photo,0,0,W,H);
+  const lc=document.createElement('canvas');lc.width=S;lc.height=S;
+  drawLabel(lc.getContext('2d')); gradeLabel(lc);
+  const N=60;
+  for(let i=0;i<N;i++){
+    const u0=-1+2*i/N, u1=-1+2*(i+1)/N;
+    const sx0=LCX+LR*Math.sin(u0*TH)/Math.sin(TH);
+    const sx1=LCX+LR*Math.sin(u1*TH)/Math.sin(TH);
+    const lx0=(u0+1)/2*S, lx1=(u1+1)/2*S;
+    ctx.drawImage(lc, lx0,0, lx1-lx0, S, sx0, LCY-LR, (sx1-sx0), 2*LR);
+  }
+  // *** reflet du verre renforcé : streak net repassé sur le composite final ***
+  const st=ctx.createLinearGradient(LCX-70,0,LCX+30,0);
+  st.addColorStop(0,"rgba(255,252,238,0)");st.addColorStop(.5,"rgba(255,252,238,0.22)");st.addColorStop(1,"rgba(255,252,238,0)");
+  ctx.save();ctx.beginPath();ctx.ellipse(LCX,LCY,LR*0.98,LR*1.0,0,0,7);ctx.clip();
+  ctx.globalCompositeOperation="screen";ctx.fillStyle=st;ctx.fillRect(LCX-90,LCY-LR,140,2*LR);ctx.restore();
+  window.__done=true;
+}
+(async()=>{ await document.fonts.ready;
+  await Promise.all([logo,photo].map(im=>im.complete?1:new Promise(r=>{im.onload=r;im.onerror=r;})));
+  await new Promise(r=>setTimeout(r,200)); run();
+})();
+</script>
+</body></html>
