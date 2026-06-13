@@ -141,18 +141,14 @@ nav{
 .burger span{width:24px;height:2px;background:var(--gold);transition:.3s}
 
 /* ============ DROPDOWNS ============ */
-.nav-dropdown{position:relative;display:flex;align-items:center}
-.nav-dropdown-toggle{display:flex;align-items:center;gap:6px;cursor:pointer}
-.dropdown-arrow{font-size:.6rem;transition:transform .25s;display:inline-block}
-.nav-dropdown-toggle:hover .dropdown-arrow{color:var(--gold)}
+.nav-dropdown{position:relative;display:flex;align-items:center;padding-bottom:12px}
 .nav-dropdown-menu{
-  position:absolute;top:calc(100% + 12px);left:0;
+  position:absolute;top:100%;left:0;
   display:none;flex-direction:column;gap:0;
   background:rgba(13,31,22,.98);border:1px solid rgba(200,168,75,.22);border-radius:2px;
   backdrop-filter:blur(8px);min-width:180px;box-shadow:0 12px 32px -12px rgba(0,0,0,.4);
-  padding:12px 0;z-index:101;
+  padding:12px 0;z-index:101;margin-top:0;
 }
-.nav-dropdown-menu.active{display:flex}
 .nav-dropdown:hover > .nav-dropdown-menu{display:flex}
 .nav-dropdown-menu a{
   padding:12px 20px;font-size:.72rem;border:none;
@@ -161,14 +157,11 @@ nav{
 }
 .nav-dropdown-menu a:hover{opacity:1;color:var(--gold);border-left-color:var(--gold);background:rgba(200,168,75,.06)}
 @media(max-width:768px){
-  .nav-dropdown:hover > .nav-dropdown-menu{display:none}
-  .nav-dropdown{display:flex;flex-direction:column;width:100%}
-  .nav-dropdown-menu{position:static;background:transparent;border:none;box-shadow:none;backdrop-filter:none;min-width:auto;padding:0;margin-top:8px;border-left:none;display:flex;flex-direction:column;width:100%;z-index:auto}
-  .nav-dropdown-menu.active{display:flex}
-  .nav-dropdown-menu a{padding:10px 0 10px 16px;border-left:3px solid rgba(200,168,75,.22);background:none;font-size:.75rem}
+  .nav-dropdown{display:flex;flex-direction:column;width:100%;margin-bottom:0}
+  .nav-dropdown-title{display:block;padding:8px 0;opacity:.7;font-size:.82rem;text-transform:uppercase;letter-spacing:.16em;color:var(--cream)}
+  .nav-dropdown-menu{position:static !important;display:flex !important;flex-direction:column;width:100%;padding:0;margin:0;background:transparent;border:2px solid red;visibility:visible !important;opacity:1 !important}
+  .nav-dropdown-menu a{display:block;padding:10px 0 10px 16px;border-left:3px solid rgba(200,168,75,.22);background:none;font-size:.75rem;color:var(--cream);opacity:.8;transition:all .2s}
   .nav-dropdown-menu a:hover{background:none;border-left-color:var(--gold);opacity:1}
-  .nav-dropdown-toggle{pointer-events:none;cursor:default;opacity:.7;padding:8px 0}
-  .dropdown-arrow{display:none}
   body.menu-open::after{content:"";position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.4);z-index:95;transition:opacity .35s}
 }
 
@@ -537,28 +530,28 @@ footer{background:#0a160f;color:var(--cream);padding:46px 28px 26px}
       <a onclick="goCat('all')">Boutique</a>
 
       <div class="nav-dropdown">
-        <a class="nav-dropdown-toggle" onclick="toggleDropdown(event, 'well-being')">Bien-être<span class="dropdown-arrow">▾</span></a>
+        <div class="nav-dropdown-title">Bien-être</div>
         <div class="nav-dropdown-menu" id="well-being">
-          <a onclick="goCat('miels');closeDropdowns()">Miels</a>
-          <a onclick="goCat('gelules');closeDropdowns()">Gélules</a>
-          <a onclick="goCat('poudres');closeDropdowns()">Poudres &amp; Graines</a>
-          <a onclick="goCat('huiles');closeDropdowns()">Huiles</a>
-          <a onclick="goCat('brumes');closeDropdowns()">Brumes</a>
+          <a onclick="goCat('miels')">Miels</a>
+          <a onclick="goCat('gelules')">Gélules</a>
+          <a onclick="goCat('poudres')">Poudres &amp; Graines</a>
+          <a onclick="goCat('huiles')">Huiles</a>
+          <a onclick="goCat('brumes')">Brumes</a>
         </div>
       </div>
 
       <div class="nav-dropdown">
-        <a class="nav-dropdown-toggle" onclick="toggleDropdown(event, 'mode')">Mode<span class="dropdown-arrow">▾</span></a>
+        <div class="nav-dropdown-title">Mode</div>
         <div class="nav-dropdown-menu" id="mode">
-          <a onclick="goCat('qamis');closeDropdowns()">Qamis</a>
-          <a onclick="goCat('vetements');closeDropdowns()">Abayas</a>
+          <a onclick="goCat('qamis')">Qamis</a>
+          <a onclick="goCat('vetements')">Abayas</a>
         </div>
       </div>
 
-      <a onclick="showHome();setTimeout(()=>document.getElementById('histoire').scrollIntoView({behavior:'smooth'}),60);closeDropdowns()">Notre histoire</a>
-      <a onclick="showHome();setTimeout(()=>document.getElementById('qui-sommes-nous').scrollIntoView({behavior:'smooth'}),60);closeDropdowns()">Qui sommes-nous ?</a>
-      <a onclick="showHome();setTimeout(()=>document.getElementById('faq').scrollIntoView({behavior:'smooth'}),60);closeDropdowns()">FAQ</a>
-      <a onclick="showHome();setTimeout(()=>document.getElementById('avis-clients').scrollIntoView({behavior:'smooth'}),60);closeDropdowns()">Avis</a>
+      <a onclick="showHome();setTimeout(()=>document.getElementById('histoire').scrollIntoView({behavior:'smooth'}),60)">Notre histoire</a>
+      <a onclick="showHome();setTimeout(()=>document.getElementById('qui-sommes-nous').scrollIntoView({behavior:'smooth'}),60)">Qui sommes-nous ?</a>
+      <a onclick="showHome();setTimeout(()=>document.getElementById('faq').scrollIntoView({behavior:'smooth'}),60)">FAQ</a>
+      <a onclick="showHome();setTimeout(()=>document.getElementById('avis-clients').scrollIntoView({behavior:'smooth'}),60)">Avis</a>
     </div>
     <button class="burger" id="burger" onclick="toggleMenu()" aria-label="Menu"><span></span><span></span><span></span></button>
   </nav>
@@ -2138,21 +2131,6 @@ function toggleMenu(){
   document.getElementById("navLinks").classList.toggle("open");
   document.getElementById("burger").classList.toggle("x");
   document.body.classList.toggle("menu-open");
-}
-function toggleDropdown(event, dropdownId){
-  event.preventDefault();
-  const dropdown = document.getElementById(dropdownId);
-  const isDesktop = window.innerWidth > 768;
-  if(isDesktop){return;}
-  const isCurrentlyActive = dropdown.classList.contains("active");
-  closeDropdowns();
-  if(!isCurrentlyActive){
-    dropdown.classList.add("active");
-  }
-  event.currentTarget.querySelector(".dropdown-arrow").style.transform = dropdown.classList.contains("active") ? "rotate(0deg)" : "rotate(180deg)";
-}
-function closeDropdowns(){
-  document.querySelectorAll(".nav-dropdown-menu.active").forEach(d => d.classList.remove("active"));
 }
 function closeMenu(){
   document.getElementById("navLinks").classList.remove("open");
