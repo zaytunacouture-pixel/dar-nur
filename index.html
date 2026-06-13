@@ -514,6 +514,38 @@ footer{background:#0a160f;color:var(--cream);padding:46px 28px 26px}
   .footer-trust span{line-height:1.35;text-align:left}
   .foot-bottom{margin-top:16px;padding-top:12px}
   .pp-meta{flex-direction:column;gap:18px}
+  .collections-grid{grid-template-columns:repeat(2,1fr);gap:0.75rem}
+  .collection-card{padding:0.9rem}
+  .card-title{font-size:0.8rem}
+  .card-description{font-size:0.75rem}
+}
+
+/* ============ COLLECTIONS SECTION ============ */
+.collections-section{background:var(--offwhite);padding:2.5rem 0;position:relative}
+.collections-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-top:1.5rem}
+.collection-card{background:#fff;border:1px solid var(--line);border-radius:6px;padding:1rem;text-decoration:none;color:inherit;display:flex;flex-direction:column;transition:border-color 0.25s ease,box-shadow 0.25s ease;box-shadow:0 1px 3px rgba(13,31,22,0.03)}
+.collection-card:hover{border-color:var(--gold);box-shadow:0 4px 12px rgba(13,31,22,0.08)}
+.card-title{font-family:'Cinzel',serif;font-size:1rem;font-weight:600;color:var(--green);margin:0 0 0.75rem 0;letter-spacing:0.04em}
+.card-description{font-family:'Cormorant Garamond',Georgia,serif;font-size:0.95rem;color:var(--muted);line-height:1.6;margin:0 0 1rem 0;flex:1}
+.card-cta{font-family:'Cinzel',serif;font-size:0.8rem;letter-spacing:0.05em;color:var(--gold);margin-top:auto;transition:color 0.25s}
+.collection-card:hover .card-cta{color:var(--gold-light)}
+
+@media(max-width:768px){
+  .collections-section{padding:2.5rem 0}
+  .collections-grid{grid-template-columns:repeat(2,1fr);gap:0.75rem}
+  .collection-card{padding:0.9rem}
+  .card-title{font-size:0.95rem}
+}
+
+@media(max-width:480px){
+  .collections-section{padding:2rem 0}
+  .section-head{margin-bottom:1.2rem}
+  .section-head h2{font-size:1.3rem}
+  .section-head p{font-size:1rem}
+  .collections-grid{grid-template-columns:repeat(2,1fr);gap:0.75rem;margin-top:1rem}
+  .collection-card{padding:0.9rem}
+  .card-title{font-size:0.8rem;margin-bottom:0.4rem}
+  .card-description{font-size:0.75rem;margin-bottom:0.5rem}
 }
 </style>
 </head>
@@ -588,6 +620,44 @@ footer{background:#0a160f;color:var(--cream);padding:46px 28px 26px}
       <div class="divider"><span class="line"></span><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="4"/></svg><span class="line r"></span></div>
       <blockquote id="storyText"></blockquote>
       <div class="signoff">— Youcef, fondateur de Dar Nūr</div>
+    </div>
+  </section>
+
+  <!-- ============ EXPLORER NOS COLLECTIONS ============ -->
+  <section id="collections-bridge" class="collections-section">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow">Collections</div>
+        <h2>Explorer nos collections</h2>
+        <p>Sélectionnées avec soin pour répondre à vos besoins du quotidien.</p>
+      </div>
+      <div class="collections-grid">
+        <a href="/miels/" class="collection-card">
+          <h3 class="card-title">Miels artisanaux</h3>
+          <p class="card-description">Sélection de miels purs, issus de traditions ancestrales.</p>
+          <span class="card-cta">Découvrir →</span>
+        </a>
+        <a href="/huiles/" class="collection-card">
+          <h3 class="card-title">Huiles naturelles</h3>
+          <p class="card-description">Huiles essentielles et pures, sélectionnées pour leurs propriétés.</p>
+          <span class="card-cta">Découvrir →</span>
+        </a>
+        <a href="/poudres/" class="collection-card">
+          <h3 class="card-title">Poudres & graines</h3>
+          <p class="card-description">Poudres fines et graines nobles, provenant de sources authentiques.</p>
+          <span class="card-cta">Découvrir →</span>
+        </a>
+        <a href="/abayas/" class="collection-card">
+          <h3 class="card-title">Abayas</h3>
+          <p class="card-description">Collection d'abayas et vêtements premium, alliant élégance et qualité.</p>
+          <span class="card-cta">Découvrir →</span>
+        </a>
+        <a href="/brumes/" class="collection-card">
+          <h3 class="card-title">Brumes naturelles</h3>
+          <p class="card-description">Brumes fines et apaisantes, inspirées des traditions orientales.</p>
+          <span class="card-cta">Découvrir →</span>
+        </a>
+      </div>
     </div>
   </section>
 
