@@ -304,6 +304,15 @@ section{padding:15px 28px}
 }
 .btn-product-wa:hover{background:var(--green-soft);color:var(--gold-light);transform:translateY(-1px)}
 
+/* ============ VEDETTES ============ */
+#vedettes{background:var(--offwhite);padding:46px 28px}
+.vedettes-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:36px;margin-top:32px}
+.vedettes-grid .card{
+  padding:38px 28px 32px;box-shadow:0 6px 24px -8px rgba(13,31,22,.25);
+}
+.vedettes-grid .card h3{font-size:1.08rem}
+.vedettes-grid .card .price{font-size:1.55rem}
+
 /* ============ PRODUCT PAGE ============ */
 #productView{display:none}
 .pp-hero{
@@ -519,6 +528,7 @@ footer{background:#0a160f;color:var(--cream);padding:46px 28px 26px}
   .collection-card{padding:0.9rem}
   .card-title{font-size:0.8rem}
   .card-description{font-size:0.75rem}
+  .vedettes-grid{grid-template-columns:repeat(2,1fr);gap:24px;padding:0 8px}
 }
 
 }
@@ -595,6 +605,18 @@ footer{background:#0a160f;color:var(--cream);padding:46px 28px 26px}
       <div class="divider"><span class="line"></span><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="4"/></svg><span class="line r"></span></div>
       <blockquote id="storyText"></blockquote>
       <div class="signoff">— Youcef, fondateur de Dar Nūr</div>
+    </div>
+  </section>
+
+  <!-- ============ NOS VEDETTES ============ -->
+  <section id="vedettes">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow">Sélection premium</div>
+        <h2>Nos Vedettes</h2>
+        <p>Six produits d'exception qui incarnent l'essence de Dar Nūr.</p>
+      </div>
+      <div class="vedettes-grid" id="vedettesGrid"></div>
     </div>
   </section>
 
@@ -2159,8 +2181,28 @@ document.addEventListener("click",function(e){
 /* mobile bar visibility: only on product view */
 const _origShowProduct=showProduct, _origShowHome=showHome;
 
+/* ============ VEDETTES ============ */
+const VEDETTES_IDS = ["miel-sidr-jujubier", "gel-ashwaganda", "pdr-nila", "hl-rose", "qms-blanc", "vt-aicha-noir"];
+function renderVedettes(){
+  const vedettes = VEDETTES_IDS.map(id => PRODUCTS.find(p => p.id === id)).filter(Boolean);
+  document.getElementById("vedettesGrid").innerHTML = vedettes.map(p => {
+    const img = getProductCardImage(p.id);
+    return `
+    <div class="card" data-cat="${p.cat}" onclick="showProduct('${p.id}')">
+      ${img ? `<div class="card-image has-photo"><img src="${img}" alt="${p.name}" loading="lazy"/></div>` : `<div class="card-logo-placeholder" aria-hidden="true"><img src="logo-dar-nur.png" alt="Dar Nūr"/></div>`}
+      <div class="cat-tag">${CAT_LABELS[p.cat]}</div>
+      <h3>${p.name}</h3>
+      <div class="price">${p.price.type==='format'?`<small>dès</small> ${p.price.options[0][1]}€`:`${startPrice(p)}€`}</div>
+      <div class="card-actions">
+        <a class="btn-product-wa" href="${waLink(p, p.price.type!=='fixed'?p.price.options[0][0]:'', startPrice(p))}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Commander sur WhatsApp</a>
+      </div>
+    </div>`;
+  }).join("");
+}
+
 /* ============ INIT ============ */
 document.getElementById("storyText").innerHTML=STORY;
+renderVedettes();
 renderFilters();
 renderGrid();
 
