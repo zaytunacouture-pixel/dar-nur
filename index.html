@@ -1022,6 +1022,19 @@ const getProductImages = id=>PRODUCT_IMAGES[id] || [];
 const getProductCardImage = id=>getProductImages(id)[0] || null;
 const getProductDetailImage = id=>getProductImages(id)[1] || getProductImages(id)[0] || null;
 
+/* Miniatures dédiées pour les vignettes collections (recadrage carré optimisé, ~25KB vs ~800KB) */
+const COLLECTION_THUMBS = {
+  "qms-blanc": "assets/collections/maison-rayeve-qamis-saoudien-blanc.jpg",
+  "qms-bleu-ciel": "assets/collections/maison-rayeve-qamis-saoudien-bleu-ciel.jpg",
+  "qms-gris": "assets/collections/maison-rayeve-qamis-saoudien-gris-fonce.jpg",
+  "qms-marron": "assets/collections/maison-rayeve-qamis-saoudien-marron.jpg",
+  "vt-abaya-nouha-gris-argente": "assets/collections/maison-rayeve-abaya-nouha-gris-argente.jpg",
+  "vt-abaya-nouha-noir-dentelle": "assets/collections/maison-rayeve-abaya-nouha-noir-dentelle.jpg",
+  "vt-abaya-nouha-bleu-ciel": "assets/collections/maison-rayeve-abaya-nouha-bleu-ciel.jpg",
+  "vt-abaya-nouha-rose-marrone": "assets/collections/maison-rayeve-abaya-nouha-rose-marrone.jpg"
+};
+const getCollectionThumb = id=>COLLECTION_THUMBS[id] || getProductCardImage(id);
+
 // Pour les miels : image principale liée au format choisi (50 g / 200 g / 300 g).
 // Si un format n'a pas d'image dédiée, l'image principale ne change pas (fallback).
 const PRODUCT_FORMAT_IMAGES = {
@@ -2225,7 +2238,7 @@ function renderCollections(){
   document.getElementById("collectionsGrid").innerHTML = COLLECTIONS.map(c=>{
     const items = getCollectionItems(c);
     const thumbs = items.map(p=>{
-      const img = getProductCardImage(p.id);
+      const img = getCollectionThumb(p.id);
       return img ? `<img src="${img}" alt="${p.name}" loading="lazy"/>` : `<div class="collection-thumb-placeholder"><img src="logo-dar-nur.png" alt="Dar Nūr"/></div>`;
     }).join("");
     const count = c.type==="all" ? PRODUCTS.length : PRODUCTS.filter(p=>p.cat===c.cat).length;
