@@ -454,7 +454,7 @@ footer{background:#0a160f;color:var(--cream);padding:46px 28px 26px}
 .card-image::after{width:38%;height:38%;transform:rotate(45deg);border-radius:8px}
 .card-image.has-photo{background:var(--cream)}
 .card-image.has-photo::before,.card-image.has-photo::after{display:none}
-.card-image.has-photo img{width:100%;height:100%;object-fit:cover;transition:transform .4s ease}
+.card-image.has-photo img{width:100%;height:100%;object-fit:cover;object-position:center;transition:transform .4s ease}
 .card[data-cat="qamis"] .card-image.has-photo img,
 .card[data-cat="vetements"] .card-image.has-photo img{object-fit:contain}
 .card:hover .card-image.has-photo img{transform:scale(1.05)}
@@ -469,7 +469,7 @@ footer{background:#0a160f;color:var(--cream);padding:46px 28px 26px}
 .format-price{font-family:'Cormorant Garamond';font-size:1.8rem;color:var(--green);font-weight:600}
 .pp-thumbs{display:grid;grid-template-columns:repeat(auto-fit,minmax(64px,1fr));gap:10px}
 .pp-thumb{aspect-ratio:1;border:1px solid var(--line);border-radius:4px;background:#f6f0e3;padding:4px;cursor:pointer}
-.pp-thumb img{width:100%;height:100%;object-fit:cover;border-radius:3px;display:block}
+.pp-thumb img{width:100%;height:100%;object-fit:cover;object-position:center;border-radius:3px;display:block}
 .pp-thumb.active{border-color:var(--gold)}
 
 /* ============ RESPONSIVE ============ */
