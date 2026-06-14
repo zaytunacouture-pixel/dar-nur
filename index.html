@@ -217,7 +217,7 @@ nav{
 /* ============ SECTIONS ============ */
 section{padding:15px 28px}
 .wrap{max-width:1240px;margin:0 auto}
-.section-head{text-align:center;margin-bottom:16px}
+.section-head{text-align:center;margin-bottom:12px}
 .section-head .eyebrow{font-family:'Cinzel';font-size:.74rem;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);margin-bottom:14px}
 .section-head h2{font-size:clamp(1.8rem,4vw,2.6rem);color:var(--green)}
 .section-head p{font-family:'Cormorant Garamond';font-size:1.3rem;color:var(--muted);max-width:560px;margin:16px auto 0;font-style:italic}
@@ -270,7 +270,7 @@ section{padding:15px 28px}
 .footer-trust span{font-family:'Cinzel';font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(244,239,228,.72)}
 
 /* ============ FILTERS ============ */
-.filters{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:46px}
+.filters{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:22px}
 .filters button{
   font-family:'Cinzel';font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;
   padding:10px 20px;border:1px solid var(--line);border-radius:40px;color:var(--muted);
@@ -280,19 +280,19 @@ section{padding:15px 28px}
 .filters button.active{background:var(--green);color:var(--gold);border-color:var(--green)}
 
 /* ============ PRODUCT GRID ============ */
-.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:26px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
 .card{
   background:#fff;border:1px solid var(--line);border-radius:4px;
-  padding:30px 24px 26px;text-align:center;cursor:pointer;
+  padding:22px 18px 18px;text-align:center;cursor:pointer;
   transition:transform .3s,box-shadow .3s,border-color .3s;
   display:flex;flex-direction:column;align-items:center;position:relative;overflow:hidden;
 }
 .card::after{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold-light),var(--gold));transform:scaleX(0);transform-origin:left;transition:transform .35s}
 .card:hover{transform:translateY(-6px);box-shadow:var(--shadow);border-color:var(--gold)}
 .card:hover::after{transform:scaleX(1)}
-.card .emblem{width:64px;height:64px;margin-bottom:18px;color:var(--green);opacity:.92}
-.card .cat-tag{font-family:'Cinzel';font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:10px}
-.card h3{font-size:1rem;color:var(--green);line-height:1.4;margin-bottom:14px;font-weight:500}
+.card .emblem{width:56px;height:56px;margin-bottom:10px;color:var(--green);opacity:.92}
+.card .cat-tag{font-family:'Cinzel';font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
+.card h3{font-size:0.95rem;color:var(--green);line-height:1.3;margin-bottom:8px;font-weight:500}
 .card .price{font-family:'Cormorant Garamond';font-size:1.45rem;color:var(--ink);font-weight:600;margin-top:auto}
 .card .price small{font-size:.8rem;color:var(--muted);font-style:italic}
 .card-actions{margin-top:18px;width:100%}
