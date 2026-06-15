@@ -2215,6 +2215,7 @@ function syncBar(){ mbar.style.display = (activeProduct && window.innerWidth<=76
 window.addEventListener("resize",syncBar);
 const obs=new MutationObserver(syncBar);
 obs.observe(document.getElementById("productView"),{attributes:true,attributeFilter:["style"]});
+syncBar();
 
 </script>
 </body>
