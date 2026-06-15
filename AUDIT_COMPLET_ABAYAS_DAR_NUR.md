@@ -229,13 +229,13 @@ Aucun doublon détecté :
 
 #### CONSTAT C2 - Nommage mixte
 ```
-Images statiques: maison-rayeve-abaya-nouha-gris-argente.jpg
+Images statiques: dar-nur-abaya-nouha-gris-argente.jpg
 Images produits:  vt-abaya-nouha-gris-argente-02.jpg
 
-Variation: Préfixe "maison-rayeve-" vs "vt-"
+Variation: Préfixe "dar-nur-" vs "vt-"
 ```
 
-**Hypothèse H2** : "maison-rayeve" = nom fournisseur ou collection source
+**Hypothèse H2** : "dar-nur" = nom fournisseur ou collection source
 
 **Impact** : Confus en maintenance (double nomenclature)
 
@@ -303,7 +303,7 @@ Concurrence analyse (abayas premium) propose souvent :
 
 **Image OG (Nouha Gris Argenté)**
 ```
-Nom: maison-rayeve-abaya-nouha-gris-argente.jpg
+Nom: dar-nur-abaya-nouha-gris-argente.jpg
 Taille: 870 KB
 Dimensions: 2268 x 4032 px (haute résolution)
 Format: JPEG progressif
@@ -371,10 +371,10 @@ Couverture par produit:
 
 ### 4.4 Images fournisseur détectées
 
-#### CONSTAT C5 - Nomenclature "maison-rayeve"
+#### CONSTAT C5 - Nomenclature "dar-nur"
 ```
-Image OG: maison-rayeve-abaya-nouha-gris-argente.jpg
-Pattern:  "maison-rayeve-" + modèle + couleur
+Image OG: dar-nur-abaya-nouha-gris-argente.jpg
+Pattern:  "dar-nur-" + modèle + couleur
 ```
 
 **Interprétation** :
@@ -446,7 +446,7 @@ Ensemble Aïcha, Layali, Nissah Mastoura. Livraison France.
 ```html
 og:title        = "Abayas & Ensembles Islamiques — Dar Nūr"
 og:description  = "22 abayas et ensembles pudiques..."
-og:image        = https://dar-nur.fr/maison-rayeve-abaya-nouha-gris-argente.jpg
+og:image        = https://dar-nur.fr/dar-nur-abaya-nouha-gris-argente.jpg
 og:type         = website
 og:locale       = fr_FR
 og:site_name    = Dar Nūr
@@ -458,7 +458,7 @@ og:site_name    = Dar Nūr
 ```html
 twitter:card    = summary_large_image
 twitter:title   = "Abayas & Ensembles Islamiques — Dar Nūr"
-twitter:image   = https://dar-nur.fr/maison-rayeve-abaya-nouha-gris-argente.jpg
+twitter:image   = https://dar-nur.fr/dar-nur-abaya-nouha-gris-argente.jpg
 ```
 
 **Score** : 8/10 (description courte acceptée)
@@ -1086,7 +1086,7 @@ Bilan & ajustements
 - `index.html` (SPA) — 3000+ lignes
 - `abayas/index.html` (page catégorie) — 523 lignes
 - `/assets/mode/produits/` — 22 dossiers, 88 JPG
-- `maison-rayeve-abaya-nouha-gris-argente.jpg` — Image OG
+- `dar-nur-abaya-nouha-gris-argente.jpg` — Image OG
 
 ### Outils utilisés
 - grep, bash (extraction données)

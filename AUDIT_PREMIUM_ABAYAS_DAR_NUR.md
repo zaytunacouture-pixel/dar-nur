@@ -31,7 +31,7 @@ Prix:         89,99 € (M/L/XL/2XL)
 Tagline:      "Une abaya fluide à la coupe papillon élégante"
 Images:       5 (748 KB, 982 KB, 924 KB, 946 KB, 929 KB = ~4.5 MB total)
               → Plus d'images = plus couverte (5 vs 3-4 autres)
-Vignette:     maison-rayeve-abaya-nouha-gris-argente.jpg (870 KB, 2268×4032px)
+Vignette:     dar-nur-abaya-nouha-gris-argente.jpg (870 KB, 2268×4032px)
 Benefits:     Coupe papillon fluide | Manches larges intégrées | Tissu léger | Confort mouvement
 Description:  "Abaya Nouha à la coupe papillon fluide, offrant une silhouette ample, élégante et confortable."
               + "Une pièce pensée pour le quotidien comme pour les occasions."
@@ -51,7 +51,7 @@ ID:           vt-abaya-nouha-noir-dentelle
 Prix:         89,99 € (M/L/XL/2XL)
 Tagline:      "La sobriété du noir avec une finition raffinée"
 Images:       4
-Vignette:     maison-rayeve-abaya-nouha-noir-dentelle.jpg
+Vignette:     dar-nur-abaya-nouha-noir-dentelle.jpg
 Benefits:     Coupe ample couvrante | Noir élégant | Finition raffinée | Confort quotidien
 Description:  "Abaya Nouha noire à la coupe papillon ample, pensée pour une allure sobre et élégante."
               + "Une tenue fluide qui associe pudeur, confort et raffinement."
@@ -69,7 +69,7 @@ ID:           vt-abaya-nouha-bleu-ciel
 Prix:         89,99 € (M/L/XL/2XL)
 Tagline:      "Une abaya douce, fluide et lumineuse"
 Images:       3 (MINIMUM)
-Vignette:     maison-rayeve-abaya-nouha-bleu-ciel.jpg
+Vignette:     dar-nur-abaya-nouha-bleu-ciel.jpg
 Benefits:     Coupe papillon fluide | Bleu ciel lumineux | Couvrance optimale | Tissu agréable
 Description:  "Abaya Nouha bleu ciel à la coupe papillon, conçue pour offrir aisance et élégance."
               + "Sa teinte douce apporte une allure claire et raffinée."
@@ -87,7 +87,7 @@ ID:           vt-abaya-nouha-rose-marrone
 Prix:         89,99 € (M/L/XL/2XL)
 Tagline:      "Une nuance douce pour une silhouette élégante"
 Images:       3 (MINIMUM)
-Vignette:     maison-rayeve-abaya-nouha-rose-marrone.jpg
+Vignette:     dar-nur-abaya-nouha-rose-marrone.jpg
 Benefits:     Coupe ample | Teinte rose marroné | Tombé fluide | Confort optimal
 Description:  "Abaya Nouha rose marroné à la coupe ample et fluide, pensée pour une tenue pudique et confortable."
               + "Une pièce élégante, facile à porter au quotidien comme lors des occasions."
@@ -199,7 +199,7 @@ Provenance:   Maison Dar Nūr
 
 #### Produit A1 : Abaya Nouha Gris Argenté
 **Images** : 5
-**Vignette** : maison-rayeve-abaya-nouha-gris-argente.jpg
+**Vignette** : dar-nur-abaya-nouha-gris-argente.jpg
 
 **Analyse** :
 - Vignette haute résolution (2268×4032px) → Professional
@@ -217,7 +217,7 @@ Provenance:   Maison Dar Nūr
 
 #### Produit A2 : Abaya Nouha Noir Dentelle
 **Images** : 4
-**Vignette** : maison-rayeve-abaya-nouha-noir-dentelle.jpg
+**Vignette** : dar-nur-abaya-nouha-noir-dentelle.jpg
 
 **Analyse** :
 - Noir pur intemporel (safest choice for premium)
@@ -234,7 +234,7 @@ Provenance:   Maison Dar Nūr
 
 #### Produit A3 : Abaya Nouha Bleu Ciel
 **Images** : 3 (MINIMUM)
-**Vignette** : maison-rayeve-abaya-nouha-bleu-ciel.jpg
+**Vignette** : dar-nur-abaya-nouha-bleu-ciel.jpg
 
 **Analyse** :
 - Bleu ciel (couleur pastel, moins premium que gris argenté/noir)
@@ -251,7 +251,7 @@ Provenance:   Maison Dar Nūr
 
 #### Produit A4 : Abaya Nouha Rose Marrone
 **Images** : 3 (MINIMUM)
-**Vignette** : maison-rayeve-abaya-nouha-rose-marrone.jpg
+**Vignette** : dar-nur-abaya-nouha-rose-marrone.jpg
 
 **Analyse** :
 - Rose marroné = couleur niche, peu testée sur marché (risque)
@@ -365,14 +365,14 @@ Provenance:   Maison Dar Nūr
 
 ### 3.1 Observations nomenclature images
 
-**Fait** : Toutes les vignettes utilisent le préfixe `maison-rayeve-`
+**Fait** : Toutes les vignettes utilisent le préfixe `dar-nur-`
 
 ```
 Exemples:
-- maison-rayeve-abaya-nouha-gris-argente.jpg
-- maison-rayeve-ensemble-aicha-vert-sapin.jpg
-- maison-rayeve-ensemble-layali-beige.jpg
-- maison-rayeve-nissah-blanc.jpg
+- dar-nur-abaya-nouha-gris-argente.jpg
+- dar-nur-ensemble-aicha-vert-sapin.jpg
+- dar-nur-ensemble-layali-beige.jpg
+- dar-nur-nissah-blanc.jpg
 ```
 
 **Images détail** (en dossiers assets/mode/produits/) utilisent le préfixe `vt-`
@@ -385,7 +385,7 @@ Exemples:
 
 ---
 
-### 3.2 Hypothèses sur "maison-rayeve"
+### 3.2 Hypothèses sur "dar-nur"
 
 #### H1 : Fournisseur/atelier nommé "Maison Rayève" ou "Rayève"
 **Indice** : Nom français, cohérent avec positionnement luxury
@@ -398,7 +398,7 @@ Exemples:
 **Preuves** : Mention "Maison Dar Nūr" dans metadata produits SPA (différent de "Maison Rayève")
 
 #### H3 : Confusion nomenclature (une migration d'images partiellement complétée)
-**Indice** : Dual naming (maison-rayeve + vt-) = désorganisation possible
+**Indice** : Dual naming (dar-nur + vt-) = désorganisation possible
 **Probabilité** : Moyenne
 **Preuves** : Deux systèmes coexistent
 
