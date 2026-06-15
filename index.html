@@ -410,6 +410,27 @@ section{padding:15px 28px}
 .panel li::before{content:"";position:absolute;left:0;top:9px;width:6px;height:6px;border-radius:50%;background:var(--gold)}
 .panel.warn li::before{border-radius:1px;background:#c79a3a}
 
+/* === Accordéons fiche produit === */
+.pp-accordions{margin-top:34px}
+.pp-accordions > h2{margin-bottom:14px}
+.acc-item{border:1px solid var(--line);border-radius:8px;background:#fff;margin-bottom:12px;overflow:hidden}
+.acc-head{width:100%;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:17px 20px;background:none;border:0;cursor:pointer;text-align:left;font-family:'Cinzel',serif;font-size:.92rem;letter-spacing:.03em;color:var(--green);transition:color .2s}
+.acc-head:hover{color:var(--gold)}
+.acc-chevron{width:18px;height:18px;flex-shrink:0;color:var(--gold);transition:transform .3s ease}
+.acc-item.open .acc-chevron{transform:rotate(180deg)}
+.acc-panel{max-height:0;overflow:hidden;transition:max-height .35s ease}
+.acc-inner{padding:2px 20px 20px;font-family:'Lora',serif;font-size:.95rem;line-height:1.7;color:#4a4a4a}
+.acc-inner p{margin:0 0 12px}
+.acc-inner p:last-child{margin-bottom:0}
+.acc-inner em{font-style:italic}
+.acc-hadith{background:var(--green);border-left:3px solid var(--gold);border-radius:8px;padding:18px 20px;margin:6px 0 14px}
+.acc-hadith .ar{direction:rtl;text-align:right;font-size:1.5rem;line-height:2;color:#fff;margin-bottom:12px;font-family:'Amiri','Traditional Arabic',serif}
+.acc-hadith .tr{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.12rem;color:var(--cream);line-height:1.5}
+.acc-hadith .ref{margin-top:12px;font-family:'Lora',serif;font-size:.78rem;color:var(--gold);line-height:1.5}
+.faq-q{font-family:'Cinzel',serif;font-size:.85rem;color:var(--green);margin-top:16px}
+.faq-a{margin:5px 0 0}
+@media(max-width:480px){.acc-head{font-size:.86rem;padding:15px 16px}.acc-inner{padding:2px 16px 18px}.acc-hadith .ar{font-size:1.3rem}}
+
 /* engagement band */
 .engage{background:var(--green);color:var(--cream);padding:64px 28px}
 .engage-inner{display:grid;grid-template-columns:1fr 1.1fr;gap:50px;align-items:center}
@@ -1842,7 +1863,38 @@ const SUPPLIER_PATCHES = {
   "miel-gingembre-curcuma": {compo:"Miel pur, gingembre, curcuma, préparation artisanale",uso:"1 à 2 cuillères à café par jour, le matin à jeun ou en journée. Peut être consommé seul ou dilué dans une boisson tiède."},
   "miel-aphrodisiaque": {compo:"Miel pur, Gelée Royale, Propolis, Ginseng, Ashwaganda, Moringa, Costus, Shilajit, Spiruline, Hibiscus",uso:"1 à 2 cuillères à café par jour, le matin à jeun ou en journée. Peut être consommé seul ou dilué dans une boisson tiède."},
   "miel-blanc-kirghizistan": {compo:"Miel blanc du Kirghizistan, préparation artisanale",uso:"1 à 2 cuillères à café par jour, le matin à jeun ou en journée. Peut être consommé seul ou dilué dans une boisson tiède."},
-  "miel-nigelle": {compo:"Miel pur, poudre de nigelle, graines de nigelle, préparation artisanale",uso:"1 à 2 cuillères à café par jour, le matin à jeun ou en journée. Peut être consommé seul ou dilué dans une boisson tiède."},
+  "miel-nigelle": {
+    tagline:"L'alliance ancestrale du miel doré et de la graine noire.",
+    benefitsLabel:"Ce qui le distingue",
+    desc:[
+      "Du miel, et la graine noire — rien d'autre. C'est l'association la plus simple et la plus pure qui soit : une préparation à base de miel et de nigelle, à savourer une cuillère le matin, nature ou dans une boisson tiède.",
+      "Notre ligne est claire : un miel n'est pas un médicament. Nous ne promettons rien sur votre santé — nous vous offrons un goût franc et une histoire que peu d'aliments du quotidien peuvent revendiquer."
+    ],
+    benefits:[
+      "L'association fondatrice : miel et graine de nigelle, sans autre ajout",
+      "Graines entières et moulues, pour le goût et le caractère",
+      "Préparation artisanale, par petits lots",
+      "Prêt à l'emploi : une cuillère, nature ou dans une boisson tiède"
+    ],
+    compo:"Préparation à base de miel et de graines de nigelle (Nigella sativa) — miel, poudre de nigelle, graines de nigelle",
+    prov:"Préparation artisanale — Miel de France",
+    uso:"1 à 2 cuillères à café par jour, nature ou diluées dans une boisson tiède (thé, tisane, lait) — évitez l'eau bouillante, qui dénature le miel. Délicieux aussi sur une tartine ou dans un yaourt. Remuez avant usage : les graines se déposent. À conserver à l'abri de la chaleur et de la lumière ; la cristallisation est un phénomène naturel, sans altération.",
+    precautions:[
+      "Ne pas donner aux enfants de moins de 12 mois (comme tout miel)",
+      "Déconseillé aux femmes enceintes et allaitantes",
+      "En cas de traitement médical (notamment anticoagulants) ou de diabète, demandez l'avis d'un professionnel de santé",
+      "Produit artisanal : la couleur, la texture et l'intensité peuvent varier selon les lots",
+      "À conserver à l'abri de la chaleur et de la lumière"
+    ],
+    accordions:[
+      { title:"Qu'est-ce que la nigelle ?", html:`<p>De petites graines noires issues d'une fleur, <em>Nigella sativa</em>, au goût chaud et légèrement poivré qui rappelle un peu l'oignon. On l'appelle aussi <strong>graine noire</strong> ou <em>habba sawda</em>.</p><p>Méfiez-vous d'un surnom répandu : « cumin noir ». La nigelle n'a rien à voir avec le cumin — c'est une plante d'une tout autre famille. Le savoir vous évite une confusion fréquente, en cuisine comme à l'achat.</p>` },
+      { title:"Une graine que l'humanité n'a jamais oubliée", html:`<p>La nigelle compte parmi les épices les plus anciennes du Proche-Orient : on en suit la trace depuis plus de trois mille ans. Les médecines grecque, romaine puis arabe l'ont toutes consignée — jusqu'à Avicenne, au XI<sup>e</sup> siècle, dans l'un des traités de médecine les plus influents de l'histoire.</p><p>Cette continuité n'est pas un argument de santé : c'est un signe de confiance. Une graine qu'on se transmet sans interruption depuis l'Antiquité a forcément tenu une place réelle dans la vie des gens. C'est ce fil que vous prolongez.</p>` },
+      { title:"Dans la tradition islamique", html:`<p>Pour beaucoup d'entre vous, la graine noire a une valeur particulière. Nous la partageons comme un repère culturel et spirituel — jamais comme une promesse de guérison.</p><div class="acc-hadith"><div class="ar" dir="rtl" lang="ar">إِنَّ فِي الْحَبَّةِ السَّوْدَاءِ شِفَاءً مِنْ كُلِّ دَاءٍ إِلَّا السَّامَ</div><div class="tr">« Il y a dans la graine noire un remède contre tout mal, sauf la mort. »</div><div class="ref">Rapporté par Abū Hurayra — Ṣaḥīḥ al-Bukhārī 5688 · Ṣaḥīḥ Muslim 2215. Hadith ṣaḥīḥ (authentique), muttafaq ʿalayh.</div></div><p>Les savants eux-mêmes rappellent que « tout mal » ne se lit pas au sens littéral. La tradition invite à la mesure — et c'est dans cet esprit que nous vous transmettons cet héritage, sans en faire une garantie.</p>` },
+      { title:"Ce que la science sait — et ne sait pas", html:`<p>La nigelle est l'une des graines les plus étudiées au monde, en particulier pour une molécule : la <strong>thymoquinone</strong>. Cela, c'est vrai.</p><p>Mais l'essentiel de ces recherches porte sur des cellules ou des animaux. Chez l'être humain, les preuves solides manquent encore — à ce jour, rien n'est démontré. « Beaucoup étudiée » ne veut pas dire « prouvée », et nous préférons vous le dire.</p><p>Une précision honnête : un miel de nigelle reste avant tout du miel, la part de graine y est faible. Nous ne lui prêtons donc aucun pouvoir particulier — ce qui compte ici, c'est l'alliance et le goût.</p>` },
+      { title:"Pourquoi nous l'avons choisi", html:`<p>La nigelle existe sous bien des formes — graines à croquer, poudre, huile pour la peau, gélules dosées. Ce miel en est la version la plus douce et la plus simple : la façon la plus agréable de l'intégrer à son quotidien, sans dosage ni amertume.</p><p>Nous l'avons sélectionné pour cela, pour sa préparation artisanale par petits lots, et parce qu'il est élaboré à partir d'un <strong>miel récolté en France</strong>. Sa couleur et son intensité peuvent varier d'un pot à l'autre — la marque d'un produit vivant.</p>` },
+      { title:"Questions fréquentes", html:`<div class="faq-q">Est-ce vraiment du miel ?</div><div class="faq-a">C'est une préparation à base de miel, à laquelle on ajoute de la nigelle (en graines et moulue). Le miel en reste l'ingrédient principal.</div><div class="faq-q">Quel goût a-t-il ?</div><div class="faq-a">La douceur ronde du miel, relevée d'une note poivrée venue de la nigelle. Les graines entières ajoutent une légère mâche.</div><div class="faq-q">Mon miel a cristallisé, est-il périmé ?</div><div class="faq-a">Non. La cristallisation est naturelle, sans altération. Ne le mettez pas au réfrigérateur ; pour le rendre plus fluide, réchauffez le pot doucement au bain-marie tiède.</div><div class="faq-q">Les enfants peuvent-ils en manger ?</div><div class="faq-a">Oui après 1 an. Jamais avant 12 mois : comme tout miel, il est déconseillé aux nourrissons.</div><div class="faq-q">Combien de temps se conserve-t-il ?</div><div class="faq-a">Le miel se garde très longtemps. Conservez le pot fermé, à l'abri de la chaleur et de la lumière.</div><div class="faq-q">Nigelle en miel, en huile ou en gélules ?</div><div class="faq-a">L'huile s'utilise pour la peau et les cheveux ; les gélules et la poudre offrent un format dosé ; ce miel est la forme gourmande, à savourer.</div>` }
+    ]
+  },
   "miel-moringa-nigelle": {compo:"Miel pur, poudre de moringa, graines de nigelle, préparation artisanale",uso:"1 à 2 cuillères à café par jour, le matin à jeun ou en journée. Peut être consommé seul ou dilué dans une boisson tiède."},
   "miel-costus-nigelle": {compo:"Miel pur, poudre de Costus Indien, graines de nigelle, préparation artisanale",uso:"1 à 2 cuillères à café par jour, le matin à jeun ou en journée. Peut être consommé seul ou dilué dans une boisson tiède."},
   "miel-fraise-russie": {compo:"Miel pur, fraise de Russie, préparation artisanale",uso:"1 à 2 cuillères à café par jour, le matin à jeun ou en journée. Peut être consommé seul ou dilué dans une boisson tiède."},
@@ -2157,6 +2209,15 @@ function updateHomeMetadata(){
   if(productSchema) productSchema.remove();
 }
 
+function toggleAccordion(btn){
+  const item = btn.closest('.acc-item');
+  if(!item) return;
+  const panel = item.querySelector('.acc-panel');
+  const open = item.classList.toggle('open');
+  btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  panel.style.maxHeight = open ? panel.scrollHeight + 'px' : null;
+}
+
 function showProduct(id){
   const p = PRODUCTS.find(x=>x.id===id);
   if(!p) return;
@@ -2241,7 +2302,7 @@ function showProduct(id){
       </div>
       <div class="pp-content">
         ${p.desc.map(d=>`<p>${d}</p>`).join("")}
-        ${(p.benefits&&p.benefits.length)?`<h2>${isWear ? 'Points forts' : 'Bienfaits'}</h2>
+        ${(p.benefits&&p.benefits.length)?`<h2>${p.benefitsLabel || (isWear ? 'Points forts' : 'Bienfaits')}</h2>
         <ul class="pp-benefits">${p.benefits.map(b=>`<li>${b}</li>`).join("")}</ul>`:""}
         <h2>Le produit</h2>
         <div class="pp-meta">
@@ -2249,6 +2310,14 @@ function showProduct(id){
         </div>
         ${usageContent?`<h2>${usageTitle}</h2>
         <p>${usageContent}</p>`:""}
+
+        ${(p.accordions&&p.accordions.length)?`<div class="pp-accordions">
+          <h2>En savoir plus</h2>
+          ${p.accordions.map(a=>`<div class="acc-item">
+            <button class="acc-head" type="button" aria-expanded="false" onclick="toggleAccordion(this)"><span>${a.title}</span><svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            <div class="acc-panel"><div class="acc-inner">${a.html}</div></div>
+          </div>`).join("")}
+        </div>`:""}
 
         <div class="dual-panel">
           <div class="panel">
