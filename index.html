@@ -798,12 +798,14 @@ const EMBLEMS = {
 
 const CAT_LABELS = {
   miels:"Miel artisanal", gelules:"Gélules végétales", poudres:"Poudre & graine",
-  huiles:"Huile pure", brumes:"Brume & soin", qamis:"Qamis saoudien", vetements:"Couture femme"
+  huiles:"Huile pure", brumes:"Brume & soin", qamis:"Qamis saoudien", vetements:"Couture femme",
+  chechias:"Chéchia", tahara:"Tahara & Hygiène", parfums:"Parfum & Musc", bakhour:"Bakhour & Encens", bijoux:"Bague & Bijou", chaussures:"Sandales", accessoires:"Accessoire"
 };
 
 const FILTERS = [
   ["all","Tous"],["miels","Miels"],["gelules","Gélules"],["poudres","Poudres & Graines"],
-  ["huiles","Huiles"],["brumes","Brumes"],["qamis","Qamis"],["vetements","Abayas"]
+  ["huiles","Huiles"],["brumes","Brumes"],["qamis","Qamis"],["vetements","Abayas"],
+  ["parfums","Parfums"],["tahara","Tahara"],["bakhour","Bakhour"],["bijoux","Bijoux"],["chaussures","Sandales"],["chechias","Chéchias"],["accessoires","Accessoires"]
 ];
 
 /* ---- COLLECTIONS HOMEPAGE (config centralisée) ---- */
@@ -817,6 +819,13 @@ const COLLECTIONS = [
   {key:"brumes",    title:"Brumes",             desc:"Brumes parfumées pour sublimer l'intérieur et le corps.", cat:"brumes",    type:"category"},
   {key:"qamis",     title:"Qamis",              desc:"L'élégance masculine, entre tradition et raffinement.",   cat:"qamis",     type:"category"},
   {key:"vetements", title:"Abayas & Ensembles", desc:"Pudeur et élégance, pensées pour chaque silhouette.",     cat:"vetements", type:"category"},
+  {key:"parfums",   title:"Parfums & Muscs",    desc:"Muscs, oud et ambres orientaux de Maison Rayeve.",         cat:"parfums",   type:"category"},
+  {key:"tahara",    title:"Tahara & Hygiène",   desc:"Muscs Tahara, packs et coffrets pour la pureté.",          cat:"tahara",    type:"category"},
+  {key:"bakhour",   title:"Bakhour & Encens",   desc:"L'encens traditionnel arabe pour parfumer vos intérieurs.",cat:"bakhour",   type:"category"},
+  {key:"bijoux",    title:"Bagues & Bijoux",    desc:"Bagues orientales serties, élégance et caractère.",        cat:"bijoux",    type:"category"},
+  {key:"chaussures",title:"Sandales",           desc:"Sandales de Médine pour homme, confort et style.",         cat:"chaussures",type:"category"},
+  {key:"chechias",  title:"Chéchias",           desc:"Chéchias du Caire, l'authenticité à porter.",                cat:"chechias",  type:"category"},
+  {key:"accessoires",title:"Accessoires",       desc:"Shemaghs yéménites et pièces d'exception.",                 cat:"accessoires",type:"category"},
   {key:"all",       title:"Tous les Produits",  desc:"Découvrez l'intégralité de la sélection Dar Nūr.",        cat:"all",       type:"all"}
 ];
 
@@ -962,7 +971,110 @@ const PRODUCT_IMAGES = {
   "vt-nissah-noir": ["maison-rayeve-ensemble-nissah-mastoura-noir.jpg","assets/mode/produits/vt-nissah-noir/vt-nissah-noir-02.jpg","assets/mode/produits/vt-nissah-noir/vt-nissah-noir-03.jpg","assets/mode/produits/vt-nissah-noir/vt-nissah-noir-04.jpg","assets/mode/produits/vt-nissah-noir/vt-nissah-noir-05.jpg","assets/mode/produits/vt-nissah-noir/vt-nissah-noir-06.jpg"],
   "vt-nissah-vert": ["maison-rayeve-ensemble-nissah-mastoura-vert-sapin.jpg","assets/mode/produits/vt-nissah-vert/vt-nissah-vert-02.jpg","assets/mode/produits/vt-nissah-vert/vt-nissah-vert-03.jpg","assets/mode/produits/vt-nissah-vert/vt-nissah-vert-04.jpg","assets/mode/produits/vt-nissah-vert/vt-nissah-vert-05.jpg"],
   "vt-nissah-violet": ["maison-rayeve-ensemble-nissah-mastoura-violet.jpg","assets/mode/produits/vt-nissah-violet/vt-nissah-violet-02.jpg","assets/mode/produits/vt-nissah-violet/vt-nissah-violet-03.jpg","assets/mode/produits/vt-nissah-violet/vt-nissah-violet-04.jpg","assets/mode/produits/vt-nissah-violet/vt-nissah-violet-05.jpg"],
-  "vt-nissah-kaki": ["maison-rayeve-ensemble-nissah-moustara-kaki.jpg","assets/mode/produits/vt-nissah-kaki/vt-nissah-kaki-02.jpg","assets/mode/produits/vt-nissah-kaki/vt-nissah-kaki-03.jpg","assets/mode/produits/vt-nissah-kaki/vt-nissah-kaki-04.jpg","assets/mode/produits/vt-nissah-kaki/vt-nissah-kaki-05.jpg"]
+  "vt-nissah-kaki": ["maison-rayeve-ensemble-nissah-moustara-kaki.jpg","assets/mode/produits/vt-nissah-kaki/vt-nissah-kaki-02.jpg","assets/mode/produits/vt-nissah-kaki/vt-nissah-kaki-03.jpg","assets/mode/produits/vt-nissah-kaki/vt-nissah-kaki-04.jpg","assets/mode/produits/vt-nissah-kaki/vt-nissah-kaki-05.jpg"],
+  /* ===== Catalogue fournisseur Maison Rayeve ===== */
+  "rayeve-chechia-cairo-0": ["assets/produits-fournisseur/rayeve-chechia-cairo-0/rayeve-chechia-cairo-0.webp"],
+  "rayeve-chechia-cairo-1": ["assets/produits-fournisseur/rayeve-chechia-cairo-1/rayeve-chechia-cairo-1.webp"],
+  "rayeve-chechia-cairo-2": ["assets/produits-fournisseur/rayeve-chechia-cairo-2/rayeve-chechia-cairo-2.webp"],
+  "rayeve-chechia-cairo-3": ["assets/produits-fournisseur/rayeve-chechia-cairo-3/rayeve-chechia-cairo-3.webp"],
+  "rayeve-chechia-cairo-4": ["assets/produits-fournisseur/rayeve-chechia-cairo-4/rayeve-chechia-cairo-4.webp"],
+  "rayeve-chechia-cairo-5": ["assets/produits-fournisseur/rayeve-chechia-cairo-5/rayeve-chechia-cairo-5.webp"],
+  "rayeve-chechia-cairo-6": ["assets/produits-fournisseur/rayeve-chechia-cairo-6/rayeve-chechia-cairo-6.webp"],
+  "rayeve-pack-tahara-0": ["assets/produits-fournisseur/rayeve-pack-tahara-0/rayeve-pack-tahara-0.webp"],
+  "rayeve-pack-tahara-1": ["assets/produits-fournisseur/rayeve-pack-tahara-1/rayeve-pack-tahara-1.webp"],
+  "rayeve-pack-tahara-2": ["assets/produits-fournisseur/rayeve-pack-tahara-2/rayeve-pack-tahara-2.webp"],
+  "rayeve-musc-tahara-0": ["assets/produits-fournisseur/rayeve-musc-tahara-0/rayeve-musc-tahara-0.webp"],
+  "rayeve-musc-tahara-1": ["assets/produits-fournisseur/rayeve-musc-tahara-1/rayeve-musc-tahara-1.webp"],
+  "rayeve-musc-tahara-2": ["assets/produits-fournisseur/rayeve-musc-tahara-2/rayeve-musc-tahara-2.webp"],
+  "rayeve-parfum-200-0": ["assets/produits-fournisseur/rayeve-parfum-200-0/rayeve-parfum-200-0.webp"],
+  "rayeve-parfum-200-1": ["assets/produits-fournisseur/rayeve-parfum-200-1/rayeve-parfum-200-1.webp"],
+  "rayeve-parfum-200-2": ["assets/produits-fournisseur/rayeve-parfum-200-2/rayeve-parfum-200-2.webp"],
+  "rayeve-parfum-12-6-0": ["assets/produits-fournisseur/rayeve-parfum-12-6-0/rayeve-parfum-12-6-0.webp"],
+  "rayeve-parfum-12-6-1": ["assets/produits-fournisseur/rayeve-parfum-12-6-1/rayeve-parfum-12-6-1.webp"],
+  "rayeve-parfum-12-6-2": ["assets/produits-fournisseur/rayeve-parfum-12-6-2/rayeve-parfum-12-6-2.webp"],
+  "rayeve-bakhour-0": ["assets/produits-fournisseur/rayeve-bakhour-0/rayeve-bakhour-0.webp"],
+  "rayeve-abaya-demi-papillon-0": ["assets/produits-fournisseur/rayeve-abaya-demi-papillon-0/rayeve-abaya-demi-papillon-0.webp"],
+  "rayeve-abaya-demi-papillon-1": ["assets/produits-fournisseur/rayeve-abaya-demi-papillon-1/rayeve-abaya-demi-papillon-1.webp"],
+  "rayeve-abaya-demi-papillon-2": ["assets/produits-fournisseur/rayeve-abaya-demi-papillon-2/rayeve-abaya-demi-papillon-2.webp"],
+  "rayeve-abaya-papillon-0": ["assets/produits-fournisseur/rayeve-abaya-papillon-0/rayeve-abaya-papillon-0.webp"],
+  "rayeve-abaya-papillon-1": ["assets/produits-fournisseur/rayeve-abaya-papillon-1/rayeve-abaya-papillon-1.webp"],
+  "rayeve-abaya-papillon-2": ["assets/produits-fournisseur/rayeve-abaya-papillon-2/rayeve-abaya-papillon-2.webp"],
+  "rayeve-abaya-papillon-3": ["assets/produits-fournisseur/rayeve-abaya-papillon-3/rayeve-abaya-papillon-3.webp"],
+  "rayeve-abaya-papillon-4": ["assets/produits-fournisseur/rayeve-abaya-papillon-4/rayeve-abaya-papillon-4.webp"],
+  "rayeve-abaya-saoudienne-0": ["assets/produits-fournisseur/rayeve-abaya-saoudienne-0/rayeve-abaya-saoudienne-0.webp"],
+  "rayeve-abaya-saoudienne-1": ["assets/produits-fournisseur/rayeve-abaya-saoudienne-1/rayeve-abaya-saoudienne-1.webp"],
+  "rayeve-abaya-saoudienne-2": ["assets/produits-fournisseur/rayeve-abaya-saoudienne-2/rayeve-abaya-saoudienne-2.webp"],
+  "rayeve-abaya-saoudienne-3": ["assets/produits-fournisseur/rayeve-abaya-saoudienne-3/rayeve-abaya-saoudienne-3.webp"],
+  "rayeve-abaya-saoudienne-4": ["assets/produits-fournisseur/rayeve-abaya-saoudienne-4/rayeve-abaya-saoudienne-4.webp"],
+  "rayeve-abaya-saoudienne-5": ["assets/produits-fournisseur/rayeve-abaya-saoudienne-5/rayeve-abaya-saoudienne-5.webp"],
+  "rayeve-abaya-saoudienne-6": ["assets/produits-fournisseur/rayeve-abaya-saoudienne-6/rayeve-abaya-saoudienne-6.webp"],
+  "rayeve-abaya-saoudienne-7": ["assets/produits-fournisseur/rayeve-abaya-saoudienne-7/rayeve-abaya-saoudienne-7.webp"],
+  "rayeve-abaya-saoudienne-8": ["assets/produits-fournisseur/rayeve-abaya-saoudienne-8/rayeve-abaya-saoudienne-8.webp"],
+  "rayeve-abaya-saoudienne-9": ["assets/produits-fournisseur/rayeve-abaya-saoudienne-9/rayeve-abaya-saoudienne-9.webp"],
+  "rayeve-abaya-iltihad-0": ["assets/produits-fournisseur/rayeve-abaya-iltihad-0/rayeve-abaya-iltihad-0.webp"],
+  "rayeve-abaya-iltihad-1": ["assets/produits-fournisseur/rayeve-abaya-iltihad-1/rayeve-abaya-iltihad-1.webp"],
+  "rayeve-abaya-iltihad-2": ["assets/produits-fournisseur/rayeve-abaya-iltihad-2/rayeve-abaya-iltihad-2.webp"],
+  "rayeve-abaya-mme-rayeve-0": ["assets/produits-fournisseur/rayeve-abaya-mme-rayeve-0/rayeve-abaya-mme-rayeve-0.webp"],
+  "rayeve-abaya-mme-rayeve-1": ["assets/produits-fournisseur/rayeve-abaya-mme-rayeve-1/rayeve-abaya-mme-rayeve-1.webp"],
+  "rayeve-abaya-mme-rayeve-2": ["assets/produits-fournisseur/rayeve-abaya-mme-rayeve-2/rayeve-abaya-mme-rayeve-2.webp"],
+  "rayeve-abaya-mme-rayeve-3": ["assets/produits-fournisseur/rayeve-abaya-mme-rayeve-3/rayeve-abaya-mme-rayeve-3.webp"],
+  "rayeve-abaya-chita-0": ["assets/produits-fournisseur/rayeve-abaya-chita-0/rayeve-abaya-chita-0.webp"],
+  "rayeve-abaya-chita-1": ["assets/produits-fournisseur/rayeve-abaya-chita-1/rayeve-abaya-chita-1.webp"],
+  "rayeve-abaya-chita-2": ["assets/produits-fournisseur/rayeve-abaya-chita-2/rayeve-abaya-chita-2.webp"],
+  "rayeve-abaya-chita-3": ["assets/produits-fournisseur/rayeve-abaya-chita-3/rayeve-abaya-chita-3.webp"],
+  "rayeve-abaya-chita-4": ["assets/produits-fournisseur/rayeve-abaya-chita-4/rayeve-abaya-chita-4.webp"],
+  "rayeve-abaya-chita-5": ["assets/produits-fournisseur/rayeve-abaya-chita-5/rayeve-abaya-chita-5.webp"],
+  "rayeve-abaya-kimono-seyra-0": ["assets/produits-fournisseur/rayeve-abaya-kimono-seyra-0/rayeve-abaya-kimono-seyra-0.webp"],
+  "rayeve-abaya-kimono-seyra-1": ["assets/produits-fournisseur/rayeve-abaya-kimono-seyra-1/rayeve-abaya-kimono-seyra-1.webp"],
+  "rayeve-abaya-kimono-seyra-2": ["assets/produits-fournisseur/rayeve-abaya-kimono-seyra-2/rayeve-abaya-kimono-seyra-2.webp"],
+  "rayeve-abaya-nilla-0": ["assets/produits-fournisseur/rayeve-abaya-nilla-0/rayeve-abaya-nilla-0.webp"],
+  "rayeve-abaya-nilla-1": ["assets/produits-fournisseur/rayeve-abaya-nilla-1/rayeve-abaya-nilla-1.webp"],
+  "rayeve-abaya-nilla-2": ["assets/produits-fournisseur/rayeve-abaya-nilla-2/rayeve-abaya-nilla-2.webp"],
+  "rayeve-abaya-nilla-3": ["assets/produits-fournisseur/rayeve-abaya-nilla-3/rayeve-abaya-nilla-3.webp"],
+  "rayeve-abaya-nilla-4": ["assets/produits-fournisseur/rayeve-abaya-nilla-4/rayeve-abaya-nilla-4.webp"],
+  "rayeve-abaya-nilla-5": ["assets/produits-fournisseur/rayeve-abaya-nilla-5/rayeve-abaya-nilla-5.webp"],
+  "rayeve-sandale-homme-0": ["assets/produits-fournisseur/rayeve-sandale-homme-0/rayeve-sandale-homme-0.webp"],
+  "rayeve-sandale-homme-1": ["assets/produits-fournisseur/rayeve-sandale-homme-1/rayeve-sandale-homme-1.webp"],
+  "rayeve-sandale-homme-2": ["assets/produits-fournisseur/rayeve-sandale-homme-2/rayeve-sandale-homme-2.webp"],
+  "rayeve-sandale-homme-3": ["assets/produits-fournisseur/rayeve-sandale-homme-3/rayeve-sandale-homme-3.webp"],
+  "rayeve-sandale-homme-4": ["assets/produits-fournisseur/rayeve-sandale-homme-4/rayeve-sandale-homme-4.webp"],
+  "rayeve-sandale-homme-5": ["assets/produits-fournisseur/rayeve-sandale-homme-5/rayeve-sandale-homme-5.webp"],
+  "rayeve-sandale-homme-6": ["assets/produits-fournisseur/rayeve-sandale-homme-6/rayeve-sandale-homme-6.webp"],
+  "rayeve-sandale-homme-7": ["assets/produits-fournisseur/rayeve-sandale-homme-7/rayeve-sandale-homme-7.webp"],
+  "rayeve-sandale-homme-8": ["assets/produits-fournisseur/rayeve-sandale-homme-8/rayeve-sandale-homme-8.webp"],
+  "rayeve-sandale-homme-10": ["assets/produits-fournisseur/rayeve-sandale-homme-10/rayeve-sandale-homme-10.webp"],
+  "rayeve-sandale-homme-11": ["assets/produits-fournisseur/rayeve-sandale-homme-11/rayeve-sandale-homme-11.webp"],
+  "rayeve-lot-nissah-0": ["assets/produits-fournisseur/rayeve-lot-nissah-0/rayeve-lot-nissah-0.webp"],
+  "rayeve-lot-nissah-1": ["assets/produits-fournisseur/rayeve-lot-nissah-1/rayeve-lot-nissah-1.webp"],
+  "rayeve-bague-sultan-0": ["assets/produits-fournisseur/rayeve-bague-sultan-0/rayeve-bague-sultan-0.webp"],
+  "rayeve-bague-sultan-1": ["assets/produits-fournisseur/rayeve-bague-sultan-1/rayeve-bague-sultan-1.webp"],
+  "rayeve-bague-sultan-2": ["assets/produits-fournisseur/rayeve-bague-sultan-2/rayeve-bague-sultan-2.webp"],
+  "rayeve-bague-sultan-3": ["assets/produits-fournisseur/rayeve-bague-sultan-3/rayeve-bague-sultan-3.webp"],
+  "rayeve-bague-ali-0": ["assets/produits-fournisseur/rayeve-bague-ali-0/rayeve-bague-ali-0.webp"],
+  "rayeve-bague-ali-1": ["assets/produits-fournisseur/rayeve-bague-ali-1/rayeve-bague-ali-1.webp"],
+  "rayeve-bague-ali-2": ["assets/produits-fournisseur/rayeve-bague-ali-2/rayeve-bague-ali-2.webp"],
+  "rayeve-bague-ali-3": ["assets/produits-fournisseur/rayeve-bague-ali-3/rayeve-bague-ali-3.webp"],
+  "rayeve-bague-ali-4": ["assets/produits-fournisseur/rayeve-bague-ali-4/rayeve-bague-ali-4.webp"],
+  "rayeve-bague-houdeyfa-0": ["assets/produits-fournisseur/rayeve-bague-houdeyfa-0/rayeve-bague-houdeyfa-0.webp"],
+  "rayeve-bague-houdeyfa-1": ["assets/produits-fournisseur/rayeve-bague-houdeyfa-1/rayeve-bague-houdeyfa-1.webp"],
+  "rayeve-bague-houdeyfa-2": ["assets/produits-fournisseur/rayeve-bague-houdeyfa-2/rayeve-bague-houdeyfa-2.webp"],
+  "rayeve-bague-houdeyfa-3": ["assets/produits-fournisseur/rayeve-bague-houdeyfa-3/rayeve-bague-houdeyfa-3.webp"],
+  "rayeve-qamiss-sultan-saphir-0": ["assets/produits-fournisseur/rayeve-qamiss-sultan-saphir-0/rayeve-qamiss-sultan-saphir-0.webp"],
+  "rayeve-qamiss-sultan-saphir-1": ["assets/produits-fournisseur/rayeve-qamiss-sultan-saphir-1/rayeve-qamiss-sultan-saphir-1.webp"],
+  "rayeve-qamiss-sultan-saphir-2": ["assets/produits-fournisseur/rayeve-qamiss-sultan-saphir-2/rayeve-qamiss-sultan-saphir-2.webp"],
+  "rayeve-qamiss-sultan-saphir-3": ["assets/produits-fournisseur/rayeve-qamiss-sultan-saphir-3/rayeve-qamiss-sultan-saphir-3.webp"],
+  "rayeve-sheymagh-0": ["assets/produits-fournisseur/rayeve-sheymagh-0/rayeve-sheymagh-0.webp"],
+  "rayeve-sheymagh-1": ["assets/produits-fournisseur/rayeve-sheymagh-1/rayeve-sheymagh-1.webp"],
+  "rayeve-sheymagh-2": ["assets/produits-fournisseur/rayeve-sheymagh-2/rayeve-sheymagh-2.webp"],
+  "rayeve-miel-nigelle-hibiscus": ["assets/produits-fournisseur/rayeve-miel-nigelle-hibiscus/rayeve-miel-nigelle-hibiscus.webp"],
+  "rayeve-bague-el-emir-brown-diamond": ["assets/produits-fournisseur/rayeve-bague-el-emir-brown-diamond/rayeve-bague-el-emir-brown-diamond.webp"],
+  "rayeve-rose-imperial-valley": ["assets/produits-fournisseur/rayeve-rose-imperial-valley/rayeve-rose-imperial-valley.webp"],
+  "rayeve-bague-el-emir-medina": ["assets/produits-fournisseur/rayeve-bague-el-emir-medina/rayeve-bague-el-emir-medina.webp"],
+  "rayeve-ismid-medine": ["assets/produits-fournisseur/rayeve-ismid-medine/rayeve-ismid-medine.webp"],
+  "rayeve-musc-tahara-grenade": ["assets/produits-fournisseur/rayeve-musc-tahara-grenade/rayeve-musc-tahara-grenade.webp"],
+  "rayeve-poudre-de-sidr-50g": ["assets/produits-fournisseur/rayeve-poudre-de-sidr-50g/rayeve-poudre-de-sidr-50g.webp"],
+  "rayeve-bague-emir-el-medina-brown": ["assets/produits-fournisseur/rayeve-bague-emir-el-medina-brown/rayeve-bague-emir-el-medina-brown.webp"],
+  "rayeve-pack-tahara-abyad": ["assets/produits-fournisseur/rayeve-pack-tahara-abyad/rayeve-pack-tahara-abyad.webp"],
 };
 const getProductImages = id=>PRODUCT_IMAGES[id] || [];
 const getProductCardImage = id=>getProductImages(id)[0] || null;
@@ -1572,7 +1684,110 @@ const PRODUCTS = [
    desc:["Un ensemble Nissah Mastoura dans un kaki naturel et élégant, couvrant et confortable pour le quotidien.","Couture artisanale élaborée au Maroc, dans le respect du savoir-faire traditionnel."],
    benefits:["Kaki naturel et sobre","Couvrant et pudique","Confortable au quotidien","Couture artisanale marocaine"],
    compo:"Ensemble Nissah Mastoura — couture artisanale",prov:"Maroc",
-   uso:"Précisez votre taille lors de la commande.",price:fixed("59,99")}
+   uso:"Précisez votre taille lors de la commande.",price:fixed("59,99")},
+  /* ===== Catalogue fournisseur Maison Rayeve (import WhatsApp) ===== */
+  {id:"rayeve-chechia-cairo-0",cat:"chechias",name:"Chechia Cairo Blanc",tagline:"",desc:[],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("7,99")},
+  {id:"rayeve-chechia-cairo-1",cat:"chechias",name:"Chechia Cairo Noir",tagline:"",desc:[],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("7,99")},
+  {id:"rayeve-chechia-cairo-2",cat:"chechias",name:"Chechia Cairo Marron",tagline:"",desc:[],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("7,99")},
+  {id:"rayeve-chechia-cairo-3",cat:"chechias",name:"Chechia Cairo Bleu",tagline:"",desc:[],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("7,99")},
+  {id:"rayeve-chechia-cairo-4",cat:"chechias",name:"Chechia Cairo Vert",tagline:"",desc:[],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("7,99")},
+  {id:"rayeve-chechia-cairo-5",cat:"chechias",name:"Chechia Cairo Gris Clair",tagline:"",desc:[],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("7,99")},
+  {id:"rayeve-chechia-cairo-6",cat:"chechias",name:"Chechia Cairo Beige",tagline:"",desc:[],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("7,99")},
+  {id:"rayeve-pack-tahara-0",cat:"tahara",name:"Pack Tahara Sabaya",tagline:"",desc:[],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("19,99")},
+  {id:"rayeve-pack-tahara-1",cat:"tahara",name:"Pack Tahara Aswad",tagline:"",desc:[],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("19,99")},
+  {id:"rayeve-pack-tahara-2",cat:"tahara",name:"Pack Tahara Lavande",tagline:"",desc:[],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("19,99")},
+  {id:"rayeve-musc-tahara-0",cat:"tahara",name:"Musc Tahara Lavande 6ml",tagline:"",desc:["Le musc Tahara, également appelé musc blanc ou musc intime, est un parfum traditionnel originaire du Moyen-Orient. Il est utilisé principalement pour l'hygiène intime féminine et symbolise la pureté, comme son nom l'indique en arabe. Ce produit, souvent sans alcool, se présente sous une texture épaisse et blanche. Il est apprécié pour ses propriétés purifiantes, apaisantes et odorantes, offrant un parfum subtil rappelant le propre. Traditionnellement, il est employé après les ablutions ou les menstruations pour parfumer et purifier le corps"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("8,99")},
+  {id:"rayeve-musc-tahara-1",cat:"tahara",name:"Musc Tahara White 6ml",tagline:"",desc:["Le musc Tahara, également appelé musc blanc ou musc intime, est un parfum traditionnel originaire du Moyen-Orient. Il est utilisé principalement pour l'hygiène intime féminine et symbolise la pureté, comme son nom l'indique en arabe. Ce produit, souvent sans alcool, se présente sous une texture épaisse et blanche. Il est apprécié pour ses propriétés purifiantes, apaisantes et odorantes, offrant un parfum subtil rappelant le propre. Traditionnellement, il est employé après les ablutions ou les menstruations pour parfumer et purifier le corps"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("8,99")},
+  {id:"rayeve-musc-tahara-2",cat:"tahara",name:"Musc Tahara Blueberry 6ml",tagline:"",desc:["Le musc Tahara, également appelé musc blanc ou musc intime, est un parfum traditionnel originaire du Moyen-Orient. Il est utilisé principalement pour l'hygiène intime féminine et symbolise la pureté, comme son nom l'indique en arabe. Ce produit, souvent sans alcool, se présente sous une texture épaisse et blanche. Il est apprécié pour ses propriétés purifiantes, apaisantes et odorantes, offrant un parfum subtil rappelant le propre. Traditionnellement, il est employé après les ablutions ou les menstruations pour parfumer et purifier le corps"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("8,99")},
+  {id:"rayeve-parfum-200-0",cat:"parfums",name:"Ameer el oud Original 100 ML",tagline:"",desc:["Ameer Al Oud Original est un parfum caractérisé par des notes boisées d'oud, de vanille et de sucre. Conçu pour les occasions spéciales, ce parfum offre une fragrance intense et sophistiquée, idéal pour l'automne et l'hiver. Sa composition complexe combine des notes de bois d'agar, de vanille et de bois de santal, créant un sillage chaleureux et mémorable"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("29,99")},
+  {id:"rayeve-parfum-200-1",cat:"parfums",name:"L'ambre Rose",tagline:"",desc:["Avec l' Ambre Rosé plongez dans la chaleur opulente de l'ambre, enveloppante et réconfortante, sublimée par des notes de fond douces et poudrées. Ce parfum prend vie à travers des accords élégants qui oscillent entre la profondeur boisée et la douceur ambrée, laissant derrière lui un sillage chaleureux et irrésistiblement séduisant."],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("49,99")},
+  {id:"rayeve-parfum-200-2",cat:"parfums",name:"L'ambre Brut",tagline:"",desc:["L'ambré brut est un parfum oriental boisé lancé en. Il offre un voyage olfactif captivant avec des notes de bergamote de Sicile, poivre rose et davana en tête, ambre blanche et oud au cœur, et une base de cuir, musc et vétiver d'Haïti. Cette fragrance sophistiquée évoque des paysages contrastés, mêlant fraîcheur et chaleur, pour un sillage élégant et séduisant."],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("49,99")},
+  {id:"rayeve-parfum-12-6-0",cat:"parfums",name:"Musc Wardiaa 6ml",tagline:"",desc:["Le Musc Wardiaa reflète l'élégance et estcaptivant. Un voile de rose délicate enveloppé d'un musc velouté et chaleureux. Élégant, envoûtant, légèrement mystérieux. Un parfum doux et sucré."],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("11,99")},
+  {id:"rayeve-parfum-12-6-1",cat:"parfums",name:"Musc Rose 6ml",tagline:"",desc:["Un parfum oriental , alliant la délicatesse de la rose aux notes profondes du musc. Composition complexe et sensuelle, il séduit par sa polyvalence et son sillage envoûtant, transcendant les codes traditionnels de la parfumerie."],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("17,99")},
+  {id:"rayeve-parfum-12-6-2",cat:"parfums",name:"Oud El Medina (Al Mukhalat) 12ml",tagline:"",desc:["Le Oud El Medina (Al Mukhalat) est un parfum oriental mixte, offrant une expérience olfactive unique avec des notes de oud indien, musc naturel, rose, santal, et ambre rosé. Ce parfum de 12 ml évoque la spiritualité et l'élégance, idéal pour un usage quotidien ou des occasions spéciales"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("34,99")},
+  {id:"rayeve-bakhour-0",cat:"bakhour",name:"Bakhur Mukhalat",tagline:"",desc:["Le Bakhur Mukhalat est un encens traditionnel arabe, composé de bois précieux, de résines et d'essences parfumées. Sa fragrance complexe mêle des notes de bois d'oud, de rose et de musc, créant une atmosphère riche et enveloppante. Utilisé pour parfumer les intérieurs et lors de cérémonies, il symbolise l'hospitalité et la spiritualité du monde arabe, se consumant sur des charbons ardents pour libérer son parfum subtil et profond."],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("24,99")},
+  {id:"rayeve-abaya-demi-papillon-0",cat:"vetements",name:"Abaya Nouha",tagline:"Abaya Demi-papillon",desc:["Abaya Demi-papillon"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("79,90")},
+  {id:"rayeve-abaya-demi-papillon-1",cat:"vetements",name:"Abaya Nouha",tagline:"Abaya Demi papillon",desc:["Abaya Demi papillon"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("79,90")},
+  {id:"rayeve-abaya-demi-papillon-2",cat:"vetements",name:"Abaya Nouha",tagline:"Abaya Demi papillon brique satiné",desc:["Abaya Demi papillon brique satiné"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("79,90")},
+  {id:"rayeve-abaya-papillon-0",cat:"vetements",name:"Abaya Farasha",tagline:"Abaya Farasha taupe & Noire",desc:["Abaya Farasha taupe & Noire"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("59,90")},
+  {id:"rayeve-abaya-papillon-1",cat:"vetements",name:"Abaya Farasha",tagline:"Abaya Farasha kimono black",desc:["Abaya Farasha kimono black"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("59,90")},
+  {id:"rayeve-abaya-papillon-2",cat:"vetements",name:"Abaya Farasha",tagline:"Abaya saoudienne Bleu",desc:["Abaya saoudienne Bleu"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("59,90")},
+  {id:"rayeve-abaya-papillon-3",cat:"vetements",name:"Abaya Farasha (brodé) mole",tagline:"Abaya Farasha Médine",desc:["Abaya Farasha Médine"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("59,90")},
+  {id:"rayeve-abaya-papillon-4",cat:"vetements",name:"Abaya Farasha (Brodé) Black",tagline:"Abaya Farasha Médine",desc:["Abaya Farasha Médine"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("59,90")},
+  {id:"rayeve-abaya-saoudienne-0",cat:"vetements",name:"Abaya Roumeyssa",tagline:"Abaya saoudienne/kimono marron caramel",desc:["Abaya saoudienne/kimono marron caramel T-unique"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("64,90")},
+  {id:"rayeve-abaya-saoudienne-1",cat:"vetements",name:"Abaya Roumeyssa",tagline:"Abaya saoudienne/kimono taupe & Or",desc:["Abaya saoudienne/kimono taupe & Or T-unique"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("64,90")},
+  {id:"rayeve-abaya-saoudienne-2",cat:"vetements",name:"Abaya Roumeyssa",tagline:"Abaya saoudienne/kimono bleu anthracite",desc:["Abaya saoudienne/kimono bleu anthracite T-unique"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("64,90")},
+  {id:"rayeve-abaya-saoudienne-3",cat:"vetements",name:"Abaya Roumeyssa",tagline:"Abaya saoudienne/kimono Aubergine & or",desc:["Abaya saoudienne/kimono Aubergine & or T-unique"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("64,90")},
+  {id:"rayeve-abaya-saoudienne-4",cat:"vetements",name:"Abaya Roumeyssa",tagline:"Abaya saoudienne/kimono beige poudré",desc:["Abaya saoudienne/kimono beige poudré T-unique"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("64,90")},
+  {id:"rayeve-abaya-saoudienne-5",cat:"vetements",name:"Abaya Roumeyssa",tagline:"Abaya saoudienne/kimono Vert Eau",desc:["Abaya saoudienne/kimono Vert Eau T-unique"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("64,90")},
+  {id:"rayeve-abaya-saoudienne-6",cat:"vetements",name:"Abaya Roumeyssa",tagline:"Abaya saoudienne/kimono blanc & Or",desc:["Abaya saoudienne/kimono blanc & Or T-unique"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("64,90")},
+  {id:"rayeve-abaya-saoudienne-7",cat:"vetements",name:"Abaya Roumeyssa",tagline:"Abaya saoudienne/kimono gris souris",desc:["Abaya saoudienne/kimono gris souris T-unique"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("64,90")},
+  {id:"rayeve-abaya-saoudienne-8",cat:"vetements",name:"Abaya Roumeyssa",tagline:"Abaya saoudienne/kimono Bleu Marine",desc:["Abaya saoudienne/kimono Bleu Marine T-unique"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("64,90")},
+  {id:"rayeve-abaya-saoudienne-9",cat:"vetements",name:"Abaya Roumeyssa",tagline:"Abaya saoudienne/kimono beige clair",desc:["Abaya saoudienne/kimono beige clair T-unique"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("64,90")},
+  {id:"rayeve-abaya-iltihad-0",cat:"vetements",name:"Abaya Iltihad",tagline:"Abaya deux côtés/Robes événementiel",desc:["Abaya deux côtés/Robes événementiel"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("79,90")},
+  {id:"rayeve-abaya-iltihad-1",cat:"vetements",name:"Abaya Iltihad",tagline:"Abaya deux côtés/Robes événementiel",desc:["Abaya deux côtés/Robes événementiel"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("79,90")},
+  {id:"rayeve-abaya-iltihad-2",cat:"vetements",name:"Abaya Iltihad",tagline:"Abaya deux côtés/Robes événementiel",desc:["Abaya deux côtés/Robes événementiel"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("79,90")},
+  {id:"rayeve-abaya-mme-rayeve-0",cat:"vetements",name:"Abaya Mme Rayeve Black and green",tagline:"Abaya 4 Pièces",desc:["Abaya 4 Pièces -Cape Abaya -Jupe taille haute -Foulard 2M -Ceinture"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("120,00")},
+  {id:"rayeve-abaya-mme-rayeve-1",cat:"vetements",name:"Abaya Mme Rayeve White and Black",tagline:"Abaya 4 Pièces",desc:["Abaya 4 Pièces -Cape Abaya -Jupe taille haute -Foulard 2M -Ceinture"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("120,00")},
+  {id:"rayeve-abaya-mme-rayeve-2",cat:"vetements",name:"Abaya Mme Rayeve Black and Rad",tagline:"Abaya 4 Pièces",desc:["Abaya 4 Pièces -Cape Abaya -Jupe taille haute -Foulard 2M -Ceinture"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("120,00")},
+  {id:"rayeve-abaya-mme-rayeve-3",cat:"vetements",name:"Abaya Mme Rayeve l'effet papillon",tagline:"Abaya l'effet papillon",desc:["Abaya l'effet papillon -Cape Abaya -jupe taille haute broderie à la main -foulard 2M broderie"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("135,00")},
+  {id:"rayeve-abaya-chita-0",cat:"vetements",name:"Abaya chita (Pink)",tagline:"Abaya Hivernale",desc:["Abaya Hivernale"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("44,90")},
+  {id:"rayeve-abaya-chita-1",cat:"vetements",name:"Abaya chita (brown)",tagline:"Abaya Hivernale",desc:["Abaya Hivernale"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("44,90")},
+  {id:"rayeve-abaya-chita-2",cat:"vetements",name:"Abaya Chita (Red)",tagline:"Abaya Hivernale",desc:["Abaya Hivernale"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("44,90")},
+  {id:"rayeve-abaya-chita-3",cat:"vetements",name:"Abaya Chita (Royal blue)",tagline:"Abaya Hivernale",desc:["Abaya Hivernale"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("44,90")},
+  {id:"rayeve-abaya-chita-4",cat:"vetements",name:"Abaya chita (Water green)",tagline:"Abaya Hivernale",desc:["Abaya Hivernale"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("44,90")},
+  {id:"rayeve-abaya-chita-5",cat:"vetements",name:"Abaya Chita (eggplant)",tagline:"Abaya Hivernale",desc:["Abaya Hivernale"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("44,90")},
+  {id:"rayeve-abaya-kimono-seyra-0",cat:"vetements",name:"Abaya kimono Seyra Médine (Black And Gray)",tagline:"Abaya Seyra Médine (chic et élégante)",desc:["Abaya Seyra Médine (chic et élégante)"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("69,90")},
+  {id:"rayeve-abaya-kimono-seyra-1",cat:"vetements",name:"Abaya kimono Seyra (Black And Brown)",tagline:"Abaya Seyra Médine",desc:["Abaya Seyra Médine"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("69,90")},
+  {id:"rayeve-abaya-kimono-seyra-2",cat:"vetements",name:"Abaya kimono Seyra Médine (Black)",tagline:"Abaya Seyra de Médine",desc:["Abaya Seyra de Médine"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("69,90")},
+  {id:"rayeve-abaya-nilla-0",cat:"vetements",name:"Abaya Nilla white and Gold",tagline:"Abaya Nilla Egytptian Foustan",desc:["Abaya Nilla Egytptian Foustan"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("39,90")},
+  {id:"rayeve-abaya-nilla-1",cat:"vetements",name:"Abaya Nilla white and Gold",tagline:"Abaya Nilla Egytptian Foustan",desc:["Abaya Nilla Egytptian Foustan"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("39,90")},
+  {id:"rayeve-abaya-nilla-2",cat:"vetements",name:"Abaya Nilla white and Gold",tagline:"Abaya Nilla Egytptian Foustan",desc:["Abaya Nilla Egytptian Foustan"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("39,90")},
+  {id:"rayeve-abaya-nilla-3",cat:"vetements",name:"Abaya Nilla white and Gold",tagline:"Abaya Nilla Egytptian Foustan",desc:["Abaya Nilla Egytptian Foustan"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("39,90")},
+  {id:"rayeve-abaya-nilla-4",cat:"vetements",name:"Abaya Nilla white and Gold 2",tagline:"Abaya Nilla Egytptian Foustan",desc:["Abaya Nilla Egytptian Foustan"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("39,90")},
+  {id:"rayeve-abaya-nilla-5",cat:"vetements",name:"Abaya Nilla white and Gold",tagline:"Abaya Nilla Egytptian Foustan",desc:["Abaya Nilla Egytptian Foustan"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("39,90")},
+  {id:"rayeve-sandale-homme-0",cat:"chaussures",name:"Sandale Comera white (Homme)",tagline:"Sandale el Médina",desc:["Sandale el Médina"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("29,90")},
+  {id:"rayeve-sandale-homme-1",cat:"chaussures",name:"Sandale Comera Beige (homme)",tagline:"Sandales de Médine",desc:["Sandales de Médine"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("29,90")},
+  {id:"rayeve-sandale-homme-2",cat:"chaussures",name:"Sandale Comera (beige and rail) Homme",tagline:"Sandale el Médina",desc:["Sandale el Médina"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("29,90")},
+  {id:"rayeve-sandale-homme-3",cat:"chaussures",name:"Sandale Comera (military green) Homme",tagline:"Sandale el Médina",desc:["Sandale el Médina"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("29,90")},
+  {id:"rayeve-sandale-homme-4",cat:"chaussures",name:"Sandale Comera Black (Homme)",tagline:"Sandale de Médine",desc:["Sandale de Médine"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("29,90")},
+  {id:"rayeve-sandale-homme-5",cat:"chaussures",name:"Sandales Comera Brown (Homme)",tagline:"Sandale de Médine",desc:["Sandale de Médine"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("29,90")},
+  {id:"rayeve-sandale-homme-6",cat:"chaussures",name:"Sandale Comera Black And White Homme",tagline:"Sandale el Medina",desc:["Sandale el Medina"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("29,90")},
+  {id:"rayeve-sandale-homme-7",cat:"chaussures",name:"Sandale Étique (Homme)",tagline:"Sandale Étique El Médine",desc:["Sandale Étique El Médine"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("29,90")},
+  {id:"rayeve-sandale-homme-8",cat:"chaussures",name:"Sandales Comera (navy blue) Homme",tagline:"Sandale de Médine",desc:["Sandale de Médine"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("29,90")},
+  {id:"rayeve-sandale-homme-10",cat:"chaussures",name:"Sandales Chujara Brown (Homme)",tagline:"Sandale el Médina",desc:["Sandale el Médina"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("29,90")},
+  {id:"rayeve-sandale-homme-11",cat:"chaussures",name:"Sandale hayat (Homme)",tagline:"Sandale Hayat El Médine",desc:["Sandale Hayat El Médine"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("29,90")},
+  {id:"rayeve-lot-nissah-0",cat:"tahara",name:"Lot Nissah Mastoura",tagline:"",desc:["Lot Nissah Mastoura -Niqab -gant -bas-collant -Musc Tahara -chapelet"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("29,90")},
+  {id:"rayeve-lot-nissah-1",cat:"tahara",name:"Coffret Tahara (El Makhmariya)",tagline:"Coffret Tahara",desc:["Coffret Tahara -Musc intime -Musc corporelle -chapelet"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("15,00")},
+  {id:"rayeve-bague-sultan-0",cat:"bijoux",name:"Bague Sultan (Black Saphir)",tagline:"Bague Sultan Black Saphir",desc:["Bague Sultan Black Saphir"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("19,90")},
+  {id:"rayeve-bague-sultan-1",cat:"bijoux",name:"Bague Sultan (green saphir)",tagline:"",desc:[],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("19,90")},
+  {id:"rayeve-bague-sultan-2",cat:"bijoux",name:"Bague Sultan (saphir orange)",tagline:"Bague Sultan saphir orange",desc:["Bague Sultan saphir orange Saphir turquoise"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("19,90")},
+  {id:"rayeve-bague-sultan-3",cat:"bijoux",name:"Bague Sultan (Red Saphir)",tagline:"",desc:[],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("19,90")},
+  {id:"rayeve-bague-ali-0",cat:"bijoux",name:"Bague Ali El Khalifa (Gray Diamond)",tagline:"Bague Ali el khalifa gray Diamond",desc:["Bague Ali el khalifa gray Diamond"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("19,90")},
+  {id:"rayeve-bague-ali-1",cat:"bijoux",name:"Bague Ali El Khalifa (Green Saphir)",tagline:"Bague El khalifa Green Saphir",desc:["Bague El khalifa Green Saphir"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("19,90")},
+  {id:"rayeve-bague-ali-2",cat:"bijoux",name:"Bague Ali (Blue Diamond)",tagline:"Bague Ali el khalifa Blue Diamond",desc:["Bague Ali el khalifa Blue Diamond"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("19,90")},
+  {id:"rayeve-bague-ali-3",cat:"bijoux",name:"Bague Ali El Khalifa (Turquoise Saphir)",tagline:"Bague Ali El Khalifa Turquoise Saphir",desc:["Bague Ali El Khalifa Turquoise Saphir"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("19,90")},
+  {id:"rayeve-bague-ali-4",cat:"bijoux",name:"Bague Ali El Khalifa (Green Saphir)",tagline:"Bague",desc:["Bague"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("19,90")},
+  {id:"rayeve-bague-houdeyfa-0",cat:"bijoux",name:"Bague Houdeyfa (Black Diamond)",tagline:"Bague Houdeyfa (Black Diamond) Sultana",desc:["Bague Houdeyfa (Black Diamond) Sultana"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("19,90")},
+  {id:"rayeve-bague-houdeyfa-1",cat:"bijoux",name:"Bague Houdeyfa (Blue Diamond)",tagline:"Bague Blue Diamond Du sultan",desc:["Bague Blue Diamond Du sultan"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("19,90")},
+  {id:"rayeve-bague-houdeyfa-2",cat:"bijoux",name:"Bague Houdeyfa (Red Diamond)",tagline:"",desc:[],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("19,90")},
+  {id:"rayeve-bague-houdeyfa-3",cat:"bijoux",name:"Bague Houdeyfa (Mirror Diamond)",tagline:"Bague Houdeyfa El Sultan",desc:["Bague Houdeyfa El Sultan"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("19,90")},
+  {id:"rayeve-qamiss-sultan-saphir-0",cat:"qamis",name:"Qamiss Sultan saphir",tagline:"Qamiss noire et moutarde",desc:["Qamiss noire et moutarde"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("64,90")},
+  {id:"rayeve-qamiss-sultan-saphir-1",cat:"qamis",name:"Qamiss Sultan saphir",tagline:"Qamiss Sultan saphir bleu Ciel",desc:["Qamiss Sultan saphir bleu Ciel"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("59,90")},
+  {id:"rayeve-qamiss-sultan-saphir-2",cat:"qamis",name:"Qamiss Sultan saphir",tagline:"Qamiss Sultan saphir beige",desc:["Qamiss Sultan saphir beige"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("59,90")},
+  {id:"rayeve-qamiss-sultan-saphir-3",cat:"qamis",name:"Qamiss Sultan saphir",tagline:"Qamiss Sultan saphir black satiné",desc:["Qamiss Sultan saphir black satiné"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("64,90")},
+  {id:"rayeve-sheymagh-0",cat:"accessoires",name:"Sheymaghs yéménite motif saoudien",tagline:"",desc:["Le shemagh yéménite est bien plus qu'un simple accessoire : il incarne l'élégance, la tradition et le raffinement. Son tissage délicat et ses motifs uniques en font une pièce d'exception qui ajoute une touche de noblesse à votre tenue. Porté avec prestance, il sublime votre allure et vous confère une aura royale. Une véritable signature de style et d'authenticité"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("29,99")},
+  {id:"rayeve-sheymagh-1",cat:"accessoires",name:"Sheymagh imprimer",tagline:"",desc:["Le shemagh yéménite est bien plus qu'un simple accessoire : il incarne l'élégance, la tradition et le raffinement. Son tissage délicat et ses motifs uniques en font une pièce d'exception qui ajoute une touche de noblesse à votre tenue. Porté avec prestance, il sublime votre allure et vous confère une aura royale. Une véritable signature de style et d'authenticité"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("26,99")},
+  {id:"rayeve-sheymagh-2",cat:"accessoires",name:"Sheymagh yéménite brodé",tagline:"",desc:["Le shemagh yéménite est bien plus qu'un simple accessoire : il incarne l'élégance, la tradition et le raffinement. Son tissage délicat et ses motifs uniques en font une pièce d'exception qui ajoute une touche de noblesse à votre tenue. Porté avec prestance, il sublime votre allure et vous confère une aura royale. Une véritable signature de style et d'authenticité"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("29,99")},
+  {id:"rayeve-miel-nigelle-hibiscus",cat:"miels",name:"Miel Nigelle & Hibiscus",tagline:"Miel Hibiscus Nigelle",desc:["Miel Hibiscus Nigelle"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("25,00")},
+  {id:"rayeve-bague-el-emir-brown-diamond",cat:"bijoux",name:"Bague El Émir (Brown Diamond)",tagline:"",desc:[],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("19,90")},
+  {id:"rayeve-rose-imperial-valley",cat:"parfums",name:"Rosé de l'impérial valley",tagline:"Parfum impérial valley 200ML",desc:["Parfum impérial valley 200ML. L'ambré brut est un parfum oriental boisé lancé en. Il offre un voyage olfactif captivant avec des notes de bergamote de Sicile, poivre rose et davana en tête, ambre blanche et oud au cœur, et une base de cuir, musc et vétiver d'Haïti. Cette fragrance sophistiquée évoque des paysages contrastés, mêlant fraîcheur et chaleur, pour un sillage élégant et séduisant."],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("49,90")},
+  {id:"rayeve-bague-el-emir-medina",cat:"bijoux",name:"Bague El Émir",tagline:"Bague El Émir Médina",desc:["Bague El Émir Médina"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("19,90")},
+  {id:"rayeve-ismid-medine",cat:"poudres",name:"Ismid de Médine",tagline:"",desc:["L'ismid (ou ithmid) est un khôl traditionnel souvent utilisé en médecine prophétique et en cosmétique, principalement dans les pays arabes et asiatiques. Il est généralement composé de sulfure d'antimoine et parfois d'autres minéraux. Voici quelques-uns de ses bienfaits supposés : 1. Amélioration de la vision : selon certaines traditions, l'application régulière d'ismid sur les paupières renforcerait la vue et protégerait les yeux contre les infections. 2. Traitement des maladies oculaires : il est réputé pour aider contre les irritations, les rougeurs et certains problèmes comme la conjonctivite. 3. Renforcement et croissance des cils : il favoriserait la pousse des cils et les rendrait plus épais. 4. Propriétés antibactériennes : il aide à protéger les yeux contre certaines bactéries et infections. 5. Utilisation cosmétique : il donne un regard intense et était utilisé comme maquillage naturel depuis l'Antiquité. 6. Propriétés anti-inflammatoires : certains affirment qu'il peut réduire les inflammations des yeux. Précautions d'utilisation : il est important d'utiliser un ismid pur et naturel, car certains produits contrefaits peuvent contenir des métaux lourds dangereux. Son utilisation est déconseillée aux personnes allergiques aux minéraux ou souffrant de problèmes oculaires graves sans avis médical."],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("6,90")},
+  {id:"rayeve-musc-tahara-grenade",cat:"tahara",name:"Musc Tahara Grenade 6ml",tagline:"",desc:["Le musc Tahara, également appelé musc blanc ou musc intime, est un parfum traditionnel originaire du Moyen-Orient. Il est utilisé principalement pour l'hygiène intime féminine et symbolise la pureté, comme son nom l'indique en arabe. Ce produit, souvent sans alcool, se présente sous une texture épaisse et blanche. Il est apprécié pour ses propriétés purifiantes, apaisantes et odorantes, offrant un parfum subtil rappelant le propre. Traditionnellement, il est employé après les ablutions ou les menstruations pour parfumer et purifier le corps"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("8,99")},
+  {id:"rayeve-poudre-de-sidr-50g",cat:"poudres",name:"Poudre De Sidr 50g",tagline:"",desc:["La poudre de sidr, issue des feuilles du jujubier (mentionné dans le Coran), est un ingrédient naturel aux multiples bienfaits. En Islam, elle est utilisée dans des pratiques spirituelles comme la roqya ou la toilette mortuaire. Riche en saponines, elle nettoie en douceur, apaise le cuir chevelu, lutte contre les pellicules et fixe les colorations végétales. Idéale pour tous les types de cheveux, elle apporte force, brillance et volume tout en respectant les traditions religieuses et naturelles."],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("5,99")},
+  {id:"rayeve-bague-emir-el-medina-brown",cat:"bijoux",name:"Bague Émir El Médina (Brown Diamond)",tagline:"Bague brown diamond",desc:["Bague brown diamond"],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("19,90")},
+  {id:"rayeve-pack-tahara-abyad",cat:"tahara",name:"Pack Tahara Abyad",tagline:"",desc:[],benefits:[],compo:"",prov:"Maison Rayeve — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("19,99")},
 ];
 
 /* Corrections fournisseur — informations produit uniquement, sans modification visuelle. */
@@ -1955,6 +2170,8 @@ function showProduct(id){
   const isConsumable = ["miels","gelules","poudres","huiles"].includes(p.cat);
   const isBrume = p.cat==="brumes";
   const isWear = p.cat==="qamis" || p.cat==="vetements";
+  const isFragrance = ["parfums","tahara","bakhour"].includes(p.cat);
+  const isAccessory = ["bijoux","chaussures","accessoires","chechias"].includes(p.cat);
   const productImages = getProductImages(p.id);
   const formatImages = PRODUCT_FORMAT_IMAGES[p.id];
   const initialFormatImg = (formatImages && hasOptions) ? formatImages[p.price.options[0][0]] : null;
@@ -1967,13 +2184,19 @@ function showProduct(id){
   // Qualité panel (left) — varies slightly by type
   const qualite = isWear
     ? ["Couture artisanale soignée","Tissu sélectionné avec exigence","Finitions de qualité premium"]
+    : (isFragrance || isAccessory)
+    ? ["Sélection Maison Rayeve","Pièce authentique soignée","Origine Médine & Caire"]
     : ["Produit 100% naturel","Sélection rigoureuse Dar Nūr","Non traité chimiquement"];
 
   // Right panel: Précautions (consommables/brumes) OU Entretien & taille (vêtements)
-  const rightTitle = isWear ? "Entretien & taille" : "Précautions";
+  const rightTitle = isWear ? "Entretien & taille" : (isAccessory ? "Entretien" : "Précautions");
   const rightItems = isWear
     ? ["Lavage délicat recommandé, à l'eau froide","Repassage à température modérée","Taille confirmée avec vous sur WhatsApp avant l'envoi","En cas de doute, choisissez la taille supérieure."]
-    : (p.precautions || (isBrume
+    : isFragrance
+    ? ["Usage externe — éviter le contour des yeux","Produit artisanal : couleur et senteur peuvent varier selon les lots","À conserver à l'abri de la chaleur et de la lumière"]
+    : isAccessory
+    ? ["Produit artisanal : de légères variations peuvent exister selon les lots","À manipuler et entretenir avec soin"]
+    : ((p.precautions && p.precautions.length) ? p.precautions : (isBrume
         ? ["Usage externe uniquement, éviter le contour des yeux","Produit artisanal : couleur et parfum peuvent varier selon les lots","À conserver dans un endroit sec et à l'abri de la lumière"]
         : ["Déconseillé aux femmes enceintes et allaitantes","Ne remplace pas un traitement médical","À conserver dans un endroit sec et à l'abri de la lumière"]));
 
@@ -1982,10 +2205,10 @@ function showProduct(id){
     ? `Précisez votre taille lors de votre commande WhatsApp. Votre taille sera confirmée avec vous avant l'envoi.<br/><br/><strong>Comment choisir ?</strong> En cas de doute entre deux tailles, prenez la taille supérieure. Les coupes sont pensées pour rester confortables et pudiques, sans être trop ajustées.<br/><br/>Pour les qamis : basez-vous surtout sur votre hauteur.<br/>Pour les abayas et ensembles : basez-vous sur votre taille vestimentaire habituelle.`
     : p.uso;
   const productMeta = [
-    ["Composition", p.compo],
+    p.compo ? ["Composition", p.compo] : null,
     p.poids ? ["Poids", p.poids] : null,
     p.contenance ? ["Contenance", p.contenance] : null,
-    ["Provenance", p.prov]
+    p.prov ? ["Provenance", p.prov] : null
   ].filter(Boolean);
 
   document.getElementById("productView").innerHTML = `
@@ -2018,14 +2241,14 @@ function showProduct(id){
       </div>
       <div class="pp-content">
         ${p.desc.map(d=>`<p>${d}</p>`).join("")}
-        <h2>${isWear ? 'Points forts' : 'Bienfaits'}</h2>
-        <ul class="pp-benefits">${p.benefits.map(b=>`<li>${b}</li>`).join("")}</ul>
+        ${(p.benefits&&p.benefits.length)?`<h2>${isWear ? 'Points forts' : 'Bienfaits'}</h2>
+        <ul class="pp-benefits">${p.benefits.map(b=>`<li>${b}</li>`).join("")}</ul>`:""}
         <h2>Le produit</h2>
         <div class="pp-meta">
           ${productMeta.map(([k,v])=>`<div><div class="k">${k}</div><div class="v">${v}</div></div>`).join("")}
         </div>
-        <h2>${usageTitle}</h2>
-        <p>${usageContent}</p>
+        ${usageContent?`<h2>${usageTitle}</h2>
+        <p>${usageContent}</p>`:""}
 
         <div class="dual-panel">
           <div class="panel">
