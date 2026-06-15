@@ -239,31 +239,37 @@ section{padding:15px 28px}
 /* ============ ABOUT ============ */
 .about{background:var(--offwhite)}
 .about-box{max-width:900px;margin:0 auto;text-align:center}
-.about-box p{color:#3a3a3a;margin:0 auto 18px;max-width:760px}
-.about-points{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:34px}
+.about-box p{color:#3a3a3a;margin:0 auto 14px;max-width:760px}
+.about-points{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:22px}
 .about-point{background:#fff;border:1px solid var(--line);border-radius:4px;padding:24px 18px}
 .about-point h3{font-size:.86rem;color:var(--green);margin-bottom:8px}
 .about-point p{font-size:.92rem;color:var(--muted);margin:0}
 
 /* ============ CUSTOMER INFO ============ */
 .customer-info{background:var(--offwhite)}
-.info-grid,.faq-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
-.info-card,.faq-item,.review-empty{
+.steps-simple{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.step-simple{background:#fff;border:1px solid var(--line);border-radius:4px;padding:20px 22px;text-align:center}
+.step-simple .step-num{font-family:'Cinzel';font-size:.75rem;letter-spacing:.2em;color:var(--gold)}
+.step-simple h3{font-size:.86rem;color:var(--green);margin:8px 0 6px}
+.step-simple p{font-size:.94rem;color:var(--muted);margin:0}
+.pay-note{text-align:center;font-family:'Cormorant Garamond';font-style:italic;font-size:1.05rem;color:var(--muted);margin-top:14px}
+.faq-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.faq-item,.review-empty{
   background:#fff;border:1px solid var(--line);border-radius:4px;padding:26px 22px;
 }
-.info-card h3,.faq-item h3{font-size:.86rem;color:var(--green);margin-bottom:10px}
-.info-card p,.faq-item p,.review-empty p{font-size:.94rem;color:var(--muted);margin:0}
+.faq-item h3{font-size:.86rem;color:var(--green);margin-bottom:10px}
+.faq-item p,.review-empty p{font-size:.94rem;color:var(--muted);margin:0}
 .faq{background:var(--cream)}
 .reviews{background:var(--offwhite)}
 .reviews-inner{max-width:760px;margin:0 auto;text-align:center}
 .review-empty{margin-bottom:26px}
-.reviews-list{display:grid;gap:18px;margin-bottom:24px}
-.review-card{background:#fff;border:1px solid var(--line);border-radius:4px;padding:32px 28px;text-align:left}
+.reviews-list{display:grid;gap:14px;margin-bottom:20px}
+.review-card{background:#fff;border:1px solid var(--line);border-radius:4px;padding:24px 22px;text-align:left}
 .review-stars{font-size:1.05rem;color:var(--gold);letter-spacing:.1em;margin-bottom:8px;display:flex;align-items:center;gap:10px}
 .review-score{font-family:'Cinzel';font-size:.68rem;letter-spacing:.14em;color:var(--muted)}
-.review-product{font-family:'Cinzel';font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:18px}
-.review-text{margin:0 0 18px;padding:0;border:none}
-.review-text p{font-size:.94rem;color:#3a3a3a;line-height:1.65;margin-bottom:10px}
+.review-product{font-family:'Cinzel';font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:14px}
+.review-text{margin:0 0 14px;padding:0;border:none}
+.review-text p{font-size:.94rem;color:#3a3a3a;line-height:1.6;margin-bottom:10px}
 .review-text p:last-child{margin-bottom:0}
 .review-author{font-size:.88rem;color:var(--green);font-style:italic;text-align:right}
 .footer-trust{max-width:1100px;margin:26px auto 0;padding-top:18px;border-top:1px solid rgba(200,168,75,.18);display:flex;flex-wrap:wrap;gap:10px 22px;justify-content:center}
@@ -439,19 +445,6 @@ section{padding:15px 28px}
 .mbar .p{font-family:'Cormorant Garamond';font-size:1.5rem;color:var(--cream);font-weight:600}
 .mbar .btn-wa{padding:13px 22px;font-size:.74rem}
 
-/* ============ PAYMENTS ============ */
-.pay{background:var(--green);color:var(--cream)}
-.pay .section-head h2{color:var(--cream)}
-.pay-grid{display:flex;gap:24px;justify-content:center;flex-wrap:wrap;max-width:760px;margin:0 auto}
-.pay-card{
-  flex:1;min-width:240px;background:rgba(255,255,255,.04);
-  border:1px solid rgba(200,168,75,.28);border-radius:6px;padding:34px;text-align:center;
-}
-.pay-card .ic{font-size:2rem;margin-bottom:14px}
-.pay-card h3{font-size:1rem;color:var(--gold);margin-bottom:10px}
-.pay-card p{font-family:'Cormorant Garamond';font-size:1.15rem;color:var(--cream);opacity:.9}
-.pay-card a{color:var(--gold-light);text-decoration:underline;text-underline-offset:3px}
-
 /* ============ FOOTER ============ */
 footer{background:#0a160f;color:var(--cream);padding:46px 28px 26px}
 .foot-grid{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:30px;align-items:start}
@@ -519,7 +512,7 @@ footer{background:#0a160f;color:var(--cream);padding:46px 28px 26px}
   .burger.x span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
   section{padding:12px 22px}
   .hero{padding:20px 22px 25px}
-  .trust-list,.about-points,.info-grid,.faq-grid{grid-template-columns:1fr}
+  .trust-list,.about-points,.steps-simple,.faq-grid{grid-template-columns:1fr}
   .trust-item{justify-content:flex-start;text-align:left}
   .grid,.family .grid{grid-template-columns:repeat(2,1fr);gap:14px}
   .family .grid[style*="grid-template-columns:repeat(3"]{grid-template-columns:repeat(2,1fr)!important;gap:14px}
@@ -667,11 +660,11 @@ footer{background:#0a160f;color:var(--cream);padding:46px 28px 26px}
         <p>Une maison engagée dans une sélection naturelle, sérieuse et de qualité.</p>
       </div>
       <div class="about-box">
-        <p>Dar Nūr sélectionne avec soin des produits naturels et de qualité, avec une attention particulière portée à l'authenticité, à la traçabilité et à la satisfaction des clients.</p>
+        <p>Dar Nūr sélectionne avec soin des produits naturels, authentiques et de qualité.</p>
         <div class="about-points">
-          <div class="about-point"><h3>Sélection</h3><p>Des références choisies avec attention, selon leur intérêt et leur qualité.</p></div>
-          <div class="about-point"><h3>Conseil</h3><p>Un contact direct pour répondre aux questions avant la commande.</p></div>
-          <div class="about-point"><h3>Confiance</h3><p>Une relation simple, transparente et suivie après l’achat.</p></div>
+          <div class="about-point"><h3>Sélection</h3><p>Des références choisies pour leur qualité et leur intérêt.</p></div>
+          <div class="about-point"><h3>Conseil</h3><p>Un contact direct pour vos questions avant l’achat.</p></div>
+          <div class="about-point"><h3>Confiance</h3><p>Une relation simple et suivie après l’achat.</p></div>
         </div>
       </div>
     </div>
@@ -681,39 +674,15 @@ footer{background:#0a160f;color:var(--cream);padding:46px 28px 26px}
     <div class="wrap">
       <div class="section-head">
         <div class="eyebrow">Commande & livraison</div>
-        <h2>Commander en toute simplicité</h2>
+        <h2>Commander simplement</h2>
         <p>Un parcours direct, clair et accompagné sur WhatsApp.</p>
       </div>
-      <div class="info-grid">
-        <div class="info-card"><h3>Comment commander</h3><p>Sélectionnez votre produit et cliquez sur le bouton WhatsApp — le message est prérempli. Envoyez-le, et Dar Nūr vous répond pour confirmer votre commande.</p></div>
-        <div class="info-card"><h3>Livraison en Île-de-France</h3><p>Les modalités de livraison sont organisées avec attention et communiquées lors de la confirmation de votre commande.</p></div>
-        <div class="info-card"><h3>Paiement</h3><p>Revolut ou espèces, selon votre préférence. Le mode est confirmé ensemble sur WhatsApp avant la livraison.</p></div>
-        <div class="info-card"><h3>Réponse rapide</h3><p>Dar Nūr répond généralement en moins d'une heure sur WhatsApp — avant, pendant et après votre commande.</p></div>
+      <div class="steps-simple">
+        <div class="step-simple"><span class="step-num">01</span><h3>Choisissez votre produit</h3><p>Parcourez nos collections et trouvez l'article qui vous intéresse.</p></div>
+        <div class="step-simple"><span class="step-num">02</span><h3>Envoyez votre demande</h3><p>Le bouton WhatsApp prérempli le message — il ne reste qu'à l'envoyer.</p></div>
+        <div class="step-simple"><span class="step-num">03</span><h3>Confirmation & livraison</h3><p>Dar Nūr confirme votre commande et organise la livraison en Île-de-France.</p></div>
       </div>
-      <div id="process-steps" style="margin-top:2.5rem;max-width:680px;margin-left:auto;margin-right:auto">
-        <ol style="list-style:none;padding:0;display:flex;flex-direction:column;gap:1rem">
-          <li style="display:flex;gap:1rem;align-items:flex-start">
-            <span style="font-family:'Cinzel',serif;font-size:.75rem;color:var(--gold);min-width:2rem;padding-top:.15rem;flex-shrink:0">01</span>
-            <div><strong>Vous envoyez votre message</strong> — le bouton WhatsApp prérempli contient déjà le produit. Complétez vos coordonnées et envoyez.</div>
-          </li>
-          <li style="display:flex;gap:1rem;align-items:flex-start">
-            <span style="font-family:'Cinzel',serif;font-size:.75rem;color:var(--gold);min-width:2rem;padding-top:.15rem;flex-shrink:0">02</span>
-            <div><strong>Dar Nūr vous répond</strong> — disponibilité confirmée, questions éventuelles traitées. Généralement en moins d'une heure.</div>
-          </li>
-          <li style="display:flex;gap:1rem;align-items:flex-start">
-            <span style="font-family:'Cinzel',serif;font-size:.75rem;color:var(--gold);min-width:2rem;padding-top:.15rem;flex-shrink:0">03</span>
-            <div><strong>Le paiement est effectué</strong> — par Revolut ou en espèces, selon votre préférence.</div>
-          </li>
-          <li style="display:flex;gap:1rem;align-items:flex-start">
-            <span style="font-family:'Cinzel',serif;font-size:.75rem;color:var(--gold);min-width:2rem;padding-top:.15rem;flex-shrink:0">04</span>
-            <div><strong>La livraison est organisée</strong> — un créneau est convenu ensemble sur WhatsApp. Livraison en personne.</div>
-          </li>
-          <li style="display:flex;gap:1rem;align-items:flex-start">
-            <span style="font-family:'Cinzel',serif;font-size:.75rem;color:var(--gold);min-width:2rem;padding-top:.15rem;flex-shrink:0">05</span>
-            <div><strong>Vous recevez votre commande</strong> — remise en main propre en Île-de-France, après confirmation.</div>
-          </li>
-        </ol>
-      </div>
+      <p class="pay-note">Paiement par <strong>Revolut</strong> ou <strong>espèces</strong>, à la livraison.</p>
     </div>
   </section>
 
@@ -725,13 +694,9 @@ footer{background:#0a160f;color:var(--cream);padding:46px 28px 26px}
         <p>Les réponses essentielles avant de commander.</p>
       </div>
       <div class="faq-grid">
-        <div class="faq-item"><h3>Comment commander ?</h3><p>Cliquez sur le bouton WhatsApp de la fiche produit — le message est prérempli. Complétez vos informations et envoyez. Dar Nūr confirme la disponibilité et organise la livraison avec vous.</p></div>
-        <div class="faq-item"><h3>Quels sont les délais de livraison ?</h3><p>Les délais varient selon votre situation et vous sont communiqués lors de la confirmation. Un créneau est convenu ensemble sur WhatsApp.</p></div>
-        <div class="faq-item"><h3>Quels moyens de paiement acceptez-vous ?</h3><p>Dar Nūr accepte Revolut et les espèces. Le paiement est effectué avant la livraison, selon le mode convenu ensemble sur WhatsApp.</p></div>
-        <div class="faq-item"><h3>Comment vous contacter ?</h3><p>Sur WhatsApp au 07 49 89 03 22. Dar Nūr répond généralement en moins d’une heure.</p></div>
-        <div class="faq-item"><h3>Comment suivre ma commande ?</h3><p>La livraison étant effectuée en personne, le suivi se fait directement sur WhatsApp. Vous êtes informé du créneau et de tout changement en temps réel.</p></div>
-        <div class="faq-item"><h3>Livrez-vous en dehors de l’Île-de-France ?</h3><p>Dar Nūr livre actuellement en Île-de-France. Pour toute demande hors zone, contactez-nous sur WhatsApp — nous étudions chaque situation.</p></div>
-        <div class="faq-item"><h3>Que se passe-t-il en cas de problème ?</h3><p>En cas de problème avec votre commande, contactez-nous directement sur WhatsApp. Chaque situation est étudiée avec attention afin de trouver la solution la plus adaptée.</p></div>
+        <div class="faq-item"><h3>Comment commander ?</h3><p>Cliquez sur le bouton WhatsApp de la fiche produit — le message est prérempli. Dar Nūr confirme la disponibilité et organise la livraison avec vous.</p></div>
+        <div class="faq-item"><h3>Livraison</h3><p>Dar Nūr livre en Île-de-France. Le créneau est convenu ensemble sur WhatsApp lors de la confirmation.</p></div>
+        <div class="faq-item"><h3>Paiement</h3><p>Revolut ou espèces, selon votre préférence. Le mode est confirmé ensemble sur WhatsApp avant la livraison.</p></div>
       </div>
     </div>
   </section>
@@ -765,26 +730,6 @@ footer{background:#0a160f;color:var(--cream);padding:46px 28px 26px}
     </div>
   </section>
 
-  <section class="pay">
-    <div class="wrap">
-      <div class="section-head">
-        <div class="eyebrow">Simple & sûr</div>
-        <h2>Paiements acceptés</h2>
-      </div>
-      <div class="pay-grid">
-        <div class="pay-card">
-          <div class="ic">💳</div>
-          <h3>Revolut</h3>
-          <p>Paiement instantané et sécurisé<br/><a href="https://revolut.me/youcefkir" target="_blank" rel="noopener">revolut.me/youcefkir</a></p>
-        </div>
-        <div class="pay-card">
-          <div class="ic">💵</div>
-          <h3>Espèces</h3>
-          <p>Réglez à la livraison,<br/>en toute simplicité</p>
-        </div>
-      </div>
-    </div>
-  </section>
 </main>
 
 <!-- ============ PRODUCT VIEW ============ -->
@@ -806,6 +751,7 @@ footer{background:#0a160f;color:var(--cream);padding:46px 28px 26px}
       <div class="name">DAR NŪR</div>
       <div class="ar">دار النور</div>
       <p>La Maison de la Lumière. Des trésors naturels, présentés avec sincérité et soin.</p>
+      <p>Paiement par Revolut ou espèces.</p>
     </div>
     <div class="foot-col">
       <h4>Contact</h4>
