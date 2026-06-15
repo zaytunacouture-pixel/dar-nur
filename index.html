@@ -986,16 +986,21 @@ const getCollectionThumb = id=>COLLECTION_THUMBS[id] || getProductCardImage(id);
 const PRODUCT_FORMAT_IMAGES = {
   "miel-nigelle": {"50 g":"assets/produits-ia/miel-nigelle/miel-nigelle-2.webp","200 g":"assets/produits-ia/miel-nigelle/miel-nigelle-1.webp"},
   "miel-aphrodisiaque": {"50 g":"assets/produits-ia/miel-aphrodisiaque/miel-aphrodisiaque-2.webp","200 g":"assets/produits-ia/miel-aphrodisiaque/miel-aphrodisiaque-1.webp"},
-  "miel-rose-siberie": {"50 g":"assets/produits-ia/miel-rose-siberie/miel-rose-siberie-2.webp"},
-  "miel-spiruline": {"50 g":"assets/produits-ia/miel-spiruline/miel-spiruline-1.webp"},
+  // Format 300 g : réutilise provisoirement le visuel 200 g, jusqu'à la création d'un visuel dédié 300 g.
+  "miel-rose-siberie": {"50 g":"assets/produits-ia/miel-rose-siberie/miel-rose-siberie-2.webp","200 g":"assets/produits-ia/miel-rose-siberie/miel-rose-siberie-1.webp","300 g":"assets/produits-ia/miel-rose-siberie/miel-rose-siberie-1.webp"},
+  // Format 300 g : réutilise provisoirement le visuel 200 g, jusqu'à la création d'un visuel dédié 300 g.
+  "miel-spiruline": {"50 g":"assets/produits-ia/miel-spiruline/miel-spiruline-1.webp","200 g":"assets/produits-ia/miel-spiruline/miel-spiruline-2.webp","300 g":"assets/produits-ia/miel-spiruline/miel-spiruline-2.webp"},
   "miel-gingembre-curcuma": {"50 g":"assets/produits-ia/miel-gingembre-curcuma/miel-gingembre-curcuma-1.webp","200 g":"assets/produits-ia/miel-gingembre-curcuma/miel-gingembre-curcuma-2.webp"},
   "miel-hibiscus-zamzam": {"50 g":"assets/produits-ia/miel-hibiscus-zamzam/miel-hibiscus-zamzam-2.webp","200 g":"assets/produits-ia/miel-hibiscus-zamzam/miel-hibiscus-zamzam-1.webp"},
   "miel-moringa-nigelle": {"50 g":"assets/produits-ia/miel-moringa-nigelle/miel-moringa-nigelle-2.webp","200 g":"assets/produits-ia/miel-moringa-nigelle/miel-moringa-nigelle-1.webp"},
-  "miel-gingembre-fenugrec": {"50 g":"assets/produits-ia/miel-gingembre-fenugrec/miel-gingembre-fenugrec-2.webp"},
+  // Format 300 g : réutilise provisoirement le visuel 200 g, jusqu'à la création d'un visuel dédié 300 g.
+  "miel-gingembre-fenugrec": {"50 g":"assets/produits-ia/miel-gingembre-fenugrec/miel-gingembre-fenugrec-2.webp","200 g":"assets/produits-ia/miel-gingembre-fenugrec/miel-gingembre-fenugrec-1.webp","300 g":"assets/produits-ia/miel-gingembre-fenugrec/miel-gingembre-fenugrec-1.webp"},
   "miel-aubepine": {"50 g":"assets/produits-ia/miel-aubepine/miel-aubepine-2.webp","200 g":"assets/produits-ia/miel-aubepine/miel-aubepine-1.webp"},
-  "miel-costus-nigelle": {"50 g":"assets/produits-ia/miel-costus-nigelle/miel-costus-nigelle-2.webp"},
+  // Format 300 g : réutilise provisoirement le visuel 200 g, jusqu'à la création d'un visuel dédié 300 g.
+  "miel-costus-nigelle": {"50 g":"assets/produits-ia/miel-costus-nigelle/miel-costus-nigelle-2.webp","200 g":"assets/produits-ia/miel-costus-nigelle/miel-costus-nigelle-1.webp","300 g":"assets/produits-ia/miel-costus-nigelle/miel-costus-nigelle-1.webp"},
   "miel-sidr-jujubier": {"50 g":"assets/produits-ia/miel-sidr-jujubier/miel-sidr-jujubier-2.webp","200 g":"assets/produits-ia/miel-sidr-jujubier/miel-sidr-jujubier-1.webp"},
-  "miel-fraise-russie": {"50 g":"assets/produits-ia/miel-fraise-russie/miel-fraise-russie-2.webp"},
+  // Format 300 g : réutilise provisoirement le visuel 200 g, jusqu'à la création d'un visuel dédié 300 g.
+  "miel-fraise-russie": {"50 g":"assets/produits-ia/miel-fraise-russie/miel-fraise-russie-2.webp","200 g":"assets/produits-ia/miel-fraise-russie/miel-fraise-russie-1.webp","300 g":"assets/produits-ia/miel-fraise-russie/miel-fraise-russie-1.webp"},
   // Format 300 g : réutilise provisoirement le visuel 200 g, jusqu'à la création d'un visuel dédié 300 g.
   "miel-shilajit": {"50 g":"assets/produits-ia/miel-shilajit/miel-shilajit-1.webp","200 g":"assets/produits-ia/miel-shilajit/miel-shilajit-2.webp","300 g":"assets/produits-ia/miel-shilajit/miel-shilajit-2.webp"},
   "miel-blanc-kirghizistan": {"50 g":"assets/produits-ia/miel-blanc-kirghizistan/miel-blanc-kirghizistan-2.webp","200 g":"assets/produits-ia/miel-blanc-kirghizistan/miel-blanc-kirghizistan-1.webp"},
