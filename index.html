@@ -290,6 +290,19 @@ section{padding:15px 28px}
 /* ============ PRODUCT GRID ============ */
 #boutique{display:none}
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+/* Skeleton loader */
+.skeleton-card{
+  background:#fff;border:1px solid var(--line);border-radius:4px;padding:12px 11px 8px;
+  display:flex;flex-direction:column;align-items:center;gap:10px;min-height:220px;
+}
+.sk-block{background:linear-gradient(90deg,#f0ece3 25%,#e8e3d8 50%,#f0ece3 75%);
+  background-size:200% 100%;animation:sk-shimmer 1.4s infinite;border-radius:3px;width:100%;}
+.sk-img{height:120px;width:100%;border-radius:3px;}
+.sk-tag{height:12px;width:50%;}
+.sk-title{height:16px;width:80%;}
+.sk-price{height:14px;width:40%;}
+.sk-btn{height:32px;width:90%;border-radius:40px;margin-top:auto;}
+@keyframes sk-shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 .card{
   background:#fff;border:1px solid var(--line);border-radius:4px;
   padding:12px 11px 8px;text-align:center;cursor:pointer;
@@ -2504,9 +2517,19 @@ function renderCollections(){
 
 /* ============ INIT ============ */
 document.getElementById("storyText").innerHTML=STORY;
-renderCollections();
 renderFilters();
-renderGrid();
+
+/* Skeleton — 8 cartes placeholder pendant le chargement Supabase */
+function renderSkeleton(){
+  document.getElementById("grid").innerHTML = Array.from({length:8},()=>`
+    <div class="skeleton-card" aria-hidden="true">
+      <div class="sk-block sk-img"></div>
+      <div class="sk-block sk-tag"></div>
+      <div class="sk-block sk-title"></div>
+      <div class="sk-block sk-price"></div>
+      <div class="sk-block sk-btn"></div>
+    </div>`).join("");
+}
 
 /* show/hide mobile bar based on view */
 const mbar=document.getElementById("mbar");
@@ -2516,10 +2539,13 @@ const obs=new MutationObserver(syncBar);
 obs.observe(document.getElementById("productView"),{attributes:true,attributeFilter:["style"]});
 syncBar();
 
-/* ── Supabase : remplace le catalogue par les produits actifs ── */
+/* ── Supabase : source principale — fallback hardcodé uniquement en cas d'erreur ── */
 (async function loadFromSupabase(){
+  /* Affiche le skeleton immédiatement — les produits hardcodés ne s'affichent jamais */
+  renderSkeleton();
+
   try {
-    if(typeof supabase==='undefined' || typeof SUPABASE_URL==='undefined') return;
+    if(typeof supabase==='undefined' || typeof SUPABASE_URL==='undefined') throw new Error('SDK absent');
     const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
     const {data, error} = await _sb
@@ -2528,9 +2554,9 @@ syncBar();
       .eq('active', true)
       .order('sort_order');
 
-    if(error || !data || !data.length) return;
+    if(error) throw error;
+    if(!data || !data.length) throw new Error('Aucun produit retourné');
 
-    // Convertit le format Supabase → format attendu par les fonctions de rendu
     function adaptPrice(p){
       const axes = p.variant_axes || [];
       const variants = (p.product_variants || [])
@@ -2544,12 +2570,9 @@ syncBar();
       return {type:'fixed', value: p.price_value};
     }
 
-    // Vide et remplit PRODUCTS avec les actifs Supabase
     PRODUCTS.length = 0;
     data.forEach(p => {
-      // Met à jour la lookup d'images pour que getProductCardImage() fonctionne
       if(p.images && p.images.length) PRODUCT_IMAGES[p.slug] = p.images;
-
       PRODUCTS.push({
         id:           p.slug,
         cat:          p.category_id,
@@ -2570,12 +2593,14 @@ syncBar();
       });
     });
 
-    // Ré-affiche la grille et les collections avec les données Supabase
     renderGrid();
     renderCollections();
 
   } catch(e){
+    /* Fallback : catalogue hardcodé affiché uniquement si Supabase est réellement indisponible */
     console.warn('[Dar Nūr] Supabase indisponible — catalogue local affiché.', e.message);
+    renderGrid();
+    renderCollections();
   }
 })();
 
