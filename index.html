@@ -2794,6 +2794,16 @@ async function loadActiveOffersSection(_sb){
 }
 
 /* ── Modal Pack : détails et contenu ── */
+// Config : variante à utiliser par pack et par produit (sans modifier Supabase)
+const PACK_VARIANT_CONFIG = {
+  'Pack Sport — 5 produits d\'exception': {
+    'miel-gingembre-fenugrec': '200 g',
+    'miel-spiruline':          '200 g',
+    'miel-shilajit':           '200 g',
+    // gel-nigelle / gel-spiruline : pas de variante → prix de base
+  }
+};
+
 async function openPackModal(offerId) {
   if (!_offersSB) return;
   try {
@@ -2805,55 +2815,97 @@ async function openPackModal(offerId) {
       .single();
     if (offerError || !offers) return;
 
-    // Récupère les slugs des produits
-    const slugs = (offers.offer_products || []).map(op => op.product_slug);
+    // Récupère les slugs dans l'ordre
+    const offerLines = (offers.offer_products || [])
+      .sort((a, b) => a.sort_order - b.sort_order);
+    const slugs = offerLines.map(op => op.product_slug);
     if (!slugs.length) return;
 
-    // Récupère les détails complets des produits
+    // Config de variante pour ce pack (null si pas de config)
+    const variantConfig = PACK_VARIANT_CONFIG[offers.title] || null;
+
+    // Récupère les produits avec leurs variantes
     const {data: products, error: prodError} = await _offersSB
       .from('products')
-      .select('slug, name, price_value, images')
+      .select('slug, name, price_value, images, product_variants(id, name, price, images)')
       .in('slug', slugs);
     if (prodError || !products) return;
 
-    // Crée une map par slug pour un accès rapide
+    // Map par slug
     const prodMap = {};
-    products.forEach(p => {
-      prodMap[p.slug] = p;
-    });
+    products.forEach(p => { prodMap[p.slug] = p; });
 
-    // Réordonne les produits selon l'ordre dans offer_products
-    const orderedProducts = slugs
-      .map(slug => prodMap[slug])
-      .filter(p => p);  // Filtre les doublons
+    // Pour chaque produit, résoudre la bonne variante
+    const orderedLines = slugs.map(slug => {
+      const p = prodMap[slug];
+      if (!p) return null;
 
-    // Calcule les totaux
-    const totalIndividual = orderedProducts.reduce((sum, p) => sum + (p.price_value || 0), 0);
-    const packPrice = offers.promo_price || 0;
-    const savings = totalIndividual - packPrice;
+      // Cherche la variante cible si config existe pour ce slug
+      const targetVariantName = variantConfig ? variantConfig[slug] : null;
+      let resolvedVariant = null;
+
+      if (targetVariantName && p.product_variants && p.product_variants.length > 0) {
+        resolvedVariant = p.product_variants.find(
+          v => v.name && v.name.trim() === targetVariantName
+        ) || null;
+      }
+
+      // Prix et image : variante si trouvée, sinon prix de base
+      const displayPrice  = resolvedVariant ? resolvedVariant.price  : p.price_value;
+      const variantImages = resolvedVariant ? resolvedVariant.images  : null;
+      const rawImg        = (variantImages && variantImages.length > 0)
+        ? variantImages[0]
+        : (p.images && p.images.length > 0 ? p.images[0] : null);
+      // Chemin root-relative : évite les erreurs selon le contexte (localhost, mobile, sous-dossier)
+      const displayImage  = rawImg
+        ? (rawImg.startsWith('http') || rawImg.startsWith('/') ? rawImg : '/' + rawImg)
+        : '/logo-dar-nur.png';
+      // Fallback produit (root-relative) si la variante ne charge pas
+      const fallbackImage = (p.images && p.images.length > 0)
+        ? (p.images[0].startsWith('http') || p.images[0].startsWith('/') ? p.images[0] : '/' + p.images[0])
+        : '/logo-dar-nur.png';
+      const displayFormat = resolvedVariant ? resolvedVariant.name : null;
+
+      return { name: p.name, slug, displayPrice, displayImage, fallbackImage, displayFormat };
+    }).filter(x => x);
+
+    // Calcul du total avec les prix résolus
+    const totalIndividual = orderedLines.reduce((sum, l) => sum + (l.displayPrice || 0), 0);
+    const packPrice       = offers.promo_price || 0;
+    const savings         = totalIndividual - packPrice;
 
     // Affiche le modal
     document.getElementById('packModalTitle').textContent = offers.title;
-    document.getElementById('packModalCount').textContent = orderedProducts.length;
+    document.getElementById('packModalCount').textContent = orderedLines.length;
     document.getElementById('packModalTotal').textContent = totalIndividual.toFixed(2) + '€';
-    document.getElementById('packModalSavings').textContent = savings.toFixed(2) + '€';
 
-    // Affiche les produits
-    document.getElementById('packModalProducts').innerHTML = orderedProducts.map(p => {
-      const img = p.images && p.images.length > 0
-        ? p.images[0]
-        : '/logo-dar-nur.png';
-      return `
+    // Économie : masquer si nulle ou négative
+    const savingsEl     = document.getElementById('packModalSavings');
+    const savingsParent = savingsEl ? savingsEl.closest('.pack-modal-summary-item') : null;
+    if (savings > 0) {
+      savingsEl.textContent = savings.toFixed(2) + '€';
+      if (savingsParent) savingsParent.style.display = '';
+    } else {
+      if (savingsParent) savingsParent.style.display = 'none';
+    }
+
+    // Affiche les produits avec image et prix de la bonne variante
+    document.getElementById('packModalProducts').innerHTML = orderedLines.map(l => `
       <div class="pack-product">
-        <img src="${img}" class="pack-product-img" alt="${p.name}" loading="lazy"/>
+        <img src="${l.displayImage}"
+             class="pack-product-img"
+             alt="${l.name}"
+             onerror="if(this.src!=='${l.fallbackImage}'){this.src='${l.fallbackImage}'}else{this.src='/logo-dar-nur.png'}"/>
         <div class="pack-product-info">
-          <div class="pack-product-name">${p.name}</div>
-          <div class="pack-product-price">${p.price_value ? p.price_value.toFixed(2) + '€' : '—'}</div>
+          <div class="pack-product-name">${l.name}</div>
+          <div class="pack-product-price">
+            ${l.displayFormat ? `<span class="pack-product-format">${l.displayFormat}</span> — ` : ''}
+            ${l.displayPrice != null ? l.displayPrice.toFixed(2) + '€' : '—'}
+          </div>
         </div>
-      </div>`;
-    }).join('');
+      </div>`).join('');
 
-    // Configure le bouton WhatsApp du modal
+    // Configure le bouton WhatsApp
     const msg = encodeURIComponent(
       `Salam alaykoum, je souhaite commander : ${offers.title} — ${packPrice}€\n\nBarakAllahu fik.`
     );
