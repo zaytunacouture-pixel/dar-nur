@@ -98,6 +98,69 @@ async function deleteVariant(id) {
   if (error) throw error;
 }
 
+// ── Offres (lecture publique) ─────────────────────────────────────────────────
+
+async function fetchActiveOffers() {
+  const { data, error } = await _supa
+    .from('offers')
+    .select('*, offer_products(*)')
+    .eq('active', true)
+    .order('sort_order');
+  if (error) throw error;
+  // Filtrage côté client pour la fenêtre de dates (RLS filtre déjà pour anon)
+  const now = new Date();
+  return (data || []).filter(o => {
+    const started    = !o.starts_at || new Date(o.starts_at) <= now;
+    const notExpired = !o.ends_at   || new Date(o.ends_at)   >  now;
+    return started && notExpired;
+  });
+}
+
+// ── Offres (écriture admin) ───────────────────────────────────────────────────
+
+async function fetchOffers() {
+  const { data, error } = await _supa
+    .from('offers')
+    .select('*, offer_products(*)')
+    .order('sort_order');
+  if (error) throw error;
+  return data;
+}
+
+async function saveOffer(offer) {
+  const { id, offer_products: _op, ...fields } = offer;
+  if (id) {
+    const { data, error } = await _supa.from('offers').update(fields).eq('id', id).select().single();
+    if (error) throw error;
+    return data;
+  } else {
+    const { data, error } = await _supa.from('offers').insert(fields).select().single();
+    if (error) throw error;
+    return data;
+  }
+}
+
+async function deleteOffer(id) {
+  const { error } = await _supa.from('offers').delete().eq('id', id);
+  if (error) throw error;
+}
+
+async function toggleOfferActive(id, active) {
+  const { data, error } = await _supa
+    .from('offers').update({ active }).eq('id', id).select().single();
+  if (error) throw error;
+  return data;
+}
+
+async function saveOfferProducts(offerId, slugs) {
+  const { error: delErr } = await _supa.from('offer_products').delete().eq('offer_id', offerId);
+  if (delErr) throw delErr;
+  if (!slugs.length) return;
+  const rows = slugs.map((slug, i) => ({ offer_id: offerId, product_slug: slug.trim(), sort_order: i }));
+  const { error } = await _supa.from('offer_products').insert(rows);
+  if (error) throw error;
+}
+
 // ── Storage photos ────────────────────────────────────────────────────────────
 
 async function uploadImage(file, path) {

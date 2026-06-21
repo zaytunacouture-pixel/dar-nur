@@ -303,6 +303,37 @@ section{padding:15px 28px}
 .sk-price{height:14px;width:40%;}
 .sk-btn{height:32px;width:90%;border-radius:40px;margin-top:auto;}
 @keyframes sk-shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* ── Section Offres & Packs ── */
+#offres{padding:60px 0;background:var(--offwhite);display:none}
+.offers-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:24px}
+.offer-card{
+  background:#fff;border:1px solid var(--line);border-radius:8px;
+  overflow:hidden;display:flex;flex-direction:column;
+  transition:transform .3s,box-shadow .3s;
+}
+.offer-card:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+.offer-card-img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block}
+.offer-card-body{padding:20px 22px;flex:1;display:flex;flex-direction:column}
+.offer-badge{
+  display:inline-block;padding:4px 12px;border-radius:99px;margin-bottom:12px;
+  background:var(--gold);color:#fff;font-size:.72rem;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;align-self:flex-start;
+}
+.offer-title{font-family:'Cinzel';font-size:1.05rem;color:var(--green);margin-bottom:8px;line-height:1.35}
+.offer-desc{font-size:.88rem;color:var(--muted);line-height:1.65;margin-bottom:16px;flex:1}
+.offer-prices{display:flex;align-items:baseline;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.offer-price-old{font-size:1.05rem;color:var(--muted);text-decoration:line-through}
+.offer-price-new{font-size:1.7rem;font-weight:700;color:var(--green);font-family:'Cinzel'}
+.offer-economy{font-size:.8rem;color:var(--gold);font-weight:700;letter-spacing:.04em}
+.offer-cta{
+  display:block;text-align:center;padding:13px;margin-top:auto;
+  background:var(--green);color:var(--gold);border-radius:4px;
+  text-decoration:none;font-family:'Cinzel';font-size:.75rem;
+  letter-spacing:.12em;text-transform:uppercase;transition:background .25s;
+}
+.offer-cta:hover{background:#1a3525}
+@media(max-width:768px){.offers-grid{grid-template-columns:1fr}}
 .card{
   background:#fff;border:1px solid var(--line);border-radius:4px;
   padding:12px 11px 8px;text-align:center;cursor:pointer;
@@ -672,6 +703,18 @@ footer{background:#0a160f;color:var(--cream);padding:46px 28px 26px}
         <p>Chaque collection est une porte ouverte vers un savoir transmis avec soin.</p>
       </div>
       <div class="collections-grid" id="collectionsGrid"></div>
+    </div>
+  </section>
+
+  <!-- ============ OFFRES & PACKS ============ -->
+  <section id="offres">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow">Offres exclusives</div>
+        <h2>Promotions & Packs</h2>
+        <p>Des offres soigneusement composées, disponibles pour une durée limitée.</p>
+      </div>
+      <div class="offers-grid" id="offresGrid"></div>
     </div>
   </section>
 
@@ -2595,6 +2638,7 @@ syncBar();
 
     renderGrid();
     renderCollections();
+    await loadActiveOffersSection(_sb);
 
   } catch(e){
     /* Fallback : catalogue hardcodé affiché uniquement si Supabase est réellement indisponible */
@@ -2603,6 +2647,60 @@ syncBar();
     renderCollections();
   }
 })();
+
+/* ── Offres & Packs : section publique ── */
+async function loadActiveOffersSection(_sb){
+  try {
+    const {data, error} = await _sb
+      .from('offers')
+      .select('*, offer_products(*)')
+      .eq('active', true)
+      .order('sort_order');
+    if(error || !data || !data.length) return;
+
+    const now    = new Date();
+    const active = data.filter(o => {
+      const started    = !o.starts_at || new Date(o.starts_at) <= now;
+      const notExpired = !o.ends_at   || new Date(o.ends_at)   >  now;
+      return started && notExpired;
+    });
+    if(!active.length) return;
+
+    const WA = 'https://wa.me/33769253375?text=';
+    document.getElementById('offres').style.display = 'block';
+    document.getElementById('offresGrid').innerHTML = active.map(o => {
+      const economy = (o.normal_price && o.promo_price)
+        ? `Économisez ${(o.normal_price - o.promo_price).toFixed(0)}€` : '';
+      const imgTag = o.image
+        ? `<img src="${o.image}" class="offer-card-img" alt="${o.title}" loading="lazy"/>`
+        : '';
+      const pricesHtml = o.promo_price ? `
+        <div class="offer-prices">
+          ${o.normal_price ? `<span class="offer-price-old">${o.normal_price}€</span>` : ''}
+          <span class="offer-price-new">${o.promo_price}€</span>
+          ${economy ? `<span class="offer-economy">${economy}</span>` : ''}
+        </div>` : '';
+      const msg = encodeURIComponent(
+        `Salam alaykoum, je souhaite commander l'offre : ${o.title}`
+        + (o.promo_price ? ` — ${o.promo_price}€` : '')
+        + `\n\nBarakAllahu fik.`
+      );
+      return `
+      <div class="offer-card">
+        ${imgTag}
+        <div class="offer-card-body">
+          ${o.badge ? `<span class="offer-badge">${o.badge}</span>` : ''}
+          <h3 class="offer-title">${o.title}</h3>
+          ${o.description ? `<p class="offer-desc">${o.description}</p>` : ''}
+          ${pricesHtml}
+          <a class="offer-cta" href="${WA}${msg}" target="_blank" rel="noopener">Commander sur WhatsApp</a>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e){
+    console.warn('[Dar Nūr] Offres non disponibles.', e.message);
+  }
+}
 
 </script>
 </body>

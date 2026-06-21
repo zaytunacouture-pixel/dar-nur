@@ -264,6 +264,8 @@ tr:hover td { background: #fafaf8; }
       <div class="section-label">Catalogue</div>
       <a href="#" class="active" onclick="showSection('products',this)">📦 Produits</a>
       <a href="#" onclick="showSection('categories',this)">🏷️ Catégories</a>
+      <div class="section-label">Marketing</div>
+      <a href="#" onclick="showSection('offers',this)">🎁 Offres & Packs</a>
     </nav>
 
     <main class="main-content">
@@ -274,6 +276,7 @@ tr:hover td { background: #fafaf8; }
         <div class="stat-card"><div class="num" id="stat-active">—</div><div class="lbl">Actifs</div></div>
         <div class="stat-card"><div class="num" id="stat-variants">—</div><div class="lbl">Variantes</div></div>
         <div class="stat-card"><div class="num" id="stat-cats">—</div><div class="lbl">Catégories</div></div>
+        <div class="stat-card"><div class="num" id="stat-offers">—</div><div class="lbl">Offres actives</div></div>
       </div>
 
       <!-- Section : Produits -->
@@ -311,6 +314,28 @@ tr:hover td { background: #fafaf8; }
           </table>
         </div>
         <div class="pagination" id="products-pagination"></div>
+      </div>
+
+      <!-- Section : Offres & Packs -->
+      <div id="section-offers" style="display:none">
+        <div class="toolbar">
+          <div class="spacer"></div>
+          <button class="btn btn-primary" onclick="openOfferModal()">+ Nouvelle offre</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Image</th><th>Titre</th><th>Type</th>
+                <th>Normal → Promo</th><th>Badge</th><th>Dates</th>
+                <th>Statut</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="offers-tbody">
+              <tr><td colspan="8" class="loading">Chargement…</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <!-- Section : Catégories -->
@@ -441,6 +466,85 @@ tr:hover td { background: #fafaf8; }
   </div>
 </div>
 
+<!-- ══════════════════════════════════════════════════ MODAL OFFRE ═══ -->
+<div class="overlay" id="offer-modal">
+  <div class="modal">
+    <h2 id="offer-modal-title">Nouvelle offre</h2>
+    <input type="hidden" id="o-id"/>
+
+    <!-- Image offre -->
+    <div class="img-section">
+      <label>Image de l'offre</label>
+      <div class="img-preview-wrap">
+        <div id="offer-img-placeholder" class="img-placeholder">Aucune<br>image</div>
+        <img id="offer-img-preview" class="img-preview" style="display:none" alt="Aperçu offre"/>
+        <div class="img-actions">
+          <button class="btn btn-outline btn-small" type="button" onclick="document.getElementById('offer-img-file').click()">📁 Changer l'image</button>
+          <button class="btn btn-danger btn-small" type="button" id="offer-img-remove-btn" style="display:none" onclick="removeOfferImage()">✕ Supprimer</button>
+          <div class="img-status" id="offer-img-status"></div>
+        </div>
+      </div>
+      <input type="file" id="offer-img-file" accept="image/*" style="display:none" onchange="handleOfferImageSelect(this.files[0])"/>
+    </div>
+
+    <div class="form-grid">
+      <div class="form-field">
+        <label>Type *</label>
+        <select id="o-type" onchange="togglePackProducts()">
+          <option value="product_promo">Promotion produit</option>
+          <option value="pack">Pack</option>
+          <option value="banner">Bannière</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label>Badge promo</label>
+        <input type="text" id="o-badge" placeholder="-30%, Offre spéciale, Prix lancement…"/>
+      </div>
+      <div class="form-field full">
+        <label>Titre *</label>
+        <input type="text" id="o-title" placeholder="Pack Sport — 5 produits d'exception"/>
+      </div>
+      <div class="form-field full">
+        <label>Description</label>
+        <textarea id="o-description" rows="3" placeholder="Courte description de l'offre…"></textarea>
+      </div>
+      <div class="form-field">
+        <label>Prix normal (€)</label>
+        <input type="number" id="o-normal-price" step="0.01" min="0" placeholder="100"/>
+      </div>
+      <div class="form-field">
+        <label>Prix promotionnel (€)</label>
+        <input type="number" id="o-promo-price" step="0.01" min="0" placeholder="80"/>
+      </div>
+      <div class="form-field">
+        <label>Date de début (optionnel)</label>
+        <input type="datetime-local" id="o-starts-at"/>
+      </div>
+      <div class="form-field">
+        <label>Date de fin (optionnel)</label>
+        <input type="datetime-local" id="o-ends-at"/>
+      </div>
+      <div class="form-field">
+        <label>Ordre d'affichage</label>
+        <input type="number" id="o-sort" value="0" min="0"/>
+      </div>
+      <div class="form-field" style="display:flex;align-items:flex-end;padding-bottom:4px">
+        <label class="toggle-row"><input type="checkbox" id="o-active" checked/> Actif</label>
+      </div>
+      <div class="form-field full" id="pack-products-section">
+        <label>Slugs des produits inclus (un par ligne)</label>
+        <textarea id="o-product-slugs" rows="5" placeholder="miel-nigelle&#10;gelules-spiruline&#10;miel-shilajit"></textarea>
+        <small style="color:var(--muted);font-size:.8rem">Slugs exacts visibles dans la liste produits (colonne Nom)</small>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeOfferModal()">Annuler</button>
+      <button class="btn btn-primary" onclick="saveOfferModal()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
@@ -448,14 +552,20 @@ tr:hover td { background: #fafaf8; }
 // ── État global ────────────────────────────────────────────────────────────────
 let allProducts      = [];
 let allCategories    = [];
+let allOffers        = [];
 let filteredProducts = [];
 let currentPage      = 1;
 const PAGE_SIZE      = 25;
 
-// ── État image du modal ────────────────────────────────────────────────────────
-let currentImages    = [];   // tableau images[] du produit en cours d'édition
-let pendingImageFile = null; // fichier sélectionné, pas encore uploadé
-let imageRemoved     = false; // l'utilisateur a cliqué "Supprimer"
+// ── État image modal produit ───────────────────────────────────────────────────
+let currentImages    = [];
+let pendingImageFile = null;
+let imageRemoved     = false;
+
+// ── État image modal offre ─────────────────────────────────────────────────────
+let offerCurrentImage    = null;
+let offerPendingFile     = null;
+let offerImageRemoved    = false;
 
 function showImgPreview(url) {
   document.getElementById('img-preview').src          = url;
@@ -544,20 +654,24 @@ async function initApp() {
 }
 
 async function loadAll() {
-  const [prods, cats] = await Promise.all([
+  const [prods, cats, offs] = await Promise.all([
     fetchProducts({ activeOnly: false }),
-    fetchCategories()
+    fetchCategories(),
+    fetchOffers()
   ]);
-  allProducts   = prods  || [];
-  allCategories = cats   || [];
+  allProducts   = prods || [];
+  allCategories = cats  || [];
+  allOffers     = offs  || [];
 
   // Stats
-  const active   = allProducts.filter(p => p.active).length;
-  const variants = allProducts.reduce((s,p) => s + (p.product_variants?.length||0), 0);
+  const active       = allProducts.filter(p => p.active).length;
+  const variants     = allProducts.reduce((s,p) => s + (p.product_variants?.length||0), 0);
+  const activeOffers = allOffers.filter(o => o.active).length;
   document.getElementById('stat-total').textContent    = allProducts.length;
   document.getElementById('stat-active').textContent   = active;
   document.getElementById('stat-variants').textContent = variants;
   document.getElementById('stat-cats').textContent     = allCategories.length;
+  document.getElementById('stat-offers').textContent   = activeOffers;
 
   // Filtre catégorie
   const sel = document.getElementById('filter-cat');
@@ -575,6 +689,7 @@ async function loadAll() {
 
   filterProducts();
   renderCategories();
+  renderOffers();
 }
 
 // ── Section switch ─────────────────────────────────────────────────────────────
@@ -583,6 +698,7 @@ function showSection(name, el) {
   el.classList.add('active');
   document.getElementById('section-products').style.display   = name==='products'   ? 'block' : 'none';
   document.getElementById('section-categories').style.display = name==='categories' ? 'block' : 'none';
+  document.getElementById('section-offers').style.display     = name==='offers'     ? 'block' : 'none';
   return false;
 }
 
@@ -836,6 +952,218 @@ async function deleteProductConfirm(id, name) {
   try {
     await deleteProduct(id);
     showToast('Produit supprimé ✓', 'ok');
+    await loadAll();
+  } catch(e) { showToast('Erreur : ' + e.message, 'err'); }
+}
+
+// ── Offres — rendu table ───────────────────────────────────────────────────────
+const OFFER_TYPE_LABELS = { product_promo: 'Promo produit', pack: 'Pack', banner: 'Bannière' };
+
+function renderOffers() {
+  const tbody = document.getElementById('offers-tbody');
+  if (!allOffers.length) {
+    tbody.innerHTML = '<tr><td colspan="8" class="loading">Aucune offre. Créez-en une avec « + Nouvelle offre ».</td></tr>';
+    return;
+  }
+  const now = new Date();
+  tbody.innerHTML = allOffers.map(o => {
+    const thumb = o.image
+      ? `<img src="${o.image}" class="thumb" loading="lazy" onerror="this.style.display='none'">`
+      : `<span class="no-thumb"></span>`;
+    const typeLabel  = OFFER_TYPE_LABELS[o.type] || o.type;
+    const prices     = o.promo_price
+      ? `${o.normal_price ? `<s style="color:var(--muted)">${o.normal_price}€</s> ` : ''}${o.promo_price}€`
+      : '—';
+    const badge      = o.badge ? `<span class="badge badge-cat">${esc(o.badge)}</span>` : '—';
+    const dateStart  = o.starts_at ? new Date(o.starts_at).toLocaleDateString('fr-FR') : '∞';
+    const dateEnd    = o.ends_at   ? new Date(o.ends_at).toLocaleDateString('fr-FR')   : '∞';
+    const expired    = o.ends_at && new Date(o.ends_at) <= now;
+    const statusBadge = !o.active
+      ? '<span class="badge badge-off">Inactif</span>'
+      : expired
+        ? '<span class="badge badge-off">Expirée</span>'
+        : '<span class="badge badge-ok">Active</span>';
+    return `<tr>
+      <td>${thumb}</td>
+      <td><strong>${esc(o.title)}</strong></td>
+      <td><span class="badge badge-cat">${typeLabel}</span></td>
+      <td>${prices}</td>
+      <td>${badge}</td>
+      <td style="font-size:.8rem;color:var(--muted)">${dateStart} → ${dateEnd}</td>
+      <td>${statusBadge}</td>
+      <td><div class="actions">
+        <button class="btn btn-outline btn-small" onclick="openOfferModal('${o.id}')">Éditer</button>
+        <button class="btn btn-outline btn-small" onclick="toggleOfferActiveAdmin('${o.id}',${!o.active})">${o.active ? 'Désactiver' : 'Activer'}</button>
+        <button class="btn btn-danger btn-small" onclick="deleteOfferConfirm('${o.id}','${esc(o.title)}')">Suppr.</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Offres — image modal ───────────────────────────────────────────────────────
+function showOfferImgPreview(url) {
+  document.getElementById('offer-img-preview').src             = url;
+  document.getElementById('offer-img-preview').style.display   = 'block';
+  document.getElementById('offer-img-placeholder').style.display = 'none';
+  document.getElementById('offer-img-remove-btn').style.display  = 'inline-block';
+}
+function hideOfferImgPreview() {
+  document.getElementById('offer-img-preview').src             = '';
+  document.getElementById('offer-img-preview').style.display   = 'none';
+  document.getElementById('offer-img-placeholder').style.display = 'flex';
+  document.getElementById('offer-img-remove-btn').style.display  = 'none';
+}
+function handleOfferImageSelect(file) {
+  if (!file) return;
+  offerPendingFile  = file;
+  offerImageRemoved = false;
+  showOfferImgPreview(URL.createObjectURL(file));
+  document.getElementById('offer-img-status').textContent =
+    `${file.name} (${(file.size/1024).toFixed(0)} Ko) — sera uploadé à l'enregistrement`;
+}
+function removeOfferImage() {
+  offerPendingFile  = null;
+  offerImageRemoved = true;
+  hideOfferImgPreview();
+  document.getElementById('offer-img-status').textContent = 'Image supprimée à l\'enregistrement';
+}
+
+// ── Offres — modal CRUD ────────────────────────────────────────────────────────
+function togglePackProducts() {
+  const type = document.getElementById('o-type').value;
+  const section = document.getElementById('pack-products-section');
+  section.style.display = (type === 'banner') ? 'none' : 'block';
+}
+
+function openOfferModal(id) {
+  // Reset image state
+  offerCurrentImage = null;
+  offerPendingFile  = null;
+  offerImageRemoved = false;
+  document.getElementById('offer-img-file').value = '';
+  document.getElementById('offer-img-status').textContent = '';
+  hideOfferImgPreview();
+
+  document.getElementById('offer-modal').classList.add('open');
+
+  if (!id) {
+    document.getElementById('offer-modal-title').textContent = 'Nouvelle offre';
+    ['o-id','o-badge','o-title','o-description','o-normal-price','o-promo-price','o-starts-at','o-ends-at','o-product-slugs']
+      .forEach(x => { document.getElementById(x).value = ''; });
+    document.getElementById('o-sort').value   = '0';
+    document.getElementById('o-type').value   = 'pack';
+    document.getElementById('o-active').checked = true;
+    togglePackProducts();
+    return;
+  }
+
+  document.getElementById('offer-modal-title').textContent = 'Modifier l\'offre';
+  const o = allOffers.find(x => x.id === id);
+  if (!o) return;
+
+  document.getElementById('o-id').value           = o.id;
+  document.getElementById('o-type').value         = o.type || 'pack';
+  document.getElementById('o-badge').value        = o.badge || '';
+  document.getElementById('o-title').value        = o.title || '';
+  document.getElementById('o-description').value  = o.description || '';
+  document.getElementById('o-normal-price').value = o.normal_price ?? '';
+  document.getElementById('o-promo-price').value  = o.promo_price  ?? '';
+  document.getElementById('o-sort').value         = o.sort_order ?? 0;
+  document.getElementById('o-active').checked     = !!o.active;
+
+  // Dates
+  const toLocal = iso => iso ? new Date(iso).toISOString().slice(0,16) : '';
+  document.getElementById('o-starts-at').value = toLocal(o.starts_at);
+  document.getElementById('o-ends-at').value   = toLocal(o.ends_at);
+
+  // Produits pack
+  const slugs = (o.offer_products || [])
+    .sort((a,b) => a.sort_order - b.sort_order)
+    .map(p => p.product_slug);
+  document.getElementById('o-product-slugs').value = slugs.join('\n');
+
+  // Image
+  if (o.image) {
+    offerCurrentImage = o.image;
+    showOfferImgPreview(o.image);
+  }
+
+  togglePackProducts();
+}
+
+function closeOfferModal() {
+  document.getElementById('offer-modal').classList.remove('open');
+}
+
+async function saveOfferModal() {
+  const id    = document.getElementById('o-id').value;
+  const title = document.getElementById('o-title').value.trim();
+  const type  = document.getElementById('o-type').value;
+
+  if (!title || !type) { showToast('Titre et type sont requis.', 'err'); return; }
+
+  const toISO = v => v ? new Date(v).toISOString() : null;
+
+  const offer = {
+    id:           id || undefined,
+    type,
+    title,
+    description:  document.getElementById('o-description').value.trim() || null,
+    badge:        document.getElementById('o-badge').value.trim() || null,
+    normal_price: parseFloat(document.getElementById('o-normal-price').value) || null,
+    promo_price:  parseFloat(document.getElementById('o-promo-price').value)  || null,
+    starts_at:    toISO(document.getElementById('o-starts-at').value),
+    ends_at:      toISO(document.getElementById('o-ends-at').value),
+    sort_order:   parseInt(document.getElementById('o-sort').value) || 0,
+    active:       document.getElementById('o-active').checked,
+    image:        offerCurrentImage || null,
+  };
+
+  try {
+    // Image upload
+    if (offerPendingFile) {
+      const st  = document.getElementById('offer-img-status');
+      st.textContent = 'Upload en cours…';
+      const ext  = offerPendingFile.name.split('.').pop().toLowerCase();
+      const slug = title.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'')
+        .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,40);
+      const path = `offers/${slug}/${slug}-${Date.now()}.${ext}`;
+      offer.image = await uploadImage(offerPendingFile, path);
+      st.textContent = 'Upload réussi ✓';
+    } else if (offerImageRemoved) {
+      offer.image = null;
+    }
+
+    const saved = await saveOffer(offer);
+
+    // Produits du pack
+    if (type !== 'banner') {
+      const slugs = document.getElementById('o-product-slugs').value
+        .split('\n').map(s => s.trim()).filter(Boolean);
+      await saveOfferProducts(saved.id, slugs);
+    }
+
+    showToast('Offre enregistrée ✓', 'ok');
+    closeOfferModal();
+    await loadAll();
+  } catch(e) {
+    showToast('Erreur : ' + e.message, 'err');
+  }
+}
+
+async function toggleOfferActiveAdmin(id, active) {
+  try {
+    await toggleOfferActive(id, active);
+    showToast(active ? 'Offre activée ✓' : 'Offre désactivée ✓', 'ok');
+    await loadAll();
+  } catch(e) { showToast('Erreur : ' + e.message, 'err'); }
+}
+
+async function deleteOfferConfirm(id, name) {
+  if (!confirm(`Supprimer définitivement l'offre « ${name} » ?\nCette action est irréversible.`)) return;
+  try {
+    await deleteOffer(id);
+    showToast('Offre supprimée ✓', 'ok');
     await loadAll();
   } catch(e) { showToast('Erreur : ' + e.message, 'err'); }
 }
