@@ -2885,15 +2885,16 @@ async function openPackModal(offerId) {
       return { name: p.name, slug, displayPrice, displayImage, fallbackImage, displayFormat };
     }).filter(x => x);
 
-    // Calcul du total avec les prix résolus
+    // Valeur de référence = normal_price (cohérence carte/affiche) ; fallback sur somme réelle
     const totalIndividual = orderedLines.reduce((sum, l) => sum + (l.displayPrice || 0), 0);
-    const packPrice       = offers.promo_price || 0;
-    const savings         = totalIndividual - packPrice;
+    const refPrice        = offers.normal_price || totalIndividual;
+    const packPrice       = offers.promo_price  || 0;
+    const savings         = refPrice - packPrice;
 
     // Affiche le modal
     document.getElementById('packModalTitle').textContent = offers.title;
     document.getElementById('packModalCount').textContent = orderedLines.length;
-    document.getElementById('packModalTotal').textContent = totalIndividual.toFixed(2) + '€';
+    document.getElementById('packModalTotal').textContent = refPrice.toFixed(2) + '€';
 
     // Économie : masquer si nulle ou négative
     const savingsEl     = document.getElementById('packModalSavings');
