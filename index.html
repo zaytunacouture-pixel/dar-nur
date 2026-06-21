@@ -2117,6 +2117,8 @@ function waLink(p, opt, price){
     variantLine = '\n• Format / Poids : '+opt;
   } else if(p.cat==='gelules'){
     variantLine = '\n• Contenu : 60 gélules';
+  } else if(opt){
+    variantLine = '\n• Format : '+opt;
   }
   const t = `As-salâm 'alaykoum,
 
@@ -2922,9 +2924,12 @@ async function openPackModal(offerId) {
         </div>
       </div>`).join('');
 
-    // Configure le bouton WhatsApp
+    // Configure le bouton WhatsApp — message enrichi avec le contenu du pack
+    const packLines = orderedLines
+      .map(l => `• ${l.name}${l.displayFormat ? ' — ' + l.displayFormat : ''}`)
+      .join('\n');
     const msg = encodeURIComponent(
-      `Salam alaykoum, je souhaite commander : ${offers.title} — ${packPrice}€\n\nBarakAllahu fik.`
+      `Salam alaykoum,\n\nJe souhaite commander :\n\n📦 ${offers.title} — ${packPrice}€\n\nContenu :\n${packLines}\n\nMerci.`
     );
     document.getElementById('packModalCTA').href = `https://wa.me/33769253375?text=${msg}`;
     document.getElementById('packModalCTA').onclick = function() {
