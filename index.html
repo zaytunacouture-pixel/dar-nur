@@ -334,6 +334,52 @@ section{padding:15px 28px}
 }
 .offer-cta:hover{background:#1a3525}
 @media(max-width:768px){.offers-grid{grid-template-columns:1fr}}
+
+/* ── Modal Contenu Pack ── */
+.pack-modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;
+  align-items:center;justify-content:center;z-index:1000;padding:20px;
+}
+.pack-modal-overlay.open{display:flex}
+.pack-modal{
+  background:#fff;border-radius:12px;width:100%;max-width:700px;
+  max-height:90vh;overflow-y:auto;padding:40px;
+  animation:slideUp .3s ease;
+}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+.pack-modal-header{margin-bottom:30px}
+.pack-modal-title{font-family:'Cinzel';font-size:1.4rem;color:var(--green);margin-bottom:10px}
+.pack-modal-summary{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-bottom:30px;padding-bottom:20px;border-bottom:1px solid var(--line)}
+.pack-modal-summary-item{text-align:center}
+.pack-modal-summary-label{font-size:.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px}
+.pack-modal-summary-value{font-size:1.5rem;font-weight:700;color:var(--green);font-family:'Cinzel'}
+.pack-modal-products{margin-bottom:30px}
+.pack-modal-products-title{font-family:'Cinzel';font-size:1.1rem;color:var(--green);margin-bottom:15px}
+.pack-product{
+  display:flex;gap:15px;margin-bottom:20px;padding:15px;
+  background:#fafaf8;border-radius:8px;border:1px solid var(--line)
+}
+.pack-product-img{
+  width:80px;height:80px;object-fit:cover;border-radius:6px;flex-shrink:0;
+  background:#eee;border:1px solid var(--line)
+}
+.pack-product-info{flex:1}
+.pack-product-name{font-weight:600;color:var(--green);margin-bottom:5px}
+.pack-product-price{font-size:.9rem;color:var(--muted)}
+.pack-modal-footer{display:flex;gap:15px;justify-content:center}
+.pack-modal-cta{
+  display:inline-block;padding:15px 40px;background:var(--green);color:var(--gold);
+  text-decoration:none;font-family:'Cinzel';font-size:.8rem;
+  letter-spacing:.12em;text-transform:uppercase;border-radius:4px;
+  transition:background .25s;cursor:pointer;border:none;
+}
+.pack-modal-cta:hover{background:#1a3525}
+.pack-modal-close{
+  position:absolute;top:20px;right:20px;width:40px;height:40px;
+  border:none;background:transparent;font-size:1.5rem;cursor:pointer;
+  color:var(--muted);transition:color .2s;
+}
+.pack-modal-close:hover{color:var(--green)}
 .card{
   background:#fff;border:1px solid var(--line);border-radius:4px;
   padding:12px 11px 8px;text-align:center;cursor:pointer;
@@ -717,6 +763,37 @@ footer{background:#0a160f;color:var(--cream);padding:46px 28px 26px}
       <div class="offers-grid" id="offresGrid"></div>
     </div>
   </section>
+
+  <!-- ════════════════ MODAL CONTENU PACK ════════════════ -->
+  <div class="pack-modal-overlay" id="packModalOverlay">
+    <div class="pack-modal">
+      <button class="pack-modal-close" onclick="closePackModal()">✕</button>
+      <div class="pack-modal-header">
+        <h2 class="pack-modal-title" id="packModalTitle"></h2>
+      </div>
+      <div class="pack-modal-summary">
+        <div class="pack-modal-summary-item">
+          <div class="pack-modal-summary-label">Nombre de produits</div>
+          <div class="pack-modal-summary-value" id="packModalCount">0</div>
+        </div>
+        <div class="pack-modal-summary-item">
+          <div class="pack-modal-summary-label">Valeur totale</div>
+          <div class="pack-modal-summary-value" id="packModalTotal">0€</div>
+        </div>
+        <div class="pack-modal-summary-item">
+          <div class="pack-modal-summary-label">Vous économisez</div>
+          <div class="pack-modal-summary-value" id="packModalSavings">0€</div>
+        </div>
+      </div>
+      <div class="pack-modal-products">
+        <h3 class="pack-modal-products-title">Contenu du pack</h3>
+        <div id="packModalProducts"></div>
+      </div>
+      <div class="pack-modal-footer">
+        <button class="pack-modal-cta" id="packModalCTA">Commander sur WhatsApp</button>
+      </div>
+    </div>
+  </div>
 
   <!-- ============ CATALOGUE COMPLET ============ -->
   <section id="boutique">
@@ -2215,11 +2292,14 @@ function updatePageMetadata(product){
   // Add price offer only using data actually present in the product object
   let schemaPrice = null;
   if(product.price.type === 'format' && product.price.options && product.price.options.length > 0) {
-    schemaPrice = product.price.options[0][1].replace(',', '.');
+    const priceVal = product.price.options[0][1];
+    schemaPrice = (typeof priceVal === 'number' ? priceVal.toString() : priceVal).replace(',', '.');
   } else if(product.price.type === 'size' && product.price.options && product.price.options.length > 0) {
-    schemaPrice = product.price.options[0][1].replace(',', '.');
+    const priceVal = product.price.options[0][1];
+    schemaPrice = (typeof priceVal === 'number' ? priceVal.toString() : priceVal).replace(',', '.');
   } else if(product.price.type === 'fixed' && product.price.value) {
-    schemaPrice = product.price.value.replace(',', '.');
+    const priceVal = product.price.value;
+    schemaPrice = (typeof priceVal === 'number' ? priceVal.toString() : priceVal).replace(',', '.');
   }
   if(schemaPrice) {
     schemaData.offers = {
@@ -2359,7 +2439,7 @@ function showProduct(id){
       </div>`:""}
       </div>
       <div class="pp-content">
-        ${p.desc.map(d=>`<p>${d}</p>`).join("")}
+        ${p.description.map(d=>`<p>${d}</p>`).join("")}
         ${(p.benefits&&p.benefits.length)?`<h2>${p.benefitsLabel || (isWear ? 'Points forts' : 'Bienfaits')}</h2>
         <ul class="pp-benefits">${p.benefits.map(b=>`<li>${b}</li>`).join("")}</ul>`:""}
         <h2>Le produit</h2>
@@ -2649,7 +2729,10 @@ syncBar();
 })();
 
 /* ── Offres & Packs : section publique ── */
+let _offersSB = null;  // Stocke la référence à Supabase pour le modal
+
 async function loadActiveOffersSection(_sb){
+  _offersSB = _sb;  // Sauvegarde pour les appels du modal
   try {
     const {data, error} = await _sb
       .from('offers')
@@ -2680,6 +2763,13 @@ async function loadActiveOffersSection(_sb){
           <span class="offer-price-new">${o.promo_price}€</span>
           ${economy ? `<span class="offer-economy">${economy}</span>` : ''}
         </div>` : '';
+
+      // Pour les packs : bouton "Voir le contenu"
+      const packButton = (o.type === 'pack' && o.offer_products?.length > 0) ? `
+        <button class="offer-cta" style="background:var(--gold);color:var(--green);margin-bottom:10px;cursor:pointer;border:none;" onclick="openPackModal('${o.id}')">
+          Voir le contenu (${o.offer_products.length} produits)
+        </button>` : '';
+
       const msg = encodeURIComponent(
         `Salam alaykoum, je souhaite commander l'offre : ${o.title}`
         + (o.promo_price ? ` — ${o.promo_price}€` : '')
@@ -2693,6 +2783,7 @@ async function loadActiveOffersSection(_sb){
           <h3 class="offer-title">${o.title}</h3>
           ${o.description ? `<p class="offer-desc">${o.description}</p>` : ''}
           ${pricesHtml}
+          ${packButton}
           <a class="offer-cta" href="${WA}${msg}" target="_blank" rel="noopener">Commander sur WhatsApp</a>
         </div>
       </div>`;
@@ -2700,6 +2791,87 @@ async function loadActiveOffersSection(_sb){
   } catch(e){
     console.warn('[Dar Nūr] Offres non disponibles.', e.message);
   }
+}
+
+/* ── Modal Pack : détails et contenu ── */
+async function openPackModal(offerId) {
+  if (!_offersSB) return;
+  try {
+    // Récupère l'offre avec ses produits
+    const {data: offers, error: offerError} = await _offersSB
+      .from('offers')
+      .select('*, offer_products(*)')
+      .eq('id', offerId)
+      .single();
+    if (offerError || !offers) return;
+
+    // Récupère les slugs des produits
+    const slugs = (offers.offer_products || []).map(op => op.product_slug);
+    if (!slugs.length) return;
+
+    // Récupère les détails complets des produits
+    const {data: products, error: prodError} = await _offersSB
+      .from('products')
+      .select('slug, name, price_value, images')
+      .in('slug', slugs);
+    if (prodError || !products) return;
+
+    // Crée une map par slug pour un accès rapide
+    const prodMap = {};
+    products.forEach(p => {
+      prodMap[p.slug] = p;
+    });
+
+    // Réordonne les produits selon l'ordre dans offer_products
+    const orderedProducts = slugs
+      .map(slug => prodMap[slug])
+      .filter(p => p);  // Filtre les doublons
+
+    // Calcule les totaux
+    const totalIndividual = orderedProducts.reduce((sum, p) => sum + (p.price_value || 0), 0);
+    const packPrice = offers.promo_price || 0;
+    const savings = totalIndividual - packPrice;
+
+    // Affiche le modal
+    document.getElementById('packModalTitle').textContent = offers.title;
+    document.getElementById('packModalCount').textContent = orderedProducts.length;
+    document.getElementById('packModalTotal').textContent = totalIndividual.toFixed(2) + '€';
+    document.getElementById('packModalSavings').textContent = savings.toFixed(2) + '€';
+
+    // Affiche les produits
+    document.getElementById('packModalProducts').innerHTML = orderedProducts.map(p => {
+      const img = p.images && p.images.length > 0
+        ? p.images[0]
+        : '/logo-dar-nur.png';
+      return `
+      <div class="pack-product">
+        <img src="${img}" class="pack-product-img" alt="${p.name}" loading="lazy"/>
+        <div class="pack-product-info">
+          <div class="pack-product-name">${p.name}</div>
+          <div class="pack-product-price">${p.price_value ? p.price_value.toFixed(2) + '€' : '—'}</div>
+        </div>
+      </div>`;
+    }).join('');
+
+    // Configure le bouton WhatsApp du modal
+    const msg = encodeURIComponent(
+      `Salam alaykoum, je souhaite commander : ${offers.title} — ${packPrice}€\n\nBarakAllahu fik.`
+    );
+    document.getElementById('packModalCTA').href = `https://wa.me/33769253375?text=${msg}`;
+    document.getElementById('packModalCTA').onclick = function() {
+      window.open(this.href, '_blank', 'noopener');
+      return false;
+    };
+
+    // Affiche le modal
+    document.getElementById('packModalOverlay').classList.add('open');
+  } catch (e) {
+    console.error('[Dar Nūr] Erreur ouverture modal pack:', e.message);
+  }
+}
+
+function closePackModal() {
+  document.getElementById('packModalOverlay').classList.remove('open');
 }
 
 </script>
