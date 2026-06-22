@@ -335,6 +335,67 @@ section{padding:15px 28px}
 .offer-cta:hover{background:#1a3525}
 @media(max-width:768px){.offers-grid{grid-template-columns:1fr}}
 
+/* ── Modal Couleur Abaya ── */
+.color-modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;
+  align-items:center;justify-content:center;z-index:1000;padding:20px;
+}
+.color-modal-overlay.open{display:flex}
+.color-modal{
+  background:#fff;border-radius:12px;width:100%;max-width:560px;
+  max-height:92vh;overflow-y:auto;padding:32px;position:relative;
+  animation:slideUp .3s ease;
+}
+.color-preview{
+  width:100%;height:220px;border-radius:8px;margin-bottom:20px;
+  background:#f0ece4;display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+}
+.color-preview-img{width:100%;height:100%;object-fit:cover;transition:opacity .25s}
+.color-preview-placeholder{font-size:3rem;opacity:.3}
+.color-modal-price{
+  font-family:'Cormorant Garamond';font-size:1.3rem;
+  color:var(--green);font-weight:600;margin-bottom:20px;
+}
+.color-section-label{
+  font-family:'Cinzel';font-size:.72rem;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--muted);margin-bottom:10px;
+}
+.color-swatches{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(68px,1fr));
+  gap:10px;margin-bottom:24px;
+}
+.color-swatch{
+  border:2px solid transparent;border-radius:6px;overflow:hidden;
+  cursor:pointer;transition:border-color .2s,transform .15s;
+}
+.color-swatch:hover{transform:translateY(-2px)}
+.color-swatch.sel{border-color:var(--green)}
+.color-swatch img{width:100%;aspect-ratio:3/4;object-fit:cover;display:block}
+.color-swatch-label{
+  text-align:center;font-size:.65rem;padding:4px 2px;
+  color:var(--green);font-weight:600;line-height:1.2;
+}
+.color-size-btns{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:28px}
+.color-size-btn{
+  padding:10px 20px;border:2px solid var(--line);background:#fff;
+  border-radius:4px;cursor:pointer;font-family:'Cinzel';font-size:.8rem;
+  color:var(--ink);transition:all .2s;
+}
+.color-size-btn.sel{border-color:var(--green);background:var(--green);color:var(--gold)}
+.color-modal-cta{
+  display:block;width:100%;padding:16px;background:var(--green);
+  color:var(--gold);font-family:'Cinzel';font-size:.78rem;
+  letter-spacing:.1em;text-transform:uppercase;border-radius:4px;
+  border:none;cursor:pointer;transition:background .25s;
+}
+.color-modal-cta:hover:not([disabled]){background:#1a3525}
+.color-modal-cta[disabled]{background:#ccc;color:#888;cursor:not-allowed}
+@media(max-width:480px){
+  .color-swatches{grid-template-columns:repeat(auto-fill,minmax(56px,1fr))}
+  .color-preview{height:160px}
+}
+
 /* ── Modal Contenu Pack ── */
 .pack-modal-overlay{
   position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;
@@ -792,6 +853,32 @@ footer{background:#0a160f;color:var(--cream);padding:46px 28px 26px}
       <div class="pack-modal-footer">
         <button class="pack-modal-cta" id="packModalCTA">Commander sur WhatsApp</button>
       </div>
+    </div>
+  </div>
+
+  <!-- ════════════ MODAL COULEUR ABAYA ════════════ -->
+  <div class="color-modal-overlay" id="colorModalOverlay"
+       onclick="if(event.target===this)closeColorModal()">
+    <div class="color-modal">
+      <button class="pack-modal-close" onclick="closeColorModal()">✕</button>
+      <div class="color-preview" id="colorPreviewWrap">
+        <img id="colorPreviewImg" src="" alt="" class="color-preview-img" style="display:none"/>
+        <span id="colorPreviewPlaceholder" class="color-preview-placeholder">👗</span>
+      </div>
+      <h2 class="pack-modal-title" id="colorModalTitle"></h2>
+      <p class="color-modal-price" id="colorModalPrice"></p>
+      <p class="color-section-label">Couleur</p>
+      <div class="color-swatches" id="colorSwatches"></div>
+      <p class="color-section-label">Taille</p>
+      <div class="color-size-btns" id="colorSizeBtns">
+        <button class="color-size-btn" onclick="selectSize(this,'M')">M</button>
+        <button class="color-size-btn sel" onclick="selectSize(this,'L')">L</button>
+        <button class="color-size-btn" onclick="selectSize(this,'XL')">XL</button>
+        <button class="color-size-btn" onclick="selectSize(this,'2XL')">2XL</button>
+      </div>
+      <button class="color-modal-cta" id="colorModalCTA" disabled onclick="colorModalOrder()">
+        Choisissez une couleur pour commander
+      </button>
     </div>
   </div>
 
@@ -2731,7 +2818,8 @@ syncBar();
 })();
 
 /* ── Offres & Packs : section publique ── */
-let _offersSB = null;  // Stocke la référence à Supabase pour le modal
+let _offersSB    = null;  // Référence Supabase pour les modals
+let _offersCache = [];    // Offres chargées — accès par openColorModal
 
 async function loadActiveOffersSection(_sb){
   _offersSB = _sb;  // Sauvegarde pour les appels du modal
@@ -2750,6 +2838,7 @@ async function loadActiveOffersSection(_sb){
       return started && notExpired;
     });
     if(!active.length) return;
+    _offersCache = active;  // Stocke pour openColorModal
 
     const WA = 'https://wa.me/33769253375?text=';
     document.getElementById('offres').style.display = 'block';
@@ -2766,11 +2855,17 @@ async function loadActiveOffersSection(_sb){
           ${economy ? `<span class="offer-economy">${economy}</span>` : ''}
         </div>` : '';
 
-      // Pour les packs : bouton "Voir le contenu"
-      const packButton = (o.type === 'pack' && o.offer_products?.length > 0) ? `
-        <button class="offer-cta" style="background:var(--gold);color:var(--green);margin-bottom:10px;cursor:pointer;border:none;" onclick="openPackModal('${o.id}')">
-          Voir le contenu (${o.offer_products.length} produits)
-        </button>` : '';
+      // Pack : "Voir le contenu" | product_promo avec produits : sélecteur couleur
+      const packButton =
+        o.type === 'pack' && o.offer_products?.length > 0
+          ? `<button class="offer-cta" style="background:var(--gold);color:var(--green);margin-bottom:10px;cursor:pointer;border:none;" onclick="openPackModal('${o.id}')">
+               Voir le contenu (${o.offer_products.length} produits)
+             </button>`
+          : o.type === 'product_promo' && o.offer_products?.length > 0
+            ? `<button class="offer-cta" style="background:var(--gold);color:var(--green);margin-bottom:10px;cursor:pointer;border:none;" onclick="openColorModal('${o.id}')">
+                 👗 Choisir ma couleur &amp; taille
+               </button>`
+            : '';
 
       const msg = encodeURIComponent(
         `Salam alaykoum, je souhaite commander l'offre : ${o.title}`
@@ -2946,6 +3041,116 @@ async function openPackModal(offerId) {
 
 function closePackModal() {
   document.getElementById('packModalOverlay').classList.remove('open');
+}
+
+/* ── Modal Couleur Abaya ── */
+let _selectedColor = null;
+let _selectedSize  = 'L';
+let _colorOfferActive = null;
+
+function openColorModal(offerId) {
+  const offer = _offersCache.find(o => o.id === offerId);
+  if (!offer) return;
+
+  // Résoudre les couleurs depuis offer_products → PRODUCTS (déjà chargé)
+  const colors = (offer.offer_products || [])
+    .sort((a, b) => a.sort_order - b.sort_order)
+    .map(op => {
+      const p = PRODUCTS.find(pr => pr.id === op.product_slug);
+      if (!p) return null;
+      return {
+        slug:  p.id,
+        label: p.name.replace('Ensemble Nissah Mastoura', '').trim(),
+        img:   '/' + (PRODUCT_IMAGES[p.id]?.[0] || 'logo-dar-nur.png'),
+      };
+    })
+    .filter(Boolean);
+
+  if (!colors.length) return;
+
+  _selectedColor    = null;
+  _selectedSize     = 'L';
+  _colorOfferActive = { offer, colors };
+
+  document.getElementById('colorModalTitle').textContent = offer.title;
+  document.getElementById('colorModalPrice').textContent =
+    offer.promo_price + '€ au lieu de ' + offer.normal_price + '€';
+
+  // Reset aperçu
+  const img = document.getElementById('colorPreviewImg');
+  img.src = ''; img.style.display = 'none';
+  document.getElementById('colorPreviewPlaceholder').style.display = 'block';
+
+  // Swatches
+  document.getElementById('colorSwatches').innerHTML = colors.map(c => `
+    <div class="color-swatch" onclick="selectColor(this,'${c.slug}','${c.label}','${c.img}')">
+      <img src="${c.img}" alt="${c.label}" loading="lazy"
+           onerror="this.style.background='#e8e4da'"/>
+      <div class="color-swatch-label">${c.label}</div>
+    </div>`).join('');
+
+  // Pré-sélection taille L
+  document.querySelectorAll('#colorSizeBtns .color-size-btn').forEach(b =>
+    b.classList.toggle('sel', b.textContent === 'L'));
+
+  // CTA désactivé jusqu'à sélection couleur
+  const cta = document.getElementById('colorModalCTA');
+  cta.disabled    = true;
+  cta.textContent = 'Choisissez une couleur pour commander';
+
+  document.getElementById('colorModalOverlay').classList.add('open');
+}
+
+function selectColor(el, slug, label, img) {
+  document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('sel'));
+  el.classList.add('sel');
+  _selectedColor = { slug, label };
+
+  // Aperçu grand format
+  const previewImg = document.getElementById('colorPreviewImg');
+  previewImg.src          = img;
+  previewImg.style.display = 'block';
+  document.getElementById('colorPreviewPlaceholder').style.display = 'none';
+
+  updateColorWA();
+}
+
+function selectSize(el, size) {
+  document.querySelectorAll('#colorSizeBtns .color-size-btn')
+    .forEach(b => b.classList.remove('sel'));
+  el.classList.add('sel');
+  _selectedSize = size;
+  if (_selectedColor) updateColorWA();
+}
+
+function updateColorWA() {
+  if (!_colorOfferActive || !_selectedColor) return;
+  const { offer } = _colorOfferActive;
+  const msg = encodeURIComponent(
+    `Salam alaykoum, je souhaite commander :\n\n`
+    + `👗 ${offer.title} — ${offer.promo_price}€\n`
+    + `Ensemble Nissah Mastoura\n\n`
+    + `• Couleur : ${_selectedColor.label}\n`
+    + `• Taille : ${_selectedSize}\n\n`
+    + `Mes informations :\n`
+    + `• Nom :\n• Ville :\n`
+    + `• Paiement : Revolut / Espèces\n\n`
+    + `Merci.`
+  );
+  window._colorWAHref = `https://wa.me/33769253375?text=${msg}`;
+
+  const cta = document.getElementById('colorModalCTA');
+  cta.disabled    = false;
+  cta.textContent = `Commander — ${_selectedColor.label} / ${_selectedSize}`;
+}
+
+function colorModalOrder() {
+  if (window._colorWAHref) window.open(window._colorWAHref, '_blank', 'noopener');
+}
+
+function closeColorModal() {
+  document.getElementById('colorModalOverlay').classList.remove('open');
+  _selectedColor = null;
 }
 
 </script>
