@@ -2867,11 +2867,6 @@ async function loadActiveOffersSection(_sb){
                </button>`
             : '';
 
-      const msg = encodeURIComponent(
-        `Salam alaykoum, je souhaite commander l'offre : ${o.title}`
-        + (o.promo_price ? ` — ${o.promo_price}€` : '')
-        + `\n\nBarakAllahu fik.`
-      );
       return `
       <div class="offer-card">
         ${imgTag}
@@ -2881,7 +2876,6 @@ async function loadActiveOffersSection(_sb){
           ${o.description ? `<p class="offer-desc">${o.description}</p>` : ''}
           ${pricesHtml}
           ${packButton}
-          <a class="offer-cta" href="${WA}${msg}" target="_blank" rel="noopener">Commander sur WhatsApp</a>
         </div>
       </div>`;
     }).join('');
