@@ -227,6 +227,70 @@ tr:hover td { background: #fafaf8; }
 }
 .img-actions { display: flex; flex-direction: column; gap: 8px; justify-content: center; }
 .img-status { font-size: .8rem; color: var(--muted); margin-top: 2px; font-style: italic; }
+.btn-menu { display: none; }   /* masqué sur desktop, révélé via media query */
+
+/* ══════════════════════════════════════════════
+   RESPONSIVE MOBILE — breakpoint < 768px
+   Desktop entièrement inchangé au-dessus.
+   ══════════════════════════════════════════════ */
+@media (max-width: 767px) {
+
+  /* Prévention scroll horizontal (hors tableau) */
+  body { overflow-x: hidden; }
+  .main-content { overflow-x: hidden; }
+
+  /* ── Topbar ── */
+  .topbar { padding: 0 12px; gap: 8px; }
+  .topbar .logo { font-size: .9rem; }
+  .user-info { display: none; }
+  .btn-menu {
+    display: block;   /* révèle le burger sur mobile */
+    background: none; border: none; color: #fff;
+    font-size: 1.4rem; cursor: pointer;
+    padding: 0 2px; line-height: 1; flex-shrink: 0;
+  }
+
+  /* ── Sidebar off-canvas ── */
+  .layout { display: block; }
+  .sidebar {
+    position: fixed; top: 56px; left: 0; bottom: 0;
+    width: 220px; z-index: 150;
+    transform: translateX(-220px);
+    transition: transform .25s ease;
+    box-shadow: 2px 0 16px rgba(0,0,0,.18);
+  }
+  .sidebar.open { transform: translateX(0); }
+
+  /* ── Overlay fond ── */
+  .sidebar-overlay {
+    display: none; position: fixed; inset: 0;
+    z-index: 140; background: rgba(0,0,0,.35);
+  }
+  .sidebar-overlay.open { display: block; }
+
+  /* Main pleine largeur */
+  .main-content { padding: 14px; width: 100%; }
+
+  /* ── Stats 2 colonnes ── */
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .stat-card { min-width: 0; }
+
+  /* ── Toolbar empilé ── */
+  .toolbar { flex-direction: column; align-items: stretch; gap: 8px; }
+  .toolbar input[type=search] { width: 100%; }
+  .toolbar select { width: 100%; }
+  .toolbar .spacer { display: none; }
+
+  /* ── Tableau : scroll horizontal maîtrisé ── */
+  .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table { min-width: 900px; }
+
+  /* ── Modals 1 colonne ── */
+  .form-grid { grid-template-columns: 1fr; }
+  .modal { padding: 18px; }
+  .variant-row { grid-template-columns: 1fr 80px auto; }
+
+}
 </style>
 </head>
 <body>
@@ -251,7 +315,9 @@ tr:hover td { background: #fafaf8; }
 
 <!-- ═══════════════════════════════════════════════════════ APP ════ -->
 <div id="app">
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
   <div class="topbar">
+    <button class="btn-menu" id="btn-menu" onclick="toggleSidebar()" aria-label="Menu">☰</button>
     <span class="logo">Dar Nūr — Admin</span>
     <div class="topbar-right">
       <span class="user-info" id="user-email"></span>
@@ -699,6 +765,7 @@ function showSection(name, el) {
   document.getElementById('section-products').style.display   = name==='products'   ? 'block' : 'none';
   document.getElementById('section-categories').style.display = name==='categories' ? 'block' : 'none';
   document.getElementById('section-offers').style.display     = name==='offers'     ? 'block' : 'none';
+  if(window.innerWidth < 768) closeSidebar(); // ferme uniquement sur mobile
   return false;
 }
 
@@ -1180,6 +1247,16 @@ function showToast(msg, type) {
   el.className = `toast show ${type}`;
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => el.classList.remove('show'), 3500);
+}
+
+// ── Sidebar mobile off-canvas ─────────────────────────────────────────────────
+function toggleSidebar() {
+  document.querySelector('.sidebar').classList.toggle('open');
+  document.getElementById('sidebar-overlay').classList.toggle('open');
+}
+function closeSidebar() {
+  document.querySelector('.sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('open');
 }
 
 // ── Démarrage ──────────────────────────────────────────────────────────────────
