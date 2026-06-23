@@ -515,6 +515,9 @@ tr:hover td { background: #fafaf8; }
         <label class="toggle-row">
           <input type="checkbox" id="p-featured"/> Mis en avant
         </label>
+        <label class="toggle-row">
+          <input type="checkbox" id="p-coming-soon"/> Disponible prochainement
+        </label>
       </div>
     </div>
 
@@ -805,7 +808,9 @@ function renderProductsPage() {
     const price    = p.price_value != null ? p.price_value.toFixed(2)+' €' : '—';
     const varCount = p.product_variants?.length || 0;
     const status   = p.active
-      ? '<span class="badge badge-ok">Actif</span>'
+      ? (p.coming_soon
+          ? '<span class="badge badge-ok">Actif</span> <span class="badge badge-cat">Bientôt</span>'
+          : '<span class="badge badge-ok">Actif</span>')
       : '<span class="badge badge-off">Inactif</span>';
     const thumb = img
       ? `<img src="${img}" class="thumb" loading="lazy" onerror="this.style.display='none'">`
@@ -880,7 +885,8 @@ function openProductModal(id) {
   document.getElementById('p-weight').value       = p.weight || '';
   document.getElementById('p-volume').value       = p.volume || '';
   document.getElementById('p-sort').value         = p.sort_order ?? 0;
-  document.getElementById('p-active').checked    = !!p.active;
+  document.getElementById('p-active').checked       = !!p.active;
+  document.getElementById('p-coming-soon').checked  = !!p.coming_soon;
   document.getElementById('p-featured').checked  = !!p.featured;
   renderVariantRows(p.product_variants||[]);
 
@@ -900,8 +906,9 @@ function clearProductModal() {
     .forEach(id => document.getElementById(id).value = '');
   document.getElementById('p-price').value   = '';
   document.getElementById('p-sort').value    = '0';
-  document.getElementById('p-active').checked   = true;
-  document.getElementById('p-featured').checked = false;
+  document.getElementById('p-active').checked      = true;
+  document.getElementById('p-featured').checked    = false;
+  document.getElementById('p-coming-soon').checked = false;
   document.getElementById('variants-list').innerHTML = '';
   resetImageState();
 }
@@ -955,6 +962,7 @@ async function saveProductModal() {
     sort_order:     parseInt(document.getElementById('p-sort').value)||0,
     active:         document.getElementById('p-active').checked,
     featured:       document.getElementById('p-featured').checked,
+    coming_soon:    document.getElementById('p-coming-soon').checked,
     variant_axes:   [],
     images:         [],
     accordions:     [],
