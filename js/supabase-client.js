@@ -51,6 +51,30 @@ async function fetchCategories() {
   return data;
 }
 
+async function fetchAllCategories() {
+  const { data, error } = await _supa
+    .from('categories')
+    .select('*')
+    .order('sort_order');
+  if (error) throw error;
+  return data;
+}
+
+async function saveCategory(cat) {
+  const { data, error } = await _supa
+    .from('categories')
+    .upsert(cat, { onConflict: 'id' })
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+async function deleteCategory(id) {
+  const { error } = await _supa.from('categories').delete().eq('id', id);
+  if (error) throw error;
+}
+
 // ── Produits (écriture admin — nécessite session authentifiée) ─────────────────
 
 async function saveProduct(product) {

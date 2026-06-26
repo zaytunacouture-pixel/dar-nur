@@ -1044,38 +1044,94 @@ const EMBLEMS = {
   vetements:`<svg class="emblem" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M32 12c-4 0-7 2-7 5l-9 5 4 8 5-2v22h14V31l5 2 4-8-9-5c0-3-3-5-7-5z"/></svg>`
 };
 
-const CAT_LABELS = {
+/* ── Catégories — source principale : Supabase
+   CAT_LABELS, FILTERS et COLLECTIONS démarrent avec des valeurs de fallback
+   identiques à l'affichage actuel. Dès que Supabase répond, _applyCategories()
+   les remplace avec les données réelles. Si Supabase est indisponible, le
+   fallback est conservé silencieusement.
+   ── */
+
+/* Fallback labels badge fiche produit (= category.label en base) */
+const _CAT_LABELS_FB = {
   miels:"Miel artisanal", gelules:"Gélules végétales", poudres:"Poudre & graine",
   huiles:"Huile pure", brumes:"Brume & soin", qamis:"Qamis saoudien", vetements:"Couture femme",
-  chechias:"Chéchia", tahara:"Tahara & Hygiène", parfums:"Parfum & Musc", bakhour:"Bakhour & Encens", bijoux:"Bague & Bijou", chaussures:"Sandales", accessoires:"Accessoire"
+  chechias:"Chéchia", tahara:"Tahara & Hygiène", parfums:"Parfum & Musc",
+  bakhour:"Bakhour & Encens", bijoux:"Bague & Bijou", chaussures:"Sandales", accessoires:"Accessoire"
 };
 
-const FILTERS = [
+/* Descriptions éditoriales des collections (champ absent de la table categories — copy marketing) */
+const _COLLECTION_DESCS = {
+  miels:      "Des miels rares et bruts, récoltés avec patience.",
+  gelules:    "Compléments naturels pour le corps et l'esprit.",
+  poudres:    "Graines et poudres ancestrales, brutes et puissantes.",
+  huiles:     "Huiles précieuses pour la peau, les cheveux et le corps.",
+  brumes:     "Brumes parfumées pour sublimer l'intérieur et le corps.",
+  qamis:      "L'élégance masculine, entre tradition et raffinement.",
+  vetements:  "Pudeur et élégance, pensées pour chaque silhouette.",
+  parfums:    "Muscs, oud et ambres orientaux de Dar Nūr.",
+  tahara:     "Muscs Tahara, packs et coffrets pour la pureté.",
+  bakhour:    "L'encens traditionnel arabe pour parfumer vos intérieurs.",
+  bijoux:     "Bagues orientales serties, élégance et caractère.",
+  chaussures: "Sandales de Médine pour homme, confort et style.",
+  chechias:   "Chéchias du Caire, l'authenticité à porter.",
+  accessoires:"Shemaghs yéménites et pièces d'exception.",
+};
+
+/* Entrée "Tous" fixe — toujours en dernier dans COLLECTIONS */
+const _COLLECTIONS_ALL = {
+  key:"all", title:"Tous les Produits",
+  desc:"Découvrez l'intégralité de la sélection Dar Nūr.",
+  cat:"all", type:"all"
+};
+
+/* Variables vivantes — remplacées par _applyCategories() au chargement */
+let CAT_LABELS = { ..._CAT_LABELS_FB };
+let FILTERS    = [
   ["all","Tous"],["miels","Miels"],["gelules","Gélules"],["poudres","Poudres & Graines"],
   ["huiles","Huiles"],["brumes","Brumes"],["qamis","Qamis"],["vetements","Abayas"],
-  ["parfums","Parfums"],["tahara","Tahara"],["bakhour","Bakhour"],["bijoux","Bijoux"],["chaussures","Sandales"],["chechias","Chéchias"],["accessoires","Accessoires"]
+  ["parfums","Parfums"],["tahara","Tahara"],["bakhour","Bakhour"],["bijoux","Bijoux"],
+  ["chaussures","Sandales"],["chechias","Chéchias"],["accessoires","Accessoires"]
+];
+let COLLECTIONS = [
+  {key:"miels",      title:"Miels",              desc:_COLLECTION_DESCS.miels,       cat:"miels",      type:"category"},
+  {key:"gelules",    title:"Gélules",            desc:_COLLECTION_DESCS.gelules,     cat:"gelules",    type:"category"},
+  {key:"poudres",    title:"Poudres & Graines",  desc:_COLLECTION_DESCS.poudres,     cat:"poudres",    type:"category"},
+  {key:"huiles",     title:"Huiles",             desc:_COLLECTION_DESCS.huiles,      cat:"huiles",     type:"category"},
+  {key:"brumes",     title:"Brumes",             desc:_COLLECTION_DESCS.brumes,      cat:"brumes",     type:"category"},
+  {key:"qamis",      title:"Qamis",              desc:_COLLECTION_DESCS.qamis,       cat:"qamis",      type:"category"},
+  {key:"vetements",  title:"Abayas & Ensembles", desc:_COLLECTION_DESCS.vetements,   cat:"vetements",  type:"category"},
+  {key:"parfums",    title:"Parfums & Muscs",    desc:_COLLECTION_DESCS.parfums,     cat:"parfums",    type:"category"},
+  {key:"tahara",     title:"Tahara & Hygiène",   desc:_COLLECTION_DESCS.tahara,      cat:"tahara",     type:"category"},
+  {key:"bakhour",    title:"Bakhour & Encens",   desc:_COLLECTION_DESCS.bakhour,     cat:"bakhour",    type:"category"},
+  {key:"bijoux",     title:"Bagues & Bijoux",    desc:_COLLECTION_DESCS.bijoux,      cat:"bijoux",     type:"category"},
+  {key:"chaussures", title:"Sandales",           desc:_COLLECTION_DESCS.chaussures,  cat:"chaussures", type:"category"},
+  {key:"chechias",   title:"Chéchias",           desc:_COLLECTION_DESCS.chechias,    cat:"chechias",   type:"category"},
+  {key:"accessoires",title:"Accessoires",        desc:_COLLECTION_DESCS.accessoires, cat:"accessoires",type:"category"},
+  _COLLECTIONS_ALL
 ];
 
-/* ---- COLLECTIONS HOMEPAGE (config centralisée) ---- */
-/* Pour ajouter une collection (ex: Parfums), ajouter une entrée ici. */
-/* "highlights": tableau optionnel d'IDs produits pour figer les 4 vignettes (sinon: les 4 premiers de la catégorie). */
-const COLLECTIONS = [
-  {key:"miels",     title:"Miels",              desc:"Des miels rares et bruts, récoltés avec patience.",        cat:"miels",     type:"category"},
-  {key:"gelules",   title:"Gélules",            desc:"Compléments naturels pour le corps et l'esprit.",          cat:"gelules",   type:"category"},
-  {key:"poudres",   title:"Poudres & Graines",  desc:"Graines et poudres ancestrales, brutes et puissantes.",    cat:"poudres",   type:"category"},
-  {key:"huiles",    title:"Huiles",             desc:"Huiles précieuses pour la peau, les cheveux et le corps.",cat:"huiles",    type:"category"},
-  {key:"brumes",    title:"Brumes",             desc:"Brumes parfumées pour sublimer l'intérieur et le corps.", cat:"brumes",    type:"category"},
-  {key:"qamis",     title:"Qamis",              desc:"L'élégance masculine, entre tradition et raffinement.",   cat:"qamis",     type:"category"},
-  {key:"vetements", title:"Abayas & Ensembles", desc:"Pudeur et élégance, pensées pour chaque silhouette.",     cat:"vetements", type:"category"},
-  {key:"parfums",   title:"Parfums & Muscs",    desc:"Muscs, oud et ambres orientaux de Dar Nūr.",         cat:"parfums",   type:"category"},
-  {key:"tahara",    title:"Tahara & Hygiène",   desc:"Muscs Tahara, packs et coffrets pour la pureté.",          cat:"tahara",    type:"category"},
-  {key:"bakhour",   title:"Bakhour & Encens",   desc:"L'encens traditionnel arabe pour parfumer vos intérieurs.",cat:"bakhour",   type:"category"},
-  {key:"bijoux",    title:"Bagues & Bijoux",    desc:"Bagues orientales serties, élégance et caractère.",        cat:"bijoux",    type:"category"},
-  {key:"chaussures",title:"Sandales",           desc:"Sandales de Médine pour homme, confort et style.",         cat:"chaussures",type:"category"},
-  {key:"chechias",  title:"Chéchias",           desc:"Chéchias du Caire, l'authenticité à porter.",                cat:"chechias",  type:"category"},
-  {key:"accessoires",title:"Accessoires",       desc:"Shemaghs yéménites et pièces d'exception.",                 cat:"accessoires",type:"category"},
-  {key:"all",       title:"Tous les Produits",  desc:"Découvrez l'intégralité de la sélection Dar Nūr.",        cat:"all",       type:"all"}
-];
+/* Reconstruit CAT_LABELS, FILTERS et COLLECTIONS depuis les catégories Supabase */
+function _applyCategories(cats) {
+  // category.label → badge fiche produit, fil d'Ariane, titre page, Schema.org
+  CAT_LABELS = {};
+  cats.forEach(c => { CAT_LABELS[c.id] = c.label; });
+
+  // category.filter_label → boutons de filtre boutique, order = sort_order
+  FILTERS = [["all","Tous"], ...cats.map(c => [c.id, c.filter_label])];
+
+  // Chaque catégorie active = une collection homepage
+  // Description : éditoriale conservée si connue, générique sinon
+  COLLECTIONS = [
+    ...cats.map(c => ({
+      key:   c.id,
+      title: c.filter_label,
+      desc:  _COLLECTION_DESCS[c.id] || 'Découvrez notre sélection.',
+      cat:   c.id,
+      type:  'category',
+    })),
+    _COLLECTIONS_ALL,
+  ];
+}
 
 /* ---- COMPLEMENTARY PRODUCTS FOR INTERNAL LINKING ---- */
 /* Maps product IDs to complementary product IDs for cross-category recommendations */
@@ -2217,7 +2273,7 @@ function waLink(p, opt, price){
 Je souhaite commander le produit suivant :
 
 • Produit : ${p.name}
-• Catégorie : ${CAT_LABELS[p.cat]}
+• Catégorie : ${CAT_LABELS[p.cat] || p.cat}
 • Référence : ${p.id}${variantLine}
 • Prix : ${price} €
 • Quantité : 1
@@ -2248,7 +2304,7 @@ function renderGrid(){
     return `
     <div class="card" data-cat="${p.cat}" onclick="showProduct('${p.id}')">
       ${img ? `<div class="card-image has-photo"><img src="${img}" alt="${p.name}" loading="lazy"/></div>` : `<div class="card-logo-placeholder" aria-hidden="true"><img src="logo-dar-nur.png" alt="Dar Nūr"/></div>`}
-      <div class="cat-tag">${CAT_LABELS[p.cat]}</div>
+      <div class="cat-tag">${CAT_LABELS[p.cat] || p.cat}</div>
       <h3>${p.name}</h3>
       <div class="price">${p.price.type==='format'?`<small>dès</small> ${p.price.options[0][1]}€`:`${startPrice(p)}€`}</div>
       <div class="card-actions">
@@ -2272,7 +2328,7 @@ function setProductGalleryImage(btn, src){
 /* ============ RENDER PRODUCT PAGE ============ */
 function updatePageMetadata(product){
   // Update title tag
-  document.title = `${product.name} — Dar Nūr | ${CAT_LABELS[product.cat]}`;
+  document.title = `${product.name} — Dar Nūr | ${CAT_LABELS[product.cat] || product.cat}`;
 
   // Build price display string based on actual price type present in data
   let priceStr = '';
@@ -2511,10 +2567,10 @@ function showProduct(id){
       <div class="pp-hero-inner">
         <div class="breadcrumb">
           <a onclick="showHome()">Dar Nūr</a><span>›</span>
-          <a onclick="goCat('${p.cat}')">${CAT_LABELS[p.cat]}</a><span>›</span>
+          <a onclick="goCat('${p.cat}')">${CAT_LABELS[p.cat] || p.cat}</a><span>›</span>
           <span style="color:var(--cream)">${p.name}</span>
         </div>
-        <div class="pp-badge">${CAT_LABELS[p.cat]}</div>
+        <div class="pp-badge">${CAT_LABELS[p.cat] || p.cat}</div>
         <h1>${p.name}</h1>
         <div class="tagline">${p.tagline}</div>
       </div>
@@ -2603,7 +2659,7 @@ function showProduct(id){
         <div class="grid">
           ${family.map(f=>{const fimg=getProductCardImage(f.id);return `<div class="card" data-cat="${f.cat}" onclick="showProduct('${f.id}')">
             ${fimg ? `<div class="card-image has-photo"><img src="${fimg}" alt="${f.name}" loading="lazy"/></div>` : `<div class="card-logo-placeholder" aria-hidden="true"><img src="logo-dar-nur.png" alt="Dar Nūr"/></div>`}
-            <div class="cat-tag">${CAT_LABELS[f.cat]}</div>
+            <div class="cat-tag">${CAT_LABELS[f.cat] || f.cat}</div>
             <h3>${f.name}</h3>
             <div class="price">${f.price.type==='format'?`<small>dès</small> ${f.price.options[0][1]}€`:`${startPrice(f)}€`}</div>
             <div class="card-actions">
@@ -2624,7 +2680,7 @@ function showProduct(id){
         <div class="grid" style="grid-template-columns:repeat(3,1fr)">
           ${complements.map(c=>{const cimg=getProductCardImage(c.id);return `<div class="card" data-cat="${c.cat}" onclick="showProduct('${c.id}')" title="Découvrir ${c.name}">
             ${cimg ? `<div class="card-image has-photo"><img src="${cimg}" alt="${c.name}" loading="lazy"/></div>` : `<div class="card-logo-placeholder" aria-hidden="true"><img src="logo-dar-nur.png" alt="Dar Nūr"/></div>`}
-            <div class="cat-tag">${CAT_LABELS[c.cat]}</div>
+            <div class="cat-tag">${CAT_LABELS[c.cat] || c.cat}</div>
             <h3>${c.name}</h3>
             <div class="price">${c.price.type==='format'?`<small>dès</small> ${c.price.options[0][1]}€`:`${startPrice(c)}€`}</div>
           </div>`}).join("")}
@@ -2778,12 +2834,19 @@ syncBar();
     if(typeof supabase==='undefined' || typeof SUPABASE_URL==='undefined') throw new Error('SDK absent');
     const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-    const {data, error} = await _sb
-      .from('products')
-      .select('*, product_variants(*)')
-      .eq('active', true)
-      .order('sort_order');
+    /* Chargement parallèle : catégories actives + produits actifs — zéro latence ajoutée */
+    const [catRes, prodRes] = await Promise.all([
+      _sb.from('categories').select('*').eq('active', true).order('sort_order'),
+      _sb.from('products').select('*, product_variants(*)').eq('active', true).order('sort_order'),
+    ]);
 
+    /* Appliquer les catégories Supabase avant tout rendu */
+    if (!catRes.error && catRes.data?.length) {
+      _applyCategories(catRes.data);
+      renderFilters(); /* Mise à jour des boutons filtres avec les vraies données */
+    }
+
+    const {data, error} = prodRes;
     if(error) throw error;
     if(!data || !data.length) throw new Error('Aucun produit retourné');
 

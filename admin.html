@@ -206,6 +206,11 @@ tr:hover td { background: #fafaf8; }
 /* ── Loading ── */
 .loading { text-align: center; padding: 40px; color: var(--muted); }
 
+/* ── Input readonly ── */
+.form-field input[readonly] {
+  background: #f5f5f5; color: var(--muted); cursor: not-allowed;
+}
+
 /* ── Image upload ── */
 .img-section { margin-bottom: 4px; }
 .img-section > label { display:block; font-size:.82rem; font-weight:600; margin-bottom:8px; color:#444; }
@@ -408,14 +413,15 @@ tr:hover td { background: #fafaf8; }
       <div id="section-categories" style="display:none">
         <div class="toolbar">
           <div class="spacer"></div>
+          <button class="btn btn-primary" onclick="openCategoryModal()">+ Nouvelle catégorie</button>
         </div>
         <div class="table-wrap">
           <table>
             <thead>
-              <tr><th>ID</th><th>Label (badge fiche)</th><th>Filtre boutique</th><th>Ordre</th><th>Statut</th></tr>
+              <tr><th>ID / Slug</th><th>Label (badge fiche)</th><th>Filtre boutique</th><th>Ordre</th><th>Statut</th><th>Actions</th></tr>
             </thead>
             <tbody id="categories-tbody">
-              <tr><td colspan="5" class="loading">Chargement…</td></tr>
+              <tr><td colspan="6" class="loading">Chargement…</td></tr>
             </tbody>
           </table>
         </div>
@@ -458,7 +464,13 @@ tr:hover td { background: #fafaf8; }
       </div>
       <div class="form-field">
         <label>Catégorie *</label>
-        <select id="p-cat"></select>
+        <div style="display:flex;gap:8px;align-items:center">
+          <select id="p-cat" style="flex:1;min-width:0"></select>
+          <button class="btn btn-outline btn-small" type="button"
+            onclick="openCategoryModalFromProduct()"
+            title="Créer une nouvelle catégorie"
+            style="white-space:nowrap;flex-shrink:0">+ Nouvelle</button>
+        </div>
       </div>
       <div class="form-field">
         <label>Prix de base (€)</label>
@@ -614,6 +626,41 @@ tr:hover td { background: #fafaf8; }
   </div>
 </div>
 
+<!-- ═══════════════════════════════════════════════ MODAL CATÉGORIE ═══ -->
+<div class="overlay" id="category-modal">
+  <div class="modal" style="max-width:480px">
+    <h2 id="cat-modal-title">Nouvelle catégorie</h2>
+    <input type="hidden" id="cat-is-new"/>
+    <div class="form-grid" style="grid-template-columns:1fr; gap:14px">
+      <div class="form-field">
+        <label>ID / Slug * <small style="color:var(--muted);font-weight:400">(ex : miels, gelules, huiles — ne peut plus être modifié après création)</small></label>
+        <input type="text" id="cat-id" placeholder="miels"/>
+      </div>
+      <div class="form-field">
+        <label>Label affiché sur la fiche produit *</label>
+        <input type="text" id="cat-label" placeholder="Miels naturels"/>
+      </div>
+      <div class="form-field">
+        <label>Nom affiché dans le filtre boutique *</label>
+        <input type="text" id="cat-filter-label" placeholder="Miels"/>
+      </div>
+      <div class="form-field">
+        <label>Ordre d'affichage</label>
+        <input type="number" id="cat-sort" value="0" min="0"/>
+      </div>
+      <div class="form-field">
+        <label class="toggle-row">
+          <input type="checkbox" id="cat-active" checked/> Active
+        </label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeCategoryModal()">Annuler</button>
+      <button class="btn btn-primary" onclick="saveCategoryModal()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
@@ -725,7 +772,7 @@ async function initApp() {
 async function loadAll() {
   const [prods, cats, offs] = await Promise.all([
     fetchProducts({ activeOnly: false }),
-    fetchCategories(),
+    fetchAllCategories(),
     fetchOffers()
   ]);
   allProducts   = prods || [];
@@ -846,16 +893,140 @@ function renderPagination() {
 
 function goPage(n) { currentPage = n; renderProductsPage(); }
 
-// ── Catégories ─────────────────────────────────────────────────────────────────
+// ── Catégories — rendu ────────────────────────────────────────────────────────
 function renderCategories() {
   const tbody = document.getElementById('categories-tbody');
-  tbody.innerHTML = allCategories.map(c => `<tr>
-    <td><code>${esc(c.id)}</code></td>
-    <td>${esc(c.label)}</td>
-    <td>${esc(c.filter_label)}</td>
-    <td>${c.sort_order}</td>
-    <td><span class="badge ${c.active?'badge-ok':'badge-off'}">${c.active?'Actif':'Inactif'}</span></td>
-  </tr>`).join('');
+  if (!allCategories.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="loading">Aucune catégorie. Créez-en une avec « + Nouvelle catégorie ».</td></tr>';
+    return;
+  }
+  tbody.innerHTML = allCategories.map(c => {
+    const used = allProducts.filter(p => p.category_id === c.id).length;
+    return `<tr>
+      <td><code>${esc(c.id)}</code></td>
+      <td>${esc(c.label)}</td>
+      <td>${esc(c.filter_label)}</td>
+      <td>${c.sort_order}</td>
+      <td><span class="badge ${c.active?'badge-ok':'badge-off'}">${c.active?'Active':'Inactive'}</span></td>
+      <td><div class="actions">
+        <button class="btn btn-outline btn-small" onclick="openCategoryModal('${esc(c.id)}')">Éditer</button>
+        <button class="btn btn-danger btn-small" onclick="deleteCategoryConfirm('${esc(c.id)}','${esc(c.filter_label)}',${used})">Suppr.</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Catégories — CRUD ─────────────────────────────────────────────────────────
+let _catModalFromProduct = false; // true si ouvert depuis le modal produit
+
+function openCategoryModalFromProduct() {
+  _catModalFromProduct = true;
+  openCategoryModal(); // mode création uniquement
+}
+
+function openCategoryModal(id) {
+  document.getElementById('category-modal').classList.add('open');
+  const isNew = !id;
+  document.getElementById('cat-is-new').value = isNew ? '1' : '';
+
+  if (isNew) {
+    document.getElementById('cat-modal-title').textContent = 'Nouvelle catégorie';
+    document.getElementById('cat-id').value          = '';
+    document.getElementById('cat-id').readOnly       = false;
+    document.getElementById('cat-label').value       = '';
+    document.getElementById('cat-filter-label').value= '';
+    document.getElementById('cat-sort').value        = '0';
+    document.getElementById('cat-active').checked    = true;
+    return;
+  }
+
+  document.getElementById('cat-modal-title').textContent = 'Modifier la catégorie';
+  const c = allCategories.find(x => x.id === id);
+  if (!c) return;
+  document.getElementById('cat-id').value           = c.id;
+  document.getElementById('cat-id').readOnly        = true;   // slug immuable
+  document.getElementById('cat-label').value        = c.label || '';
+  document.getElementById('cat-filter-label').value = c.filter_label || '';
+  document.getElementById('cat-sort').value         = c.sort_order ?? 0;
+  document.getElementById('cat-active').checked     = !!c.active;
+}
+
+function closeCategoryModal() {
+  document.getElementById('category-modal').classList.remove('open');
+  _catModalFromProduct = false;
+}
+
+async function saveCategoryModal() {
+  const isNew       = document.getElementById('cat-is-new').value === '1';
+  const id          = document.getElementById('cat-id').value.trim();
+  const label       = document.getElementById('cat-label').value.trim();
+  const filterLabel = document.getElementById('cat-filter-label').value.trim();
+
+  if (!id || !label || !filterLabel) {
+    showToast('ID, label fiche et nom filtre sont requis.', 'err');
+    return;
+  }
+  if (isNew && allCategories.find(c => c.id === id)) {
+    showToast('Cet ID existe déjà. Choisissez un autre slug.', 'err');
+    return;
+  }
+
+  const cat = {
+    id,
+    label,
+    filter_label: filterLabel,
+    sort_order:   parseInt(document.getElementById('cat-sort').value) || 0,
+    active:       document.getElementById('cat-active').checked,
+  };
+
+  try {
+    const saved = await saveCategory(cat);
+    showToast(isNew ? 'Catégorie créée ✓' : 'Catégorie modifiée ✓', 'ok');
+
+    const fromProduct = _catModalFromProduct; // lire avant closeCategoryModal() qui remet à false
+    closeCategoryModal();
+
+    if (fromProduct && isNew) {
+      // Mise à jour légère : le modal produit reste ouvert, aucune saisie perdue
+      allCategories.push(saved);
+      allCategories.sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+
+      // Reconstruire #p-cat et sélectionner automatiquement la nouvelle catégorie
+      const pCat = document.getElementById('p-cat');
+      pCat.innerHTML = '';
+      allCategories.forEach(c => {
+        pCat.innerHTML += `<option value="${c.id}">${c.filter_label}</option>`;
+      });
+      pCat.value = saved.id;
+
+      // Mettre à jour le compteur stat et le filtre produits
+      document.getElementById('stat-cats').textContent = allCategories.length;
+      const sel = document.getElementById('filter-cat');
+      sel.innerHTML = '<option value="">Toutes catégories</option>';
+      allCategories.forEach(c => {
+        sel.innerHTML += `<option value="${c.id}">${c.filter_label}</option>`;
+      });
+    } else {
+      await loadAll();
+    }
+  } catch(e) {
+    showToast('Erreur : ' + e.message, 'err');
+  }
+}
+
+async function deleteCategoryConfirm(id, name, usedCount) {
+  if (usedCount > 0) {
+    alert(`Impossible de supprimer cette catégorie : des produits y sont encore rattachés.\n\n${usedCount} produit(s) utilisent encore « ${name} ».`);
+    return;
+  }
+  if (!confirm(`Supprimer la catégorie « ${name} » (${id}) ?\nCette action est irréversible.`)) return;
+  try {
+    await deleteCategory(id);
+    showToast('Catégorie supprimée ✓', 'ok');
+    await loadAll();
+  } catch(e) {
+    showToast('Erreur : ' + e.message, 'err');
+  }
 }
 
 // ── Modal produit ──────────────────────────────────────────────────────────────
@@ -1270,5 +1441,14 @@ function closeSidebar() {
 // ── Démarrage ──────────────────────────────────────────────────────────────────
 (async () => { await initApp(); })();
 </script>
+
+<!-- Marqueur de version — visible sur le site déployé pour confirmer le déploiement -->
+<div id="admin-version" style="
+  position:fixed; bottom:8px; left:50%; transform:translateX(-50%);
+  background:rgba(13,31,22,.85); color:rgba(200,168,75,.9);
+  font-size:.72rem; font-family:monospace; padding:4px 12px;
+  border-radius:20px; pointer-events:none; z-index:9999;
+  white-space:nowrap;
+">Admin version : catégories CRUD + création rapide produit</div>
 </body>
 </html>
