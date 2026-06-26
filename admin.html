@@ -211,6 +211,28 @@ tr:hover td { background: #fafaf8; }
   background: #f5f5f5; color: var(--muted); cursor: not-allowed;
 }
 
+/* ── Sélecteur produits pack ── */
+.pack-picker {
+  max-height: 280px; overflow-y: auto;
+  border: 1px solid var(--border); border-radius: 8px;
+  background: #fff;
+}
+.pack-cat-label {
+  padding: 7px 12px 4px; font-size: .72rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .08em;
+  color: var(--muted); background: #f8f8f8;
+  position: sticky; top: 0;
+}
+.pack-product-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 12px; cursor: pointer; font-size: .88rem;
+  border-top: 1px solid #f4f4f4;
+}
+.pack-product-row:hover { background: var(--cream); }
+.pack-product-row input[type=checkbox] { width: 15px; height: 15px; flex-shrink: 0; cursor: pointer; accent-color: var(--green); }
+.pack-product-row .pp-price { color: var(--muted); font-size: .78rem; margin-left: auto; white-space: nowrap; }
+.pack-empty { padding: 20px; text-align: center; color: var(--muted); font-size: .88rem; }
+
 /* ── Image upload ── */
 .img-section { margin-bottom: 4px; }
 .img-section > label { display:block; font-size:.82rem; font-weight:600; margin-bottom:8px; color:#444; }
@@ -613,9 +635,15 @@ tr:hover td { background: #fafaf8; }
         <label class="toggle-row"><input type="checkbox" id="o-active" checked/> Actif</label>
       </div>
       <div class="form-field full" id="pack-products-section">
-        <label>Slugs des produits inclus (un par ligne)</label>
-        <textarea id="o-product-slugs" rows="5" placeholder="miel-nigelle&#10;gelules-spiruline&#10;miel-shilajit"></textarea>
-        <small style="color:var(--muted);font-size:.8rem">Slugs exacts visibles dans la liste produits (colonne Nom)</small>
+        <label>Produits inclus <span id="pack-count-label" style="font-weight:400;color:var(--muted)"></span></label>
+        <div class="pack-picker" id="pack-product-list">
+          <div class="pack-empty">Chargement des produits…</div>
+        </div>
+        <small style="color:var(--muted);font-size:.8rem;margin-top:4px;display:block">
+          Cochez les produits à inclure dans ce pack ou cette offre.
+        </small>
+        <!-- textarea conservé caché — source de slugs pour saveOfferProducts() -->
+        <textarea id="o-product-slugs" style="display:none"></textarea>
       </div>
     </div>
 
@@ -1296,6 +1324,56 @@ function togglePackProducts() {
   section.style.display = (type === 'banner') ? 'none' : 'block';
 }
 
+function renderPackProductPicker(selectedSlugs = []) {
+  const list = document.getElementById('pack-product-list');
+  if (!allProducts.length) {
+    list.innerHTML = '<div class="pack-empty">Aucun produit disponible.</div>';
+    return;
+  }
+
+  // Grouper les produits actifs par catégorie, triés par sort_order
+  const catMap = {};
+  allCategories.forEach(c => { catMap[c.id] = c.filter_label; });
+
+  const byCategory = {};
+  allProducts
+    .filter(p => p.active)
+    .forEach(p => {
+      const cat = p.category_id || '_';
+      if (!byCategory[cat]) byCategory[cat] = [];
+      byCategory[cat].push(p);
+    });
+
+  // Ordre des catégories : suivre allCategories (sort_order Supabase)
+  const catOrder = allCategories.map(c => c.id).filter(id => byCategory[id]);
+  const uncategorized = Object.keys(byCategory).filter(k => !catOrder.includes(k));
+
+  let html = '';
+  [...catOrder, ...uncategorized].forEach(catId => {
+    const products = byCategory[catId] || [];
+    const catLabel = catMap[catId] || catId;
+    html += `<div class="pack-cat-label">${esc(catLabel)}</div>`;
+    products.forEach(p => {
+      const checked = selectedSlugs.includes(p.slug) ? 'checked' : '';
+      const price   = p.price_value != null ? p.price_value.toFixed(2) + ' €' : '';
+      html += `<label class="pack-product-row">
+        <input type="checkbox" value="${esc(p.slug)}" ${checked} onchange="updatePackCount()"/>
+        <span>${esc(p.name)}</span>
+        <span class="pp-price">${price}</span>
+      </label>`;
+    });
+  });
+
+  list.innerHTML = html;
+  updatePackCount();
+}
+
+function updatePackCount() {
+  const checked = document.querySelectorAll('#pack-product-list input[type=checkbox]:checked').length;
+  const label = document.getElementById('pack-count-label');
+  if (label) label.textContent = checked > 0 ? `— ${checked} sélectionné${checked > 1 ? 's' : ''}` : '';
+}
+
 function openOfferModal(id) {
   // Reset image state
   offerCurrentImage = null;
@@ -1315,6 +1393,7 @@ function openOfferModal(id) {
     document.getElementById('o-type').value   = 'pack';
     document.getElementById('o-active').checked = true;
     togglePackProducts();
+    renderPackProductPicker([]); // picker vide pour une nouvelle offre
     return;
   }
 
@@ -1337,11 +1416,11 @@ function openOfferModal(id) {
   document.getElementById('o-starts-at').value = toLocal(o.starts_at);
   document.getElementById('o-ends-at').value   = toLocal(o.ends_at);
 
-  // Produits pack
+  // Produits pack — pré-cocher les produits déjà liés
   const slugs = (o.offer_products || [])
     .sort((a,b) => a.sort_order - b.sort_order)
     .map(p => p.product_slug);
-  document.getElementById('o-product-slugs').value = slugs.join('\n');
+  renderPackProductPicker(slugs); // construit le picker avec coches pré-sélectionnées
 
   // Image
   if (o.image) {
@@ -1397,10 +1476,14 @@ async function saveOfferModal() {
 
     const saved = await saveOffer(offer);
 
-    // Produits du pack
+    // Produits du pack — lire les slugs depuis les coches du picker
     if (type !== 'banner') {
-      const slugs = document.getElementById('o-product-slugs').value
-        .split('\n').map(s => s.trim()).filter(Boolean);
+      const slugs = [...document.querySelectorAll('#pack-product-list input[type=checkbox]:checked')]
+        .map(cb => cb.value);
+      if (type === 'pack' && !slugs.length) {
+        showToast('Sélectionnez au moins un produit pour ce pack.', 'err');
+        return;
+      }
       await saveOfferProducts(saved.id, slugs);
     }
 
