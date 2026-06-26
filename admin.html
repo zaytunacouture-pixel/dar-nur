@@ -770,6 +770,11 @@ async function initApp() {
 }
 
 async function loadAll() {
+  // ── Conserver l'état UI avant le rechargement ────────────────────────────
+  const savedCat    = document.getElementById('filter-cat').value;
+  const savedPage   = currentPage;
+  const savedScrollY = window.scrollY;
+
   const [prods, cats, offs] = await Promise.all([
     fetchProducts({ activeOnly: false }),
     fetchAllCategories(),
@@ -789,12 +794,13 @@ async function loadAll() {
   document.getElementById('stat-cats').textContent     = allCategories.length;
   document.getElementById('stat-offers').textContent   = activeOffers;
 
-  // Filtre catégorie
+  // Filtre catégorie — reconstruire puis restaurer la sélection
   const sel = document.getElementById('filter-cat');
   sel.innerHTML = '<option value="">Toutes catégories</option>';
   allCategories.forEach(c => {
     sel.innerHTML += `<option value="${c.id}">${c.filter_label}</option>`;
   });
+  sel.value = savedCat; // restaure la catégorie sélectionnée (ou "" si supprimée)
 
   // Sélect catégorie du modal
   const pCat = document.getElementById('p-cat');
@@ -803,7 +809,16 @@ async function loadAll() {
     pCat.innerHTML += `<option value="${c.id}">${c.filter_label}</option>`;
   });
 
-  filterProducts();
+  filterProducts(); // remet currentPage = 1, puis applique les filtres restaurés
+  // Restaurer la page si elle est toujours valide après le rechargement
+  const maxPage = Math.ceil(filteredProducts.length / PAGE_SIZE) || 1;
+  if (savedPage > 1 && savedPage <= maxPage) {
+    currentPage = savedPage;
+    renderProductsPage();
+  }
+  // Restaurer la position de défilement après le rendu
+  requestAnimationFrame(() => window.scrollTo(0, savedScrollY));
+
   renderCategories();
   renderOffers();
 }
