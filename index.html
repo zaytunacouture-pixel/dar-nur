@@ -2559,7 +2559,7 @@ function showProduct(id){
     p.compo ? ["Composition", p.compo] : null,
     p.poids ? ["Poids", p.poids] : null,
     p.contenance ? ["Contenance", p.contenance] : null,
-    p.prov ? ["Provenance", p.prov] : null
+    (p.cat === 'miels' && p.prov) ? ["Provenance", p.prov] : null
   ].filter(Boolean);
 
   document.getElementById("productView").innerHTML = `
