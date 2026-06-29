@@ -1,5 +1,5 @@
 # DOCUMENT DE RÉFÉRENCE OFFICIEL — DAR NŪR
-**Version : 1.0 — 29 juin 2026**
+**Version : 1.1 — 29 juin 2026**
 **Source de vérité pour toutes les sessions futures.**
 **À lire intégralement avant toute modification.**
 ---
@@ -51,6 +51,7 @@ par le système de maillage.
 | Poudres & Graines | `poudres` | 20 | ✅ Complet |
 | Brumes | `brumes` | 4 | ✅ Complet |
 | Tahara (muscs, packs, lots) | `tahara` | 10 | ✅ Complet |
+| Miels Gourmands | `miels-gourmands` | 8 | ✅ Complet |
 ### Familles terminées éditorialmente — produits EN BROUILLON
 *(contenu complet, en attente d'images + activation)*
 | Famille | Cat. Supabase | Brouillons | Note |
@@ -59,7 +60,6 @@ par le système de maillage.
 | Gommages | `tahara` | 6 | Routines par collection |
 | Poudres Tahara | `tahara` | 7 | Anti-transp. vs poudres minérales distingués |
 | Chantilly de Karité | `tahara` | 2 | Moninga ≠ Nila différenciés |
-| Miels Gourmands | `miels-gourmands` | 8 | Prix 24,99 €. **Catégorie à désactiver jusqu'à activation** |
 ### Familles Mode — contenu minimal
 | Famille | Cat. Supabase | Actifs | Niveau |
 |---|---|---|---|
@@ -91,9 +91,7 @@ par le système de maillage.
 1. Un produit ne peut être activé que si son contenu éditorial est complet.
 2. Un produit ne peut être activé que si une image est associée ou le logo Dar Nūr
    est accepté comme fallback.
-3. La catégorie `miels-gourmands` doit rester inactive en Supabase tant que ses
-   8 produits sont en brouillon — sinon le filtre boutique affiche 0 résultats.
-4. Les cosmétiques Tahara (24 produits) s'activent ensemble, après import de leurs
+3. Les cosmétiques Tahara (24 produits) s'activent ensemble, après import de leurs
    visuels.
 ---
 ## 3. Règles éditoriales officielles
@@ -422,19 +420,17 @@ analyse, itérations et validation explicite.*
 ### Priorité A — Bloquants avant lancement
 | # | Tâche | Détail |
 |---|---|---|
-| A1 | **Désactiver catégorie `miels-gourmands`** | Admin → Catégories → miels-gourmands → active = false. Tant que les 8 produits sont en brouillon, le filtre boutique affiche 0 résultats et la collection homepage est vide. |
-| A2 | **Corriger nom `dn-abaya-nilla-4`** | "Abaya Nilla white and Gold **2**" → "Abaya Nilla white and Gold" (admin ou Supabase). |
-| A3 | **Corriger copyright footer** | `index.html` ligne ~1037 : "© 2025" → "© 2026". |
+| A1 | **Corriger nom `dn-abaya-nilla-4`** | "Abaya Nilla white and Gold **2**" → "Abaya Nilla white and Gold" (admin ou Supabase). |
+| A2 | **Corriger copyright footer** | `index.html` ligne ~1037 : "© 2025" → "© 2026". |
 ### Priorité B — Recommandé avant ou juste après lancement
 | # | Tâche | Détail |
 |---|---|---|
 | B1 | **Import visuels cosmétiques Tahara** | 24 produits en brouillon (savons, gommages, poudres, chantilly). Upload via admin, puis activer. |
-| B2 | **Import visuels Miels Gourmands** | 8 produits. Uploader les images, activer, réactiver la catégorie. |
-| B3 | **Activer Spray Brumisateur Hibiscus & Nigelle** | `br-brumisateur-hibiscus-nigelle` — contenu complet, image manquante. |
-| B4 | **Taglines + descriptions Chéchias** | 7 produits actifs sans tagline ni description. |
-| B5 | **Descriptions Packs Tahara** | 4 packs actifs (Sabaya, Aswad, Lavande, Abyad) sans description de contenu. |
-| B6 | **Taglines Ismid + Poudre de Sidr** | Actifs sans tagline. |
-| B7 | **Décision `dn-miel-nigelle-hibiscus`** | Supprimer (recommandé) ou développer. Doublon de `miel-hibiscus-zamzam`. |
+| B2 | **Activer Spray Brumisateur Hibiscus & Nigelle** | `br-brumisateur-hibiscus-nigelle` — contenu complet, image manquante. |
+| B3 | **Taglines + descriptions Chéchias** | 7 produits actifs sans tagline ni description. |
+| B4 | **Descriptions Packs Tahara** | 4 packs actifs (Sabaya, Aswad, Lavande, Abyad) sans description de contenu. |
+| B5 | **Taglines Ismid + Poudre de Sidr** | Actifs sans tagline. |
+| B6 | **Décision `dn-miel-nigelle-hibiscus`** | Supprimer (recommandé) ou développer. Doublon de `miel-hibiscus-zamzam`. |
 ### Priorité C — Post-lancement, sans urgence
 | # | Tâche | Détail |
 |---|---|---|
@@ -447,16 +443,22 @@ analyse, itérations et validation explicite.*
 | C7 | **Confirmer produits "À vérifier"** | Poudres Oud Blanc (×3, ×1 rose, ×1 Khalnaji) + Pierre d'Alun bordeaux : 1 produit ou variantes ? |
 ---
 ## 8. Bugs et anomalies confirmées
+### Bugs actifs
 | Sévérité | Zone | Anomalie | Correction |
 |---|---|---|---|
-| 🔴 | Filtre boutique | "Miels Gourmands" → 0 résultats (8 produits en brouillon) | Désactiver catégorie (A1) |
-| 🔴 | Collection homepage | Miels Gourmands → 0 thumbnails | Même correction |
-| 🟡 | Produit | `dn-abaya-nilla-4` : nom "…Gold 2" incohérent | Corriger (A2) |
+| 🟡 | Produit | `dn-abaya-nilla-4` : nom "…Gold 2" incohérent | Corriger (A1) |
 | 🟡 | Navigation desktop | Dropdowns hover-only, inaccessibles clavier (WCAG 2.1) | Post-lancement (C) |
 | 🟡 | Menu mobile | Sous-catégories toujours dépliées — menu très long | Post-lancement (C) |
-| 🟢 | Footer | Copyright 2025 → 2026 | Correction rapide (A3) |
-| 🟢 | `dn-miel-nigelle-hibiscus` | Fantôme inactif, contenu vide | Décision (B7) |
+| 🟢 | Footer | Copyright 2025 → 2026 | Correction rapide (A2) |
+| 🟢 | `dn-miel-nigelle-hibiscus` | Fantôme inactif, contenu vide | Décision (B6) |
 | 🟢 | `dn-rose-imperial-valley` | Description copiée-collée incorrecte (inactif) | Si réactivation |
+### Bugs corrigés
+| Statut | Zone | Anomalie | Résolution |
+|---|---|---|---|
+| ✅ | Filtre boutique | "Miels Gourmands" → 0 résultats (8 produits en brouillon) | Résolu — 29 juin 2026 |
+| ✅ | Collection homepage | Miels Gourmands → 0 thumbnails | Résolu — 29 juin 2026 |
+
+> Les 8 produits `mg-*` sont désormais actifs en production, disposent chacun d'une image et la catégorie `miels-gourmands` est active. Le filtre et la collection homepage fonctionnent normalement.
 ---
 ## 9. Dette technique
 *Améliorations futures, non urgentes, sans impact sur le lancement.*
@@ -476,7 +478,7 @@ analyse, itérations et validation explicite.*
 | **Éditorial** | 95 % | Standard figé · conformité assurée · 112 produits au standard |
 | **UX** | 91 % | A/B/C implémentés · 2 bugs critiques à corriger (20 min) |
 | **Technique** | 88 % | Supabase stable · admin fonctionnel · responsive validé |
-| **Visuels** | 70 % | Naturels + Mode OK · 24 cosmétiques + 8 Miels Gourmands sans images |
+| **Visuels** | 75 % | Naturels + Mode + Miels Gourmands OK · 24 cosmétiques sans images |
 | **Conversion** | 85 % | WA pré-rempli correct · CTA visible · réassurance · maillage actif |
 | **Préparation globale** | **91 %** | Sur 171 produits actifs · 3 corrections urgentes · visuels = côté propriétaire |
 ---
@@ -521,24 +523,19 @@ analyse, itérations et validation explicite.*
 ---
 ## 12. Checklist avant ouverture
 ```
-CORRECTIONS OBLIGATOIRES (≈ 20 min)
-□ A1 — Désactiver catégorie "miels-gourmands" en Supabase
-       (admin.html → Catégories → miels-gourmands → active = false)
-□ A2 — Corriger nom dn-abaya-nilla-4
+CORRECTIONS OBLIGATOIRES (≈ 10 min)
+□ A1 — Corriger nom dn-abaya-nilla-4
        ("Abaya Nilla white and Gold 2" → "Abaya Nilla white and Gold")
-□ A3 — Corriger copyright footer
+□ A2 — Corriger copyright footer
        (index.html ~l.1037 : "© 2025" → "© 2026")
 VISUELS (côté propriétaire)
 □ Uploader images des 24 cosmétiques Tahara (savons, gommages, poudres, chantilly)
-□ Uploader images des 8 Miels Gourmands
 □ Uploader image Spray Brumisateur Hibiscus & Nigelle
 ACTIVATION (après visuels)
 □ Activer les 24 cosmétiques Tahara (admin → active = true)
-□ Réactiver catégorie "miels-gourmands" en Supabase
-□ Activer les 8 Miels Gourmands
 VÉRIFICATIONS FINALES
 □ Test filtre "Miels Thérapeutiques" → produits visibles
-□ Test filtre "Miels Gourmands" → produits visibles (après activation seulement)
+□ Test filtre "Miels Gourmands" → produits visibles
 □ Test fiche miel-nigelle : ordre sections correct (desc → Idéal pour → bienfaits)
 □ Test cartes B1 (3 cartes) et B2 (2 cartes) sur miel-nigelle
 □ Test bouton "Commander" → WhatsApp pré-rempli correct (produit + format + prix)
@@ -572,6 +569,6 @@ DÉPLOIEMENT
 7. **Toute décision importante prise pendant la session** doit être ajoutée à ce
    document avant la clôture.
 ---
-*Document de référence officiel Dar Nūr — v1.0 — 29 juin 2026*
+*Document de référence officiel Dar Nūr — v1.1 — 29 juin 2026*
 *À enregistrer sous : `docs/DOCUMENT_REFERENCE_DAR_NUR.md`*
 *Maintenu par : Claude + propriétaire du projet*
