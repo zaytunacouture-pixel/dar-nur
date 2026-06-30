@@ -538,6 +538,11 @@ section{padding:15px 28px}
 .pp-meta div{flex:1;min-width:140px}
 .pp-meta .k{font-family:'Cinzel';font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:5px}
 .pp-meta .v{font-family:'Cormorant Garamond';font-size:1.15rem;color:var(--green)}
+/* Idéal pour — section visible en fiche produit */
+.pp-ideal{margin:20px 0 8px;padding:16px 20px;background:var(--cream);border-radius:8px;border-left:3px solid var(--gold)}
+.pp-ideal .ideal-lbl{font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;display:block}
+.pp-ideal ul{list-style:none;padding:0;margin:0;display:flex;flex-wrap:wrap;gap:7px}
+.pp-ideal li{font-size:.86rem;color:var(--green);padding:5px 13px;background:#fff;border-radius:20px;border:1px solid rgba(200,168,75,.28);line-height:1.4}
 
 /* order block */
 .order-box{
@@ -555,6 +560,10 @@ section{padding:15px 28px}
 .order-foot{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
 .order-price{font-family:'Cormorant Garamond';font-size:2.2rem;color:var(--green);font-weight:600;line-height:1}
 .order-price small{font-size:.9rem;color:var(--muted);font-style:italic;display:block;letter-spacing:.04em}
+/* Réassurance dans l'encart de commande */
+.order-reassurance{display:flex;flex-wrap:wrap;gap:6px 20px;margin-top:16px;padding-top:14px;border-top:1px solid rgba(200,168,75,.2)}
+.order-reassurance span{display:flex;align-items:center;gap:6px;font-family:'Cinzel',serif;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.order-reassurance svg{width:13px;height:13px;flex-shrink:0;color:var(--gold);stroke:var(--gold)}
 
 /* dual panel: qualité / précautions */
 .dual-panel{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:30px}
@@ -613,6 +622,10 @@ section{padding:15px 28px}
 .family{background:var(--cream);padding:80px 28px}
 .family .grid{grid-template-columns:repeat(4,1fr)}
 .family .grid[style*="grid-template-columns:repeat(3"]{grid-template-columns:repeat(3,1fr)!important}
+/* Bloc 2 — Explorer la collection : traitement plus discret */
+.family-coll{background:#fff;border-top:1px solid rgba(200,168,75,.15)}
+.family-coll .section-head .eyebrow{opacity:.55;font-size:.68rem;letter-spacing:.13em}
+.family-coll .section-head h2{font-size:1.3rem;color:var(--green);opacity:.85}
 
 /* mobile sticky bar */
 .mbar{
@@ -1133,50 +1146,155 @@ function _applyCategories(cats) {
   ];
 }
 
-/* ---- COMPLEMENTARY PRODUCTS FOR INTERNAL LINKING ---- */
-/* Maps product IDs to complementary product IDs for cross-category recommendations */
-const COMPLEMENTS = {
-  /* Miels → Gélules, Huiles, Poudres */
-  "miel-nigelle": ["gel-nigelle", "hl-nigelle", "pdr-nigelle", "grn-baraka"],
-  "miel-aphrodisiaque": ["gel-aphrodisiaque", "hl-costus"],
-  "miel-gingembre-curcuma": ["gel-gingembre-curcuma", "pdr-gingembre-curcuma"],
-  "miel-hibiscus-zamzam": ["gel-valériane", "grn-oliban"],
-  "miel-moringa-nigelle": ["gel-moringa", "pdr-moringa"],
-  "miel-gingembre-fenugrec": ["gel-fenugrec", "hl-fenugrec"],
-  "miel-costus-nigelle": ["gel-costus", "pdr-costus"],
+/* ---- MAILLAGE CURÉ — Bloc 1 (compléments) + Bloc 2 (collection) ---- */
+const TM="Explorer notre gamme de miels thérapeutiques",
+      TE="Explorer notre collection de miels d'exception",
+      TR="Découvrir d'autres miels de Russie",
+      TGo="Découvrir d'autres miels gourmands",
+      TGel="Découvrir nos gélules naturelles",
+      THl="Découvrir nos huiles naturelles",
+      TP="Découvrir nos poudres & graines",
+      TB="Découvrir nos brumes naturelles",
+      TS="Découvrir nos savons noirs",
+      TGom="Découvrir nos gommages",
+      TCh="Découvrir nos chantillys de karité",
+      TMusc="Découvrir nos muscs Tahara",
+      TK="Découvrir nos produits Tahara",
+      TPT="Découvrir nos poudres Tahara";
 
-  /* Gélules → Huiles, Poudres, Miels */
-  "gel-nigelle": ["hl-nigelle", "pdr-nigelle", "miel-nigelle"],
-  "gel-valeriane": ["hl-lavande", "grn-lavande"],
-  "gel-spiruline": ["miel-spiruline", "pdr-moringa"],
-  "gel-gingembre-curcuma": ["pdr-gingembre-curcuma", "miel-gingembre-curcuma"],
-  "gel-chardon": ["pdr-costus"],
-  "gel-moringa": ["pdr-moringa", "miel-moringa-nigelle"],
-
-  /* Huiles → Poudres, Gélules, Brumes */
-  "hl-nigelle": ["pdr-nigelle", "gel-nigelle", "br-nila"],
-  "hl-gingembre": ["pdr-gingembre-curcuma", "gel-gingembre-curcuma"],
-  "hl-lavande": ["grn-lavande", "gel-valeriane"],
-  "hl-menthe-poivree": ["br-apaisante"],
-  "hl-costus": ["pdr-costus", "gel-costus"],
-
-  /* Poudres → Huiles, Gélules, Brumes */
-  "pdr-nigelle": ["hl-nigelle", "gel-nigelle"],
-  "pdr-gingembre-curcuma": ["gel-gingembre-curcuma", "hl-gingembre"],
-  "pdr-moringa": ["gel-moringa", "miel-moringa-nigelle"],
-  "grn-lavande": ["hl-lavande", "gel-valeriane"],
-
-  /* Brumes → Huiles, Gélules */
-  "br-nila": ["hl-nigelle", "pdr-nila"],
-  "br-apaisante": ["hl-menthe-poivree", "gel-valeriane"]
+const MAILLAGE = {
+  /* ── Miels Thérapeutiques ── */
+  "miel-nigelle":{b1:["gel-nigelle","hl-nigelle","pdr-nigelle"],b2:["miel-moringa-nigelle","miel-costus-nigelle"],l:TM},
+  "miel-moringa-nigelle":{b1:["gel-moringa","pdr-moringa"],b2:["miel-nigelle","miel-gingembre-curcuma"],l:TM},
+  "miel-gingembre-curcuma":{b1:["gel-gingembre-curcuma","pdr-gingembre-curcuma","hl-gingembre"],b2:["miel-gingembre-fenugrec","miel-gingembre-citron"],l:TM},
+  "miel-gingembre-fenugrec":{b1:["gel-fenugrec","hl-fenugrec"],b2:["miel-gingembre-curcuma","miel-gingembre-citron"],l:TM},
+  "miel-gingembre-citron":{b1:["hl-citron","gel-gingembre-curcuma"],b2:["miel-gingembre-curcuma","miel-gingembre-fenugrec"],l:TM},
+  "miel-costus-nigelle":{b1:["gel-costus","hl-costus","pdr-costus"],b2:["miel-nigelle","miel-moringa-nigelle"],l:TM},
+  "miel-hibiscus-zamzam":{b1:["gommage-hibiscus-nigelle","savon-noir-hibiscus-nigelle"],b2:["miel-nigelle","miel-moringa-nigelle"],l:TM},
+  "miel-spiruline":{b1:["gel-spiruline"],b2:["miel-nigelle","miel-gingembre-curcuma"],l:TM},
+  "miel-aphrodisiaque":{b1:["gel-aphrodisiaque"],b2:["miel-sidr-jujubier","miel-blanc-kirghizistan"],l:TE},
+  "miel-lavande":{b1:["hl-lavande","grn-lavande"],b2:["miel-rose-siberie","miel-fraise-russie"],l:TR},
+  "miel-rose-siberie":{b1:[],b2:["miel-fraise-russie","miel-lavande"],l:TR},
+  "miel-fraise-russie":{b1:[],b2:["miel-rose-siberie","miel-lavande"],l:TR},
+  "miel-blanc-kirghizistan":{b1:[],b2:["miel-sidr-jujubier","miel-shilajit"],l:TE},
+  "miel-sidr-jujubier":{b1:[],b2:["miel-blanc-kirghizistan","miel-cactus"],l:TE},
+  "miel-cactus":{b1:[],b2:["miel-sidr-jujubier","miel-blanc-kirghizistan"],l:TE},
+  "miel-shilajit":{b1:[],b2:["miel-blanc-kirghizistan","miel-sidr-jujubier"],l:TE},
+  "miel-aubepine":{b1:[],b2:["miel-sidr-jujubier","miel-cactus"],l:TE},
+  /* ── Miels Gourmands ── */
+  "mg-framboise":{b1:[],b2:["mg-framboise-passion","mg-mangue"],l:TGo},
+  "mg-framboise-passion":{b1:[],b2:["mg-framboise","mg-passion"],l:TGo},
+  "mg-fraise":{b1:[],b2:["mg-mangue-fraise","mg-ananas"],l:TGo},
+  "mg-mangue-fraise":{b1:[],b2:["mg-framboise-passion","mg-papaye"],l:TGo},
+  "mg-mangue":{b1:[],b2:["mg-papaye","mg-framboise"],l:TGo},
+  "mg-papaye":{b1:[],b2:["mg-ananas","mg-fraise"],l:TGo},
+  "mg-ananas":{b1:[],b2:["mg-passion","mg-framboise"],l:TGo},
+  "mg-passion":{b1:[],b2:["mg-ananas","mg-framboise-passion"],l:TGo},
+  /* ── Gélules ── */
+  "gel-nigelle":{b1:["miel-nigelle","hl-nigelle","pdr-nigelle"],b2:["gel-moringa","gel-gingembre-curcuma"],l:TGel},
+  "gel-gingembre-curcuma":{b1:["miel-gingembre-curcuma","pdr-gingembre-curcuma","hl-gingembre"],b2:["gel-nigelle","gel-moringa"],l:TGel},
+  "gel-moringa":{b1:["pdr-moringa","miel-moringa-nigelle"],b2:["gel-nigelle","gel-gingembre-curcuma"],l:TGel},
+  "gel-costus":{b1:["miel-costus-nigelle","hl-costus","pdr-costus"],b2:["gel-nigelle","gel-moringa"],l:TGel},
+  "gel-fenugrec":{b1:["hl-fenugrec","miel-gingembre-fenugrec"],b2:["gel-nigelle","gel-gingembre-curcuma"],l:TGel},
+  "gel-spiruline":{b1:["miel-spiruline"],b2:["gel-nigelle","gel-moringa"],l:TGel},
+  "gel-chardon":{b1:["grn-chardon"],b2:["gel-nigelle","gel-gingembre-curcuma"],l:TGel},
+  "gel-termis":{b1:["pdr-termis"],b2:["gel-nigelle","gel-moringa"],l:TGel},
+  "gel-aphrodisiaque":{b1:["miel-aphrodisiaque"],b2:["gel-nigelle","gel-gingembre-curcuma"],l:TGel},
+  "gel-valeriane":{b1:[],b2:["gel-nigelle","gel-ashwaganda"],l:TGel},
+  "gel-ashwaganda":{b1:[],b2:["gel-macca","gel-nigelle"],l:TGel},
+  "gel-macca":{b1:[],b2:["gel-ashwaganda","gel-nigelle"],l:TGel},
+  /* ── Huiles ── */
+  "hl-nigelle":{b1:["gel-nigelle","miel-nigelle","pdr-nigelle"],b2:["hl-fenugrec","hl-costus"],l:THl},
+  "hl-gingembre":{b1:["gel-gingembre-curcuma","pdr-gingembre-curcuma","miel-gingembre-curcuma"],b2:["hl-nigelle","hl-costus"],l:THl},
+  "hl-fenugrec":{b1:["gel-fenugrec","miel-gingembre-fenugrec"],b2:["hl-nigelle","hl-gingembre"],l:THl},
+  "hl-costus":{b1:["gel-costus","miel-costus-nigelle","pdr-costus"],b2:["hl-nigelle","hl-gingembre"],l:THl},
+  "hl-oliban":{b1:["grn-oliban","gommage-louban"],b2:["hl-lavande","hl-nigelle"],l:THl},
+  "hl-lavande":{b1:["grn-lavande","savon-noir-lavande"],b2:["hl-nigelle","hl-oliban"],l:THl},
+  "hl-citron":{b1:["miel-gingembre-citron"],b2:["hl-nigelle","hl-gingembre"],l:THl},
+  "hl-eucalyptus":{b1:[],b2:["hl-nigelle","hl-lavande"],l:THl},
+  "hl-menthe-poivree":{b1:["hl-menthe-pouliot"],b2:["hl-nigelle","hl-eucalyptus"],l:THl},
+  "hl-menthe-pouliot":{b1:["hl-menthe-poivree"],b2:["hl-nigelle","hl-eucalyptus"],l:THl},
+  "hl-clou-girofle":{b1:["pdr-clou-girofle"],b2:["hl-nigelle","hl-gingembre"],l:THl},
+  "hl-rose":{b1:["hl-rose-blanc"],b2:["hl-figue-barbarie","hl-pepins-raisin"],l:THl},
+  "hl-rose-blanc":{b1:["hl-rose"],b2:["hl-figue-barbarie","hl-pepins-raisin"],l:THl},
+  "hl-figue-barbarie":{b1:[],b2:["hl-rose","hl-pepins-raisin"],l:THl},
+  "hl-pepins-raisin":{b1:[],b2:["hl-rose","hl-figue-barbarie"],l:THl},
+  "hl-arthrose":{b1:[],b2:["hl-nigelle","hl-gingembre"],l:THl},
+  /* ── Poudres & Graines ── */
+  "pdr-nigelle":{b1:["gel-nigelle","hl-nigelle","grn-baraka"],b2:["pdr-moringa","pdr-gingembre-curcuma"],l:TP},
+  "grn-baraka":{b1:["miel-nigelle","gel-nigelle","hl-nigelle"],b2:["grn-nigelle-baraka","pdr-nigelle"],l:TP},
+  "grn-nigelle-baraka":{b1:["miel-nigelle","gel-nigelle","pdr-nigelle"],b2:["grn-baraka","pdr-moringa"],l:TP},
+  "pdr-gingembre-curcuma":{b1:["gel-gingembre-curcuma","miel-gingembre-curcuma","hl-gingembre"],b2:["pdr-moringa","pdr-nigelle"],l:TP},
+  "pdr-moringa":{b1:["gel-moringa","miel-moringa-nigelle"],b2:["pdr-nigelle","pdr-gingembre-curcuma"],l:TP},
+  "pdr-costus":{b1:["gel-costus","hl-costus","miel-costus-nigelle"],b2:["pdr-moringa","pdr-nigelle"],l:TP},
+  "pdr-termis":{b1:["gel-termis"],b2:["pdr-moringa","pdr-nigelle"],l:TP},
+  "pdr-clou-girofle":{b1:["hl-clou-girofle"],b2:["pdr-nigelle","pdr-gingembre-curcuma"],l:TP},
+  "grn-chardon":{b1:["gel-chardon"],b2:["pdr-moringa","pdr-nigelle"],l:TP},
+  "grn-oliban":{b1:["hl-oliban","gommage-louban","gommage-louban-lavande"],b2:["grn-nigelle-baraka","pdr-moringa"],l:TP},
+  "grn-lavande":{b1:["hl-lavande","miel-lavande"],b2:["grn-oliban","pdr-nigelle"],l:TP},
+  "grn-gomme-arabique":{b1:[],b2:["pdr-psyllium","pdr-moringa"],l:TP},
+  "pdr-psyllium":{b1:[],b2:["grn-gomme-arabique","pdr-moringa"],l:TP},
+  "grn-fenouil":{b1:[],b2:["grn-gomme-arabique","pdr-psyllium"],l:TP},
+  "pdr-nila":{b1:["savon-noir-nila","gommage-nila","br-nila"],b2:[],l:TP},
+  "dn-ismid-medine":{b1:["dn-poudre-de-sidr-50g"],b2:["pdr-moringa","pdr-nigelle"],l:TP},
+  "dn-poudre-de-sidr-50g":{b1:["dn-ismid-medine"],b2:["pdr-moringa","pdr-nigelle"],l:TP},
+  "grn-chia":{b1:[],b2:["pdr-moringa","pdr-nigelle"],l:TP},
+  "pdr-romarin":{b1:[],b2:["pdr-gingembre-curcuma","pdr-moringa"],l:TP},
+  "grn-kirikou":{b1:[],b2:["grn-gomme-arabique","pdr-moringa"],l:TP},
+  /* ── Brumes ── */
+  "br-nila":{b1:["savon-noir-nila","gommage-nila","chantilly-karite-nila"],b2:["br-apaisante","br-sublimante"],l:TB},
+  "br-sublimante":{b1:["br-eau-rose","hl-rose"],b2:["br-apaisante","spray-brumisateur-hibiscus-nigelle"],l:TB},
+  "br-eau-rose":{b1:["br-sublimante","hl-rose"],b2:["br-apaisante","spray-brumisateur-hibiscus-nigelle"],l:TB},
+  "br-apaisante":{b1:["gommage-louban-lavande","hl-lavande"],b2:["br-sublimante","br-eau-rose"],l:TB},
+  "spray-brumisateur-hibiscus-nigelle":{b1:["savon-noir-hibiscus-nigelle","gommage-hibiscus-nigelle"],b2:["br-apaisante","br-sublimante"],l:TB},
+  /* ── Savons Noirs ── */
+  "savon-noir-aker-fassi":{b1:["gommage-aker-fassi","chantilly-karite-moninga"],b2:["savon-noir-hibiscus-nigelle","savon-noir-nila"],l:TS},
+  "savon-noir-nila":{b1:["gommage-nila","chantilly-karite-nila","br-nila"],b2:["savon-noir-aker-fassi","savon-noir-lavande"],l:TS},
+  "savon-noir-ekhan":{b1:["gommage-aker-fassi","chantilly-karite-moninga"],b2:["savon-noir-karite","savon-noir-lavande"],l:TS},
+  "savon-noir-lavande":{b1:["gommage-louban-lavande","chantilly-karite-moninga"],b2:["savon-noir-aloes-pinere","savon-noir-ekhan"],l:TS},
+  "savon-noir-aloes-pinere":{b1:["gommage-khamare-citron","chantilly-karite-moninga"],b2:["savon-noir-lavande","savon-noir-ekhan"],l:TS},
+  "savon-noir-karite":{b1:["gommage-aker-fassi","chantilly-karite-moninga"],b2:["savon-noir-ekhan","savon-noir-lavande"],l:TS},
+  "savon-noir-hibiscus-nigelle":{b1:["gommage-hibiscus-nigelle","chantilly-karite-moninga"],b2:["savon-noir-nila","savon-noir-aker-fassi"],l:TS},
+  "savon-nila-bleu":{b1:["savon-noir-nila","gommage-nila","chantilly-karite-nila"],b2:["savon-noir-aker-fassi","savon-noir-lavande"],l:TS},
+  "savon-oliban":{b1:["gommage-louban","gommage-louban-lavande"],b2:["savon-noir-aker-fassi","savon-noir-lavande"],l:TS},
+  /* ── Gommages ── */
+  "gommage-aker-fassi":{b1:["savon-noir-aker-fassi","chantilly-karite-moninga"],b2:["gommage-hibiscus-nigelle","gommage-nila"],l:TGom},
+  "gommage-louban":{b1:["savon-oliban","grn-oliban","hl-oliban"],b2:["gommage-louban-lavande","gommage-aker-fassi"],l:TGom},
+  "gommage-louban-lavande":{b1:["savon-noir-lavande","gommage-louban","hl-lavande"],b2:["gommage-hibiscus-nigelle","gommage-aker-fassi"],l:TGom},
+  "gommage-hibiscus-nigelle":{b1:["savon-noir-hibiscus-nigelle","chantilly-karite-moninga"],b2:["gommage-aker-fassi","gommage-nila"],l:TGom},
+  "gommage-khamare-citron":{b1:["savon-noir-aloes-pinere","chantilly-karite-moninga"],b2:["gommage-aker-fassi","gommage-louban-lavande"],l:TGom},
+  "gommage-nila":{b1:["savon-noir-nila","chantilly-karite-nila"],b2:["gommage-hibiscus-nigelle","gommage-aker-fassi"],l:TGom},
+  /* ── Chantilly ── */
+  "chantilly-karite-moninga":{b1:["savon-noir-aker-fassi","gommage-aker-fassi"],b2:["chantilly-karite-nila"],l:TCh},
+  "chantilly-karite-nila":{b1:["savon-noir-nila","gommage-nila"],b2:["chantilly-karite-moninga"],l:TCh},
+  /* ── Tahara Muscs ── */
+  "dn-musc-tahara-0":{b1:["dn-pack-tahara-2"],b2:["dn-musc-tahara-1","dn-musc-tahara-grenade"],l:TMusc},
+  "dn-musc-tahara-1":{b1:["dn-pack-tahara-abyad"],b2:["dn-musc-tahara-0","dn-musc-tahara-grenade"],l:TMusc},
+  "dn-musc-tahara-2":{b1:[],b2:["dn-musc-tahara-grenade","dn-musc-tahara-1"],l:TMusc},
+  "dn-musc-tahara-grenade":{b1:[],b2:["dn-musc-tahara-2","dn-musc-tahara-0"],l:TMusc},
+  /* ── Tahara Packs ── */
+  "dn-pack-tahara-0":{b1:["dn-lot-nissah-1"],b2:["dn-pack-tahara-2","dn-pack-tahara-abyad"],l:TK},
+  "dn-pack-tahara-1":{b1:["dn-lot-nissah-1"],b2:["dn-pack-tahara-abyad","dn-pack-tahara-2"],l:TK},
+  "dn-pack-tahara-2":{b1:["dn-musc-tahara-0","dn-lot-nissah-1"],b2:["dn-pack-tahara-0","dn-pack-tahara-abyad"],l:TK},
+  "dn-pack-tahara-abyad":{b1:["dn-musc-tahara-1","dn-lot-nissah-1"],b2:["dn-pack-tahara-2","dn-pack-tahara-0"],l:TK},
+  "dn-lot-nissah-0":{b1:["dn-lot-nissah-1"],b2:["dn-pack-tahara-0","dn-pack-tahara-abyad"],l:TK},
+  "dn-lot-nissah-1":{b1:["dn-lot-nissah-0"],b2:["dn-pack-tahara-abyad","dn-pack-tahara-2"],l:TK},
+  /* ── Tahara Poudres ── */
+  "poudre-el-anoud":{b1:["poudre-al-mousany","pierre-alun-khaliji"],b2:["poudre-sultan","poudre-arnousha"],l:TPT},
+  "poudre-al-mousany":{b1:["poudre-el-anoud","pierre-alun-khaliji"],b2:["poudre-arawar","poudre-nesaim"],l:TPT},
+  "pierre-alun-khaliji":{b1:["poudre-el-anoud","poudre-al-mousany"],b2:["poudre-sultan","poudre-arnousha"],l:TPT},
+  "poudre-arawar":{b1:[],b2:["poudre-sultan","poudre-arnousha"],l:TPT},
+  "poudre-sultan":{b1:[],b2:["poudre-arawar","poudre-nesaim"],l:TPT},
+  "poudre-arnousha":{b1:[],b2:["poudre-al-mousany","poudre-arawar"],l:TPT},
+  "poudre-nesaim":{b1:[],b2:["poudre-sultan","poudre-arawar"],l:TPT},
 };
 
-function getComplementaryProducts(productId, limit = 3) {
-  const complementIds = COMPLEMENTS[productId] || [];
-  return complementIds
-    .map(id => PRODUCTS.find(p => p.id === id))
-    .filter(p => p !== undefined)
-    .slice(0, limit);
+function getBloc1(id){
+  return((MAILLAGE[id]||{}).b1||[]).map(s=>PRODUCTS.find(p=>p.id===s)).filter(Boolean).slice(0,3);
+}
+function getBloc2(id){
+  const m=MAILLAGE[id]||{};
+  return{products:((m.b2||[]).map(s=>PRODUCTS.find(p=>p.id===s)).filter(Boolean).slice(0,2)),label:m.l||"Explorer la collection Dar Nūr"};
 }
 
 /* helper builders */
@@ -2592,6 +2710,7 @@ function showProduct(id){
       </div>
       <div class="pp-content">
         ${p.description.map(d=>`<p>${d}</p>`).join("")}
+        ${(()=>{const ip=(p.accordions||[]).find(a=>a.title==='Idéal pour');return ip?`<div class="pp-ideal"><span class="ideal-lbl">Idéal pour</span>${ip.html}</div>`:''})()}
         ${(p.benefits&&p.benefits.length)?`<h2>${p.benefitsLabel || (isWear ? 'Points forts' : 'Bienfaits')}</h2>
         <ul class="pp-benefits">${p.benefits.map(b=>`<li>${b}</li>`).join("")}</ul>`:""}
         <h2>Le produit</h2>
@@ -2601,13 +2720,7 @@ function showProduct(id){
         ${usageContent?`<h2>${usageTitle}</h2>
         <p>${usageContent}</p>`:""}
 
-        ${(p.accordions&&p.accordions.length)?`<div class="pp-accordions">
-          <h2>En savoir plus</h2>
-          ${p.accordions.map(a=>`<div class="acc-item">
-            <button class="acc-head" type="button" aria-expanded="false" onclick="toggleAccordion(this)"><span>${a.title}</span><svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-            <div class="acc-panel"><div class="acc-inner">${a.html}</div></div>
-          </div>`).join("")}
-        </div>`:""}
+        ${(()=>{const visAcc=(p.accordions||[]).filter(a=>a.title!=='Produits complémentaires'&&a.title!=='Idéal pour');return visAcc.length?`<div class="pp-accordions"><h2>En savoir plus</h2>${visAcc.map(a=>`<div class="acc-item"><button class="acc-head" type="button" aria-expanded="false" onclick="toggleAccordion(this)"><span>${a.title}</span><svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="acc-panel"><div class="acc-inner">${a.html}</div></div></div>`).join("")}</div>`:"";})()}
 
         <div class="dual-panel">
           <div class="panel">
@@ -2633,6 +2746,10 @@ function showProduct(id){
               <svg viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.945C.16 5.335 5.495 0 12.05 0a11.82 11.82 0 018.413 3.488 11.82 11.82 0 013.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.86 9.86 0 001.512 5.26l-.999 3.648 3.985-1.607zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
               Commander
             </a>`}
+          </div>
+          <div class="order-reassurance">
+            <span><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M21 10c0-7-9-13-9-13S3 3 3 10a9 9 0 0018 0z"/><path d="M9 10l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>Livraison en Île-de-France</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke-linecap="round" stroke-linejoin="round"/></svg>Service client WhatsApp</span>
           </div>
         </div>
       </div>
@@ -2673,20 +2790,32 @@ function showProduct(id){
     </section>`:""}
 
     ${(()=>{
-      const complements = getComplementaryProducts(p.id, 3);
-      return complements.length ? `<section class="family">
-      <div class="wrap">
+      // ── Bloc 1 : Produits complémentaires (ingrédient / rituel)
+      const b1=getBloc1(p.id);
+      const b1html=b1.length?`<section class="family"><div class="wrap">
         <div class="section-head"><div class="eyebrow">Complément parfait</div><h2>Produits complémentaires</h2></div>
-        <div class="grid" style="grid-template-columns:repeat(3,1fr)">
-          ${complements.map(c=>{const cimg=getProductCardImage(c.id);return `<div class="card" data-cat="${c.cat}" onclick="showProduct('${c.id}')" title="Découvrir ${c.name}">
-            ${cimg ? `<div class="card-image has-photo"><img src="${cimg}" alt="${c.name}" loading="lazy"/></div>` : `<div class="card-logo-placeholder" aria-hidden="true"><img src="logo-dar-nur.png" alt="Dar Nūr"/></div>`}
-            <div class="cat-tag">${CAT_LABELS[c.cat] || c.cat}</div>
-            <h3>${c.name}</h3>
+        <div class="grid" style="grid-template-columns:repeat(${Math.min(b1.length,3)},1fr)">
+          ${b1.map(c=>{const ci=getProductCardImage(c.id);return`<div class="card" data-cat="${c.cat}" onclick="showProduct('${c.id}')">
+            ${ci?`<div class="card-image has-photo"><img src="${ci}" alt="${c.name}" loading="lazy"/></div>`:`<div class="card-logo-placeholder" aria-hidden="true"><img src="logo-dar-nur.png" alt="Dar Nūr"/></div>`}
+            <div class="cat-tag">${CAT_LABELS[c.cat]||c.cat}</div><h3>${c.name}</h3>
             <div class="price">${c.price.type==='format'?`<small>dès</small> ${c.price.options[0][1]}€`:`${startPrice(c)}€`}</div>
-          </div>`}).join("")}
+            <div class="card-actions">${c.coming_soon===true?`<span class="btn-product-wa btn-soon">Disponible prochainement</span>`:`<a class="btn-product-wa" href="${waLink(c,c.price.type!=='fixed'?c.price.options[0][0]:'',startPrice(c))}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Commander sur WhatsApp</a>`}</div>
+          </div>`;}).join("")}
         </div>
-      </div>
-    </section>` : "";
+      </div></section>`:"";
+      // ── Bloc 2 : Explorer la collection (découverte de gamme)
+      const {products:b2,label:b2l}=getBloc2(p.id);
+      const b2html=b2.length?`<section class="family family-coll"><div class="wrap">
+        <div class="section-head"><div class="eyebrow">Collection Dar Nūr</div><h2>${b2l}</h2></div>
+        <div class="grid" style="grid-template-columns:repeat(${Math.min(b2.length,2)},1fr);max-width:680px">
+          ${b2.map(c=>{const ci=getProductCardImage(c.id);return`<div class="card" data-cat="${c.cat}" onclick="showProduct('${c.id}')">
+            ${ci?`<div class="card-image has-photo"><img src="${ci}" alt="${c.name}" loading="lazy"/></div>`:`<div class="card-logo-placeholder" aria-hidden="true"><img src="logo-dar-nur.png" alt="Dar Nūr"/></div>`}
+            <div class="cat-tag">${CAT_LABELS[c.cat]||c.cat}</div><h3>${c.name}</h3>
+            <div class="price">${c.price.type==='format'?`<small>dès</small> ${c.price.options[0][1]}€`:`${startPrice(c)}€`}</div>
+          </div>`;}).join("")}
+        </div>
+      </div></section>`:"";
+      return b1html+b2html;
     })()}
   `;
 
