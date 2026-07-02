@@ -826,7 +826,7 @@ async function loadAll() {
   const sel = document.getElementById('filter-cat');
   sel.innerHTML = '<option value="">Toutes catégories</option>';
   allCategories.forEach(c => {
-    sel.innerHTML += `<option value="${c.id}">${c.filter_label}</option>`;
+    sel.innerHTML += `<option value="${esc(c.id)}">${esc(c.filter_label)}</option>`;
   });
   sel.value = savedCat; // restaure la catégorie sélectionnée (ou "" si supprimée)
 
@@ -834,7 +834,7 @@ async function loadAll() {
   const pCat = document.getElementById('p-cat');
   pCat.innerHTML = '';
   allCategories.forEach(c => {
-    pCat.innerHTML += `<option value="${c.id}">${c.filter_label}</option>`;
+    pCat.innerHTML += `<option value="${esc(c.id)}">${esc(c.filter_label)}</option>`;
   });
 
   filterProducts(); // remet currentPage = 1, puis applique les filtres restaurés
@@ -902,8 +902,9 @@ function renderProductsPage() {
           ? '<span class="badge badge-ok">Actif</span> <span class="badge badge-cat">Bientôt</span>'
           : '<span class="badge badge-ok">Actif</span>')
       : '<span class="badge badge-off">Inactif</span>';
-    const thumb = img
-      ? `<img src="${img}" class="thumb" loading="lazy" onerror="this.style.display='none'">`
+    const safeImg = safeImageSrc(img);
+    const thumb = safeImg
+      ? `<img src="${safeImg}" class="thumb" loading="lazy" onerror="this.style.display='none'">`
       : `<span class="no-thumb"></span>`;
     return `<tr>
       <td>${thumb}</td>
@@ -915,7 +916,7 @@ function renderProductsPage() {
       <td><div class="actions">
         <button class="btn btn-outline btn-small" onclick="openProductModal('${p.id}')">Éditer</button>
         <button class="btn btn-outline btn-small" onclick="toggleActive('${p.id}', ${!p.active})">${p.active ? 'Désactiver' : 'Activer'}</button>
-        <button class="btn btn-danger btn-small" onclick="deleteProductConfirm('${p.id}', '${esc(p.name)}')">Suppr.</button>
+        <button class="btn btn-danger btn-small btn-delete-product" data-id="${esc(p.id)}" data-name="${esc(p.name)}">Suppr.</button>
       </div></td>
     </tr>`;
   }).join('');
@@ -952,8 +953,8 @@ function renderCategories() {
       <td>${c.sort_order}</td>
       <td><span class="badge ${c.active?'badge-ok':'badge-off'}">${c.active?'Active':'Inactive'}</span></td>
       <td><div class="actions">
-        <button class="btn btn-outline btn-small" onclick="openCategoryModal('${esc(c.id)}')">Éditer</button>
-        <button class="btn btn-danger btn-small" onclick="deleteCategoryConfirm('${esc(c.id)}','${esc(c.filter_label)}',${used})">Suppr.</button>
+        <button class="btn btn-outline btn-small btn-edit-category" data-id="${esc(c.id)}">Éditer</button>
+        <button class="btn btn-danger btn-small btn-delete-category" data-id="${esc(c.id)}" data-name="${esc(c.filter_label)}" data-used="${used}">Suppr.</button>
       </div></td>
     </tr>`;
   }).join('');
@@ -1038,7 +1039,7 @@ async function saveCategoryModal() {
       const pCat = document.getElementById('p-cat');
       pCat.innerHTML = '';
       allCategories.forEach(c => {
-        pCat.innerHTML += `<option value="${c.id}">${c.filter_label}</option>`;
+        pCat.innerHTML += `<option value="${esc(c.id)}">${esc(c.filter_label)}</option>`;
       });
       pCat.value = saved.id;
 
@@ -1047,7 +1048,7 @@ async function saveCategoryModal() {
       const sel = document.getElementById('filter-cat');
       sel.innerHTML = '<option value="">Toutes catégories</option>';
       allCategories.forEach(c => {
-        sel.innerHTML += `<option value="${c.id}">${c.filter_label}</option>`;
+        sel.innerHTML += `<option value="${esc(c.id)}">${esc(c.filter_label)}</option>`;
       });
     } else {
       await loadAll();
@@ -1110,7 +1111,8 @@ function openProductModal(id) {
   imageRemoved     = false;
   document.getElementById('img-file-input').value = '';
   document.getElementById('img-status').textContent = '';
-  if (currentImages.length > 0) showImgPreview(currentImages[0]);
+  const safePreview = currentImages.length > 0 ? safeImageSrc(currentImages[0]) : '';
+  if (safePreview) showImgPreview(safePreview);
   else hideImgPreview();
 }
 
@@ -1146,7 +1148,7 @@ function addVariantRow(v, idx) {
   div.dataset.variantId = v?.id || '';
   div.innerHTML = `
     <input type="text" placeholder="Nom (ex: 200 g)"  value="${esc(v?.name||'')}" data-field="name"/>
-    <input type="text" placeholder="Clé option (ex: format:200 g)" value="${v?.options ? JSON.stringify(v.options) : ''}" data-field="options"/>
+    <input type="text" placeholder="Clé option (ex: format:200 g)" value="${esc(v?.options ? JSON.stringify(v.options) : '')}" data-field="options"/>
     <input type="number" placeholder="Prix €" step="0.01" value="${v?.price??''}" data-field="price"/>
     <button class="btn btn-danger btn-small" onclick="this.closest('.variant-row').remove()">✕</button>
   `;
@@ -1256,8 +1258,9 @@ function renderOffers() {
   }
   const now = new Date();
   tbody.innerHTML = allOffers.map(o => {
-    const thumb = o.image
-      ? `<img src="${o.image}" class="thumb" loading="lazy" onerror="this.style.display='none'">`
+    const safeOfferImg = safeImageSrc(o.image);
+    const thumb = safeOfferImg
+      ? `<img src="${safeOfferImg}" class="thumb" loading="lazy" onerror="this.style.display='none'">`
       : `<span class="no-thumb"></span>`;
     const typeLabel  = OFFER_TYPE_LABELS[o.type] || o.type;
     const prices     = o.promo_price
@@ -1283,7 +1286,7 @@ function renderOffers() {
       <td><div class="actions">
         <button class="btn btn-outline btn-small" onclick="openOfferModal('${o.id}')">Éditer</button>
         <button class="btn btn-outline btn-small" onclick="toggleOfferActiveAdmin('${o.id}',${!o.active})">${o.active ? 'Désactiver' : 'Activer'}</button>
-        <button class="btn btn-danger btn-small" onclick="deleteOfferConfirm('${o.id}','${esc(o.title)}')">Suppr.</button>
+        <button class="btn btn-danger btn-small btn-delete-offer" data-id="${esc(o.id)}" data-name="${esc(o.title)}">Suppr.</button>
       </div></td>
     </tr>`;
   }).join('');
@@ -1424,8 +1427,9 @@ function openOfferModal(id) {
 
   // Image
   if (o.image) {
-    offerCurrentImage = o.image;
-    showOfferImgPreview(o.image);
+    offerCurrentImage = o.image; // valeur persistée telle quelle si l'admin ne change pas l'image
+    const safePreview = safeImageSrc(o.image);
+    if (safePreview) showOfferImgPreview(safePreview);
   }
 
   togglePackProducts();
@@ -1516,6 +1520,58 @@ async function deleteOfferConfirm(id, name) {
 function esc(s) {
   return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
+
+// Unique politique de validation des URLs d'image de tout admin.html — s'appuie sur
+// l'API URL (protocole/origine/pathname) plutôt que sur une regex de caractères
+// autorisés : une regex de type [a-zA-Z0-9/_.-]+ rejetterait à tort tout chemin
+// légitime dont le slug produit contient un accent, une apostrophe, une esperluette
+// ou une parenthèse — rien n'empêche un admin de saisir un tel slug, et le fichier
+// uploadé hériterait alors d'un chemin `products/<slug>/...` avec ces caractères.
+// L'API URL accepte nativement ces caractères (percent-encodés automatiquement, donc
+// jamais de guillemet/chevron brut dans le résultat) et permet de valider les deux cas
+// (chemin relatif du site / URL Supabase Storage) avec la même logique, sans dupliquer
+// une règle de validation. Tout code qui affiche une image issue de Supabase, d'un
+// upload ou d'une saisie admin doit passer par cette fonction — aucune autre voie.
+const SUPABASE_ORIGIN = new URL(SUPABASE_URL).origin;
+
+function safeImageSrc(url) {
+  const raw = String(url ?? '').trim();
+  if (!raw) return '';
+
+  let u;
+  try { u = new URL(raw, window.location.origin); } catch { return ''; }
+
+  if (u.protocol !== 'http:' && u.protocol !== 'https:') return ''; // bloque javascript:, data:, vbscript:, etc.
+
+  if (u.origin === window.location.origin) {
+    // Reste relatif au site (résiste à un déplacement futur d'admin.html hors de la racine)
+    return esc(u.pathname + u.search + u.hash);
+  }
+  if (u.origin === SUPABASE_ORIGIN) {
+    return esc(u.href);
+  }
+  return ''; // hôte non reconnu
+}
+
+// ── Suppressions (produits/catégories/offres) — délégation d'événements ────────
+// Les noms/titres passent par data-id/data-name (lus via .dataset, décodés HTML par
+// le navigateur) plutôt que par un onclick="" inline : plus aucune valeur n'est
+// injectée dans une chaîne JS, donc apostrophes, guillemets, accents ou emojis
+// dans un nom de produit ne peuvent plus casser le gestionnaire d'événement.
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('.btn-delete-product, .btn-delete-category, .btn-delete-offer, .btn-edit-category');
+  if (!btn) return;
+  const { id, name } = btn.dataset;
+  if (btn.classList.contains('btn-delete-product')) {
+    deleteProductConfirm(id, name);
+  } else if (btn.classList.contains('btn-delete-category')) {
+    deleteCategoryConfirm(id, name, Number(btn.dataset.used));
+  } else if (btn.classList.contains('btn-delete-offer')) {
+    deleteOfferConfirm(id, name);
+  } else if (btn.classList.contains('btn-edit-category')) {
+    openCategoryModal(id);
+  }
+});
 
 let toastTimer;
 function showToast(msg, type) {
