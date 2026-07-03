@@ -1058,15 +1058,30 @@ footer{background:#0a160f;color:var(--cream);padding:46px 28px 26px}
 const SHOW_TEMP_LABEL_NOTICE = true;
 const TEMP_LABEL_NOTICE_TEXT = "Les premières commandes sont expédiées avec une étiquette provisoire. Le produit, son contenu, sa quantité et sa qualité sont strictement identiques aux photos ; seul le design de l'étiquette diffère temporairement.";
 
-function infoBannerHTML(){
+/* Catégories réellement concernées par une étiquette (flacon/pot/sachet) —
+   tahara est concerné sauf pour les muscs (flacon de parfum, pas d'étiquette provisoire). */
+const PACKAGED_CATEGORIES = ['miels','miels-gourmands','huiles','poudres','gelules','brumes'];
+function isPackagedProduct(p){
+  if(!p || !p.cat) return false;
+  if(PACKAGED_CATEGORIES.includes(p.cat)) return true;
+  /* tahara : concerné par défaut (savon noir, gommage, chantilly, poudre, packs...),
+     sauf les muscs. Ajuster ce regex si un cas est mal classé. */
+  if(p.cat === 'tahara') return !/musc/.test(p.id);
+  return false;
+}
+
+/* infoBannerHTML accepte un produit unique (fiche produit) ou une liste de
+   produits (modals pack/couleur) — la bannière s'affiche si au moins un
+   produit concerné est présent. */
+function infoBannerHTML(productOrList){
   if(!SHOW_TEMP_LABEL_NOTICE) return "";
+  const list = Array.isArray(productOrList) ? productOrList : [productOrList];
+  if(!list.some(isPackagedProduct)) return "";
   return `<div class="info-banner" role="note">
         <span class="info-banner-icon" aria-hidden="true">📦</span>
         <span class="info-banner-text"><strong>Information :</strong> ${TEMP_LABEL_NOTICE_TEXT}</span>
       </div>`;
 }
-document.getElementById('packModalInfoBanner').innerHTML = infoBannerHTML();
-document.getElementById('colorModalInfoBanner').innerHTML = infoBannerHTML();
 
 const STORY = "<p>Chez Dar Nūr, nous croyons qu’un produit de qualité commence par une sélection exigeante. Chaque référence est choisie avec soin, dans le respect des matières premières, de leur origine et d’un savoir herboriste ancestral qui inspire notre démarche. Notre engagement est de proposer des produits authentiques, sélectionnés pour leur qualité et présentés avec une transparence fidèle aux valeurs qui animent notre Maison.</p>";
 
@@ -2733,7 +2748,7 @@ function showProduct(id){
       </div>`:""}
       </div>
       <div class="pp-content">
-        ${infoBannerHTML()}
+        ${infoBannerHTML(p)}
         ${p.description.map(d=>`<p>${d}</p>`).join("")}
         ${(()=>{const ip=(p.accordions||[]).find(a=>a.title==='Idéal pour');return ip?`<div class="pp-ideal"><span class="ideal-lbl">Idéal pour</span>${ip.html}</div>`:''})()}
         ${(p.benefits&&p.benefits.length)?`<h2>${p.benefitsLabel || (isWear ? 'Points forts' : 'Bienfaits')}</h2>
@@ -3231,6 +3246,10 @@ async function openPackModal(offerId) {
       if (savingsParent) savingsParent.style.display = 'none';
     }
 
+    // Bannière étiquette provisoire — visible si au moins un produit du pack est concerné
+    const packProducts = slugs.map(slug => PRODUCTS.find(x => x.id === slug)).filter(Boolean);
+    document.getElementById('packModalInfoBanner').innerHTML = infoBannerHTML(packProducts);
+
     // Affiche les produits avec image et prix de la bonne variante
     document.getElementById('packModalProducts').innerHTML = orderedLines.map(l => `
       <div class="pack-product">
@@ -3299,6 +3318,12 @@ function openColorModal(offerId) {
   _selectedColor    = null;
   _selectedSize     = 'L';
   _colorOfferActive = { offer, colors };
+
+  // Bannière étiquette provisoire — visible si au moins un produit de l'offre est concerné
+  const colorProducts = (offer.offer_products || [])
+    .map(op => PRODUCTS.find(pr => pr.id === op.product_slug))
+    .filter(Boolean);
+  document.getElementById('colorModalInfoBanner').innerHTML = infoBannerHTML(colorProducts);
 
   document.getElementById('colorModalTitle').textContent = offer.title;
   document.getElementById('colorModalPrice').textContent =
