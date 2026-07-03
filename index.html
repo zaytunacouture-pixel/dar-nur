@@ -2452,9 +2452,7 @@ function renderGrid(){
       <h3>${p.name}</h3>
       <div class="price">${p.price.type==='format'?`<small>dès</small> ${p.price.options[0][1]}€`:`${startPrice(p)}€`}</div>
       <div class="card-actions">
-        ${p.coming_soon===true
-          ? `<span class="btn-product-wa btn-soon">Disponible prochainement</span>`
-          : `<a class="btn-product-wa" href="${waLink(p, p.price.type!=='fixed'?p.price.options[0][0]:'', startPrice(p))}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Commander sur WhatsApp</a>`}
+        <a class="btn-product-wa" href="#" onclick="event.preventDefault();event.stopPropagation();showProduct('${p.id}')">Voir le produit</a>
       </div>
     </div>`;
   }).join("");
@@ -2807,9 +2805,7 @@ function showProduct(id){
             <h3>${f.name}</h3>
             <div class="price">${f.price.type==='format'?`<small>dès</small> ${f.price.options[0][1]}€`:`${startPrice(f)}€`}</div>
             <div class="card-actions">
-              ${f.coming_soon===true
-                ? `<span class="btn-product-wa btn-soon">Disponible prochainement</span>`
-                : `<a class="btn-product-wa" href="${waLink(f, f.price.type!=='fixed'?f.price.options[0][0]:'', startPrice(f))}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Commander sur WhatsApp</a>`}
+              <a class="btn-product-wa" href="#" onclick="event.preventDefault();event.stopPropagation();showProduct('${f.id}')">Voir le produit</a>
             </div>
           </div>`}).join("")}
         </div>
@@ -2826,7 +2822,7 @@ function showProduct(id){
             ${ci?`<div class="card-image has-photo"><img src="${ci}" alt="${c.name}" loading="lazy"/></div>`:`<div class="card-logo-placeholder" aria-hidden="true"><img src="logo-dar-nur.png" alt="Dar Nūr"/></div>`}
             <div class="cat-tag">${CAT_LABELS[c.cat]||c.cat}</div><h3>${c.name}</h3>
             <div class="price">${c.price.type==='format'?`<small>dès</small> ${c.price.options[0][1]}€`:`${startPrice(c)}€`}</div>
-            <div class="card-actions">${c.coming_soon===true?`<span class="btn-product-wa btn-soon">Disponible prochainement</span>`:`<a class="btn-product-wa" href="${waLink(c,c.price.type!=='fixed'?c.price.options[0][0]:'',startPrice(c))}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Commander sur WhatsApp</a>`}</div>
+            <div class="card-actions"><a class="btn-product-wa" href="#" onclick="event.preventDefault();event.stopPropagation();showProduct('${c.id}')">Voir le produit</a></div>
           </div>`;}).join("")}
         </div>
       </div></section>`:"";
