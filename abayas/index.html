@@ -113,6 +113,22 @@ button,select{font-family:inherit;cursor:pointer}
 .divider .line.r{background:linear-gradient(90deg,var(--gold),transparent)}
 .divider .dot{width:6px;height:6px;border-radius:50%;background:var(--gold);flex:none}
 
+/* ===== HERO RING (sceau) ===== */
+.hero-ring{position:relative;width:110px;height:110px;margin:0 auto 18px;border-radius:50%;border:1px solid rgba(200,168,75,.55);display:flex;align-items:center;justify-content:center;overflow:hidden;background:radial-gradient(circle,rgba(200,168,75,.08),transparent 70%)}
+.hero-ring::before{content:"";position:absolute;inset:7px;border:1px solid rgba(200,168,75,.28);border-radius:50%;z-index:2;pointer-events:none}
+.hero-ring img{width:100%;height:100%;object-fit:cover}
+.hero-ring .ring-mark{font-family:'Cormorant Garamond';font-size:1.4rem;color:var(--gold-light);opacity:.85}
+
+/* ===== VALUE STRIP (repris mot pour mot de la homepage) ===== */
+.value-strip{background:#fff;border-bottom:1px solid var(--line);padding:15px 24px}
+.vs-row{max-width:1000px;margin:0 auto;display:flex;justify-content:center;gap:30px;flex-wrap:wrap}
+.vs-item{display:flex;align-items:center;gap:9px;font-family:'Jost';font-size:.72rem;letter-spacing:.02em;color:var(--muted)}
+.vs-dot{width:4px;height:4px;border-radius:50%;background:var(--gold);flex:none}
+
+/* ===== INFO NOTE ===== */
+.info-note{max-width:600px;margin:20px auto 0;text-align:center;font-family:'Jost';font-size:.76rem;color:var(--muted);padding:12px 20px;border:1px solid var(--line);border-radius:3px;background:var(--cream)}
+.info-note b{color:var(--gold-dark);font-weight:500}
+
 /* ===== NAV (identique homepage) ===== */
 header{position:sticky;top:0;z-index:100;background:rgba(13,31,22,.97);backdrop-filter:blur(8px);border-bottom:1px solid rgba(200,168,75,.22)}
 nav{display:flex;align-items:center;justify-content:space-between;max-width:1240px;margin:0 auto;padding:14px 28px}
@@ -146,7 +162,7 @@ nav{display:flex;align-items:center;justify-content:space-between;max-width:1240
 .cat-hero{background:linear-gradient(180deg,var(--green) 0%,var(--green-soft) 62%,var(--green-soft) 100%);text-align:center;padding:56px 28px 44px;position:relative;overflow:hidden}
 .cat-hero::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(135deg,rgba(200,168,75,.05) 0 2px,transparent 2px 26px);pointer-events:none}
 .cat-hero::after{content:"";position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(200,168,75,.35),transparent)}
-.cat-badge{position:relative;display:inline-block;border:1px solid rgba(200,168,75,.5);color:var(--gold);font-family:'Cinzel';font-size:.62rem;letter-spacing:.28em;text-transform:uppercase;padding:7px 22px;border-radius:20px;margin-bottom:22px}
+.cat-badge{position:relative;display:inline-block;white-space:nowrap;border:1px solid rgba(200,168,75,.5);color:var(--gold);font-family:'Cinzel';font-size:.62rem;letter-spacing:.28em;text-transform:uppercase;padding:7px 22px;border-radius:20px;margin-bottom:22px}
 .cat-hero h1{position:relative;font-family:'Cinzel';font-size:clamp(2rem,5vw,3.2rem);font-weight:600;color:var(--cream);letter-spacing:.06em;text-transform:uppercase;margin-bottom:14px}
 .cat-hero-sub{position:relative;font-family:'Cormorant Garamond';font-style:italic;font-size:clamp(1.05rem,2.4vw,1.35rem);color:rgba(250,247,240,.68);max-width:520px;margin:0 auto}
 
@@ -160,10 +176,10 @@ nav{display:flex;align-items:center;justify-content:space-between;max-width:1240
 /* ===== FILTER BAR — pilules réelles (lignes de modèle) + tri ===== */
 .filter-bar{position:sticky;top:82px;z-index:40;background:var(--offwhite);border-bottom:1px solid var(--line);padding:16px 28px}
 .filter-bar-inner{max-width:1240px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px}
-.filters{display:flex;flex-wrap:wrap;gap:10px}
-.filters button{padding:9px 20px;border:1px solid var(--line);border-radius:20px;background:#fff;font-family:'Cinzel';font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);transition:all .2s}
-.filters button:hover{border-color:var(--gold);color:var(--green)}
-.filters button.active{background:var(--green);color:var(--gold);border-color:var(--green)}
+.filters{display:flex;flex-wrap:wrap;gap:26px;justify-content:center}
+.filters button{padding:0 0 7px;border:none;border-bottom:1px solid transparent;border-radius:0;background:none;font-family:'Cinzel';font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);transition:all .2s}
+.filters button:hover{color:var(--green)}
+.filters button.active{background:none;color:var(--green);border-bottom-color:var(--gold)}
 .sort-select{display:flex;align-items:center;gap:8px;font-family:'Jost',sans-serif;font-size:.78rem;color:var(--muted)}
 .sort-select select{border:1px solid var(--line);border-radius:20px;padding:8px 16px;background:#fff;color:var(--ink);font-size:.78rem}
 .results-count{font-family:'Cinzel';font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);text-align:center;padding:22px 0 0}
@@ -175,8 +191,8 @@ nav{display:flex;align-items:center;justify-content:space-between;max-width:1240
 .card::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold-light),var(--gold));transform:scaleX(0);transform-origin:left;transition:transform .3s ease}
 .card:hover{transform:translateY(-6px);box-shadow:var(--shadow);border-color:var(--gold)}
 .card:hover::before{transform:scaleX(1)}
-.card-image{position:relative;width:100%;aspect-ratio:1/1;background:var(--cream);overflow:hidden}
-.card-image img{width:100%;height:100%;object-fit:cover;object-position:center;transition:transform .4s ease}
+.card-image{position:relative;width:100%;aspect-ratio:3/4;background:var(--cream);overflow:hidden}
+.card-image img{width:100%;height:100%;object-fit:cover;object-position:center;filter:saturate(.95) contrast(1.03);transition:transform .4s ease}
 .card:hover .card-image img{transform:scale(1.05)}
 .card-body{padding:16px 18px 18px;display:flex;flex-direction:column;flex:1}
 .cat-tag{font-family:'Cinzel';font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold-dark);margin-bottom:5px}
@@ -283,10 +299,21 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
 <!-- ===== HERO CATÉGORIE ===== -->
 <section class="cat-hero">
   <div class="cat-badge">Mode femme</div>
+  <div class="hero-ring" aria-hidden="true"><span class="ring-mark">نور</span></div>
   <h1>Abayas &amp; Ensembles</h1>
   <p class="cat-hero-sub">La pudeur et l'élégance, réunies dans chaque pièce.</p>
   <div class="divider" aria-hidden="true"><span class="line"></span><span class="dot"></span><span class="line r"></span></div>
 </section>
+
+<!-- ===== BANDEAU DE CONFIANCE (copy identique homepage) ===== -->
+<div class="value-strip">
+  <div class="vs-row">
+    <div class="vs-item">Livraison en main propre</div><div class="vs-dot"></div>
+    <div class="vs-item">Paiement sécurisé</div><div class="vs-dot"></div>
+    <div class="vs-item">Réponse WhatsApp en moins d'1h</div><div class="vs-dot"></div>
+    <div class="vs-item">Produits sélectionnés avec soin</div>
+  </div>
+</div>
 
 <!-- ===== INTRO (copy réelle, inchangée) ===== -->
 <section class="intro-section">
@@ -302,6 +329,7 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
     chaque modèle est disponible en plusieurs tailles et couleurs.
   </p>
   <a href="https://dar-nur.fr" class="intro-back">← Retour à la boutique</a>
+  <p class="info-note"><b>Bon à savoir —</b> tailles disponibles M · L · XL · 2XL selon modèle, livraison organisée en Île-de-France via WhatsApp.</p>
 </section>
 
 <!--
@@ -314,11 +342,11 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
 <div class="filter-bar">
   <div class="filter-bar-inner">
     <div class="filters" id="filters">
-      <button class="active" data-line="all">Toutes</button>
-      <button data-line="nouha">Abaya Nouha</button>
-      <button data-line="aicha">Ensemble Aïcha</button>
-      <button data-line="layali">Ensemble Layali</button>
-      <button data-line="nissah">Nissah Mastoura</button>
+      <button class="active" data-line="all">Toutes (22)</button>
+      <button data-line="nouha">Abaya Nouha (4)</button>
+      <button data-line="aicha">Ensemble Aïcha (7)</button>
+      <button data-line="layali">Ensemble Layali (4)</button>
+      <button data-line="nissah">Nissah Mastoura (7)</button>
     </div>
     <label class="sort-select">
       Trier par
@@ -337,150 +365,150 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
   <div class="grid" id="grid">
 
     <a href="https://dar-nur.fr/#vt-abaya-nouha-gris-argente" class="card" data-line="nouha" data-price="89.99">
-      <div class="card-image"><img src="../dar-nur-abaya-nouha-gris-argente.jpg" alt="Abaya Nouha Gris Argenté — Dar Nūr" loading="eager" width="400" height="400"/></div>
+      <div class="card-image"><img src="../dar-nur-abaya-nouha-gris-argente.jpg" alt="Abaya Nouha Gris Argenté — Dar Nūr" loading="eager" width="400" height="533"/></div>
       <div class="card-body">
         <div class="cat-tag">Abaya femme</div>
         <h3>Abaya Nouha Gris Argenté</h3>
         <p class="card-tagline">Une abaya fluide à la coupe papillon élégante.</p>
         <div class="card-footer">
-          <div class="card-price"><small>À partir de</small>89,99 €</div>
+          <div class="card-price">89,99 €</div>
           <span class="card-cta">Voir la fiche</span>
         </div>
       </div>
     </a>
 
     <a href="https://dar-nur.fr/#vt-abaya-nouha-noir-dentelle" class="card" data-line="nouha" data-price="89.99">
-      <div class="card-image"><img src="../dar-nur-abaya-nouha-noir-dentelle.jpg" alt="Abaya Nouha Noir Dentelle — Dar Nūr" loading="lazy" width="400" height="400"/></div>
+      <div class="card-image"><img src="../dar-nur-abaya-nouha-noir-dentelle.jpg" alt="Abaya Nouha Noir Dentelle — Dar Nūr" loading="lazy" width="400" height="533"/></div>
       <div class="card-body">
         <div class="cat-tag">Abaya femme</div>
         <h3>Abaya Nouha Noir Dentelle</h3>
         <p class="card-tagline">La sobriété du noir avec une finition raffinée.</p>
         <div class="card-footer">
-          <div class="card-price"><small>À partir de</small>89,99 €</div>
+          <div class="card-price">89,99 €</div>
           <span class="card-cta">Voir la fiche</span>
         </div>
       </div>
     </a>
 
     <a href="https://dar-nur.fr/#vt-abaya-nouha-bleu-ciel" class="card" data-line="nouha" data-price="89.99">
-      <div class="card-image"><img src="../dar-nur-abaya-nouha-bleu-ciel.jpg" alt="Abaya Nouha Bleu Ciel — Dar Nūr" loading="lazy" width="400" height="400"/></div>
+      <div class="card-image"><img src="../dar-nur-abaya-nouha-bleu-ciel.jpg" alt="Abaya Nouha Bleu Ciel — Dar Nūr" loading="lazy" width="400" height="533"/></div>
       <div class="card-body">
         <div class="cat-tag">Abaya femme</div>
         <h3>Abaya Nouha Bleu Ciel</h3>
         <p class="card-tagline">Une abaya douce, fluide et lumineuse.</p>
         <div class="card-footer">
-          <div class="card-price"><small>À partir de</small>89,99 €</div>
+          <div class="card-price">89,99 €</div>
           <span class="card-cta">Voir la fiche</span>
         </div>
       </div>
     </a>
 
     <a href="https://dar-nur.fr/#vt-abaya-nouha-rose-marrone" class="card" data-line="nouha" data-price="89.99">
-      <div class="card-image"><img src="../dar-nur-abaya-nouha-rose-marrone.jpg" alt="Abaya Nouha Rose Marroné — Dar Nūr" loading="lazy" width="400" height="400"/></div>
+      <div class="card-image"><img src="../dar-nur-abaya-nouha-rose-marrone.jpg" alt="Abaya Nouha Rose Marroné — Dar Nūr" loading="lazy" width="400" height="533"/></div>
       <div class="card-body">
         <div class="cat-tag">Abaya femme</div>
         <h3>Abaya Nouha Rose Marroné</h3>
         <p class="card-tagline">Une nuance douce pour une silhouette élégante.</p>
         <div class="card-footer">
-          <div class="card-price"><small>À partir de</small>89,99 €</div>
+          <div class="card-price">89,99 €</div>
           <span class="card-cta">Voir la fiche</span>
         </div>
       </div>
     </a>
 
     <a href="https://dar-nur.fr/#vt-aicha-vert-sapin" class="card" data-line="aicha" data-price="64.99">
-      <div class="card-image"><img src="../dar-nur-ensemble-aicha-vert-sapin.jpg" alt="Ensemble Aïcha Vert Sapin — Dar Nūr" loading="lazy" width="400" height="400"/></div>
+      <div class="card-image"><img src="../dar-nur-ensemble-aicha-vert-sapin.jpg" alt="Ensemble Aïcha Vert Sapin — Dar Nūr" loading="lazy" width="400" height="533"/></div>
       <div class="card-body">
         <div class="cat-tag">Ensemble femme</div>
         <h3>Ensemble Aïcha Vert Sapin</h3>
         <p class="card-tagline">Un ensemble couvrant, pratique et raffiné.</p>
         <div class="card-footer">
-          <div class="card-price"><small>À partir de</small>64,99 €</div>
+          <div class="card-price">64,99 €</div>
           <span class="card-cta">Voir la fiche</span>
         </div>
       </div>
     </a>
 
     <a href="https://dar-nur.fr/#vt-aicha-orange" class="card" data-line="aicha" data-price="64.99">
-      <div class="card-image"><img src="../dar-nur-ensemble-aicha-orange.jpg" alt="Ensemble Aïcha Orange — Dar Nūr" loading="lazy" width="400" height="400"/></div>
+      <div class="card-image"><img src="../dar-nur-ensemble-aicha-orange.jpg" alt="Ensemble Aïcha Orange — Dar Nūr" loading="lazy" width="400" height="533"/></div>
       <div class="card-body">
         <div class="cat-tag">Ensemble femme</div>
         <h3>Ensemble Aïcha Orange</h3>
         <p class="card-tagline">Une tenue lumineuse, pudique et pratique.</p>
         <div class="card-footer">
-          <div class="card-price"><small>À partir de</small>64,99 €</div>
+          <div class="card-price">64,99 €</div>
           <span class="card-cta">Voir la fiche</span>
         </div>
       </div>
     </a>
 
     <a href="https://dar-nur.fr/#vt-aicha-violet" class="card" data-line="aicha" data-price="64.99">
-      <div class="card-image"><img src="../dar-nur-ensemble-aicha-violet.jpg" alt="Ensemble Aïcha Violet — Dar Nūr" loading="lazy" width="400" height="400"/></div>
+      <div class="card-image"><img src="../dar-nur-ensemble-aicha-violet.jpg" alt="Ensemble Aïcha Violet — Dar Nūr" loading="lazy" width="400" height="533"/></div>
       <div class="card-body">
         <div class="cat-tag">Ensemble femme</div>
         <h3>Ensemble Aïcha Violet</h3>
         <p class="card-tagline">Une couleur noble pour une tenue couvrante.</p>
         <div class="card-footer">
-          <div class="card-price"><small>À partir de</small>64,99 €</div>
+          <div class="card-price">64,99 €</div>
           <span class="card-cta">Voir la fiche</span>
         </div>
       </div>
     </a>
 
     <a href="https://dar-nur.fr/#vt-aicha-bordeaux" class="card" data-line="aicha" data-price="64.99">
-      <div class="card-image"><img src="../dar-nur-ensemble-aicha-bordeaux.jpg" alt="Ensemble Aïcha Bordeaux — Dar Nūr" loading="lazy" width="400" height="400"/></div>
+      <div class="card-image"><img src="../dar-nur-ensemble-aicha-bordeaux.jpg" alt="Ensemble Aïcha Bordeaux — Dar Nūr" loading="lazy" width="400" height="533"/></div>
       <div class="card-body">
         <div class="cat-tag">Ensemble femme</div>
         <h3>Ensemble Aïcha Bordeaux</h3>
         <p class="card-tagline">Une teinte profonde pour une allure distinguée.</p>
         <div class="card-footer">
-          <div class="card-price"><small>À partir de</small>64,99 €</div>
+          <div class="card-price">64,99 €</div>
           <span class="card-cta">Voir la fiche</span>
         </div>
       </div>
     </a>
 
     <a href="https://dar-nur.fr/#vt-aicha-blanc" class="card" data-line="aicha" data-price="64.99">
-      <div class="card-image"><img src="../dar-nur-ensemble-aicha-blanc.jpg" alt="Ensemble Aïcha Blanc — Dar Nūr" loading="lazy" width="400" height="400"/></div>
+      <div class="card-image"><img src="../dar-nur-ensemble-aicha-blanc.jpg" alt="Ensemble Aïcha Blanc — Dar Nūr" loading="lazy" width="400" height="533"/></div>
       <div class="card-body">
         <div class="cat-tag">Ensemble femme</div>
         <h3>Ensemble Aïcha Blanc</h3>
         <p class="card-tagline">La pureté du blanc dans un ensemble couvrant.</p>
         <div class="card-footer">
-          <div class="card-price"><small>À partir de</small>64,99 €</div>
+          <div class="card-price">64,99 €</div>
           <span class="card-cta">Voir la fiche</span>
         </div>
       </div>
     </a>
 
     <a href="https://dar-nur.fr/#vt-aicha-noir" class="card" data-line="aicha" data-price="64.99">
-      <div class="card-image"><img src="../dar-nur-ensemble-aicha-noir.jpg" alt="Ensemble Aïcha Noir — Dar Nūr" loading="lazy" width="400" height="400"/></div>
+      <div class="card-image"><img src="../dar-nur-ensemble-aicha-noir.jpg" alt="Ensemble Aïcha Noir — Dar Nūr" loading="lazy" width="400" height="533"/></div>
       <div class="card-body">
         <div class="cat-tag">Ensemble femme</div>
         <h3>Ensemble Aïcha Noir</h3>
         <p class="card-tagline">L'élégance sobre d'un ensemble complet.</p>
         <div class="card-footer">
-          <div class="card-price"><small>À partir de</small>64,99 €</div>
+          <div class="card-price">64,99 €</div>
           <span class="card-cta">Voir la fiche</span>
         </div>
       </div>
     </a>
 
     <a href="https://dar-nur.fr/#vt-aicha-kaki" class="card" data-line="aicha" data-price="64.99">
-      <div class="card-image"><img src="../dar-nur-ensemble-aicha-kaki.jpg" alt="Ensemble Aïcha Kaki — Dar Nūr" loading="lazy" width="400" height="400"/></div>
+      <div class="card-image"><img src="../dar-nur-ensemble-aicha-kaki.jpg" alt="Ensemble Aïcha Kaki — Dar Nūr" loading="lazy" width="400" height="533"/></div>
       <div class="card-body">
         <div class="cat-tag">Ensemble femme</div>
         <h3>Ensemble Aïcha Kaki</h3>
         <p class="card-tagline">Une sobriété naturelle pour une tenue pudique.</p>
         <div class="card-footer">
-          <div class="card-price"><small>À partir de</small>64,99 €</div>
+          <div class="card-price">64,99 €</div>
           <span class="card-cta">Voir la fiche</span>
         </div>
       </div>
     </a>
 
     <a href="https://dar-nur.fr/#vt-layali-beige" class="card" data-line="layali" data-price="124.99">
-      <div class="card-image"><img src="../dar-nur-ensemble-layali-beige.jpg" alt="Ensemble Layali Beige — Dar Nūr" loading="lazy" width="400" height="400"/></div>
+      <div class="card-image"><img src="../dar-nur-ensemble-layali-beige.jpg" alt="Ensemble Layali Beige — Dar Nūr" loading="lazy" width="400" height="533"/></div>
       <div class="card-body">
         <div class="cat-tag">Ensemble femme</div>
         <h3>Ensemble Layali Beige</h3>
@@ -493,7 +521,7 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
     </a>
 
     <a href="https://dar-nur.fr/#vt-layali-blanc" class="card" data-line="layali" data-price="124.99">
-      <div class="card-image"><img src="../dar-nur-ensemble-layali-blanc.jpg" alt="Ensemble Layali Blanc — Dar Nūr" loading="lazy" width="400" height="400"/></div>
+      <div class="card-image"><img src="../dar-nur-ensemble-layali-blanc.jpg" alt="Ensemble Layali Blanc — Dar Nūr" loading="lazy" width="400" height="533"/></div>
       <div class="card-body">
         <div class="cat-tag">Ensemble femme</div>
         <h3>Ensemble Layali Blanc</h3>
@@ -506,7 +534,7 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
     </a>
 
     <a href="https://dar-nur.fr/#vt-layali-doree" class="card" data-line="layali" data-price="124.99">
-      <div class="card-image"><img src="../dar-nur-ensemble-layali-doree.jpg" alt="Ensemble Layali Dorée — Dar Nūr" loading="lazy" width="400" height="400"/></div>
+      <div class="card-image"><img src="../dar-nur-ensemble-layali-doree.jpg" alt="Ensemble Layali Dorée — Dar Nūr" loading="lazy" width="400" height="533"/></div>
       <div class="card-body">
         <div class="cat-tag">Ensemble femme</div>
         <h3>Ensemble Layali Dorée</h3>
@@ -519,7 +547,7 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
     </a>
 
     <a href="https://dar-nur.fr/#vt-layali-noir" class="card" data-line="layali" data-price="124.99">
-      <div class="card-image"><img src="../dar-nur-ensemble-layali-noir.jpg" alt="Ensemble Layali Noir — Dar Nūr" loading="lazy" width="400" height="400"/></div>
+      <div class="card-image"><img src="../dar-nur-ensemble-layali-noir.jpg" alt="Ensemble Layali Noir — Dar Nūr" loading="lazy" width="400" height="533"/></div>
       <div class="card-body">
         <div class="cat-tag">Ensemble femme</div>
         <h3>Ensemble Layali Noir</h3>
@@ -532,7 +560,7 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
     </a>
 
     <a href="https://dar-nur.fr/#vt-nissah-blanc" class="card" data-line="nissah" data-price="59.99">
-      <div class="card-image"><img src="../dar-nur-ensemble-nissah-mastoura-blanc.jpg" alt="Ensemble Nissah Mastoura Blanc — Dar Nūr" loading="lazy" width="400" height="400"/></div>
+      <div class="card-image"><img src="../dar-nur-ensemble-nissah-mastoura-blanc.jpg" alt="Ensemble Nissah Mastoura Blanc — Dar Nūr" loading="lazy" width="400" height="533"/></div>
       <div class="card-body">
         <div class="cat-tag">Ensemble femme</div>
         <h3>Ensemble Nissah Mastoura Blanc</h3>
@@ -545,7 +573,7 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
     </a>
 
     <a href="https://dar-nur.fr/#vt-nissah-bleu" class="card" data-line="nissah" data-price="59.99">
-      <div class="card-image"><img src="../dar-nur-ensemble-nissah-mastoura-bleu.jpg" alt="Ensemble Nissah Mastoura Bleu — Dar Nūr" loading="lazy" width="400" height="400"/></div>
+      <div class="card-image"><img src="../dar-nur-ensemble-nissah-mastoura-bleu.jpg" alt="Ensemble Nissah Mastoura Bleu — Dar Nūr" loading="lazy" width="400" height="533"/></div>
       <div class="card-body">
         <div class="cat-tag">Ensemble femme</div>
         <h3>Ensemble Nissah Mastoura Bleu</h3>
@@ -558,7 +586,7 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
     </a>
 
     <a href="https://dar-nur.fr/#vt-nissah-bordeaux" class="card" data-line="nissah" data-price="59.99">
-      <div class="card-image"><img src="../dar-nur-ensemble-nissah-mastoura-bordeaux.jpg" alt="Ensemble Nissah Mastoura Bordeaux — Dar Nūr" loading="lazy" width="400" height="400"/></div>
+      <div class="card-image"><img src="../dar-nur-ensemble-nissah-mastoura-bordeaux.jpg" alt="Ensemble Nissah Mastoura Bordeaux — Dar Nūr" loading="lazy" width="400" height="533"/></div>
       <div class="card-body">
         <div class="cat-tag">Ensemble femme</div>
         <h3>Ensemble Nissah Mastoura Bordeaux</h3>
@@ -571,7 +599,7 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
     </a>
 
     <a href="https://dar-nur.fr/#vt-nissah-noir" class="card" data-line="nissah" data-price="59.99">
-      <div class="card-image"><img src="../dar-nur-ensemble-nissah-mastoura-noir.jpg" alt="Ensemble Nissah Mastoura Noir — Dar Nūr" loading="lazy" width="400" height="400"/></div>
+      <div class="card-image"><img src="../dar-nur-ensemble-nissah-mastoura-noir.jpg" alt="Ensemble Nissah Mastoura Noir — Dar Nūr" loading="lazy" width="400" height="533"/></div>
       <div class="card-body">
         <div class="cat-tag">Ensemble femme</div>
         <h3>Ensemble Nissah Mastoura Noir</h3>
@@ -584,7 +612,7 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
     </a>
 
     <a href="https://dar-nur.fr/#vt-nissah-vert" class="card" data-line="nissah" data-price="59.99">
-      <div class="card-image"><img src="../dar-nur-ensemble-nissah-mastoura-vert-sapin.jpg" alt="Ensemble Nissah Mastoura Vert Sapin — Dar Nūr" loading="lazy" width="400" height="400"/></div>
+      <div class="card-image"><img src="../dar-nur-ensemble-nissah-mastoura-vert-sapin.jpg" alt="Ensemble Nissah Mastoura Vert Sapin — Dar Nūr" loading="lazy" width="400" height="533"/></div>
       <div class="card-body">
         <div class="cat-tag">Ensemble femme</div>
         <h3>Ensemble Nissah Mastoura Vert Sapin</h3>
@@ -597,7 +625,7 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
     </a>
 
     <a href="https://dar-nur.fr/#vt-nissah-violet" class="card" data-line="nissah" data-price="59.99">
-      <div class="card-image"><img src="../dar-nur-ensemble-nissah-mastoura-violet.jpg" alt="Ensemble Nissah Mastoura Violet — Dar Nūr" loading="lazy" width="400" height="400"/></div>
+      <div class="card-image"><img src="../dar-nur-ensemble-nissah-mastoura-violet.jpg" alt="Ensemble Nissah Mastoura Violet — Dar Nūr" loading="lazy" width="400" height="533"/></div>
       <div class="card-body">
         <div class="cat-tag">Ensemble femme</div>
         <h3>Ensemble Nissah Mastoura Violet</h3>
@@ -610,7 +638,7 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
     </a>
 
     <a href="https://dar-nur.fr/#vt-nissah-kaki" class="card" data-line="nissah" data-price="59.99">
-      <div class="card-image"><img src="../dar-nur-ensemble-nissah-moustara-kaki.jpg" alt="Ensemble Nissah Mastoura Kaki — Dar Nūr" loading="lazy" width="400" height="400"/></div>
+      <div class="card-image"><img src="../dar-nur-ensemble-nissah-moustara-kaki.jpg" alt="Ensemble Nissah Mastoura Kaki — Dar Nūr" loading="lazy" width="400" height="533"/></div>
       <div class="card-body">
         <div class="cat-tag">Ensemble femme</div>
         <h3>Ensemble Nissah Mastoura Kaki</h3>
