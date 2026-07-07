@@ -3176,6 +3176,13 @@ syncBar();
     renderGrid();
     renderCollections();
     renderBestsellers();
+  } finally {
+    /* Routage minimal par hash : ouvre directement une fiche produit si l'URL
+       arrive avec #<id-produit> (liens "Voir la fiche" des pages catégories) */
+    if(location.hash.length > 1){
+      const _hashProductId = decodeURIComponent(location.hash.slice(1));
+      if(PRODUCTS.find(p=>p.id===_hashProductId)) showProduct(_hashProductId);
+    }
   }
 })();
 
