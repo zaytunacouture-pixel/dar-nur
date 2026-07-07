@@ -802,19 +802,19 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
       <div class="nav-dropdown">
         <div class="nav-dropdown-title">Bien-être</div>
         <div class="nav-dropdown-menu" id="well-being">
-          <a onclick="goCat('miels')">Miels</a>
-          <a onclick="goCat('gelules')">Gélules</a>
-          <a onclick="goCat('poudres')">Poudres &amp; Graines</a>
-          <a onclick="goCat('huiles')">Huiles</a>
-          <a onclick="goCat('brumes')">Brumes</a>
+          <a href="/miels/">Miels</a>
+          <a href="/gelules/">Gélules</a>
+          <a href="/poudres/">Poudres &amp; Graines</a>
+          <a href="/huiles/">Huiles</a>
+          <a href="/brumes/">Brumes</a>
         </div>
       </div>
 
       <div class="nav-dropdown">
         <div class="nav-dropdown-title">Mode</div>
         <div class="nav-dropdown-menu" id="mode">
-          <a onclick="goCat('qamis')">Qamis</a>
-          <a onclick="goCat('vetements')">Abayas</a>
+          <a href="/qamis/">Qamis</a>
+          <a href="/abayas/">Abayas</a>
         </div>
       </div>
 
@@ -1113,11 +1113,11 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
     <div class="foot-cols">
       <div class="foot-col">
         <h3>Boutique</h3>
-        <a onclick="goCat('miels')">Miels</a>
-        <a onclick="goCat('huiles')">Huiles</a>
-        <a onclick="goCat('tahara')">Parfums & Muscs</a>
-        <a onclick="goCat('bakhour')">Bakhour & Encens</a>
-        <a onclick="goCat('vetements')">Qamis & Abayas</a>
+        <a href="/miels/">Miels</a>
+        <a href="/huiles/">Huiles</a>
+        <a href="/tahara/">Parfums & Muscs</a>
+        <a href="/bakhour/">Bakhour & Encens</a>
+        <a href="/abayas/">Qamis & Abayas</a>
       </div>
       <div class="foot-col">
         <h3>Aide</h3>
@@ -2819,7 +2819,7 @@ function showProduct(id){
       <div class="pp-hero-inner">
         <div class="breadcrumb">
           <a onclick="showHome()">Dar Nūr</a><span>›</span>
-          <a onclick="goCat('${p.cat}')">${CAT_LABELS[p.cat] || p.cat}</a><span>›</span>
+          <a href="/${_CAT_SLUG_OVERRIDES[p.cat] || p.cat}/">${CAT_LABELS[p.cat] || p.cat}</a><span>›</span>
           <span style="color:var(--cream)">${p.name}</span>
         </div>
         <div class="pp-badge">${CAT_LABELS[p.cat] || p.cat}</div>
@@ -3042,15 +3042,23 @@ function getCollectionItems(c){
   const list = c.type==="all" ? PRODUCTS : PRODUCTS.filter(p=>p.cat===c.cat);
   return list.slice(0,4);
 }
+const _CAT_SLUG_OVERRIDES = { vetements: "abayas", "miels-gourmands": "miels" };
 function renderCollections(){
   document.getElementById("collectionsGrid").innerHTML = COLLECTIONS.map(c=>{
     const cover = c.type==="all" ? null : getCollectionThumb(getCollectionItems(c)[0]?.id);
     const label = c.type==="all" ? "Tout le catalogue" : c.title;
+    if(c.type==="all"){
+      return `
+      <div class="collection-card collection-card--all" role="button" tabindex="0" aria-label="Découvrir ${c.title}" onclick="goCat('${c.cat}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goCat('${c.cat}')}">
+        <span class="collection-label">${label}</span>
+      </div>`;
+    }
+    const slug = _CAT_SLUG_OVERRIDES[c.cat] || c.cat;
     return `
-    <div class="collection-card${c.type==="all"?" collection-card--all":""}" role="button" tabindex="0" aria-label="Découvrir ${c.title}" onclick="goCat('${c.cat}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();goCat('${c.cat}')}">
+    <a class="collection-card" href="/${slug}/" aria-label="Découvrir ${c.title}">
       ${cover ? `<img class="collection-photo" src="${cover}" alt="" loading="lazy"/>` : ''}
       <span class="collection-label">${label}</span>
-    </div>`;
+    </a>`;
   }).join("");
 }
 
