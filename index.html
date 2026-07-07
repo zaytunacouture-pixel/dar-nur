@@ -3042,7 +3042,7 @@ function getCollectionItems(c){
   const list = c.type==="all" ? PRODUCTS : PRODUCTS.filter(p=>p.cat===c.cat);
   return list.slice(0,4);
 }
-const _CAT_SLUG_OVERRIDES = { vetements: "abayas", "miels-gourmands": "miels" };
+const _CAT_SLUG_OVERRIDES = { vetements: "abayas" };
 function renderCollections(){
   document.getElementById("collectionsGrid").innerHTML = COLLECTIONS.map(c=>{
     const cover = c.type==="all" ? null : getCollectionThumb(getCollectionItems(c)[0]?.id);
