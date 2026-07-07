@@ -107,6 +107,22 @@ button,select{font-family:inherit;cursor:pointer}
 .divider .line.r{background:linear-gradient(90deg,var(--gold),transparent)}
 .divider .dot{width:6px;height:6px;border-radius:50%;background:var(--gold);flex:none}
 
+/* ===== HERO RING (sceau) ===== */
+.hero-ring{position:relative;width:110px;height:110px;margin:0 auto 18px;border-radius:50%;border:1px solid rgba(200,168,75,.55);display:flex;align-items:center;justify-content:center;overflow:hidden;background:radial-gradient(circle,rgba(200,168,75,.08),transparent 70%)}
+.hero-ring::before{content:"";position:absolute;inset:7px;border:1px solid rgba(200,168,75,.28);border-radius:50%;z-index:2;pointer-events:none}
+.hero-ring img{width:100%;height:100%;object-fit:cover}
+.hero-ring .ring-mark{font-family:'Cormorant Garamond';font-size:1.4rem;color:var(--gold-light);opacity:.85}
+
+/* ===== VALUE STRIP (repris mot pour mot de la homepage) ===== */
+.value-strip{background:#fff;border-bottom:1px solid var(--line);padding:15px 24px}
+.vs-row{max-width:1000px;margin:0 auto;display:flex;justify-content:center;gap:30px;flex-wrap:wrap}
+.vs-item{display:flex;align-items:center;gap:9px;font-family:'Jost';font-size:.72rem;letter-spacing:.02em;color:var(--muted)}
+.vs-dot{width:4px;height:4px;border-radius:50%;background:var(--gold);flex:none}
+
+/* ===== INFO NOTE ===== */
+.info-note{max-width:600px;margin:20px auto 0;text-align:center;font-family:'Jost';font-size:.76rem;color:var(--muted);padding:12px 20px;border:1px solid var(--line);border-radius:3px;background:var(--cream)}
+.info-note b{color:var(--gold-dark);font-weight:500}
+
 /* ===== NAV (identique homepage) ===== */
 header{position:sticky;top:0;z-index:100;background:rgba(13,31,22,.97);backdrop-filter:blur(8px);border-bottom:1px solid rgba(200,168,75,.22)}
 nav{display:flex;align-items:center;justify-content:space-between;max-width:1240px;margin:0 auto;padding:14px 28px}
@@ -140,7 +156,7 @@ nav{display:flex;align-items:center;justify-content:space-between;max-width:1240
 .cat-hero{background:linear-gradient(180deg,var(--green) 0%,var(--green-soft) 62%,var(--green-soft) 100%);text-align:center;padding:56px 28px 44px;position:relative;overflow:hidden}
 .cat-hero::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(135deg,rgba(200,168,75,.05) 0 2px,transparent 2px 26px);pointer-events:none}
 .cat-hero::after{content:"";position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(200,168,75,.35),transparent)}
-.cat-badge{position:relative;display:inline-block;border:1px solid rgba(200,168,75,.5);color:var(--gold);font-family:'Cinzel';font-size:.62rem;letter-spacing:.28em;text-transform:uppercase;padding:7px 22px;border-radius:20px;margin-bottom:22px}
+.cat-badge{position:relative;display:inline-block;white-space:nowrap;border:1px solid rgba(200,168,75,.5);color:var(--gold);font-family:'Cinzel';font-size:.62rem;letter-spacing:.28em;text-transform:uppercase;padding:7px 22px;border-radius:20px;margin-bottom:22px}
 .cat-hero h1{position:relative;font-family:'Cinzel';font-size:clamp(2rem,5vw,3.2rem);font-weight:600;color:var(--cream);letter-spacing:.06em;text-transform:uppercase;margin-bottom:14px}
 .cat-hero-sub{position:relative;font-family:'Cormorant Garamond';font-style:italic;font-size:clamp(1.05rem,2.4vw,1.35rem);color:rgba(250,247,240,.68);max-width:520px;margin:0 auto}
 
@@ -272,10 +288,18 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
 <!-- ===== HERO CATÉGORIE ===== -->
 <section class="cat-hero">
   <div class="cat-badge">Huile naturelle</div>
+  <div class="hero-ring" aria-hidden="true"><span class="ring-mark">نور</span></div>
   <h1>Nos Huiles Naturelles</h1>
   <p class="cat-hero-sub">L'essence pure des plantes, en quelques gouttes précieuses.</p>
-  <div class="divider" aria-hidden="true"><span class="line"></span><span class="dot"></span><span class="line r"></span></div>
-</section>
+  <!-- ===== BANDEAU DE CONFIANCE (copy identique homepage) ===== -->
+<div class="value-strip">
+  <div class="vs-row">
+    <div class="vs-item">Livraison en main propre</div><div class="vs-dot"></div>
+    <div class="vs-item">Paiement sécurisé</div><div class="vs-dot"></div>
+    <div class="vs-item">Réponse WhatsApp en moins d'1h</div><div class="vs-dot"></div>
+    <div class="vs-item">Produits sélectionnés avec soin</div>
+  </div>
+</div>
 
 <!-- ===== INTRO (copy réelle, inchangée) ===== -->
 <section class="intro-section">
