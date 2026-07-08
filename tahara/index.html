@@ -82,8 +82,8 @@
   --shadow:0 18px 50px -22px rgba(13,31,22,.45);
 }
 *{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth;overflow-x:hidden}
-body{font-family:'Lora',Georgia,serif;background:var(--offwhite);color:var(--ink);line-height:1.7;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+html{scroll-behavior:smooth}
+body{font-family:'Lora',Georgia,serif;background:var(--offwhite);color:var(--ink);line-height:1.7;-webkit-font-smoothing:antialiased}
 h1,h2,h3,.cinzel{font-family:'Cinzel',serif;font-weight:600;letter-spacing:.04em}
 .cormorant{font-family:'Cormorant Garamond',serif}
 img{max-width:100%;display:block}
@@ -122,6 +122,7 @@ nav{display:flex;align-items:center;justify-content:space-between;max-width:1240
 .brand-text{display:flex;flex-direction:column}
 .brand .name{font-family:'Cinzel';font-size:1.35rem;color:var(--cream);letter-spacing:.18em}
 .brand .ar{font-family:'Cormorant Garamond';font-size:1rem;color:var(--gold);letter-spacing:.05em;margin-top:3px}
+.nav-portal{display:contents}
 .nav-links{display:flex;gap:34px;align-items:center}
 .nav-links > a{font-family:'Cinzel';font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--cream);opacity:.82;transition:opacity .25s,color .25s}
 .nav-links > a:hover, .nav-links > a.active{opacity:1;color:var(--gold)}
@@ -214,7 +215,12 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
   .grid{grid-template-columns:repeat(3,1fr)}
 }
 @media(max-width:768px){
-  .nav-links{position:fixed;top:81px;right:0;height:calc(100vh - 81px);width:74%;max-width:320px;background:var(--green);flex-direction:column;align-items:flex-start;padding:24px 28px;gap:4px;transform:translateX(100%);transition:transform .35s ease;overflow-y:auto}
+  .nav-portal{
+    display:block;
+    position:fixed;inset:0;overflow:clip;pointer-events:none;
+    transform:translateZ(0);z-index:96;
+  }
+  .nav-links{position:fixed;top:81px;right:0;height:calc(100vh - 81px);width:74%;max-width:320px;background:var(--green);flex-direction:column;align-items:flex-start;padding:24px 28px;gap:4px;transform:translateX(100%);transition:transform .35s ease;overflow-y:auto;pointer-events:auto}
   .nav-links.open{transform:translateX(0)}
   .nav-links > a{padding:16px 0;width:100%;border-bottom:1px solid rgba(200,168,75,.12)}
   .nav-dropdown{flex-direction:column;width:100%;align-items:flex-start;padding-bottom:0}
@@ -245,6 +251,7 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
         <span class="ar">دار النور</span>
       </div>
     </a>
+    <div class="nav-portal">
     <div class="nav-links" id="navLinks">
       <a href="https://dar-nur.fr/#boutique">Boutique</a>
       <div class="nav-dropdown">
@@ -267,6 +274,7 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
       <a href="https://dar-nur.fr/#histoire">Notre histoire</a>
       <a href="https://dar-nur.fr/#faq">FAQ</a>
       <a href="https://dar-nur.fr/#avis-clients">Avis</a>
+    </div>
     </div>
     <button class="burger" id="burger" aria-label="Menu"><span></span><span></span><span></span></button>
   </nav>
