@@ -96,14 +96,13 @@
   --shadow:0 18px 50px -22px rgba(13,31,22,.45);
 }
 *{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth;overflow-x:hidden}
+html{scroll-behavior:smooth}
 body{
   font-family:'Lora',Georgia,serif;
   background:var(--offwhite);
   color:var(--ink);
   line-height:1.7;
   -webkit-font-smoothing:antialiased;
-  overflow-x:hidden;
 }
 h1,h2,h3,.cinzel{font-family:'Cinzel',serif;font-weight:600;letter-spacing:.04em}
 .cormorant{font-family:'Cormorant Garamond',serif}
@@ -133,6 +132,7 @@ nav{
 .brand-text{display:flex;flex-direction:column}
 .brand .name{font-family:'Cinzel';font-size:1.35rem;color:var(--cream);letter-spacing:.18em}
 .brand .ar{font-family:'Cormorant Garamond';font-size:1rem;color:var(--gold);letter-spacing:.05em;margin-top:3px}
+.nav-portal{display:contents}
 .nav-links{display:flex;gap:34px;align-items:center}
 .nav-links a{
   font-family:'Cinzel';font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;
@@ -742,7 +742,7 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
 .card-logo-placeholder img{width:46%;height:46%;object-fit:contain;opacity:.38}
 .pp-visual.has-photo{padding:18px;background:#f6f0e3}
 .pp-product-img{width:100%;height:100%;object-fit:contain;object-position:center;border-radius:4px}
-.pp-gallery{display:grid;gap:16px}
+.pp-gallery{display:grid;gap:16px;align-self:stretch;align-items:start}
 .pp-format-select{background:var(--cream);border:1px solid var(--line);border-radius:6px;padding:18px}
 .pp-format-select .opt-row{margin-bottom:14px}
 .format-price{font-family:'Cormorant Garamond';font-size:1.8rem;color:var(--green);font-weight:600}
@@ -760,10 +760,16 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
   .pp-visual{position:static;aspect-ratio:1;padding:38px;width:100%;margin:0 auto}
 }
 @media(max-width:768px){
+  .nav-portal{
+    display:block;
+    position:fixed;inset:0;overflow:clip;pointer-events:none;
+    transform:translateZ(0);z-index:96;
+  }
   .nav-links{
     position:fixed;top:69px;right:0;width:74%;max-width:320px;height:calc(100vh - 69px);
     background:var(--green);flex-direction:column;align-items:flex-start;gap:0;
-    padding:30px 32px;transform:translateX(100%);transition:transform .35s;border-left:1px solid rgba(200,168,75,.2);z-index:96;
+    padding:30px 32px;transform:translateX(100%);transition:transform .35s;border-left:1px solid rgba(200,168,75,.2);
+    pointer-events:auto;
   }
   .nav-links.open{transform:translateX(0)}
   .nav-links a{padding:16px 0;width:100%;border-bottom:1px solid rgba(200,168,75,.12);font-size:.82rem}
@@ -817,6 +823,7 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
         <span class="ar">دار النور</span>
       </div>
     </div>
+    <div class="nav-portal">
     <div class="nav-links" id="navLinks">
       <a onclick="goCat('all')">Boutique</a>
 
@@ -843,6 +850,7 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
       <a onclick="showHome();setTimeout(()=>document.getElementById('qui-sommes-nous').scrollIntoView({behavior:'smooth'}),60)">Qui sommes-nous ?</a>
       <a onclick="showHome();setTimeout(()=>document.getElementById('faq').scrollIntoView({behavior:'smooth'}),60)">FAQ</a>
       <a onclick="showHome();setTimeout(()=>document.getElementById('avis-clients').scrollIntoView({behavior:'smooth'}),60)">Avis</a>
+    </div>
     </div>
     <button class="burger" id="burger" onclick="toggleMenu()" aria-label="Menu"><span></span><span></span><span></span></button>
   </nav>
