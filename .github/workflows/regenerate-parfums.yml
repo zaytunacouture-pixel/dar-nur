@@ -1,0 +1,61 @@
+name: Régénère la page Parfums (Supabase → HTML statique)
+
+# Déclenchement à la demande UNIQUEMENT — aucune exécution planifiée (cron) :
+#   - repository_dispatch "regenerate-parfums" : envoyé automatiquement par le
+#     trigger Postgres Supabase, filtré sur category_id = 'parfums' (voir
+#     supabase/sql/parfums_webhook_trigger.sql).
+#   - workflow_dispatch : bouton manuel "Run workflow" dans l'onglet Actions,
+#     de secours si besoin d'une republication immédiate.
+#
+# Protection anti-boucle : ce workflow n'écoute jamais "push" — son propre
+# commit ne peut donc jamais se re-déclencher lui-même. Le commit est en plus
+# marqué [skip ci] par défense en profondeur.
+on:
+  repository_dispatch:
+    types: [regenerate-parfums]
+  workflow_dispatch: {}
+
+concurrency:
+  group: regenerate-parfums
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout du dépôt
+        uses: actions/checkout@v4
+
+      - name: Configurer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Générer parfums/index.html depuis Supabase
+        env:
+          PARFUMS_SUPABASE_URL: ${{ secrets.PARFUMS_SUPABASE_URL }}
+          PARFUMS_SUPABASE_KEY: ${{ secrets.PARFUMS_SUPABASE_KEY }}
+        run: node scripts/generate-parfums.mjs
+
+      - name: Vérifier si le contenu généré a réellement changé
+        id: diff
+        run: |
+          if git diff --quiet -- parfums/index.html; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Contenu identique au précédent — aucun commit créé."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::Contenu modifié — commit à venir."
+          fi
+
+      - name: Committer et publier uniquement si changement réel
+        if: steps.diff.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add parfums/index.html
+          git commit -m "chore: régénère parfums/index.html depuis Supabase [skip ci]"
+          git push
