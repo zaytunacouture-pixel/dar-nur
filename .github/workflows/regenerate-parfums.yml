@@ -34,7 +34,7 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Générer parfums/index.html depuis Supabase
+      - name: Générer la collection Parfums (hub + pages marque) depuis Supabase
         env:
           PARFUMS_SUPABASE_URL: ${{ secrets.PARFUMS_SUPABASE_URL }}
           PARFUMS_SUPABASE_KEY: ${{ secrets.PARFUMS_SUPABASE_KEY }}
@@ -43,7 +43,8 @@ jobs:
       - name: Vérifier si le contenu généré a réellement changé
         id: diff
         run: |
-          if git diff --quiet -- parfums/index.html; then
+          git add -A -- parfums/ sitemap.xml
+          if git diff --cached --quiet -- parfums/ sitemap.xml; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
             echo "::notice::Contenu identique au précédent — aucun commit créé."
           else
@@ -56,6 +57,5 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add parfums/index.html
-          git commit -m "chore: régénère parfums/index.html depuis Supabase [skip ci]"
+          git commit -m "chore: régénère la collection Parfums (hub + pages marque) depuis Supabase [skip ci]"
           git push

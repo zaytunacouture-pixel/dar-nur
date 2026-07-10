@@ -539,6 +539,14 @@ tr:hover td { background: #fafaf8; }
         <input type="text" id="p-volume"/>
       </div>
       <div class="form-field">
+        <label>Marque <small style="color:var(--muted);font-weight:400">(parfums uniquement — ex: LeCode Paris)</small></label>
+        <input type="text" id="p-brand" placeholder="LeCode Paris"/>
+      </div>
+      <div class="form-field">
+        <label>Slug marque <small style="color:var(--muted);font-weight:400">(URL, ex: lecode-paris — stable après création)</small></label>
+        <input type="text" id="p-brand-slug" placeholder="lecode-paris"/>
+      </div>
+      <div class="form-field">
         <label>Ordre d'affichage</label>
         <input type="number" id="p-sort" value="0" min="0"/>
       </div>
@@ -1099,6 +1107,8 @@ function openProductModal(id) {
   document.getElementById('p-precautions').value  = (p.precautions||[]).join('\n');
   document.getElementById('p-weight').value       = p.weight || '';
   document.getElementById('p-volume').value       = p.volume || '';
+  document.getElementById('p-brand').value        = p.brand || '';
+  document.getElementById('p-brand-slug').value   = p.brand_slug || '';
   document.getElementById('p-sort').value         = p.sort_order ?? 0;
   document.getElementById('p-active').checked       = !!p.active;
   document.getElementById('p-coming-soon').checked  = !!p.coming_soon;
@@ -1118,7 +1128,8 @@ function openProductModal(id) {
 
 function clearProductModal() {
   ['p-id','p-name','p-slug','p-tagline','p-description','p-benefits','p-benefits-label',
-   'p-composition','p-provenance','p-usage','p-precautions','p-weight','p-volume']
+   'p-composition','p-provenance','p-usage','p-precautions','p-weight','p-volume',
+   'p-brand','p-brand-slug']
     .forEach(id => document.getElementById(id).value = '');
   document.getElementById('p-price').value   = '';
   document.getElementById('p-sort').value    = '0';
@@ -1175,6 +1186,8 @@ async function saveProductModal() {
     precautions:    lines(document.getElementById('p-precautions').value),
     weight:         document.getElementById('p-weight').value.trim() || null,
     volume:         document.getElementById('p-volume').value.trim() || null,
+    brand:          document.getElementById('p-brand').value.trim() || null,
+    brand_slug:     document.getElementById('p-brand-slug').value.trim() || null,
     sort_order:     parseInt(document.getElementById('p-sort').value)||0,
     active:         document.getElementById('p-active').checked,
     featured:       document.getElementById('p-featured').checked,
