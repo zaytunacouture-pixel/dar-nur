@@ -764,10 +764,10 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
     transform:translateZ(0);z-index:96;
   }
   .nav-links{
-    position:fixed;top:69px;right:0;width:74%;max-width:320px;height:calc(100vh - 69px);
+    position:fixed;top:85px;right:0;width:74%;max-width:320px;height:calc(100vh - 85px);
     background:var(--green);flex-direction:column;align-items:flex-start;gap:0;
     padding:30px 32px;transform:translateX(100%);transition:transform .35s;border-left:1px solid rgba(200,168,75,.2);
-    pointer-events:auto;
+    pointer-events:auto;overflow-y:auto;
   }
   .nav-links.open{transform:translateX(0)}
   .nav-links a{padding:16px 0;width:100%;border-bottom:1px solid rgba(200,168,75,.12);font-size:.82rem}
