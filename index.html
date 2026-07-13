@@ -1208,16 +1208,34 @@ function infoBannerHTML(productOrList){
       </div>`;
 }
 
-/* Bannière d'origine "miels gourmands" — s'affiche automatiquement sur la fiche
-   de tout produit de la catégorie miels-gourmands (tous fabriqués en France à
-   partir du miel de printemps). Un seul texte à modifier ici pour le mettre à
-   jour partout à la fois, y compris pour tout futur miel gourmand ajouté. */
-const MIEL_GOURMAND_ORIGIN_TEXT = "Ce miel gourmand est élaboré à partir de notre miel de printemps français, sélectionné comme base de toutes nos recettes gourmandes.";
-function mielGourmandOriginBannerHTML(p){
-  if(!p || p.cat !== 'miels-gourmands') return "";
+/* Bannière "élaboré en France" — miel de printemps + eau de Zamzam.
+   Le miel de printemps est la base de TOUTES nos préparations au miel fabriquées
+   en France (catégories miels + miels-gourmands), sauf 5 références importées de
+   Russie/Kirghizistan. Slugs vérifiés le 2026-07-13 via l'API REST Supabase
+   (products?category_id=eq.miels&active=eq.true, champ provenance="Russie") :
+   miel-shilajit, miel-lavande, miel-rose-siberie, miel-fraise-russie,
+   miel-blanc-kirghizistan. Le produit miel-printemps lui-même (catégorie
+   miels-terroir) est exclu : c'est la base, pas une préparation qui la contient. */
+const MIEL_PRINTEMPS_CATEGORIES = ['miels', 'miels-gourmands'];
+const MIEL_PRINTEMPS_EXCEPTIONS = [
+  'miel-shilajit',
+  'miel-lavande',
+  'miel-rose-siberie',
+  'miel-fraise-russie',
+  'miel-blanc-kirghizistan'
+];
+function isMielPrintempsPreparation(p){
+  if(!p || !p.id || !p.cat) return false;
+  if(p.id === 'miel-printemps') return false;
+  if(!MIEL_PRINTEMPS_CATEGORIES.includes(p.cat)) return false;
+  return !MIEL_PRINTEMPS_EXCEPTIONS.includes(p.id);
+}
+const MIEL_PRINTEMPS_BANNER_TEXT = "Cette préparation est élaborée à partir de notre miel de printemps et contient de l'eau de Zamzam.";
+function mielPrintempsOriginBannerHTML(p){
+  if(!isMielPrintempsPreparation(p)) return "";
   return `<div class="info-banner" role="note">
         <span class="info-banner-icon" aria-hidden="true">🍯</span>
-        <span class="info-banner-text"><strong>Notre engagement :</strong> ${MIEL_GOURMAND_ORIGIN_TEXT}</span>
+        <span class="info-banner-text"><strong>Élaboré en France :</strong> ${MIEL_PRINTEMPS_BANNER_TEXT}</span>
       </div>`;
 }
 
@@ -2906,7 +2924,7 @@ function showProduct(id){
       </div>
       <div class="pp-content">
         ${infoBannerHTML(p)}
-        ${mielGourmandOriginBannerHTML(p)}
+        ${mielPrintempsOriginBannerHTML(p)}
         ${p.description.map(d=>`<p>${d}</p>`).join("")}
         ${(()=>{const ip=(p.accordions||[]).find(a=>a.title==='Idéal pour');return ip?`<div class="pp-ideal"><span class="ideal-lbl">Idéal pour</span>${ip.html}</div>`:''})()}
         ${(p.benefits&&p.benefits.length)?`<h2>${p.benefitsLabel || (isWear ? 'Points forts' : 'Bienfaits')}</h2>
