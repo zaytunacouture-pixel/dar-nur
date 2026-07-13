@@ -1208,6 +1208,19 @@ function infoBannerHTML(productOrList){
       </div>`;
 }
 
+/* Bannière d'origine "miels gourmands" — s'affiche automatiquement sur la fiche
+   de tout produit de la catégorie miels-gourmands (tous fabriqués en France à
+   partir du miel de printemps). Un seul texte à modifier ici pour le mettre à
+   jour partout à la fois, y compris pour tout futur miel gourmand ajouté. */
+const MIEL_GOURMAND_ORIGIN_TEXT = "Ce miel gourmand est élaboré à partir de notre miel de printemps français, sélectionné comme base de toutes nos recettes gourmandes.";
+function mielGourmandOriginBannerHTML(p){
+  if(!p || p.cat !== 'miels-gourmands') return "";
+  return `<div class="info-banner" role="note">
+        <span class="info-banner-icon" aria-hidden="true">🍯</span>
+        <span class="info-banner-text"><strong>Notre engagement :</strong> ${MIEL_GOURMAND_ORIGIN_TEXT}</span>
+      </div>`;
+}
+
 const STORY = "<p>Chez Dar Nūr, nous croyons qu’un produit de qualité commence par une sélection exigeante. Chaque référence est choisie avec soin, dans le respect des matières premières, de leur origine et d’un savoir herboriste ancestral qui inspire notre démarche. Notre engagement est de proposer des produits authentiques, sélectionnés pour leur qualité et présentés avec une transparence fidèle aux valeurs qui animent notre Maison.</p>";
 
 const WA = "https://wa.me/33769253375?text=";
@@ -2893,6 +2906,7 @@ function showProduct(id){
       </div>
       <div class="pp-content">
         ${infoBannerHTML(p)}
+        ${mielGourmandOriginBannerHTML(p)}
         ${p.description.map(d=>`<p>${d}</p>`).join("")}
         ${(()=>{const ip=(p.accordions||[]).find(a=>a.title==='Idéal pour');return ip?`<div class="pp-ideal"><span class="ideal-lbl">Idéal pour</span>${ip.html}</div>`:''})()}
         ${(p.benefits&&p.benefits.length)?`<h2>${p.benefitsLabel || (isWear ? 'Points forts' : 'Bienfaits')}</h2>
