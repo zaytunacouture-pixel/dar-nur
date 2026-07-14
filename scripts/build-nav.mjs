@@ -378,6 +378,118 @@ export async function injectIntoPage(pagePath, { activeHref = null, write = fals
 }
 
 // ============================================================
+// 10. Artefact commun pour l'intégration avec generate-parfums.mjs
+//    (Phase 3.6.1). Un seul fichier généré, JAMAIS édité à la main —
+//    partials/nav-common.generated.html — contenant deux fragments
+//    nommés délimités par marqueurs, que generate-parfums.mjs (Phase
+//    3.6.3, pas encore écrite) lira et insérera dans ses propres
+//    templates. build-nav.mjs ne modifie ni ne lit AUCUN fichier
+//    appartenant à generate-parfums.mjs (templates, pages parfums,
+//    sitemap.xml) — cette fonction ne fait qu'ÉCRIRE son propre
+//    artefact.
+//
+//    Le point de coupure entre les deux fragments est purement
+//    structurel : la position de l'entrée dont l'id vaut "parfums"
+//    dans nav.config.json. Aucune notion de marque n'existe ici.
+// ============================================================
+
+const COMMON_NAV_ARTIFACT_PATH = new URL('partials/nav-common.generated.html', ROOT);
+const PARFUMS_SPLIT_ID = 'parfums';
+
+function splitEntriesAtParfums(entries) {
+  const idx = entries.findIndex(e => e.id === PARFUMS_SPLIT_ID);
+  if (idx === -1) {
+    throw new Error(
+      `Aucune entrée avec id === "${PARFUMS_SPLIT_ID}" trouvée dans nav.config — ` +
+      `impossible de déterminer le point de coupure du fragment commun.`
+    );
+  }
+  return {
+    before: entries.slice(0, idx),
+    after: entries.slice(idx + 1),
+  };
+}
+
+function wrapNamedFragment(name, html) {
+  return `<!-- ${name} -->\n${html}\n<!-- /${name} -->`;
+}
+
+// Rendu des deux fragments en mémoire, sans jamais écrire. activeHref reste
+// volontairement null : ce fragment est partagé par plusieurs pages de
+// destination (hub + une par marque), aucune ne peut être "la" page courante
+// au niveau du fragment lui-même (question de conception déjà documentée,
+// non résolue ici par choix — hors périmètre de cette sous-phase).
+export async function buildCommonNavFragments({
+  configPath = NAV_CONFIG_PATH,
+  templatePath = NAV_TEMPLATE_PATH,
+} = {}) {
+  const config = await loadNavConfig(configPath);
+
+  const { valid, errors } = validateNavConfig(config);
+  if (!valid) {
+    throw new Error(`nav.config invalide :\n  - ${errors.join('\n  - ')}`);
+  }
+
+  const templateRaw = await loadTemplateRaw(templatePath);
+  const blocks = extractTemplateParts(templateRaw);
+
+  const { before, after } = splitEntriesAtParfums(config.entries);
+
+  const beforeHtml = before.map(entry => renderEntry(entry, blocks, null)).join('\n');
+  const afterHtml = after.map(entry => renderEntry(entry, blocks, null)).join('\n');
+
+  assertNoLeftoverPlaceholders(beforeHtml, 'COMMON_NAV_BEFORE_PARFUMS');
+  assertNoLeftoverPlaceholders(afterHtml, 'COMMON_NAV_AFTER_PARFUMS');
+
+  return { beforeHtml, afterHtml };
+}
+
+// Assemble le contenu complet du fichier artefact (les deux fragments
+// nommés). Toujours en mémoire, aucune écriture ici.
+export async function renderCommonNavArtifact(opts = {}) {
+  const { beforeHtml, afterHtml } = await buildCommonNavFragments(opts);
+  return [
+    '<!--',
+    '  partials/nav-common.generated.html — ARTEFACT GÉNÉRÉ, NE JAMAIS ÉDITER À LA MAIN.',
+    '  Produit par scripts/build-nav.mjs (fonction writeCommonNavArtifact) depuis',
+    '  data/nav.config.json + partials/nav.html. Toute correction se fait à la',
+    '  source, jamais ici — ce fichier est réécrit intégralement à chaque exécution.',
+    '',
+    '  Consommé par scripts/generate-parfums.mjs (Phase 3.6.3) qui extrait les deux',
+    '  fragments nommés ci-dessous et les insère dans ses propres templates via les',
+    '  jetons {{COMMON_NAV_BEFORE_PARFUMS}} / {{COMMON_NAV_AFTER_PARFUMS}}. Son propre',
+    '  dropdown "Parfums" (par marque) se place entre les deux, en dehors de cet',
+    '  artefact — build-nav.mjs ne connaît aucune marque.',
+    '-->',
+    '',
+    wrapNamedFragment('COMMON_NAV_BEFORE_PARFUMS', beforeHtml),
+    '',
+    wrapNamedFragment('COMMON_NAV_AFTER_PARFUMS', afterHtml),
+    '',
+  ].join('\n');
+}
+
+// Seule fonction capable d'écrire partials/nav-common.generated.html, et
+// uniquement si write === true. Toujours un remplacement intégral du
+// fichier (il est 100% généré, aucune portion n'est jamais préservée d'un
+// run à l'autre) — contrairement à injectIntoPage qui ne touche qu'un
+// fragment d'une page existante.
+export async function writeCommonNavArtifact({ write = false, ...opts } = {}) {
+  const content = await renderCommonNavArtifact(opts);
+  let existing = null;
+  try {
+    existing = await readFile(COMMON_NAV_ARTIFACT_PATH, 'utf8');
+  } catch {
+    existing = null;
+  }
+  const changed = existing !== content;
+  if (write) {
+    await writeFile(COMMON_NAV_ARTIFACT_PATH, content, 'utf8');
+  }
+  return { content, changed };
+}
+
+// ============================================================
 // Rapport de vérification (dry-run) — lecture seule, aucune écriture.
 // Exécuté uniquement à l'appel manuel de ce script (node scripts/build-nav.mjs),
 // jamais déclenché automatiquement par un workflow à ce stade de la Phase 3.
