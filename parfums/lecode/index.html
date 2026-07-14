@@ -296,24 +296,46 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
     </a>
     <div class="nav-portal">
     <div class="nav-links" id="navLinks">
-      <a href="https://dar-nur.fr/#boutique">Boutique</a>
-      <div class="nav-dropdown">
-        <div class="nav-dropdown-title">Bien-être</div>
-        <div class="nav-dropdown-menu">
-          <a href="/miels/">Miels</a>
-          <a href="/gelules/">Gélules</a>
-          <a href="/poudres/">Poudres &amp; Graines</a>
-          <a href="/huiles/">Huiles</a>
-          <a href="/brumes/">Brumes</a>
-        </div>
-      </div>
-      <div class="nav-dropdown">
-        <div class="nav-dropdown-title">Mode</div>
-        <div class="nav-dropdown-menu">
-          <a href="/qamis/">Qamis</a>
-          <a href="/abayas/">Abayas</a>
-        </div>
-      </div>
+<li class="nav-item" role="none">
+  <a href="https://dar-nur.fr/#boutique" id="nav-boutique" >Boutique</a>
+</li>
+<li class="nav-item nav-dropdown" role="none">
+  <button
+    type="button"
+    class="nav-dropdown-title"
+    id="nav-bien-etre-trigger"
+    aria-haspopup="true"
+    aria-expanded="false"
+    aria-controls="nav-bien-etre-menu"
+    
+  >Bien-être</button>
+  <ul class="nav-dropdown-menu" id="nav-bien-etre-menu" aria-label="Bien-être">
+    <li class="nav-item" role="none">
+  <a href="/miels/" id="nav-miels" >Miels</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="/miels-gourmands/" id="nav-miels-gourmands" >Miels Gourmands</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="/miels-terroir/" id="nav-miels-terroir" >Miels du Terroir</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="/gelules/" id="nav-gelules" >Gélules</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="/poudres/" id="nav-poudres" >Poudres & Graines</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="/huiles/" id="nav-huiles" >Huiles</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="/brumes/" id="nav-brumes" >Brumes</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="/bakhour/" id="nav-bakhour" >Bakhour & Encens</a>
+</li>
+  </ul>
+</li>
       <div class="nav-dropdown">
         <div class="nav-dropdown-title">Parfums</div>
         <div class="nav-dropdown-menu">
@@ -322,9 +344,49 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
           <a href="/parfums/lecode/" class="active">LeCode Paris</a>
         </div>
       </div>
-      <a href="https://dar-nur.fr/#histoire">Notre histoire</a>
-      <a href="https://dar-nur.fr/#faq">FAQ</a>
-      <a href="https://dar-nur.fr/#avis-clients">Avis</a>
+<li class="nav-item nav-dropdown" role="none">
+  <button
+    type="button"
+    class="nav-dropdown-title"
+    id="nav-mode-accessoires-trigger"
+    aria-haspopup="true"
+    aria-expanded="false"
+    aria-controls="nav-mode-accessoires-menu"
+    
+  >Mode & Accessoires</button>
+  <ul class="nav-dropdown-menu" id="nav-mode-accessoires-menu" aria-label="Mode & Accessoires">
+    <li class="nav-item" role="none">
+  <a href="/qamis/" id="nav-qamis" >Qamis</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="/abayas/" id="nav-abayas" >Abayas & Ensembles</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="/bijoux/" id="nav-bijoux" >Bagues & Bijoux</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="/chaussures/" id="nav-chaussures" >Sandales</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="/chechias/" id="nav-chechias" >Chéchias</a>
+</li>
+  </ul>
+</li>
+<li class="nav-item" role="none">
+  <a href="/tahara/" id="nav-tahara" >Tahara & Hygiène</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="/accessoires/" id="nav-accessoires" >Accessoires</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="https://dar-nur.fr/#histoire" id="nav-notre-histoire" >Notre histoire</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="https://dar-nur.fr/#faq" id="nav-faq" >FAQ</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="https://dar-nur.fr/#avis-clients" id="nav-avis" >Avis</a>
+</li>
     </div>
     </div>
     <button class="burger" id="burger" aria-label="Menu"><span></span><span></span><span></span></button>

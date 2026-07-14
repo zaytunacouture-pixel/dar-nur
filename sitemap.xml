@@ -66,19 +66,19 @@
 <!-- AUTO:PARFUMS:START — géré automatiquement par scripts/generate-parfums.mjs, ne pas éditer à la main -->
   <url>
     <loc>https://dar-nur.fr/parfums/</loc>
-    <lastmod>2026-07-13</lastmod>
+    <lastmod>2026-07-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://dar-nur.fr/parfums/khair/</loc>
-    <lastmod>2026-07-13</lastmod>
+    <lastmod>2026-07-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://dar-nur.fr/parfums/lecode/</loc>
-    <lastmod>2026-07-13</lastmod>
+    <lastmod>2026-07-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
