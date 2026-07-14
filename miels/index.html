@@ -132,16 +132,16 @@ nav{display:flex;align-items:center;justify-content:space-between;max-width:1240
 .brand .name{font-family:'Cinzel';font-size:1.35rem;color:var(--cream);letter-spacing:.18em}
 .brand .ar{font-family:'Cormorant Garamond';font-size:1rem;color:var(--gold);letter-spacing:.05em;margin-top:3px}
 .nav-portal{display:contents}
-.nav-links{display:flex;gap:34px;align-items:center}
-.nav-links > a{font-family:'Cinzel';font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--cream);opacity:.82;transition:opacity .25s,color .25s}
-.nav-links > a:hover, .nav-links > a.active{opacity:1;color:var(--gold)}
+.nav-links{display:flex;gap:34px;align-items:center;list-style:none}
+.nav-links > li > a{font-family:'Cinzel';font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--cream);opacity:.82;transition:opacity .25s,color .25s}
+.nav-links > li > a:hover, .nav-links > li > a.active, .nav-links > li > a[aria-current="page"]{opacity:1;color:var(--gold)}
 .nav-dropdown{position:relative;display:flex;align-items:center;padding-bottom:12px}
 .nav-dropdown-title{font-family:'Cinzel';font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--cream);opacity:.82;cursor:pointer;padding:4px 0;transition:opacity .25s,color .25s}
 .nav-dropdown-title:hover{opacity:1;color:var(--gold)}
-.nav-dropdown-menu{display:none;position:absolute;top:100%;left:0;background:rgba(13,31,22,.98);backdrop-filter:blur(8px);min-width:180px;box-shadow:0 12px 32px -12px rgba(0,0,0,.4);padding:10px 0;border:1px solid rgba(200,168,75,.18);border-radius:4px}
+.nav-dropdown-menu{display:none;position:absolute;top:100%;left:0;background:rgba(13,31,22,.98);backdrop-filter:blur(8px);min-width:180px;box-shadow:0 12px 32px -12px rgba(0,0,0,.4);padding:10px 0;border:1px solid rgba(200,168,75,.18);border-radius:4px;list-style:none}
 .nav-dropdown:hover > .nav-dropdown-menu{display:flex;flex-direction:column}
 .nav-dropdown-menu a{padding:9px 20px;font-family:'Cinzel';font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--cream);opacity:.8;border-left:3px solid transparent;transition:all .2s}
-.nav-dropdown-menu a:hover,.nav-dropdown-menu a.active{opacity:1;color:var(--gold);border-left-color:var(--gold);background:rgba(200,168,75,.06)}
+.nav-dropdown-menu a:hover,.nav-dropdown-menu a.active,.nav-dropdown-menu a[aria-current="page"]{opacity:1;color:var(--gold);border-left-color:var(--gold);background:rgba(200,168,75,.06)}
 .burger{display:none;flex-direction:column;gap:5px;padding:4px;border:none;background:none}
 .burger span{width:22px;height:2px;background:var(--cream);border-radius:2px;display:block;transition:.3s}
 
@@ -232,7 +232,7 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
   }
   .nav-links{position:fixed;top:81px;right:0;height:calc(100vh - 81px);width:74%;max-width:320px;background:var(--green);flex-direction:column;align-items:flex-start;padding:24px 28px;gap:4px;transform:translateX(100%);transition:transform .35s ease;overflow-y:auto;pointer-events:auto}
   .nav-links.open{transform:translateX(0)}
-  .nav-links > a{padding:16px 0;width:100%;border-bottom:1px solid rgba(200,168,75,.12)}
+  .nav-links > li > a{padding:16px 0;width:100%;border-bottom:1px solid rgba(200,168,75,.12)}
   .nav-dropdown{flex-direction:column;width:100%;align-items:flex-start;padding-bottom:0}
   .nav-dropdown-menu{position:static;display:flex;flex-direction:column;width:100%;padding:0;margin:0;background:transparent;border:none}
   .burger{display:flex}
@@ -252,44 +252,119 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
 <body>
 
 <!-- ===== NAV — reprise exacte du composant homepage (liens réels, page autonome) ===== -->
+<!-- AUTO:NAV:START -->
 <header>
-  <nav>
-    <a href="https://dar-nur.fr" class="brand">
-      <img src="../logo-dar-nur.png" alt="Logo Dar Nūr" class="brand-logo"/>
-      <div class="brand-text">
+  <nav aria-label="Navigation principale">
+    <a class="brand" href="/">
+      <img src="/logo-dar-nur.png" alt="Logo Dar Nūr" class="brand-logo"/>
+      <span class="brand-text">
         <span class="name">DAR NŪR</span>
         <span class="ar">دار النور</span>
-      </div>
+      </span>
     </a>
+
     <div class="nav-portal">
-    <div class="nav-links" id="navLinks">
-      <a href="https://dar-nur.fr/#boutique">Boutique</a>
-      <div class="nav-dropdown">
-        <div class="nav-dropdown-title">Bien-être</div>
-        <div class="nav-dropdown-menu">
-          <a href="/miels/" class="active">Miels</a>
-          <a href="/gelules/">Gélules</a>
-          <a href="/poudres/">Poudres &amp; Graines</a>
-          <a href="/huiles/">Huiles</a>
-          <a href="/brumes/">Brumes</a>
-          <a href="/parfums/">Parfums</a>
-        </div>
-      </div>
-      <div class="nav-dropdown">
-        <div class="nav-dropdown-title">Mode</div>
-        <div class="nav-dropdown-menu">
-          <a href="/qamis/">Qamis</a>
-          <a href="/abayas/">Abayas</a>
-        </div>
-      </div>
-      <a href="https://dar-nur.fr/#histoire">Notre histoire</a>
-      <a href="https://dar-nur.fr/#faq">FAQ</a>
-      <a href="https://dar-nur.fr/#avis-clients">Avis</a>
+      <ul class="nav-links" id="navLinks">
+        <li class="nav-item" role="none">
+  <a href="https://dar-nur.fr/#boutique" id="nav-boutique" >Boutique</a>
+</li>
+<li class="nav-item nav-dropdown" role="none">
+  <button
+    type="button"
+    class="nav-dropdown-title"
+    id="nav-bien-etre-trigger"
+    aria-haspopup="true"
+    aria-expanded="false"
+    aria-controls="nav-bien-etre-menu"
+    aria-current="true"
+  >Bien-être</button>
+  <ul class="nav-dropdown-menu" id="nav-bien-etre-menu" aria-label="Bien-être">
+    <li class="nav-item" role="none">
+  <a href="/miels/" id="nav-miels" aria-current="page">Miels</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="/miels-gourmands/" id="nav-miels-gourmands" >Miels Gourmands</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="/miels-terroir/" id="nav-miels-terroir" >Miels du Terroir</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="/gelules/" id="nav-gelules" >Gélules</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="/poudres/" id="nav-poudres" >Poudres & Graines</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="/huiles/" id="nav-huiles" >Huiles</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="/brumes/" id="nav-brumes" >Brumes</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="/bakhour/" id="nav-bakhour" >Bakhour & Encens</a>
+</li>
+  </ul>
+</li>
+<li class="nav-item" role="none">
+  <a href="/parfums/" id="nav-parfums" >Parfums</a>
+</li>
+<li class="nav-item nav-dropdown" role="none">
+  <button
+    type="button"
+    class="nav-dropdown-title"
+    id="nav-mode-accessoires-trigger"
+    aria-haspopup="true"
+    aria-expanded="false"
+    aria-controls="nav-mode-accessoires-menu"
+    
+  >Mode & Accessoires</button>
+  <ul class="nav-dropdown-menu" id="nav-mode-accessoires-menu" aria-label="Mode & Accessoires">
+    <li class="nav-item" role="none">
+  <a href="/qamis/" id="nav-qamis" >Qamis</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="/abayas/" id="nav-abayas" >Abayas & Ensembles</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="/bijoux/" id="nav-bijoux" >Bagues & Bijoux</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="/chaussures/" id="nav-chaussures" >Sandales</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="/chechias/" id="nav-chechias" >Chéchias</a>
+</li>
+  </ul>
+</li>
+<li class="nav-item" role="none">
+  <a href="/tahara/" id="nav-tahara" >Tahara & Hygiène</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="/accessoires/" id="nav-accessoires" >Accessoires</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="https://dar-nur.fr/#histoire" id="nav-notre-histoire" >Notre histoire</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="https://dar-nur.fr/#faq" id="nav-faq" >FAQ</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="https://dar-nur.fr/#avis-clients" id="nav-avis" >Avis</a>
+</li>
+      </ul>
     </div>
-    </div>
-    <button class="burger" id="burger" aria-label="Menu"><span></span><span></span><span></span></button>
+
+    <button
+      type="button"
+      class="burger"
+      id="burger"
+      aria-label="Menu"
+      aria-expanded="false"
+      aria-controls="navLinks"
+    ><span></span><span></span><span></span></button>
   </nav>
 </header>
+<!-- AUTO:NAV:END -->
 
 <!-- ===== BREADCRUMB ===== -->
 <nav class="breadcrumb" aria-label="Fil d'Ariane">
