@@ -3187,6 +3187,26 @@ document.addEventListener("click",function(e){
   }
 });
 
+/* Interception des liens éditoriaux du menu (Notre histoire/FAQ/Avis) —
+   un seul gestionnaire pour les trois, reconnu par l'ancre du hash
+   (new URL(...).hash), pas par une comparaison textuelle du href complet :
+   fonctionne aussi bien avec un href absolu (https://dar-nur.fr/#faq) que
+   relatif (/#faq), sans dépendance au domaine. Tout autre lien suit son
+   comportement normal (return sans preventDefault). Reproduit exactement
+   l'ancien contrat onclick="showHome();setTimeout(()=>...scrollIntoView...,60)". */
+const EDITORIAL_ANCHOR_IDS = { "#histoire":"histoire", "#faq":"faq", "#avis-clients":"avis-clients" };
+document.addEventListener("click", function(e){
+  const a = e.target.closest("a[href]");
+  if(!a) return;
+  let hash;
+  try { hash = new URL(a.href).hash; } catch(err) { return; }
+  const targetId = EDITORIAL_ANCHOR_IDS[hash];
+  if(!targetId) return;
+  e.preventDefault();
+  showHome();
+  setTimeout(()=>document.getElementById(targetId).scrollIntoView({behavior:"smooth"}),60);
+});
+
 /* mobile bar visibility: only on product view */
 const _origShowProduct=showProduct, _origShowHome=showHome;
 
