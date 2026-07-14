@@ -3211,6 +3211,22 @@ document.addEventListener("click", function(e){
   setTimeout(()=>document.getElementById(targetId).scrollIntoView({behavior:"smooth"}),60);
 });
 
+/* Interception du lien "Boutique" — délègue intégralement à goCat('all'),
+   ne réimplémente aucun de ses effets (showHome, affichage de #boutique,
+   setFilter, renderFilters, renderGrid, scroll, fermeture du menu). Si
+   goCat() évolue, ce lien suit automatiquement, sans duplication.
+   PROPRIÉTÉ DE index.html — même raison que l'intercepteur éditorial
+   ci-dessus : dépend de la structure SPA locale à cette page. */
+document.addEventListener("click", function(e){
+  const a = e.target.closest("a[href]");
+  if(!a) return;
+  let hash;
+  try { hash = new URL(a.href).hash; } catch(err) { return; }
+  if(hash !== "#boutique") return;
+  e.preventDefault();
+  goCat('all');
+});
+
 /* mobile bar visibility: only on product view */
 const _origShowProduct=showProduct, _origShowHome=showHome;
 
