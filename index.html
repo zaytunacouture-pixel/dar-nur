@@ -131,7 +131,7 @@ nav{
 .brand .name{font-family:'Cinzel';font-size:1.35rem;color:var(--cream);letter-spacing:.18em}
 .brand .ar{font-family:'Cormorant Garamond';font-size:1rem;color:var(--gold);letter-spacing:.05em;margin-top:3px}
 .nav-portal{display:contents}
-.nav-links{display:flex;gap:34px;align-items:center}
+.nav-links{display:flex;gap:34px;align-items:center;list-style:none}
 .nav-links a{
   font-family:'Cinzel';font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;
   color:var(--cream);opacity:.82;transition:opacity .25s,color .25s;position:relative;padding:4px 0;
@@ -148,7 +148,7 @@ nav{
   display:none;flex-direction:column;gap:0;
   background:rgba(13,31,22,.98);border:1px solid rgba(200,168,75,.22);border-radius:2px;
   backdrop-filter:blur(8px);min-width:180px;box-shadow:0 12px 32px -12px rgba(0,0,0,.4);
-  padding:12px 0;z-index:101;margin-top:0;
+  padding:12px 0;z-index:101;margin-top:0;list-style:none;
 }
 .nav-dropdown:hover > .nav-dropdown-menu{display:flex}
 .nav-dropdown-menu a{
@@ -812,48 +812,119 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
 </head>
 <body>
 
+<!-- AUTO:NAV:START -->
 <header>
-  <nav>
-    <div class="brand" onclick="showHome()">
-      <img src="logo-dar-nur.png" alt="Logo Dar Nūr" class="brand-logo"/>
-      <div class="brand-text">
+  <nav aria-label="Navigation principale">
+    <a class="brand" href="/">
+      <img src="/logo-dar-nur.png" alt="Logo Dar Nūr" class="brand-logo"/>
+      <span class="brand-text">
         <span class="name">DAR NŪR</span>
         <span class="ar">دار النور</span>
-      </div>
-    </div>
+      </span>
+    </a>
+
     <div class="nav-portal">
-    <div class="nav-links" id="navLinks">
-      <a onclick="goCat('all')">Boutique</a>
-
-      <div class="nav-dropdown">
-        <div class="nav-dropdown-title">Bien-être</div>
-        <div class="nav-dropdown-menu" id="well-being">
-          <a href="/miels/">Miels</a>
-          <a href="/gelules/">Gélules</a>
-          <a href="/poudres/">Poudres &amp; Graines</a>
-          <a href="/huiles/">Huiles</a>
-          <a href="/brumes/">Brumes</a>
-          <a href="/parfums/">Parfums</a>
-        </div>
-      </div>
-
-      <div class="nav-dropdown">
-        <div class="nav-dropdown-title">Mode</div>
-        <div class="nav-dropdown-menu" id="mode">
-          <a href="/qamis/">Qamis</a>
-          <a href="/abayas/">Abayas</a>
-        </div>
-      </div>
-
-      <a onclick="showHome();setTimeout(()=>document.getElementById('histoire').scrollIntoView({behavior:'smooth'}),60)">Notre histoire</a>
-      <a onclick="showHome();setTimeout(()=>document.getElementById('qui-sommes-nous').scrollIntoView({behavior:'smooth'}),60)">Qui sommes-nous ?</a>
-      <a onclick="showHome();setTimeout(()=>document.getElementById('faq').scrollIntoView({behavior:'smooth'}),60)">FAQ</a>
-      <a onclick="showHome();setTimeout(()=>document.getElementById('avis-clients').scrollIntoView({behavior:'smooth'}),60)">Avis</a>
+      <ul class="nav-links" id="navLinks">
+        <li class="nav-item" role="none">
+  <a href="https://dar-nur.fr/#boutique" id="nav-boutique" >Boutique</a>
+</li>
+<li class="nav-item nav-dropdown" role="none">
+  <button
+    type="button"
+    class="nav-dropdown-title"
+    id="nav-bien-etre-trigger"
+    aria-haspopup="true"
+    aria-expanded="false"
+    aria-controls="nav-bien-etre-menu"
+    
+  >Bien-être</button>
+  <ul class="nav-dropdown-menu" id="nav-bien-etre-menu" aria-label="Bien-être">
+    <li class="nav-item" role="none">
+  <a href="/miels/" id="nav-miels" >Miels</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="/miels-gourmands/" id="nav-miels-gourmands" >Miels Gourmands</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="/miels-terroir/" id="nav-miels-terroir" >Miels du Terroir</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="/gelules/" id="nav-gelules" >Gélules</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="/poudres/" id="nav-poudres" >Poudres & Graines</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="/huiles/" id="nav-huiles" >Huiles</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="/brumes/" id="nav-brumes" >Brumes</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="/bakhour/" id="nav-bakhour" >Bakhour & Encens</a>
+</li>
+  </ul>
+</li>
+<li class="nav-item" role="none">
+  <a href="/parfums/" id="nav-parfums" >Parfums</a>
+</li>
+<li class="nav-item nav-dropdown" role="none">
+  <button
+    type="button"
+    class="nav-dropdown-title"
+    id="nav-mode-accessoires-trigger"
+    aria-haspopup="true"
+    aria-expanded="false"
+    aria-controls="nav-mode-accessoires-menu"
+    
+  >Mode & Accessoires</button>
+  <ul class="nav-dropdown-menu" id="nav-mode-accessoires-menu" aria-label="Mode & Accessoires">
+    <li class="nav-item" role="none">
+  <a href="/qamis/" id="nav-qamis" >Qamis</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="/abayas/" id="nav-abayas" >Abayas & Ensembles</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="/bijoux/" id="nav-bijoux" >Bagues & Bijoux</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="/chaussures/" id="nav-chaussures" >Sandales</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="/chechias/" id="nav-chechias" >Chéchias</a>
+</li>
+  </ul>
+</li>
+<li class="nav-item" role="none">
+  <a href="/tahara/" id="nav-tahara" >Tahara & Hygiène</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="/accessoires/" id="nav-accessoires" >Accessoires</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="https://dar-nur.fr/#histoire" id="nav-notre-histoire" >Notre histoire</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="https://dar-nur.fr/#faq" id="nav-faq" >FAQ</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="https://dar-nur.fr/#avis-clients" id="nav-avis" >Avis</a>
+</li>
+      </ul>
     </div>
-    </div>
-    <button class="burger" id="burger" onclick="toggleMenu()" aria-label="Menu"><span></span><span></span><span></span></button>
+
+    <button
+      type="button"
+      class="burger"
+      id="burger"
+      aria-label="Menu"
+      aria-expanded="false"
+      aria-controls="navLinks"
+    ><span></span><span></span><span></span></button>
   </nav>
 </header>
+<!-- AUTO:NAV:END -->
 
 <!-- ============ HOME VIEW ============ -->
 <main id="homeView">
@@ -3103,6 +3174,10 @@ function closeMenu(){
   document.getElementById("burger").classList.remove("x");
   document.body.classList.remove("menu-open");
 }
+/* Le gabarit canonique du burger ne porte plus d'onclick inline (prévu pour
+   nav.js, pas encore écrit) — rebranchement minimal, comportement identique
+   à l'ancien onclick="toggleMenu()". */
+document.getElementById("burger").addEventListener("click", toggleMenu);
 /* Close menu on backdrop click */
 document.addEventListener("click",function(e){
   const navLinks=document.getElementById("navLinks");
