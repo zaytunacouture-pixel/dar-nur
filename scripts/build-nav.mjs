@@ -17,7 +17,7 @@
 // marqueurs exactes et échoue bruyamment si l'une d'elles est absente,
 // dupliquée ou mal ordonnée.
 
-import { readFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
 
 const ROOT = new URL('..', import.meta.url);
@@ -315,6 +315,66 @@ export async function buildNavHtml({
   assertNoLeftoverPlaceholders(finalHtml, 'squelette final');
 
   return finalHtml;
+}
+
+// ============================================================
+// 9. Injection dans une page servie — Phase 3.4+.
+//    Toujours par marqueurs exacts (réutilise extractMarkedBlock), jamais
+//    par recherche de <header> ou de classe CSS. N'écrit sur disque QUE si
+//    write === true est explicitement passé — par défaut, purement en
+//    mémoire (prepareInjection ne prend aucun paramètre d'écriture, seul
+//    injectIntoPage peut écrire, et seulement sur demande explicite).
+// ============================================================
+
+const PAGE_MARKER_START = '<!-- AUTO:NAV:START -->';
+const PAGE_MARKER_END = '<!-- AUTO:NAV:END -->';
+
+async function readPageFile(pagePath) {
+  try {
+    return await readFile(pagePath, 'utf8');
+  } catch (e) {
+    throw new Error(`Impossible de lire la page (${pagePath}) : ${e.message}`);
+  }
+}
+
+function extractCurrentNavBlock(pageContent, label) {
+  return extractMarkedBlock(pageContent, PAGE_MARKER_START, PAGE_MARKER_END, label);
+}
+
+function replaceNavBlock(pageContent, newBlock, label) {
+  const startIdx = pageContent.indexOf(PAGE_MARKER_START);
+  const endIdx = pageContent.indexOf(PAGE_MARKER_END);
+  if (startIdx === -1 || endIdx === -1) {
+    throw new Error(`Marqueurs AUTO:NAV absents (${label}) — bootstrap requis avant injection`);
+  }
+  const before = pageContent.slice(0, startIdx + PAGE_MARKER_START.length);
+  const after = pageContent.slice(endIdx);
+  return `${before}\n${newBlock}\n${after}`;
+}
+
+// Rendu + lecture de la page cible, sans jamais écrire. Retourne tout ce
+// qu'il faut pour un diff humain avant toute décision d'écriture.
+export async function prepareInjection(pagePath, { activeHref = null } = {}) {
+  const pageContent = await readPageFile(pagePath);
+  const oldBlock = extractCurrentNavBlock(pageContent, pagePath);
+  const newBlock = await buildNavHtml({ activeHref });
+  const updatedContent = replaceNavBlock(pageContent, newBlock, pagePath);
+  return {
+    oldBlock,
+    newBlock,
+    changed: oldBlock !== newBlock,
+    updatedContent,
+  };
+}
+
+// Seule fonction de tout ce script capable d'écrire sur disque, et
+// uniquement si write === true est passé explicitement par l'appelant.
+export async function injectIntoPage(pagePath, { activeHref = null, write = false } = {}) {
+  const result = await prepareInjection(pagePath, { activeHref });
+  if (write) {
+    await writeFile(pagePath, result.updatedContent, 'utf8');
+  }
+  return result;
 }
 
 // ============================================================
