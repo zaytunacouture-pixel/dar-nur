@@ -3193,7 +3193,11 @@ document.addEventListener("click",function(e){
    fonctionne aussi bien avec un href absolu (https://dar-nur.fr/#faq) que
    relatif (/#faq), sans dépendance au domaine. Tout autre lien suit son
    comportement normal (return sans preventDefault). Reproduit exactement
-   l'ancien contrat onclick="showHome();setTimeout(()=>...scrollIntoView...,60)". */
+   l'ancien contrat onclick="showHome();setTimeout(()=>...scrollIntoView...,60)".
+   PROPRIÉTÉ DE index.html : ce code dépend de showHome(), de la structure
+   SPA (#homeView/#productView) et des ancres locales à cette page. Ce
+   n'est PAS un comportement générique de navigation — ne jamais le
+   déplacer dans un futur nav.js commun aux 19 pages. */
 const EDITORIAL_ANCHOR_IDS = { "#histoire":"histoire", "#faq":"faq", "#avis-clients":"avis-clients" };
 document.addEventListener("click", function(e){
   const a = e.target.closest("a[href]");
