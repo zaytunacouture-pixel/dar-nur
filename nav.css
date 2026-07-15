@@ -11,7 +11,7 @@
    D5A_PRE_AUDIT_IMPLEMENTATION_HEADER_DAR_NUR.md. */
 
 header{position:sticky;top:0;z-index:100;background:rgba(13,31,22,.97);backdrop-filter:blur(8px);border-bottom:1px solid rgba(200,168,75,.22)}
-nav{display:flex;align-items:center;justify-content:space-between;max-width:1240px;margin:0 auto;padding:14px 28px}
+nav{display:flex;align-items:center;justify-content:center;max-width:1520px;margin:0 auto}
 
 /* Rangée identité — D5c.1 (header desktop, reproduction fidèle de
    design_handoff_header_desktop/index.html, état final D4b.2). Isolée
@@ -41,13 +41,45 @@ nav{display:flex;align-items:center;justify-content:space-between;max-width:1240
 .brand .name{font-family:'Cinzel';font-size:1.3rem;color:var(--cream);letter-spacing:.28em}
 .brand .ar{font-family:'Cormorant Garamond';font-size:.95rem;color:var(--gold-light);letter-spacing:.04em;margin-top:5px}
 
+/* Rangée navigation — D5c.2 (header desktop, reproduction fidèle de
+   design_handoff_header_desktop/index.html, état final D4b.2). Le
+   prototype pose le gap de 46px directement sur son conteneur nav ;
+   en production, .nav-portal est en display:contents (voir plus bas),
+   donc c'est .nav-links (le conteneur flex réel des items) qui doit
+   porter ce gap - un gap sur nav lui-même n'aurait aucun effet visuel.
+   Padding horizontale réduite de 40px (valeur prototype) à 18px :
+   le prototype a été vérifié à 1440px (D4b.2), mais avec les 9 vrais
+   libellés de nav + white-space:nowrap (prototype) + gap:46px, 40px
+   de marge cause un débordement horizontal réel de ~33px à 1280px
+   (largeur desktop de référence de ce chantier, cf. D5c.1). Mesuré
+   empiriquement en D5c.2 ; réserve D5C0_PRE_AUDIT §3 explicitement
+   prévue pour ce cas - à reconfirmer en D5c.3 sur 1240-1920px. */
+.row-nav{
+  background:var(--green-soft);
+  padding:18px;
+}
+
 .nav-portal{display:contents}
-.nav-links{display:flex;gap:34px;align-items:center;list-style:none}
-.nav-links > li > a{font-family:'Cinzel';font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--cream);opacity:.82;transition:opacity .25s,color .25s}
-.nav-links > li > a:hover, .nav-links > li > a.active, .nav-links > li > a[aria-current="page"]{opacity:1;color:var(--gold)}
+.nav-links{display:flex;gap:46px;align-items:center;list-style:none}
+.nav-links > li > a{font-family:'Cinzel';font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--cream);opacity:.82;white-space:nowrap;transition:opacity .25s,color .25s}
+.nav-links > li > a:hover{opacity:1;color:var(--gold)}
+/* D5c.2 : lien actif adouci (gold-light, opacité .95 au lieu de gold
+   plein) pour ne plus rivaliser visuellement avec le filet or de la
+   rangée identité, cf. D4b.2. */
+.nav-links > li > a.active, .nav-links > li > a[aria-current="page"]{opacity:.95;color:var(--gold-light)}
 .nav-dropdown{position:relative;display:flex;align-items:center;padding-bottom:12px}
-.nav-dropdown-title{font-family:'Cinzel';font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--cream);opacity:.82;cursor:pointer;padding:4px 0;transition:opacity .25s,color .25s}
+.nav-dropdown-title{font-family:'Cinzel';font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--cream);opacity:.82;cursor:pointer;padding:4px 0;white-space:nowrap;border-bottom:1px solid rgba(200,168,75,.3);transition:opacity .25s,color .25s}
 .nav-dropdown-title:hover{opacity:1;color:var(--gold)}
+.nav-dropdown-title::after{
+  content:'';
+  display:inline-block;
+  width:4px;height:4px;
+  border-right:1px solid currentColor;
+  border-bottom:1px solid currentColor;
+  transform:rotate(45deg);
+  margin-left:7px;
+  opacity:.55;
+}
 .nav-dropdown-menu{display:none;position:absolute;top:100%;left:0;background:rgba(13,31,22,.98);backdrop-filter:blur(8px);min-width:180px;box-shadow:0 12px 32px -12px rgba(0,0,0,.4);padding:10px 0;border:1px solid rgba(200,168,75,.18);border-radius:4px;list-style:none}
 .nav-dropdown:hover > .nav-dropdown-menu{display:flex;flex-direction:column}
 .nav-dropdown-menu a{padding:9px 20px;font-family:'Cinzel';font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--cream);opacity:.8;border-left:3px solid transparent;transition:all .2s}
@@ -69,6 +101,13 @@ nav{display:flex;align-items:center;justify-content:space-between;max-width:1240
   .brand .name{font-size:1.35rem;letter-spacing:.18em}
   .brand .ar{font-size:1rem;color:var(--gold);margin-top:3px}
   nav{padding:0;max-width:none;margin:0}
+  /* Neutralise .row-nav (D5c.2), même logique que .row-identity ci-dessus :
+     le wrapper desktop ne doit rien ajouter au rendu mobile existant. */
+  .row-nav{background:none;padding:0}
+  .nav-links > li > a.active, .nav-links > li > a[aria-current="page"]{opacity:1;color:var(--gold)}
+  .nav-links > li > a{white-space:normal}
+  .nav-dropdown-title{border-bottom:none;white-space:normal}
+  .nav-dropdown-title::after{display:none}
   .nav-portal{
     display:block;
     position:fixed;inset:0;overflow:clip;pointer-events:none;
