@@ -76,7 +76,7 @@ nav{display:flex;align-items:center;justify-content:center;max-width:1520px;marg
    rangée identité, cf. D4b.2. */
 .nav-links > li > a.active, .nav-links > li > a[aria-current="page"]{opacity:.95;color:var(--gold-light)}
 .nav-dropdown{position:relative;display:flex;align-items:center;padding-bottom:12px}
-.nav-dropdown-title{font-family:'Cinzel';font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--cream);opacity:.82;cursor:pointer;padding:4px 0;white-space:nowrap;border-bottom:1px solid rgba(200,168,75,.3);transition:opacity .25s,color .25s}
+.nav-dropdown-title{font-family:'Cinzel';font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--cream);opacity:.82;cursor:pointer;padding:4px 0;white-space:nowrap;background:none;border:none;appearance:none;border-bottom:1px solid rgba(200,168,75,.3);transition:opacity .25s,color .25s}
 .nav-dropdown-title:hover{opacity:1;color:var(--gold)}
 .nav-dropdown-title::after{
   content:'';
