@@ -89,11 +89,25 @@ nav{display:flex;align-items:center;justify-content:center;max-width:1520px;marg
   opacity:.55;
 }
 .nav-dropdown-menu{display:none;position:absolute;top:100%;left:0;background:rgba(13,31,22,.98);backdrop-filter:blur(8px);min-width:180px;box-shadow:0 12px 32px -12px rgba(0,0,0,.4);padding:10px 0;border:1px solid rgba(200,168,75,.18);border-radius:4px;list-style:none}
-.nav-dropdown:hover > .nav-dropdown-menu{display:flex;flex-direction:column}
+/* D5f.2 : :focus-within au meme titre que :hover - sans ca, un utilisateur
+   clavier tabule dans un panneau invisible (display:none), les liens
+   internes restent atteignables au clavier mais jamais visibles. */
+.nav-dropdown:hover > .nav-dropdown-menu, .nav-dropdown:focus-within > .nav-dropdown-menu{display:flex;flex-direction:column}
 .nav-dropdown-menu a{padding:9px 20px;font-family:'Cinzel';font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--cream);opacity:.8;border-left:3px solid transparent;transition:all .2s}
 .nav-dropdown-menu a:hover,.nav-dropdown-menu a.active,.nav-dropdown-menu a[aria-current="page"]{opacity:1;color:var(--gold);border-left-color:var(--gold);background:rgba(200,168,75,.06)}
 .burger{display:none;flex-direction:column;gap:5px;padding:4px;border:none;background:none}
 .burger span{width:22px;height:2px;background:var(--cream);border-radius:2px;display:block;transition:.3s}
+
+/* D5f.2 : etats clavier (R2) - un filet or clair, distinct du hover (qui ne
+   joue que sur opacity/color, jamais d'outline) et de l'anneau bleu par
+   defaut du navigateur. Offset positif sur les elements de premiere rangee
+   (identite, liens, declencheurs) car ils ont de l'espace autour ; offset
+   negatif (inset) sur les liens de panneau dropdown, plus etroits, pour
+   rester contenu dans l'item plutot que deborder sur ses voisins. */
+.brand:focus-visible,
+.nav-links > li > a:focus-visible,
+.nav-dropdown-title:focus-visible{outline:1px solid var(--gold-light);outline-offset:4px;border-radius:2px}
+.nav-dropdown-menu a:focus-visible{outline:1px solid var(--gold-light);outline-offset:-2px}
 
 @media(max-width:768px){
   /* Neutralise les rangées desktop (D5c.1) : header redevient une
