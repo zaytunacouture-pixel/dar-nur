@@ -40,6 +40,13 @@ nav{display:flex;align-items:center;justify-content:center;max-width:1520px;marg
 }
 .brand .name{font-family:'Cinzel';font-size:1.3rem;color:var(--cream);letter-spacing:.28em}
 .brand .ar{font-family:'Cormorant Garamond';font-size:.95rem;color:var(--gold-light);letter-spacing:.04em;margin-top:5px}
+/* D5f.3 (R3) : seul effet retenu - une très légère hausse de luminosité,
+   partagée par hover et focus-visible (cohérence avec D5f.2, dont
+   l'anneau de focus reste inchangé et coexiste avec cet effet). Le
+   lockup confirme qu'il est interactif sans devenir un CTA - aucune
+   couleur de repos, taille ou espacement modifié. */
+.brand{transition:filter .18s ease}
+.brand:hover,.brand:focus-visible{filter:brightness(1.1)}
 
 /* Rangée navigation — D5c.2 (header desktop, reproduction fidèle de
    design_handoff_header_desktop/index.html, état final D4b.2). Le
