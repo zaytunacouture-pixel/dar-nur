@@ -44,7 +44,7 @@
   .row-identity{
     background:linear-gradient(180deg, var(--green) 0%, #09150f 100%);
     position:relative;
-    padding:24px 44px;
+    padding:20px 44px;
     display:flex;
     align-items:center;
   }
@@ -54,11 +54,22 @@
     background:linear-gradient(90deg, transparent, var(--gold) 15%, var(--gold-light) 50%, var(--gold) 85%, transparent);
     opacity:.9;
   }
-  .brand{display:flex;align-items:center;gap:16px;text-decoration:none;line-height:1}
-  .brand-logo{width:46px;height:46px;object-fit:cover;border-radius:3px;border:1px solid rgba(200,168,75,.45)}
-  .brand-text{display:flex;flex-direction:column}
-  .brand-text .name{font-family:'Cinzel';font-size:1.1rem;color:var(--cream);letter-spacing:.26em}
-  .brand-text .ar{font-family:'Cormorant Garamond';font-size:.85rem;color:var(--gold-light);letter-spacing:.04em;margin-top:4px}
+  /* D4b.2 : le vide de la rangée identité (D4c) ne se comble pas en
+     ajoutant du contenu, mais en donnant plus de poids au contenu
+     existant — logo agrandi + filet vertical entre logo et texte,
+     lockup traité comme une pièce à part entière, pas un logo réduit
+     posé dans un espace vide. */
+  .brand{display:flex;align-items:center;gap:14px;text-decoration:none;line-height:1}
+  .brand-logo{width:58px;height:58px;object-fit:cover;border-radius:3px;border:1px solid rgba(200,168,75,.45)}
+  .brand-text{display:flex;flex-direction:column;position:relative;padding-left:16px}
+  .brand-text::before{
+    content:'';
+    position:absolute;left:0;top:50%;transform:translateY(-50%);
+    width:1px;height:34px;
+    background:linear-gradient(180deg, transparent, rgba(200,168,75,.55), transparent);
+  }
+  .brand-text .name{font-family:'Cinzel';font-size:1.3rem;color:var(--cream);letter-spacing:.28em}
+  .brand-text .ar{font-family:'Cormorant Garamond';font-size:.95rem;color:var(--gold-light);letter-spacing:.04em;margin-top:5px}
 
   /* --- Rangée 2 : navigation, la plus généreuse en respiration horizontale,
      mais une densité verticale plus resserrée que la rangée identité —
@@ -94,24 +105,29 @@
     transition:opacity .2s,color .2s;
   }
   .nav-item > a:hover, .nav-item > button:hover{opacity:1;color:var(--gold)}
-  .nav-item[aria-current] > a{opacity:1;color:var(--gold)}
+  /* D4b.2 : lien actif adouci — il ne doit plus rivaliser avec le
+     filet or de la rangée identité (D4c, "attire presque autant l'œil
+     que le logo"). */
+  .nav-item[aria-current] > a{opacity:.95;color:var(--gold-light)}
 
   /* Léger poids différencié des déclencheurs de groupe — inspiration
      "réservoir Famille 3" conservée en D3b-2, sans reproduire la
-     Variante B dans son ensemble : juste un soulignement discret. */
+     Variante B dans son ensemble. D4b.2 : soulignement allégé (plus fin,
+     plus discret) pour rester cohérent avec la finesse générale du
+     header (D4c, "dropdown visuellement assez lourd"). */
   .nav-item.has-dropdown > button{
-    border-bottom:1px solid rgba(200,168,75,.55);
+    border-bottom:1px solid rgba(200,168,75,.3);
     padding-bottom:8px;
   }
   .nav-item.has-dropdown > button::after{
     content:'';
     display:inline-block;
-    width:5px;height:5px;
+    width:4px;height:4px;
     border-right:1px solid currentColor;
     border-bottom:1px solid currentColor;
     transform:rotate(45deg);
     margin-left:7px;
-    opacity:.8;
+    opacity:.55;
   }
 
   /* Panneau dropdown — présenté ici en 2 ÉTATS STATIQUES (pas de JS) :
