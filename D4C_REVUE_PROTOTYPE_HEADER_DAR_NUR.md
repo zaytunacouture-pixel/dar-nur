@@ -1,6 +1,6 @@
 # Phase D4c — Revue du prototype (D4b)
 
-**Statut** : compte rendu d'évaluation, décision validée. Document de conception, lecture seule pour les décisions d'architecture ; conclut sur une itération d'exécution (D4b.1), pas sur du code de production.
+**Statut** : compte rendu d'évaluation, **D4 validé** après deux itérations d'exécution (D4b.1, D4b.2 — voir sections « Suite » ci-dessous). Document de conception, lecture seule pour les décisions d'architecture ; le prototype lui-même n'est pas du code de production (règle de non-réutilisation, D4a).
 
 **Référence** : `design_handoff_header_desktop/` (D4b, prototype revu), `D4A_PRE_AUDIT_PROTOTYPE_HEADER_DAR_NUR.md` (critère de jugement : composition uniquement).
 
@@ -57,3 +57,39 @@ Faire en sorte que la rangée identité soit immédiatement perçue comme la cou
 - travailler le poids visuel du logo (sans l'agrandir arbitrairement — retrouver un statut, pas seulement une taille).
 
 Ce qui n'est pas concerné par D4b.1 : la structure à deux rangées, la rangée navigation, les 9 entrées, les dropdowns — tous déjà validés par cette revue.
+
+---
+
+## Suite — revue après D4b.1
+
+Après contraste réel entre les deux rangées, filet or renforcé, rythme vertical différencié et logo agrandi (commit `7e8518c`) :
+
+- **Objectivement meilleur** : la rangée identité a désormais une existence propre, le filet or sépare réellement les deux niveaux, la hiérarchie « identité → navigation » se lit naturellement. Le risque principal identifié en D3b-2 (« un simple header existant auquel on aurait ajouté de la hauteur ») ne se vérifie plus.
+- **Ce qui reste à ajuster** : dissonance entre le vide de la rangée identité et son contenu (un logo encore traité comme dans l'ancien header, dans un espace devenu « institutionnel ») ; dropdown visuellement un peu lourd par rapport à la finesse générale ; le lien actif rivalise encore visuellement avec le logo.
+- **Verdict à ce stade** : toujours pas de retour en D3, toujours pas de passage en D5. Une itération **D4b.2**, extrêmement ciblée sur l'expression de la rangée identité et l'allègement de la hiérarchie de navigation — plus un problème d'architecture mais de composition. Estimation à ce stade : ~85-90 % de l'objectif.
+
+## Suite — revue après D4b.2, verdict final
+
+Après renforcement du lockup (filet vertical entre logo et texte, logo à 58px, nom de marque agrandi) et allègement de la navigation (lien actif en or clair à 95 % d'opacité, soulignement des dropdowns réduit à 30 % d'opacité — commit `fa30264`) :
+
+- **Le lockup de marque fonctionne** : symbole, nom et sous-titre arabe se lisent comme une signature unique, pas trois éléments indépendants.
+- **La hiérarchie est lisible** : parcours identité → séparation → navigation → contenu, les deux niveaux existent réellement (contrairement à D4b où ils se mélangeaient encore).
+- **La navigation est plus calme** : le filet de séparation de la rangée identité est redevenu l'accent principal ; identité = accent, navigation = outil, état actif = information simple.
+- **Réserve restante (finition, pas conception)** : la rangée identité reste très ancrée à gauche, avec un espace vide à droite qui peut sembler non intentionnel plutôt qu'un choix premium assumé — à traiter comme point d'attention en D5, pas comme motif de nouvelle itération de prototype. Explicitement : ne pas remplir cet espace en ajoutant un nouvel élément de contenu (cohérent avec l'exclusion déjà actée en D1/D3b-3) — la réflexion à mener en D5 porte sur la mise en scène de l'espace existant, pas sur son remplissage.
+
+### Réponse aux 5 critères de sortie de D4 (rappel D4a)
+
+| Critère | Réponse |
+|---|---|
+| Première impression | ✔ Oui — perception d'un header plus haut de gamme que l'existant |
+| La rangée identité a-t-elle une raison d'exister ? | ✔ Oui, clairement |
+| La navigation reste-t-elle immédiatement lisible ? | ✔ Oui, même améliorée |
+| Le header semble-t-il pouvoir évoluer ? | ✔ Oui — structure nettement moins contrainte que l'actuel |
+| Donnerait-il envie d'être implémenté ? | ✔ Oui |
+
+### Verdict final
+
+- ✅ **D4 validé** — le prototype atteint son objectif de validation architecturale.
+- ✅ Les choix structurants de D3 (stratégie C, wireframe 3, D3b-1/2/3) ne sont plus remis en cause.
+- 🔶 Réserve unique, de faible priorité, à porter en D5 : **lors de l'implémentation, porter une attention particulière à la composition de la rangée identité pour que l'espace vide à droite soit perçu comme un choix graphique assumé, pas un vide accidentel.** Réserve de finition/direction artistique, pas un motif de retour en conception.
+- ➜ **Ouverture de D5** : traduction fidèle du prototype retenu dans le code existant, avec la même discipline que les chantiers précédents (pré-audit, validation, implémentation atomique, qualification avant généralisation). Conformément à la règle de non-réutilisation (D4a), D5 repart du code existant et l'adapte — aucun extrait de `design_handoff_header_desktop/` n'est copié tel quel.
