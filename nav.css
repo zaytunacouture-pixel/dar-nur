@@ -120,7 +120,7 @@ nav{display:flex;align-items:center;justify-content:center;max-width:1520px;marg
   /* Neutralise les rangées desktop (D5c.1) : header redevient une
      rangée unique flex (logo + burger), comme avant l'introduction de
      .row-identity. Mobile hors périmètre D5c/D5c.1-3 (voir D5e). */
-  header{display:flex;align-items:center;justify-content:space-between;padding:14px 28px}
+  header{display:flex;align-items:center;justify-content:space-between;padding:14px 28px;backdrop-filter:none}
   .row-identity{background:none;padding:0}
   .row-identity::after{display:none}
   .brand{gap:12px}
