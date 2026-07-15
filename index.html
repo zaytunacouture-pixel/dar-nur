@@ -1242,6 +1242,7 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js"></script>
 <script src="js/config.js"></script>
+<script src="/js/nav.js"></script>
 <script>
 /* ============================================================
    DAR NŪR — données produits + logique SPA
@@ -3165,7 +3166,10 @@ function showHome(){
   window.scrollTo(0,0);
 }
 function toggleMenu(){
-  document.getElementById("navLinks").classList.toggle("open");
+  /* Le toggle de la classe "open" sur #navLinks est desormais fourni par
+     /js/nav.js (listener separe sur #burger, meme element). toggleMenu()
+     ne gere plus que ce qui reste specifique a la homepage (animation
+     croix du burger, overlay de fond). */
   document.getElementById("burger").classList.toggle("x");
   document.body.classList.toggle("menu-open");
 }
@@ -3174,9 +3178,6 @@ function closeMenu(){
   document.getElementById("burger").classList.remove("x");
   document.body.classList.remove("menu-open");
 }
-/* Le gabarit canonique du burger ne porte plus d'onclick inline (prévu pour
-   nav.js, pas encore écrit) — rebranchement minimal, comportement identique
-   à l'ancien onclick="toggleMenu()". */
 document.getElementById("burger").addEventListener("click", toggleMenu);
 /* Close menu on backdrop click */
 document.addEventListener("click",function(e){
