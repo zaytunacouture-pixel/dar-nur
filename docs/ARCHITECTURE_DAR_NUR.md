@@ -24,7 +24,7 @@
 | Gélules | `gelules/index.html` | idem |
 | Brumes | `brumes/index.html` | idem |
 | Qamis | `qamis/index.html` | idem |
-| Bakhour & Encens | `bakhour/index.html` | **1 seul produit réel** (Bakhur Mukhalat) — première page catégorie construite sur le gabarit `design_handoff_collections/dar-nur-collection-reference.html` (nav méga-menu + footer 3 colonnes homepage, pas la mini-nav legacy des autres pages ci-dessus). Pas de barre de filtres/tri (non pertinent à 1 article), grille `.grid--single` centrée/contrainte pour éviter l'effet de grille cassée. |
+| Bakhour & Encens | `bakhour/index.html` | **1 seul produit réel** (Bakhur Mukhalat). Pas de barre de filtres/tri (non pertinent à 1 article), grille `.grid--single` centrée/contrainte pour éviter l'effet de grille cassée. Note corrigée (2026-07-15, vérifié empiriquement lors du rollout D5c) : la mention historique d'un nav méga-menu/footer homepage propre à cette page était obsolète — `bakhour/` utilise en réalité le même composant nav.css mutualisé que les 13 autres pages catégories (D5b.1a/b), confirmé par grep direct du markup `<header>`. |
 | Parfums (hub multi-marques) | `parfums/index.html` + `parfums/<brand_slug>/index.html` | **100 % généré**, jamais édité à la main — voir section dédiée ci-dessous. |
 | Admin | `admin.html` | Interface de gestion produits/catégories/offres (écrit dans Supabase) |
 | CGV / Confidentialité / Mentions légales | `cgv.html`, `confidentialite.html`, `mentions-legales.html` | Statiques |
