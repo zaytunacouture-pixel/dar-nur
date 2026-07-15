@@ -39,24 +39,34 @@
 
   header.proto-header{position:sticky;top:0;z-index:100;box-shadow:var(--shadow)}
 
-  /* --- Rangée 1 : identité, volontairement fine, isolée par contraste --- */
+  /* --- Rangée 1 : identité — D4b.1 : contraste réel + rythme vertical propre
+     (avant : simple extension visuelle de la rangée nav, cf. D4c) --- */
   .row-identity{
-    background:var(--green-soft);
-    border-bottom:1px solid var(--line);
-    padding:10px 40px;
+    background:linear-gradient(180deg, var(--green) 0%, #09150f 100%);
+    position:relative;
+    padding:24px 44px;
     display:flex;
     align-items:center;
   }
-  .brand{display:flex;align-items:center;gap:12px;text-decoration:none;line-height:1}
-  .brand-logo{width:34px;height:34px;object-fit:cover;border-radius:3px;border:1px solid rgba(200,168,75,.35)}
+  .row-identity::after{
+    content:'';
+    position:absolute;left:0;right:0;bottom:0;height:2px;
+    background:linear-gradient(90deg, transparent, var(--gold) 15%, var(--gold-light) 50%, var(--gold) 85%, transparent);
+    opacity:.9;
+  }
+  .brand{display:flex;align-items:center;gap:16px;text-decoration:none;line-height:1}
+  .brand-logo{width:46px;height:46px;object-fit:cover;border-radius:3px;border:1px solid rgba(200,168,75,.45)}
   .brand-text{display:flex;flex-direction:column}
-  .brand-text .name{font-family:'Cinzel';font-size:.95rem;color:var(--cream);letter-spacing:.2em}
-  .brand-text .ar{font-family:'Cormorant Garamond';font-size:.78rem;color:var(--gold);letter-spacing:.04em;margin-top:2px}
+  .brand-text .name{font-family:'Cinzel';font-size:1.1rem;color:var(--cream);letter-spacing:.26em}
+  .brand-text .ar{font-family:'Cormorant Garamond';font-size:.85rem;color:var(--gold-light);letter-spacing:.04em;margin-top:4px}
 
-  /* --- Rangée 2 : navigation, la plus généreuse en respiration --- */
+  /* --- Rangée 2 : navigation, la plus généreuse en respiration horizontale,
+     mais une densité verticale plus resserrée que la rangée identité —
+     c'est cet écart de rythme qui distingue les deux rangées, pas
+     seulement leur position (D4c, diagnostic "même densité"). --- */
   .row-nav{
-    background:var(--green);
-    padding:20px 40px;
+    background:var(--green-soft);
+    padding:18px 40px;
   }
   nav.proto-nav{
     display:flex;
