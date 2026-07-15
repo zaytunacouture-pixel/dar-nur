@@ -185,7 +185,7 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
 
 <!-- ===== NAV ===== -->
 <header>
-  <nav aria-label="Navigation principale">
+  <div class="row-identity">
     <a href="https://dar-nur.fr" class="brand">
       <img src="../logo-dar-nur.png" alt="Logo Dar Nūr" class="brand-logo"/>
       <span class="brand-text">
@@ -193,6 +193,9 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
         <span class="ar">دار النور</span>
       </span>
     </a>
+  </div>
+  <div class="row-nav">
+  <nav aria-label="Navigation principale">
     <div class="nav-portal">
     <ul class="nav-links" id="navLinks">
 {{COMMON_NAV_BEFORE_PARFUMS}}
@@ -207,6 +210,7 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
     </div>
     <button type="button" class="burger" id="burger" aria-label="Menu" aria-expanded="false" aria-controls="navLinks"><span></span><span></span><span></span></button>
   </nav>
+  </div>
 </header>
 
 <!-- ===== BREADCRUMB ===== -->
