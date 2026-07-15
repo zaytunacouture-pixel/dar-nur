@@ -43,8 +43,8 @@ nav{display:flex;align-items:center;justify-content:center;max-width:1520px;marg
 
 /* Rangée navigation — D5c.2 (header desktop, reproduction fidèle de
    design_handoff_header_desktop/index.html, état final D4b.2). Le
-   prototype pose le gap de 46px directement sur son conteneur nav ;
-   en production, .nav-portal est en display:contents (voir plus bas),
+   prototype pose le gap directement sur son conteneur nav ; en
+   production, .nav-portal est en display:contents (voir plus bas),
    donc c'est .nav-links (le conteneur flex réel des items) qui doit
    porter ce gap - un gap sur nav lui-même n'aurait aucun effet visuel.
    Padding horizontale réduite de 40px (valeur prototype) à 18px :
@@ -53,14 +53,22 @@ nav{display:flex;align-items:center;justify-content:center;max-width:1520px;marg
    de marge cause un débordement horizontal réel de ~33px à 1280px
    (largeur desktop de référence de ce chantier, cf. D5c.1). Mesuré
    empiriquement en D5c.2 ; réserve D5C0_PRE_AUDIT §3 explicitement
-   prévue pour ce cas - à reconfirmer en D5c.3 sur 1240-1920px. */
+   prévue pour ce cas.
+   D5c.3 : la marge réelle de non-débordement (mesurée entre .nav-links
+   et le bord de header, pas entre .nav-links et nav - le padding de
+   .row-nav n'agit pas comme une limite dure, rien n'a overflow:hidden)
+   ne dépend que de gap, pas de ce padding. À 1240px (le plus étroit de
+   la plage D1 1240-1920), gap:46px ne laissait que ~4px de marge réelle
+   - tenable mais fragile face à une variation de rendu de police d'un
+   navigateur à l'autre. Réduit à 44px : ~12px de marge à 1240px, sans
+   wrap sur toute la plage 1240-1920px (voir mesures D5c.3). */
 .row-nav{
   background:var(--green-soft);
   padding:18px;
 }
 
 .nav-portal{display:contents}
-.nav-links{display:flex;gap:46px;align-items:center;list-style:none}
+.nav-links{display:flex;gap:44px;align-items:center;list-style:none}
 .nav-links > li > a{font-family:'Cinzel';font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--cream);opacity:.82;white-space:nowrap;transition:opacity .25s,color .25s}
 .nav-links > li > a:hover{opacity:1;color:var(--gold)}
 /* D5c.2 : lien actif adouci (gold-light, opacité .95 au lieu de gold
