@@ -74,6 +74,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/nav.css" />
 
 <style>
 /* ===== Tokens — identiques à index.html (homepage production) et à la maquette collections ===== */
@@ -131,19 +132,6 @@ nav{display:flex;align-items:center;justify-content:space-between;max-width:1240
 .brand-text{display:flex;flex-direction:column}
 .brand .name{font-family:'Cinzel';font-size:1.35rem;color:var(--cream);letter-spacing:.18em}
 .brand .ar{font-family:'Cormorant Garamond';font-size:1rem;color:var(--gold);letter-spacing:.05em;margin-top:3px}
-.nav-portal{display:contents}
-.nav-links{display:flex;gap:34px;align-items:center;list-style:none}
-.nav-links > li > a{font-family:'Cinzel';font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--cream);opacity:.82;transition:opacity .25s,color .25s}
-.nav-links > li > a:hover, .nav-links > li > a.active, .nav-links > li > a[aria-current="page"]{opacity:1;color:var(--gold)}
-.nav-dropdown{position:relative;display:flex;align-items:center;padding-bottom:12px}
-.nav-dropdown-title{font-family:'Cinzel';font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--cream);opacity:.82;cursor:pointer;padding:4px 0;transition:opacity .25s,color .25s}
-.nav-dropdown-title:hover{opacity:1;color:var(--gold)}
-.nav-dropdown-menu{display:none;position:absolute;top:100%;left:0;background:rgba(13,31,22,.98);backdrop-filter:blur(8px);min-width:180px;box-shadow:0 12px 32px -12px rgba(0,0,0,.4);padding:10px 0;border:1px solid rgba(200,168,75,.18);border-radius:4px;list-style:none}
-.nav-dropdown:hover > .nav-dropdown-menu{display:flex;flex-direction:column}
-.nav-dropdown-menu a{padding:9px 20px;font-family:'Cinzel';font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--cream);opacity:.8;border-left:3px solid transparent;transition:all .2s}
-.nav-dropdown-menu a:hover,.nav-dropdown-menu a.active,.nav-dropdown-menu a[aria-current="page"]{opacity:1;color:var(--gold);border-left-color:var(--gold);background:rgba(200,168,75,.06)}
-.burger{display:none;flex-direction:column;gap:5px;padding:4px;border:none;background:none}
-.burger span{width:22px;height:2px;background:var(--cream);border-radius:2px;display:block;transition:.3s}
 
 /* ===== BREADCRUMB ===== */
 .breadcrumb{background:var(--cream);border-bottom:1px solid var(--line)}
@@ -219,17 +207,6 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
   .grid{grid-template-columns:repeat(3,1fr)}
 }
 @media(max-width:768px){
-  .nav-portal{
-    display:block;
-    position:fixed;inset:0;overflow:clip;pointer-events:none;
-    transform:translateZ(0);z-index:96;
-  }
-  .nav-links{position:fixed;top:81px;right:0;height:calc(100vh - 81px);width:74%;max-width:320px;background:var(--green);flex-direction:column;align-items:flex-start;padding:24px 28px;gap:4px;transform:translateX(100%);transition:transform .35s ease;overflow-y:auto;pointer-events:auto}
-  .nav-links.open{transform:translateX(0)}
-  .nav-links > li > a{padding:16px 0;width:100%;border-bottom:1px solid rgba(200,168,75,.12)}
-  .nav-dropdown{flex-direction:column;width:100%;align-items:flex-start;padding-bottom:0}
-  .nav-dropdown-menu{position:static;display:flex;flex-direction:column;width:100%;padding:0;margin:0;background:transparent;border:none}
-  .burger{display:flex}
   .cat-hero{padding:40px 22px 32px}
   .filter-bar{position:static;padding:14px 18px}
   .filter-bar-inner{justify-content:center}
@@ -668,11 +645,7 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
   </div>
 </footer>
 
-<script>
-document.getElementById('burger').addEventListener('click', () => {
-  document.getElementById('navLinks').classList.toggle('open');
-});
-</script>
+<script src="/js/nav.js"></script>
 
 </body>
 </html>
