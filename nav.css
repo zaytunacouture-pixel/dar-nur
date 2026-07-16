@@ -142,8 +142,17 @@ nav{display:flex;align-items:center;justify-content:center;max-width:1520px;marg
     position:fixed;inset:0;overflow:clip;pointer-events:none;
     transform:translateZ(0);z-index:96;
   }
-  .nav-links{position:fixed;top:81px;right:0;height:calc(100vh - 81px);width:74%;max-width:320px;background:var(--green);flex-direction:column;align-items:flex-start;padding:24px 28px;gap:4px;transform:translateX(100%);transition:transform .35s ease;overflow-y:auto;pointer-events:auto}
-  .nav-links.open{transform:translateX(0)}
+  /* D5e.2 : visibility accrochee au meme etat logique .open que transform
+     (aucun nouvel etat, aucun JS) - retire les 22 elements du panneau du
+     parcours de tabulation quand il est ferme (defaut n°2 de D5E0_PRE_AUDIT_
+     NAV_MOBILE_DAR_NUR.md). Delai de .35s sur la seule fermeture (pas sur
+     l'ouverture, cf. transition redeclaree sur .open ci-dessous) pour que
+     visibility ne bascule qu'une fois le glissement transform termine -
+     sans ce delai le panneau disparaitrait instantanement au lieu de
+     glisser hors champ, cassant l'animation existante (visible pour la
+     premiere fois depuis D5e.1). Duree/easing du transform inchanges. */
+  .nav-links{position:fixed;top:81px;right:0;height:calc(100vh - 81px);width:74%;max-width:320px;background:var(--green);flex-direction:column;align-items:flex-start;padding:24px 28px;gap:4px;transform:translateX(100%);visibility:hidden;transition:transform .35s ease,visibility 0s linear .35s;overflow-y:auto;pointer-events:auto}
+  .nav-links.open{transform:translateX(0);visibility:visible;transition:transform .35s ease}
   .nav-links > li > a{padding:16px 0;width:100%;border-bottom:1px solid rgba(200,168,75,.12)}
   .nav-dropdown{flex-direction:column;width:100%;align-items:flex-start;padding-bottom:0}
   .nav-dropdown-menu{position:static;display:flex;flex-direction:column;width:100%;padding:0;margin:0;background:transparent;border:none}
