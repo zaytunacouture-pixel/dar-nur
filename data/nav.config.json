@@ -1,0 +1,93 @@
+{
+  "_meta": {
+    "description": "Source unique de vérité de la navigation Dar Nūr — structure, libellés, URLs et ordre d'affichage. Consommée par les futures étapes (partials/nav.html, build-nav.mjs, nav.css, nav.js). N'est encore lue par aucun script ni page à ce stade (Phase 3.1).",
+    "sourceSpec": "SPEC_FONCTIONNELLE_NAVIGATION_DAR_NUR.md",
+    "version": 1,
+    "notes": [
+      "Le champ 'scope' vaut 'all' pour toutes les entrées actuelles : les 19 pages servies (homepage + 15 catégories + 3 pages parfums) affichent la même navigation. La valeur 'homepage' existe dans le vocabulaire du champ pour couvrir un futur cas d'entrée réellement propre à la homepage, mais n'est utilisée par aucune entrée aujourd'hui.",
+      "'Qui sommes-nous ?' n'apparaît plus ici : décision déjà validée dans SPEC_FONCTIONNELLE_NAVIGATION_DAR_NUR.md §3 (fusionnée avec 'Notre histoire').",
+      "L'ordre d'affichage est porté exclusivement par la position dans les tableaux 'entries'/'children' — aucun champ 'order' numérique redondant, pour éviter qu'il diverge de l'ordre réel.",
+      "Une seule structure sert à la fois le rendu desktop (survol/focus, dropdown en superposition) et mobile (liste continue, groupes non repliables) — seule la présentation (CSS) diffère entre les deux, jamais la donnée."
+    ]
+  },
+  "entries": [
+    {
+      "id": "boutique",
+      "label": "Boutique",
+      "type": "link",
+      "href": "https://dar-nur.fr/#boutique",
+      "scope": "all"
+    },
+    {
+      "id": "bien-etre",
+      "label": "Bien-être",
+      "type": "group",
+      "scope": "all",
+      "children": [
+        { "id": "miels", "label": "Miels", "type": "link", "href": "/miels/", "scope": "all" },
+        { "id": "miels-gourmands", "label": "Miels Gourmands", "type": "link", "href": "/miels-gourmands/", "scope": "all" },
+        { "id": "miels-terroir", "label": "Miels du Terroir", "type": "link", "href": "/miels-terroir/", "scope": "all" },
+        { "id": "gelules", "label": "Gélules", "type": "link", "href": "/gelules/", "scope": "all" },
+        { "id": "poudres", "label": "Poudres & Graines", "type": "link", "href": "/poudres/", "scope": "all" },
+        { "id": "huiles", "label": "Huiles", "type": "link", "href": "/huiles/", "scope": "all" },
+        { "id": "brumes", "label": "Brumes", "type": "link", "href": "/brumes/", "scope": "all" },
+        { "id": "bakhour", "label": "Bakhour & Encens", "type": "link", "href": "/bakhour/", "scope": "all" }
+      ]
+    },
+    {
+      "id": "parfums",
+      "label": "Parfums",
+      "type": "link",
+      "href": "/parfums/",
+      "scope": "all"
+    },
+    {
+      "id": "mode-accessoires",
+      "label": "Mode & Accessoires",
+      "type": "group",
+      "scope": "all",
+      "children": [
+        { "id": "qamis", "label": "Qamis", "type": "link", "href": "/qamis/", "scope": "all" },
+        { "id": "abayas", "label": "Abayas & Ensembles", "type": "link", "href": "/abayas/", "scope": "all" },
+        { "id": "bijoux", "label": "Bagues & Bijoux", "type": "link", "href": "/bijoux/", "scope": "all" },
+        { "id": "chaussures", "label": "Sandales", "type": "link", "href": "/chaussures/", "scope": "all" },
+        { "id": "chechias", "label": "Chéchias", "type": "link", "href": "/chechias/", "scope": "all" }
+      ]
+    },
+    {
+      "id": "tahara",
+      "label": "Tahara & Hygiène",
+      "type": "link",
+      "href": "/tahara/",
+      "scope": "all"
+    },
+    {
+      "id": "accessoires",
+      "label": "Accessoires",
+      "type": "link",
+      "href": "/accessoires/",
+      "scope": "all"
+    },
+    {
+      "id": "notre-histoire",
+      "label": "Notre histoire",
+      "type": "link",
+      "href": "https://dar-nur.fr/#histoire",
+      "scope": "all"
+    },
+    {
+      "id": "faq",
+      "label": "FAQ",
+      "type": "link",
+      "href": "https://dar-nur.fr/#faq",
+      "scope": "all"
+    },
+    {
+      "id": "avis",
+      "label": "Avis",
+      "type": "link",
+      "href": "https://dar-nur.fr/#avis-clients",
+      "scope": "all"
+    }
+  ]
+}

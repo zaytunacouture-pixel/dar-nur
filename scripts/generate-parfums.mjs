@@ -20,6 +20,13 @@ const BRAND_TEMPLATE_PATH = new URL('parfums/_brand_template.html', ROOT);
 const HUB_TEMPLATE_PATH = new URL('parfums/_hub_template.html', ROOT);
 const HUB_OUTPUT_PATH = new URL('parfums/index.html', ROOT);
 const SITEMAP_PATH = new URL('sitemap.xml', ROOT);
+// Artefact généré par scripts/build-nav.mjs (Phase 3.6.1) — lu ici comme une
+// entrée de plus, au même titre que Supabase ou les templates. Jamais écrit
+// par ce script, jamais interprété autrement qu'en extrayant ses deux
+// fragments nommés par marqueurs exacts — aucune connaissance du contenu de
+// nav.config.json ou de build-nav.mjs, aucun couplage de code entre les deux
+// générateurs (décision d'architecture Phase 3.6).
+const COMMON_NAV_ARTIFACT_PATH = new URL('partials/nav-common.generated.html', ROOT);
 
 const SUPABASE_URL = process.env.PARFUMS_SUPABASE_URL;
 const SUPABASE_KEY = process.env.PARFUMS_SUPABASE_KEY;
@@ -64,6 +71,60 @@ function escJs(str) {
     .replace(/`/g, '\\`')
     .replace(/\$\{/g, '\\${')
     .replace(/</g, '\\x3C');
+}
+
+// Extraction stricte par marqueurs exacts — jamais de correspondance
+// approximative (même principe que build-nav.mjs, réimplémenté ici
+// localement plutôt qu'importé, pour ne créer aucun couplage de code entre
+// les deux générateurs — décision d'architecture Phase 3.6).
+function extractNamedFragment(source, name, label) {
+  const startMarker = `<!-- ${name} -->`;
+  const endMarker = `<!-- /${name} -->`;
+  const startIdx = source.indexOf(startMarker);
+  const endIdx = source.indexOf(endMarker);
+
+  if (startIdx === -1) throw new Error(`Marqueur "${startMarker}" introuvable (${label})`);
+  if (endIdx === -1) throw new Error(`Marqueur "${endMarker}" introuvable (${label})`);
+  if (source.indexOf(startMarker, startIdx + 1) !== -1) {
+    throw new Error(`Marqueur "${startMarker}" dupliqué (${label})`);
+  }
+  if (source.indexOf(endMarker, endIdx + 1) !== -1) {
+    throw new Error(`Marqueur "${endMarker}" dupliqué (${label})`);
+  }
+  if (endIdx < startIdx) throw new Error(`Marqueur "${endMarker}" trouvé avant "${startMarker}" (${label})`);
+
+  return source.slice(startIdx + startMarker.length, endIdx).trim();
+}
+
+// Lit l'artefact commun produit par build-nav.mjs et en extrait les deux
+// fragments nommés. N'écrit jamais ce fichier, ne connaît aucune marque.
+async function loadCommonNavFragments() {
+  let raw;
+  try {
+    raw = await readFile(COMMON_NAV_ARTIFACT_PATH, 'utf8');
+  } catch (e) {
+    throw new Error(
+      `Impossible de lire partials/nav-common.generated.html (${e.message}) — ` +
+      `exécutez d'abord "node scripts/build-nav.mjs" pour produire cet artefact.`
+    );
+  }
+  const label = 'partials/nav-common.generated.html';
+  return {
+    before: extractNamedFragment(raw, 'COMMON_NAV_BEFORE_PARFUMS', label),
+    after: extractNamedFragment(raw, 'COMMON_NAV_AFTER_PARFUMS', label),
+  };
+}
+
+// Garde-fou générique, indépendant du nom des jetons : protège aussi bien
+// les deux nouveaux jetons que les ~24 jetons déjà existants, et tout futur
+// jeton qui serait ajouté sans son remplacement correspondant. Si un jeton
+// {{...}} subsiste dans le HTML final, la page correspondante n'est jamais
+// écrite (l'erreur est levée avant l'appel à writeFile).
+function assertNoLeftoverTokens(html, label) {
+  const leftover = html.match(/\{\{[A-Z_]+\}\}/g);
+  if (leftover) {
+    throw new Error(`Jeton(s) non substitué(s) dans ${label} : ${[...new Set(leftover)].join(', ')}`);
+  }
 }
 
 // Première phrase d'une description — teaser court sur la carte, dérivé
@@ -222,7 +283,7 @@ function buildParfumsNavBlock(groups, currentBrandSlug) {
   return lines.join('\n');
 }
 
-async function renderBrandPage(group, allGroups) {
+async function renderBrandPage(group, allGroups, commonNav) {
   const { brandSlug, brandName, products } = group;
   const imgPrefix = '../../';
   const volumeGroups = computeVolumeGroups(products);
@@ -266,9 +327,13 @@ async function renderBrandPage(group, allGroups) {
     .replaceAll('{{INTRO_TEXT}}', esc(introText))
     .replace('{{INFO_NOTE_BLOCK}}', buildInfoNoteBlock(volumeGroups))
     .replace('{{FILTER_BUTTONS}}', buildFilterButtonsHtml(volumeGroups))
+    .replace('{{COMMON_NAV_BEFORE_PARFUMS}}', commonNav.before)
     .replace('{{PARFUMS_NAV_BLOCK}}', buildParfumsNavBlock(allGroups, brandSlug))
+    .replace('{{COMMON_NAV_AFTER_PARFUMS}}', commonNav.after)
     .replace('{{JSONLD_ITEMS}}', jsonLdItems)
     .replace('{{PRODUCT_CARDS}}', cardsHtml);
+
+  assertNoLeftoverTokens(html, `parfums/${brandSlug}/index.html`);
 
   await mkdir(new URL(`parfums/${brandSlug}/`, ROOT), { recursive: true });
   await writeFile(new URL(`parfums/${brandSlug}/index.html`, ROOT), html, 'utf8');
@@ -301,7 +366,7 @@ function buildJsonLdBrandItem(group, index) {
   return `      {"@type": "ListItem", "position": ${index + 1}, "url": "https://dar-nur.fr/parfums/${group.brandSlug}/", "name": "${escJson(group.brandName)}"}`;
 }
 
-async function renderHubPage(groups, allProducts) {
+async function renderHubPage(groups, allProducts, commonNav) {
   const brandNames = groups.map(g => g.brandName);
   const brandListText = humanList(brandNames);
   const brandCountLabel = pluralize(groups.length, 'marque');
@@ -330,9 +395,13 @@ async function renderHubPage(groups, allProducts) {
     .replaceAll('{{HERO_SUBTITLE}}', esc(heroSubtitle))
     .replaceAll('{{BRAND_COUNT}}', String(groups.length))
     .replaceAll('{{PRODUCT_COUNT}}', String(allProducts.length))
+    .replace('{{COMMON_NAV_BEFORE_PARFUMS}}', commonNav.before)
     .replace('{{PARFUMS_NAV_BLOCK}}', buildParfumsNavBlock(groups, null))
+    .replace('{{COMMON_NAV_AFTER_PARFUMS}}', commonNav.after)
     .replace('{{JSONLD_BRAND_ITEMS}}', jsonLdBrandItems)
     .replace('{{BRAND_CARDS}}', brandCardsHtml);
+
+  assertNoLeftoverTokens(html, 'parfums/index.html');
 
   await writeFile(HUB_OUTPUT_PATH, html, 'utf8');
 }
@@ -428,10 +497,24 @@ async function main() {
   const groups = groupByBrand(products);
   log(`  ${groups.length} marque(s) détectée(s) : ${groups.map(g => `${g.brandName} (${g.products.length})`).join(', ')}`);
 
-  for (const group of groups) {
-    await renderBrandPage(group, groups);
+  let commonNav;
+  try {
+    commonNav = await loadCommonNavFragments();
+  } catch (e) {
+    fail(e.message);
+    await writeSummary([
+      '## Régénération Parfums — ABANDONNÉE',
+      '',
+      `- Raison : ${e.message}`,
+      '- Aucun fichier modifié — la version précédente reste en ligne.',
+    ]);
+    return;
   }
-  await renderHubPage(groups, products);
+
+  for (const group of groups) {
+    await renderBrandPage(group, groups, commonNav);
+  }
+  await renderHubPage(groups, products, commonNav);
   await updateSitemap(groups);
 
   const durationMs = Date.now() - start;

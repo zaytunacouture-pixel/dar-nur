@@ -1,0 +1,160 @@
+/* nav.css — styles communs du composant de navigation (burger, nav-links, dropdowns,
+   header/nav/brand).
+   Extraction fidèle : contenu strictement identique à celui déjà déployé, inline,
+   sur les 15 pages catégories + 2 gabarits parfums (vérifié caractère pour caractère
+   avant extraction). Aucune valeur modifiée, aucun sélecteur ajouté.
+   index.html (homepage) garde son propre CSS nav inline (comportement SPA
+   spécifique : croix animée, overlay, sélecteurs différents) — non couvert ici,
+   voir N5 dans le plan de chantier.
+   header{}/nav{}/.brand* mutualisés en D5b.1a (Chantier header desktop, phase D5) —
+   même protocole de vérification d'identité stricte que N2/N3, voir
+   D5A_PRE_AUDIT_IMPLEMENTATION_HEADER_DAR_NUR.md. */
+
+header{position:sticky;top:0;z-index:100;background:rgba(13,31,22,.97);backdrop-filter:blur(8px);border-bottom:1px solid rgba(200,168,75,.22)}
+nav{display:flex;align-items:center;justify-content:center;max-width:1520px;margin:0 auto}
+
+/* Rangée identité — D5c.1 (header desktop, reproduction fidèle de
+   design_handoff_header_desktop/index.html, état final D4b.2). Isolée
+   de la rangée navigation, cf. D5C0_PRE_AUDIT_CSS_DESKTOP_DAR_NUR.md. */
+.row-identity{
+  background:linear-gradient(180deg, var(--green) 0%, #09150f 100%);
+  position:relative;
+  padding:20px 44px;
+  display:flex;
+  align-items:center;
+}
+.row-identity::after{
+  content:'';
+  position:absolute;left:0;right:0;bottom:0;height:2px;
+  background:linear-gradient(90deg, transparent, var(--gold) 15%, var(--gold-light) 50%, var(--gold) 85%, transparent);
+  opacity:.9;
+}
+.brand{display:flex;align-items:center;gap:14px;text-decoration:none;line-height:1}
+.brand-logo{width:58px;height:58px;object-fit:cover;border-radius:3px;border:1px solid rgba(200,168,75,.45)}
+.brand-text{display:flex;flex-direction:column;position:relative;padding-left:16px}
+.brand-text::before{
+  content:'';
+  position:absolute;left:0;top:50%;transform:translateY(-50%);
+  width:1px;height:34px;
+  background:linear-gradient(180deg, transparent, rgba(200,168,75,.55), transparent);
+}
+.brand .name{font-family:'Cinzel';font-size:1.3rem;color:var(--cream);letter-spacing:.28em}
+.brand .ar{font-family:'Cormorant Garamond';font-size:.95rem;color:var(--gold-light);letter-spacing:.04em;margin-top:5px}
+/* D5f.3 (R3) : seul effet retenu - une très légère hausse de luminosité,
+   partagée par hover et focus-visible (cohérence avec D5f.2, dont
+   l'anneau de focus reste inchangé et coexiste avec cet effet). Le
+   lockup confirme qu'il est interactif sans devenir un CTA - aucune
+   couleur de repos, taille ou espacement modifié. */
+.brand{transition:filter .18s ease}
+.brand:hover,.brand:focus-visible{filter:brightness(1.1)}
+
+/* Rangée navigation — D5c.2 (header desktop, reproduction fidèle de
+   design_handoff_header_desktop/index.html, état final D4b.2). Le
+   prototype pose le gap directement sur son conteneur nav ; en
+   production, .nav-portal est en display:contents (voir plus bas),
+   donc c'est .nav-links (le conteneur flex réel des items) qui doit
+   porter ce gap - un gap sur nav lui-même n'aurait aucun effet visuel.
+   Padding horizontale réduite de 40px (valeur prototype) à 18px :
+   le prototype a été vérifié à 1440px (D4b.2), mais avec les 9 vrais
+   libellés de nav + white-space:nowrap (prototype) + gap:46px, 40px
+   de marge cause un débordement horizontal réel de ~33px à 1280px
+   (largeur desktop de référence de ce chantier, cf. D5c.1). Mesuré
+   empiriquement en D5c.2 ; réserve D5C0_PRE_AUDIT §3 explicitement
+   prévue pour ce cas.
+   D5c.3 : la marge réelle de non-débordement (mesurée entre .nav-links
+   et le bord de header, pas entre .nav-links et nav - le padding de
+   .row-nav n'agit pas comme une limite dure, rien n'a overflow:hidden)
+   ne dépend que de gap, pas de ce padding. À 1240px (le plus étroit de
+   la plage D1 1240-1920), gap:46px ne laissait que ~4px de marge réelle
+   - tenable mais fragile face à une variation de rendu de police d'un
+   navigateur à l'autre. Réduit à 44px : ~12px de marge à 1240px, sans
+   wrap sur toute la plage 1240-1920px (voir mesures D5c.3). */
+.row-nav{
+  background:var(--green-soft);
+  padding:18px;
+}
+
+.nav-portal{display:contents}
+.nav-links{display:flex;gap:44px;align-items:center;list-style:none}
+.nav-links > li > a{font-family:'Cinzel';font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--cream);opacity:.82;white-space:nowrap;transition:opacity .25s,color .25s}
+.nav-links > li > a:hover{opacity:1;color:var(--gold)}
+/* D5c.2 : lien actif adouci (gold-light, opacité .95 au lieu de gold
+   plein) pour ne plus rivaliser visuellement avec le filet or de la
+   rangée identité, cf. D4b.2. */
+.nav-links > li > a.active, .nav-links > li > a[aria-current="page"]{opacity:.95;color:var(--gold-light)}
+.nav-dropdown{position:relative;display:flex;align-items:center;padding-bottom:12px}
+.nav-dropdown-title{font-family:'Cinzel';font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--cream);opacity:.82;cursor:pointer;padding:4px 0;white-space:nowrap;background:none;border:none;appearance:none;border-bottom:1px solid rgba(200,168,75,.3);transition:opacity .25s,color .25s}
+.nav-dropdown-title:hover{opacity:1;color:var(--gold)}
+.nav-dropdown-title::after{
+  content:'';
+  display:inline-block;
+  width:4px;height:4px;
+  border-right:1px solid currentColor;
+  border-bottom:1px solid currentColor;
+  transform:rotate(45deg);
+  margin-left:7px;
+  opacity:.55;
+}
+.nav-dropdown-menu{display:none;position:absolute;top:100%;left:0;background:rgba(13,31,22,.98);backdrop-filter:blur(8px);min-width:180px;box-shadow:0 12px 32px -12px rgba(0,0,0,.4);padding:10px 0;border:1px solid rgba(200,168,75,.18);border-radius:4px;list-style:none}
+/* D5f.2 : :focus-within au meme titre que :hover - sans ca, un utilisateur
+   clavier tabule dans un panneau invisible (display:none), les liens
+   internes restent atteignables au clavier mais jamais visibles. */
+.nav-dropdown:hover > .nav-dropdown-menu, .nav-dropdown:focus-within > .nav-dropdown-menu{display:flex;flex-direction:column}
+.nav-dropdown-menu a{padding:9px 20px;font-family:'Cinzel';font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--cream);opacity:.8;border-left:3px solid transparent;transition:all .2s}
+.nav-dropdown-menu a:hover,.nav-dropdown-menu a.active,.nav-dropdown-menu a[aria-current="page"]{opacity:1;color:var(--gold);border-left-color:var(--gold);background:rgba(200,168,75,.06)}
+.burger{display:none;flex-direction:column;gap:5px;padding:4px;border:none;background:none}
+.burger span{width:22px;height:2px;background:var(--cream);border-radius:2px;display:block;transition:.3s}
+
+/* D5f.2 : etats clavier (R2) - un filet or clair, distinct du hover (qui ne
+   joue que sur opacity/color, jamais d'outline) et de l'anneau bleu par
+   defaut du navigateur. Offset positif sur les elements de premiere rangee
+   (identite, liens, declencheurs) car ils ont de l'espace autour ; offset
+   negatif (inset) sur les liens de panneau dropdown, plus etroits, pour
+   rester contenu dans l'item plutot que deborder sur ses voisins. */
+.brand:focus-visible,
+.nav-links > li > a:focus-visible,
+.nav-dropdown-title:focus-visible{outline:1px solid var(--gold-light);outline-offset:4px;border-radius:2px}
+.nav-dropdown-menu a:focus-visible{outline:1px solid var(--gold-light);outline-offset:-2px}
+
+@media(max-width:768px){
+  /* Neutralise les rangées desktop (D5c.1) : header redevient une
+     rangée unique flex (logo + burger), comme avant l'introduction de
+     .row-identity. Mobile hors périmètre D5c/D5c.1-3 (voir D5e). */
+  header{display:flex;align-items:center;justify-content:space-between;padding:14px 28px;backdrop-filter:none}
+  .row-identity{background:none;padding:0}
+  .row-identity::after{display:none}
+  .brand{gap:12px}
+  .brand-logo{width:52px;height:52px;border-radius:4px;border:1px solid rgba(200,168,75,.28);box-shadow:0 8px 22px -14px rgba(0,0,0,.9)}
+  .brand-text{padding-left:0}
+  .brand-text::before{display:none}
+  .brand .name{font-size:1.35rem;letter-spacing:.18em}
+  .brand .ar{font-size:1rem;color:var(--gold);margin-top:3px}
+  nav{padding:0;max-width:none;margin:0}
+  /* Neutralise .row-nav (D5c.2), même logique que .row-identity ci-dessus :
+     le wrapper desktop ne doit rien ajouter au rendu mobile existant. */
+  .row-nav{background:none;padding:0}
+  .nav-links > li > a.active, .nav-links > li > a[aria-current="page"]{opacity:1;color:var(--gold)}
+  .nav-links > li > a{white-space:normal}
+  .nav-dropdown-title{border-bottom:none;white-space:normal}
+  .nav-dropdown-title::after{display:none}
+  .nav-portal{
+    display:block;
+    position:fixed;inset:0;overflow:clip;pointer-events:none;
+    transform:translateZ(0);z-index:96;
+  }
+  /* D5e.2 : visibility accrochee au meme etat logique .open que transform
+     (aucun nouvel etat, aucun JS) - retire les 22 elements du panneau du
+     parcours de tabulation quand il est ferme (defaut n°2 de D5E0_PRE_AUDIT_
+     NAV_MOBILE_DAR_NUR.md). Delai de .35s sur la seule fermeture (pas sur
+     l'ouverture, cf. transition redeclaree sur .open ci-dessous) pour que
+     visibility ne bascule qu'une fois le glissement transform termine -
+     sans ce delai le panneau disparaitrait instantanement au lieu de
+     glisser hors champ, cassant l'animation existante (visible pour la
+     premiere fois depuis D5e.1). Duree/easing du transform inchanges. */
+  .nav-links{position:fixed;top:81px;right:0;height:calc(100vh - 81px);width:74%;max-width:320px;background:var(--green);flex-direction:column;align-items:flex-start;padding:24px 28px;gap:4px;transform:translateX(100%);visibility:hidden;transition:transform .35s ease,visibility 0s linear .35s;overflow-y:auto;pointer-events:auto}
+  .nav-links.open{transform:translateX(0);visibility:visible;transition:transform .35s ease}
+  .nav-links > li > a{padding:16px 0;width:100%;border-bottom:1px solid rgba(200,168,75,.12)}
+  .nav-dropdown{flex-direction:column;width:100%;align-items:flex-start;padding-bottom:0}
+  .nav-dropdown-menu{position:static;display:flex;flex-direction:column;width:100%;padding:0;margin:0;background:transparent;border:none}
+  .burger{display:flex}
+}

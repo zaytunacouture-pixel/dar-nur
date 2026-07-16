@@ -1,0 +1,94 @@
+<!--
+  partials/nav.html — gabarit HTML canonique de la navigation Dar Nūr.
+
+  Consommé par scripts/build-nav.mjs (Phase 3.3, pas encore écrit) qui lit
+  data/nav.config.json et compose le bloc final à injecter dans les 19 pages
+  servies, entre des marqueurs <!-- AUTO:NAV:START/END --> (même convention
+  que <!-- AUTO:PARFUMS:START/END --> déjà en place dans sitemap.xml).
+
+  Aucune donnée réelle (libellé, URL, id de catégorie) n'est écrite ici en
+  dur : tout ce qui provient de data/nav.config.json est représenté par un
+  jeton {{...}}, substitué au moment du build. Ce fichier n'est jamais
+  copié-collé tel quel dans une page — il est le modèle source, pas une
+  sortie. Reprend telles quelles les classes CSS déjà déployées en
+  production (nav-portal, nav-links, nav-dropdown, nav-dropdown-title,
+  nav-dropdown-menu, burger) pour que nav.css (Phase 3.6) puisse cibler la
+  structure existante sans renommage.
+
+  {{LOGO_SRC}} : chemin racine-absolu de l'image (identique quelle que soit
+  la profondeur de la page servante — /logo-dar-nur.png fonctionne depuis
+  la homepage comme depuis /parfums/lecode/, contrairement aux chemins
+  relatifs ../ actuellement utilisés par les pages catégories).
+-->
+
+<!-- NAV:SKELETON:START -->
+<header>
+  <nav aria-label="Navigation principale">
+    <a class="brand" href="/">
+      <img src="{{LOGO_SRC}}" alt="Logo Dar Nūr" class="brand-logo"/>
+      <span class="brand-text">
+        <span class="name">DAR NŪR</span>
+        <span class="ar">دار النور</span>
+      </span>
+    </a>
+
+    <div class="nav-portal">
+      <ul class="nav-links" id="navLinks">
+        {{NAV_ENTRIES}}
+      </ul>
+    </div>
+
+    <button
+      type="button"
+      class="burger"
+      id="burger"
+      aria-label="Menu"
+      aria-expanded="false"
+      aria-controls="navLinks"
+    ><span></span><span></span><span></span></button>
+  </nav>
+</header>
+<!-- NAV:SKELETON:END -->
+
+<!-- ============================================================
+     Gabarits par type d'entrée — nav.config.json → entries[].type
+     Composent {{NAV_ENTRIES}} ci-dessus. Ne sont jamais rendus tels
+     quels : chaque bloc est un modèle répété une fois par entrée réelle
+     du fichier de configuration, jamais une donnée en soi. Chacun est
+     délimité par des marqueurs explicites, extraits par
+     scripts/build-nav.mjs sans jamais recourir à une correspondance
+     approximative (même principe que l'injection AUTO:NAV dans les
+     pages : des bornes exactes, jamais une recherche de <nav> ou de
+     classe CSS arbitraire).
+     ============================================================ -->
+
+<!-- Gabarit A — entries[].type === "link" (premier niveau ou sous-entrée
+     d'un groupe : structure identique dans les deux cas, un seul gabarit
+     couvre les deux emplacements). {{ACTIVE_ATTR}} = aria-current="page"
+     si href correspond à l'URL de la page servante, sinon absent. -->
+<!-- NAV:TEMPLATE:LINK:START -->
+<li class="nav-item" role="none">
+  <a href="{{HREF}}" id="nav-{{ID}}" {{ACTIVE_ATTR}}>{{LABEL}}</a>
+</li>
+<!-- NAV:TEMPLATE:LINK:END -->
+
+<!-- Gabarit B — entries[].type === "group". {{GROUP_CHILDREN}} = une
+     répétition du Gabarit A pour chaque entrée de children[]. Le
+     déclencheur est un vrai <button> (pas un <div>) pour rester
+     focalisable et porter les attributs ARIA d'un menu déroulant. -->
+<!-- NAV:TEMPLATE:GROUP:START -->
+<li class="nav-item nav-dropdown" role="none">
+  <button
+    type="button"
+    class="nav-dropdown-title"
+    id="nav-{{ID}}-trigger"
+    aria-haspopup="true"
+    aria-expanded="false"
+    aria-controls="nav-{{ID}}-menu"
+    {{GROUP_ACTIVE_ATTR}}
+  >{{LABEL}}</button>
+  <ul class="nav-dropdown-menu" id="nav-{{ID}}-menu" aria-label="{{LABEL}}">
+    {{GROUP_CHILDREN}}
+  </ul>
+</li>
+<!-- NAV:TEMPLATE:GROUP:END -->

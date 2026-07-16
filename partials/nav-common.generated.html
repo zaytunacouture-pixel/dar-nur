@@ -1,0 +1,101 @@
+<!--
+  partials/nav-common.generated.html — ARTEFACT GÉNÉRÉ, NE JAMAIS ÉDITER À LA MAIN.
+  Produit par scripts/build-nav.mjs (fonction writeCommonNavArtifact) depuis
+  data/nav.config.json + partials/nav.html. Toute correction se fait à la
+  source, jamais ici — ce fichier est réécrit intégralement à chaque exécution.
+
+  Consommé par scripts/generate-parfums.mjs (Phase 3.6.3) qui extrait les deux
+  fragments nommés ci-dessous et les insère dans ses propres templates via les
+  jetons {{COMMON_NAV_BEFORE_PARFUMS}} / {{COMMON_NAV_AFTER_PARFUMS}}. Son propre
+  dropdown "Parfums" (par marque) se place entre les deux, en dehors de cet
+  artefact — build-nav.mjs ne connaît aucune marque.
+-->
+
+<!-- COMMON_NAV_BEFORE_PARFUMS -->
+<li class="nav-item" role="none">
+  <a href="https://dar-nur.fr/#boutique" id="nav-boutique" >Boutique</a>
+</li>
+<li class="nav-item nav-dropdown" role="none">
+  <button
+    type="button"
+    class="nav-dropdown-title"
+    id="nav-bien-etre-trigger"
+    aria-haspopup="true"
+    aria-expanded="false"
+    aria-controls="nav-bien-etre-menu"
+    
+  >Bien-être</button>
+  <ul class="nav-dropdown-menu" id="nav-bien-etre-menu" aria-label="Bien-être">
+    <li class="nav-item" role="none">
+  <a href="/miels/" id="nav-miels" >Miels</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="/miels-gourmands/" id="nav-miels-gourmands" >Miels Gourmands</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="/miels-terroir/" id="nav-miels-terroir" >Miels du Terroir</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="/gelules/" id="nav-gelules" >Gélules</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="/poudres/" id="nav-poudres" >Poudres & Graines</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="/huiles/" id="nav-huiles" >Huiles</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="/brumes/" id="nav-brumes" >Brumes</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="/bakhour/" id="nav-bakhour" >Bakhour & Encens</a>
+</li>
+  </ul>
+</li>
+<!-- /COMMON_NAV_BEFORE_PARFUMS -->
+
+<!-- COMMON_NAV_AFTER_PARFUMS -->
+<li class="nav-item nav-dropdown" role="none">
+  <button
+    type="button"
+    class="nav-dropdown-title"
+    id="nav-mode-accessoires-trigger"
+    aria-haspopup="true"
+    aria-expanded="false"
+    aria-controls="nav-mode-accessoires-menu"
+    
+  >Mode & Accessoires</button>
+  <ul class="nav-dropdown-menu" id="nav-mode-accessoires-menu" aria-label="Mode & Accessoires">
+    <li class="nav-item" role="none">
+  <a href="/qamis/" id="nav-qamis" >Qamis</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="/abayas/" id="nav-abayas" >Abayas & Ensembles</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="/bijoux/" id="nav-bijoux" >Bagues & Bijoux</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="/chaussures/" id="nav-chaussures" >Sandales</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="/chechias/" id="nav-chechias" >Chéchias</a>
+</li>
+  </ul>
+</li>
+<li class="nav-item" role="none">
+  <a href="/tahara/" id="nav-tahara" >Tahara & Hygiène</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="/accessoires/" id="nav-accessoires" >Accessoires</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="https://dar-nur.fr/#histoire" id="nav-notre-histoire" >Notre histoire</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="https://dar-nur.fr/#faq" id="nav-faq" >FAQ</a>
+</li>
+<li class="nav-item" role="none">
+  <a href="https://dar-nur.fr/#avis-clients" id="nav-avis" >Avis</a>
+</li>
+<!-- /COMMON_NAV_AFTER_PARFUMS -->
