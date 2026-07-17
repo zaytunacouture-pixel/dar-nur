@@ -406,6 +406,38 @@ async function renderHubPage(groups, allProducts, commonNav) {
   await writeFile(HUB_OUTPUT_PATH, html, 'utf8');
 }
 
+// Garde-fou final avant écriture : parcourt CHAQUE <url> du sitemap complet
+// (pas seulement le bloc généré ici) et fait échouer la génération — sans
+// toucher au fichier sur disque — si une entrée a un <loc> absent/vide, un
+// <loc> non absolu (hors https://dar-nur.fr/...), ou si un <loc> est dupliqué.
+// Réimplémentée à l'identique dans scripts/generate-product-pages.mjs plutôt
+// qu'importée, même principe de découplage que le reste du fichier.
+function validateSitemapXml(xml) {
+  const urlBlocks = xml.match(/<url>[\s\S]*?<\/url>/g) || [];
+  const locs = [];
+  for (const block of urlBlocks) {
+    const locMatches = block.match(/<loc>[\s\S]*?<\/loc>/g) || [];
+    if (locMatches.length !== 1) {
+      throw new Error(`sitemap.xml invalide : une entrée <url> doit contenir exactement une balise <loc> (${locMatches.length} trouvée(s)) :\n${block}`);
+    }
+    const loc = locMatches[0].replace(/<\/?loc>/g, '').trim();
+    if (!loc) {
+      throw new Error(`sitemap.xml invalide : <loc> vide dans une entrée <url> :\n${block}`);
+    }
+    if (!loc.startsWith('https://dar-nur.fr')) {
+      throw new Error(`sitemap.xml invalide : <loc> non absolue (doit commencer par https://dar-nur.fr) : "${loc}"`);
+    }
+    locs.push(loc);
+  }
+  const seen = new Set();
+  for (const loc of locs) {
+    if (seen.has(loc)) {
+      throw new Error(`sitemap.xml invalide : <loc> dupliquée : "${loc}"`);
+    }
+    seen.add(loc);
+  }
+}
+
 // Bloc délimité dans sitemap.xml — n'affecte jamais les autres catégories.
 // Premier passage après migration : remplace l'ancienne entrée statique unique
 // /parfums/. Passages suivants : remplace uniquement le bloc marqué.
@@ -414,9 +446,11 @@ async function updateSitemap(groups) {
   const lastmod = new Date().toISOString().slice(0, 10);
 
   const hubEntry = `  <url>\n    <loc>https://dar-nur.fr/parfums/</loc>\n    <lastmod>${lastmod}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.9</priority>\n  </url>`;
-  const brandEntries = groups.map(g =>
-    `  <url>\n    <loc>https://dar-nur.fr/parfums/${g.brandSlug}/</loc>\n    <lastmod>${lastmod}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>`
-  ).join('\n');
+  const brandEntries = groups
+    .filter(g => g.brandSlug)
+    .map(g =>
+      `  <url>\n    <loc>https://dar-nur.fr/parfums/${g.brandSlug}/</loc>\n    <lastmod>${lastmod}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>`
+    ).join('\n');
   const block = `<!-- AUTO:PARFUMS:START — géré automatiquement par scripts/generate-parfums.mjs, ne pas éditer à la main -->\n${hubEntry}\n${brandEntries}\n  <!-- AUTO:PARFUMS:END -->`;
 
   const markerRegex = /<!-- AUTO:PARFUMS:START[\s\S]*?AUTO:PARFUMS:END -->/;
@@ -430,6 +464,8 @@ async function updateSitemap(groups) {
   } else {
     throw new Error("Impossible de localiser l'entrée /parfums/ dans sitemap.xml pour la remplacer — abandon plutôt que de corrompre le fichier.");
   }
+
+  validateSitemapXml(updated);
 
   // Nettoyage des anciens dossiers de marque qui n'existent plus (marque
   // renommée ou retirée) — comparé à ce que le PRÉCÉDENT bloc sitemap listait,

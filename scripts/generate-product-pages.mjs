@@ -212,6 +212,38 @@ function injectProductHead(html, product, meta) {
   return out;
 }
 
+// Garde-fou final avant écriture : parcourt CHAQUE <url> du sitemap complet
+// (pas seulement le bloc généré ici) et fait échouer la génération — sans
+// toucher au fichier sur disque — si une entrée a un <loc> absent/vide, un
+// <loc> non absolu (hors https://dar-nur.fr/...), ou si un <loc> est dupliqué.
+// Réimplémentée à l'identique dans scripts/generate-parfums.mjs plutôt
+// qu'importée, même logique de découplage que le reste du fichier.
+function validateSitemapXml(xml) {
+  const urlBlocks = xml.match(/<url>[\s\S]*?<\/url>/g) || [];
+  const locs = [];
+  for (const block of urlBlocks) {
+    const locMatches = block.match(/<loc>[\s\S]*?<\/loc>/g) || [];
+    if (locMatches.length !== 1) {
+      throw new Error(`sitemap.xml invalide : une entrée <url> doit contenir exactement une balise <loc> (${locMatches.length} trouvée(s)) :\n${block}`);
+    }
+    const loc = locMatches[0].replace(/<\/?loc>/g, '').trim();
+    if (!loc) {
+      throw new Error(`sitemap.xml invalide : <loc> vide dans une entrée <url> :\n${block}`);
+    }
+    if (!loc.startsWith('https://dar-nur.fr')) {
+      throw new Error(`sitemap.xml invalide : <loc> non absolue (doit commencer par https://dar-nur.fr) : "${loc}"`);
+    }
+    locs.push(loc);
+  }
+  const seen = new Set();
+  for (const loc of locs) {
+    if (seen.has(loc)) {
+      throw new Error(`sitemap.xml invalide : <loc> dupliquée : "${loc}"`);
+    }
+    seen.add(loc);
+  }
+}
+
 // Retire les anciennes entrées produit en ancre (<loc>https://dar-nur.fr#slug</loc>,
 // une par produit, jamais regroupées dans un bloc délimité jusqu'ici) et les
 // remplace par un bloc délimité unique — même principe que le bloc
@@ -229,6 +261,7 @@ async function updateSitemap(products) {
   sitemap = sitemap.replace(markerRegex, '');
 
   const entries = products
+    .filter(p => p.slug)
     .map(p => `  <url>\n    <loc>https://dar-nur.fr/${p.slug}/</loc>\n    <lastmod>${lastmod}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.8</priority>\n  </url>`)
     .join('\n');
   const block = `<!-- AUTO:PRODUCTS:START — géré automatiquement par scripts/generate-product-pages.mjs, ne pas éditer à la main -->\n${entries}\n  <!-- AUTO:PRODUCTS:END -->\n`;
@@ -237,6 +270,8 @@ async function updateSitemap(products) {
     throw new Error('Balise </urlset> introuvable dans sitemap.xml — abandon pour ne pas corrompre le fichier.');
   }
   sitemap = sitemap.replace('</urlset>', `${block}</urlset>`);
+
+  validateSitemapXml(sitemap);
 
   await writeFile(SITEMAP_PATH, sitemap, 'utf8');
   return legacyMatches.length;
