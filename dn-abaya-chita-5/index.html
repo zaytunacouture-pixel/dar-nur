@@ -9,7 +9,7 @@
 <!-- Google Search Console — NE JAMAIS SUPPRIMER -->
 <meta name="google-site-verification" content="REMPLACER_PAR_VOTRE_VALEUR_EXISTANTE" />
 
-<title>Abaya Chita (eggplant) — Dar Nūr | Couture femme</title>
+<title>Abaya Chita (eggplant) | Dar Nūr</title>
 <meta name="description" content="Abaya Chita (eggplant) — Dar Nūr. Abaya Hivernale. 44.9 €. Commandez sur WhatsApp." />
 
 <meta property="og:title" content="Abaya Chita (eggplant) — Dar Nūr" />
@@ -2720,9 +2720,26 @@ function setProductGalleryImage(btn, src){
 }
 
 /* ============ RENDER PRODUCT PAGE ============ */
+// Construit le <title> SEO d'une fiche produit : nom exact du produit, puis
+// un qualificatif optionnel tiré de la tagline — ajouté uniquement quand
+// plusieurs produits de la même catégorie partagent le même nom (variantes
+// de couleur/modèle) ET que leurs taglines diffèrent réellement entre elles.
+// Même règle répliquée côté génération statique dans
+// scripts/generate-product-pages.mjs (buildProductTitle()) — garder synchro.
+function buildProductTitle(product){
+  const siblings = PRODUCTS.filter(p => p.cat === product.cat && p.name.trim().toLowerCase() === product.name.trim().toLowerCase());
+  let title = product.name;
+  if(siblings.length > 1){
+    const distinct = new Set(siblings.map(p => (p.tagline || '').trim()).filter(Boolean));
+    const myTagline = (product.tagline || '').trim();
+    if(myTagline && distinct.size > 1) title += ` – ${myTagline}`;
+  }
+  return `${title} | Dar Nūr`;
+}
+
 function updatePageMetadata(product){
   // Update title tag
-  document.title = `${product.name} — Dar Nūr | ${CAT_LABELS[product.cat] || product.cat}`;
+  document.title = buildProductTitle(product);
 
   // Build price display string based on actual price type present in data
   let priceStr = '';
@@ -2859,7 +2876,7 @@ function updatePageMetadata(product){
 }
 
 function updateHomeMetadata(){
-  document.title = "Dar Nūr — Produits Naturels Premium | Miels, Huiles, Gélules";
+  document.title = "Dar Nūr — Produits Naturels & Mode Islamique Premium";
   const metaDesc = document.querySelector("meta[name='description']");
   if(metaDesc) metaDesc.setAttribute("content", "Dar Nūr propose des produits naturels 100% purs : miels artisanaux, huiles essentielles, gélules de plantes. Commandez via WhatsApp.");
   const canonicalLink = document.getElementById("canonicalLink");

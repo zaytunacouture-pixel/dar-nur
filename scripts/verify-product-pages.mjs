@@ -38,7 +38,7 @@ function checkPageHtml(slug, html, errors) {
 
   const titleMatch = html.match(/<title>([^<]*)<\/title>/);
   if (!titleMatch || !titleMatch[1].trim()) errors.push('title manquant');
-  else if (titleMatch[1].includes('Dar Nūr — Produits Naturels Premium')) errors.push('title générique (pas réécrit pour ce produit)');
+  else if (titleMatch[1].includes('Dar Nūr — Produits Naturels & Mode Islamique Premium')) errors.push('title générique (pas réécrit pour ce produit)');
 
   const descMatch = html.match(/<meta name="description" content="([^"]*)"/);
   if (!descMatch || !descMatch[1].trim()) errors.push('meta description manquante');

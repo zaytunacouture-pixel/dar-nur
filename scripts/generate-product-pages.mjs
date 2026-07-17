@@ -89,11 +89,28 @@ function adaptPrice(p) {
 // que adaptPrice() ci-dessus.
 const CAT_SLUG_OVERRIDES = { vetements: 'abayas' };
 
+// Construit le <title> SEO d'une fiche produit : nom exact du produit, puis
+// un qualificatif optionnel tiré de la tagline — ajouté uniquement quand
+// plusieurs produits actifs de la même catégorie partagent le même nom
+// (variantes de couleur/modèle) ET que leurs taglines respectives diffèrent
+// réellement entre elles (sinon la tagline n'apporte aucune information
+// distinctive et on ne l'invente pas). Termine toujours par "| Dar Nūr".
+// Même règle répliquée côté JS runtime dans updatePageMetadata() (index.html).
+function buildProductTitle(product, siblingTaglines) {
+  let title = product.name;
+  if (siblingTaglines) {
+    const distinct = new Set(siblingTaglines.map(t => (t || '').trim()).filter(Boolean));
+    const myTagline = (product.tagline || '').trim();
+    if (myTagline && distinct.size > 1) title += ` – ${myTagline}`;
+  }
+  return `${title} | Dar Nūr`;
+}
+
 // Réplique updatePageMetadata() côté serveur — mêmes règles de format de
 // titre/description que le JS runtime, pour que le <head> statique et le
 // <head> mis à jour au chargement disent la même chose.
-function computeMeta(product, catLabel) {
-  const title = `${product.name} — Dar Nūr | ${catLabel || product.category_id}`;
+function computeMeta(product, catLabel, siblingTaglines) {
+  const title = buildProductTitle(product, siblingTaglines);
 
   const price = adaptPrice(product);
   let priceStr = '';
@@ -199,7 +216,7 @@ function injectProductHead(html, product, meta, catLabel, price) {
   let out = html;
 
   out = replaceLine(out,
-    '<title>Dar Nūr — Produits Naturels Premium | Miels, Huiles, Gélules</title>',
+    '<title>Dar Nūr — Produits Naturels & Mode Islamique Premium</title>',
     `<title>${esc(meta.title)}</title>`,
     'title');
 
@@ -398,6 +415,15 @@ async function main() {
   const manifestSlugs = await loadManifest();
   const reserved = await getReservedNames(manifestSlugs);
 
+  // Regroupe les produits actifs par (catégorie, nom) pour repérer les
+  // doublons de <title> avant génération — voir buildProductTitle().
+  const nameGroups = new Map();
+  for (const p of products) {
+    const key = `${p.category_id}||${p.name.trim().toLowerCase()}`;
+    if (!nameGroups.has(key)) nameGroups.set(key, []);
+    nameGroups.get(key).push(p);
+  }
+
   const written = [];
   const skipped = [];
 
@@ -413,7 +439,9 @@ async function main() {
     }
 
     const catLabel = catLabels.get(p.category_id);
-    const meta = computeMeta(p, catLabel);
+    const group = nameGroups.get(`${p.category_id}||${p.name.trim().toLowerCase()}`);
+    const siblingTaglines = group.length > 1 ? group.map(g => g.tagline) : null;
+    const meta = computeMeta(p, catLabel, siblingTaglines);
     let html;
     try {
       html = injectProductHead(indexTemplate, p, meta, catLabel, adaptPrice(p));
