@@ -84,6 +84,11 @@ function adaptPrice(p) {
   return { type: 'fixed', value: p.price_value };
 }
 
+// Même override que _CAT_SLUG_OVERRIDES dans index.html (catégorie Supabase
+// "vetements" affichée sous l'URL /abayas/) — dupliqué pour la même raison
+// que adaptPrice() ci-dessus.
+const CAT_SLUG_OVERRIDES = { vetements: 'abayas' };
+
 // Réplique updatePageMetadata() côté serveur — mêmes règles de format de
 // titre/description que le JS runtime, pour que le <head> statique et le
 // <head> mis à jour au chargement disent la même chose.
@@ -129,7 +134,66 @@ function replaceLine(html, oldLine, newLine, label) {
   return html.replace(oldLine, newLine);
 }
 
-function injectProductHead(html, product, meta) {
+// Contenu minimal mais réel du produit, injecté directement dans le HTML
+// statique (#productView), pour que toute fiche soit indexable sans
+// exécution JS : le moteur SPA (showProduct(), voir index.html) écrase ce
+// bloc au chargement avec le rendu riche habituel (famille de produits,
+// accordéons...) — ceci n'est qu'un filet de contenu réel pour les robots
+// et les visiteurs avant que le JS/Supabase n'ait fini de charger.
+function buildProductSSR(product, catLabel, meta, price) {
+  const name = esc(product.name);
+  const tagline = esc(product.tagline || '');
+  const label = esc(catLabel || product.category_id);
+  const catSlug = CAT_SLUG_OVERRIDES[product.category_id] || product.category_id;
+  const description = Array.isArray(product.description) ? product.description : [];
+  const descHtml = description.map(d => `<p>${esc(d)}</p>`).join('\n        ');
+
+  let priceHtml = '';
+  if ((price.type === 'format' || price.type === 'size') && price.options && price.options.length) {
+    priceHtml = `<div class="order-price"><span>dès ${esc(String(price.options[0][1]))}€</span></div>`;
+  } else if (price.type === 'fixed' && price.value) {
+    priceHtml = `<div class="order-price"><span>${esc(String(price.value))}€</span></div>`;
+  }
+
+  const images = Array.isArray(product.images) ? product.images.filter(Boolean) : [];
+  const img = images[0];
+  const imgHtml = img
+    ? `<img src="${esc(img)}" alt="${name}" class="pp-product-img" loading="eager"/>`
+    : `<img src="logo-dar-nur.png" alt="Dar Nūr" class="pp-logo-ph"/>`;
+
+  const waText = encodeURIComponent(`As-salâm 'alaykoum, je suis intéressé(e) par : ${product.name}`);
+
+  return `
+    <div class="pp-breadcrumb-bar">
+      <div class="pp-breadcrumb-bar-inner breadcrumb">
+        <a href="/">Dar Nūr</a><span>›</span>
+        <a href="/${esc(catSlug)}/">${label}</a><span>›</span>
+        <span style="color:var(--ink);font-weight:500">${name}</span>
+      </div>
+    </div>
+    <section class="pp-hero">
+      <div class="pp-hero-inner">
+        <div class="pp-badge">${label}</div>
+        <h1>${name}</h1>
+        <div class="tagline">${tagline}</div>
+      </div>
+    </section>
+    <div class="pp-body">
+      <div class="pp-gallery">
+        <div class="pp-visual${img ? ' has-photo' : ''}">${imgHtml}</div>
+      </div>
+      <div class="pp-content">
+        ${descHtml}
+        <div class="order-box">
+          ${priceHtml}
+          <a class="btn-wa dark" href="https://wa.me/33769253375?text=${waText}" target="_blank" rel="noopener">Commander sur WhatsApp</a>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function injectProductHead(html, product, meta, catLabel, price) {
   const escName = esc(product.name);
   const escTagline = esc(product.tagline || '');
   let out = html;
@@ -208,6 +272,22 @@ function injectProductHead(html, product, meta) {
     '<!DOCTYPE html>',
     `<!DOCTYPE html>\n<!-- GENERATED:PRODUCT-PAGE:${product.slug} — généré par scripts/generate-product-pages.mjs, ne pas éditer à la main -->`
   );
+
+  // Rend la fiche produit visible par défaut (et masque la vue accueil) —
+  // le JS (showHome()/showProduct()) réécrit de toute façon ces styles via
+  // affectation directe au chargement, donc ceci ne change rien une fois le
+  // JS exécuté ; ça évite en revanche qu'un robot sans JS (ou un visiteur
+  // avant la fin du chargement) ne voie que la page d'accueil sur une URL
+  // produit.
+  out = replaceLine(out,
+    '<main id="homeView">',
+    '<main id="homeView" style="display:none">',
+    'homeView display');
+
+  out = replaceLine(out,
+    '<div id="productView"></div>',
+    `<div id="productView" style="display:block">${buildProductSSR(product, catLabel, meta, price)}</div>`,
+    'productView content');
 
   return out;
 }
@@ -332,10 +412,11 @@ async function main() {
       continue;
     }
 
-    const meta = computeMeta(p, catLabels.get(p.category_id));
+    const catLabel = catLabels.get(p.category_id);
+    const meta = computeMeta(p, catLabel);
     let html;
     try {
-      html = injectProductHead(indexTemplate, p, meta);
+      html = injectProductHead(indexTemplate, p, meta, catLabel, adaptPrice(p));
     } catch (e) {
       skipped.push({ slug, reason: e.message });
       continue;
