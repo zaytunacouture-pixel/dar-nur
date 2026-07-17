@@ -2,6 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8" />
+<base href="/" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
 <!-- Google Search Console — NE JAMAIS SUPPRIMER -->
@@ -948,7 +949,7 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
       <h1>L'authenticité a une maison.</h1>
       <p class="sub">Miels bruts, huiles précieuses, parfums d'orient et pièces choisies avec exigence.</p>
       <a class="hero-cta" onclick="goCat('all')">Découvrir la collection</a>
-      <a class="hero-cta-secondary" href="#best-a">Voir les best-sellers ↓</a>
+      <a class="hero-cta-secondary" href="#best-a" onclick="event.preventDefault();document.getElementById('best-a').scrollIntoView({behavior:'smooth'})">Voir les best-sellers ↓</a>
     </div>
   </section>
 
@@ -2661,7 +2662,7 @@ function priceLabel(p){
 function waLink(p, opt, price){
   const isWear = p.cat==='qamis'||p.cat==='vetements';
   const date = new Date().toLocaleDateString('fr-FR');
-  const url = 'https://dar-nur.fr/#'+p.id;
+  const url = 'https://dar-nur.fr/'+p.id+'/';
   let variantLine = '';
   if(isWear){
     variantLine = '\n• Taille : '+(opt||'');
@@ -2754,7 +2755,7 @@ function updatePageMetadata(product){
 
   // Update canonical link
   const canonicalLink = document.getElementById("canonicalLink");
-  if(canonicalLink) canonicalLink.href = `https://dar-nur.fr#${product.id}`;
+  if(canonicalLink) canonicalLink.href = `https://dar-nur.fr/${product.id}/`;
 
   // Update OG tags
   const ogTitle = document.querySelector("meta[property='og:title']");
@@ -2764,7 +2765,7 @@ function updatePageMetadata(product){
   if(ogDesc) ogDesc.setAttribute("content", product.tagline);
 
   const ogUrl = document.querySelector("meta[property='og:url']");
-  if(ogUrl) ogUrl.setAttribute("content", `https://dar-nur.fr#${product.id}`);
+  if(ogUrl) ogUrl.setAttribute("content", `https://dar-nur.fr/${product.id}/`);
 
   // Update OG image (always set, either to product image or logo)
   const ogImage = document.querySelector("meta[property='og:image']");
@@ -2818,7 +2819,7 @@ function updatePageMetadata(product){
 
   // Update twitter:url
   const twitterUrl = document.querySelector("meta[name='twitter:url']");
-  if(twitterUrl) twitterUrl.setAttribute("content", `https://dar-nur.fr#${product.id}`);
+  if(twitterUrl) twitterUrl.setAttribute("content", `https://dar-nur.fr/${product.id}/`);
 
   // Update Product Schema.org JSON-LD
   let productSchema = document.getElementById("productSchema");
@@ -2840,7 +2841,7 @@ function updatePageMetadata(product){
     },
     "image": productImg ? `https://dar-nur.fr/${productImg}` : "https://dar-nur.fr/logo-dar-nur.png",
     "category": CAT_LABELS[product.cat],
-    "url": `https://dar-nur.fr#${product.id}`
+    "url": `https://dar-nur.fr/${product.id}/`
   };
 
   // Add price offer only using data actually present in the product object
@@ -2914,6 +2915,7 @@ function showProduct(id){
   const p = PRODUCTS.find(x=>x.id===id);
   if(!p) return;
   activeProduct = p; activeOption = 0;
+  if(location.pathname !== '/'+id+'/') history.pushState({productId:id}, '', '/'+id+'/');
   updatePageMetadata(p);
   const hasOptions = p.price.type!=="fixed";
   const optLabel = p.price.type==="format" ? "Choisissez votre format" : (p.price.type==="size" ? "Choisissez votre taille" : "");
@@ -3175,6 +3177,7 @@ function updateMobileBar(){
 
 /* ============ NAV ============ */
 function showHome(){
+  if(location.pathname !== '/') history.pushState({}, '', '/');
   updateHomeMetadata();
   document.getElementById("productView").style.display="none";
   document.getElementById("homeView").style.display="block";
@@ -3389,14 +3392,29 @@ syncBar();
     renderCollections();
     renderBestsellers();
   } finally {
-    /* Routage minimal par hash : ouvre directement une fiche produit si l'URL
-       arrive avec #<id-produit> (liens "Voir la fiche" des pages catégories) */
-    if(location.hash.length > 1){
+    /* Routage : une URL /{slug}/ (fichier statique généré par
+       scripts/generate-product-pages.mjs, servi via <base href="/">) affiche
+       directement la fiche produit correspondante. */
+    const _pathSlug = location.pathname.split('/').filter(Boolean)[0] || null;
+    if(_pathSlug && PRODUCTS.find(p=>p.id===_pathSlug)){
+      showProduct(_pathSlug);
+    } else if(location.hash.length > 1){
+      /* Compatibilité durable des anciennes ancres #<id-produit> : on affiche
+         la fiche et on bascule silencieusement l'URL vers /{slug}/, sans rechargement. */
       const _hashProductId = decodeURIComponent(location.hash.slice(1));
-      if(PRODUCTS.find(p=>p.id===_hashProductId)) showProduct(_hashProductId);
+      if(PRODUCTS.find(p=>p.id===_hashProductId)){
+        history.replaceState(null, '', '/'+_hashProductId+'/');
+        showProduct(_hashProductId);
+      }
     }
   }
 })();
+
+window.addEventListener('popstate', () => {
+  const _slug = location.pathname.split('/').filter(Boolean)[0] || null;
+  if(_slug && PRODUCTS.find(p=>p.id===_slug)) showProduct(_slug);
+  else showHome();
+});
 
 /* ── Offres & Packs : section publique ── */
 let _offersSB    = null;  // Référence Supabase pour les modals
