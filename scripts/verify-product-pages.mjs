@@ -140,6 +140,15 @@ async function main() {
           fail(slug, `X-Robots-Tag: ${xRobots}`);
           prodErrors++;
         }
+        if (res.status === 200) {
+          const html = await res.text();
+          const bodyErrors = [];
+          checkPageHtml(slug, html, bodyErrors);
+          if (bodyErrors.length) {
+            for (const e of bodyErrors) fail(slug, `[HTML] ${e}`);
+            prodErrors++;
+          }
+        }
       } catch (e) {
         fail(slug, `requête échouée : ${e.message}`);
         prodErrors++;
