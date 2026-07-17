@@ -900,9 +900,6 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
   <a href="/abayas/" id="nav-abayas" >Abayas & Ensembles</a>
 </li>
 <li class="nav-item" role="none">
-  <a href="/bijoux/" id="nav-bijoux" >Bagues & Bijoux</a>
-</li>
-<li class="nav-item" role="none">
   <a href="/chaussures/" id="nav-chaussures" >Sandales</a>
 </li>
 <li class="nav-item" role="none">
@@ -1356,7 +1353,7 @@ const _CAT_LABELS_FB = {
   miels:"Miel artisanal", gelules:"Gélules végétales", poudres:"Poudre & graine",
   huiles:"Huile pure", brumes:"Brume & soin", qamis:"Qamis saoudien", vetements:"Couture femme",
   chechias:"Chéchia", tahara:"Tahara & Hygiène", parfums:"Parfum & Musc",
-  bakhour:"Bakhour & Encens", bijoux:"Bague & Bijou", chaussures:"Sandales", accessoires:"Accessoire"
+  bakhour:"Bakhour & Encens", chaussures:"Sandales", accessoires:"Accessoire"
 };
 
 /* Descriptions éditoriales des collections (champ absent de la table categories — copy marketing) */
@@ -1371,7 +1368,6 @@ const _COLLECTION_DESCS = {
   parfums:    "Muscs, oud et ambres orientaux de Dar Nūr.",
   tahara:     "Muscs Tahara, packs et coffrets pour la pureté.",
   bakhour:    "L'encens traditionnel arabe pour parfumer vos intérieurs.",
-  bijoux:     "Bagues orientales serties, élégance et caractère.",
   chaussures: "Sandales de Médine pour homme, confort et style.",
   chechias:   "Chéchias du Caire, l'authenticité à porter.",
   accessoires:"Shemaghs yéménites et pièces d'exception.",
@@ -1389,7 +1385,7 @@ let CAT_LABELS = { ..._CAT_LABELS_FB };
 let FILTERS    = [
   ["all","Tous"],["miels","Miels"],["gelules","Gélules"],["poudres","Poudres & Graines"],
   ["huiles","Huiles"],["brumes","Brumes"],["qamis","Qamis"],["vetements","Abayas"],
-  ["parfums","Parfums"],["tahara","Tahara"],["bakhour","Bakhour"],["bijoux","Bijoux"],
+  ["parfums","Parfums"],["tahara","Tahara"],["bakhour","Bakhour"],
   ["chaussures","Sandales"],["chechias","Chéchias"],["accessoires","Accessoires"]
 ];
 let COLLECTIONS = [
@@ -1403,7 +1399,6 @@ let COLLECTIONS = [
   {key:"parfums",    title:"Parfums & Muscs",    desc:_COLLECTION_DESCS.parfums,     cat:"parfums",    type:"category"},
   {key:"tahara",     title:"Tahara & Hygiène",   desc:_COLLECTION_DESCS.tahara,      cat:"tahara",     type:"category"},
   {key:"bakhour",    title:"Bakhour & Encens",   desc:_COLLECTION_DESCS.bakhour,     cat:"bakhour",    type:"category"},
-  {key:"bijoux",     title:"Bagues & Bijoux",    desc:_COLLECTION_DESCS.bijoux,      cat:"bijoux",     type:"category"},
   {key:"chaussures", title:"Sandales",           desc:_COLLECTION_DESCS.chaussures,  cat:"chaussures", type:"category"},
   {key:"chechias",   title:"Chéchias",           desc:_COLLECTION_DESCS.chechias,    cat:"chechias",   type:"category"},
   {key:"accessoires",title:"Accessoires",        desc:_COLLECTION_DESCS.accessoires, cat:"accessoires",type:"category"},
@@ -1755,19 +1750,6 @@ const PRODUCT_IMAGES = {
   "dn-sandale-homme-11": ["assets/produits-fournisseur/dn-sandale-homme-11/dn-sandale-homme-11.webp"],
   "dn-lot-nissah-0": ["assets/produits-fournisseur/dn-lot-nissah-0/dn-lot-nissah-0.webp"],
   "dn-lot-nissah-1": ["assets/produits-fournisseur/dn-lot-nissah-1/dn-lot-nissah-1.webp"],
-  "dn-bague-sultan-0": ["assets/produits-fournisseur/dn-bague-sultan-0/dn-bague-sultan-0.webp"],
-  "dn-bague-sultan-1": ["assets/produits-fournisseur/dn-bague-sultan-1/dn-bague-sultan-1.webp"],
-  "dn-bague-sultan-2": ["assets/produits-fournisseur/dn-bague-sultan-2/dn-bague-sultan-2.webp"],
-  "dn-bague-sultan-3": ["assets/produits-fournisseur/dn-bague-sultan-3/dn-bague-sultan-3.webp"],
-  "dn-bague-ali-0": ["assets/produits-fournisseur/dn-bague-ali-0/dn-bague-ali-0.webp"],
-  "dn-bague-ali-1": ["assets/produits-fournisseur/dn-bague-ali-1/dn-bague-ali-1.webp"],
-  "dn-bague-ali-2": ["assets/produits-fournisseur/dn-bague-ali-2/dn-bague-ali-2.webp"],
-  "dn-bague-ali-3": ["assets/produits-fournisseur/dn-bague-ali-3/dn-bague-ali-3.webp"],
-  "dn-bague-ali-4": ["assets/produits-fournisseur/dn-bague-ali-4/dn-bague-ali-4.webp"],
-  "dn-bague-houdeyfa-0": ["assets/produits-fournisseur/dn-bague-houdeyfa-0/dn-bague-houdeyfa-0.webp"],
-  "dn-bague-houdeyfa-1": ["assets/produits-fournisseur/dn-bague-houdeyfa-1/dn-bague-houdeyfa-1.webp"],
-  "dn-bague-houdeyfa-2": ["assets/produits-fournisseur/dn-bague-houdeyfa-2/dn-bague-houdeyfa-2.webp"],
-  "dn-bague-houdeyfa-3": ["assets/produits-fournisseur/dn-bague-houdeyfa-3/dn-bague-houdeyfa-3.webp"],
   "dn-qamiss-sultan-saphir-0": ["assets/produits-fournisseur/dn-qamiss-sultan-saphir-0/dn-qamiss-sultan-saphir-0.webp"],
   "dn-qamiss-sultan-saphir-1": ["assets/produits-fournisseur/dn-qamiss-sultan-saphir-1/dn-qamiss-sultan-saphir-1.webp"],
   "dn-qamiss-sultan-saphir-2": ["assets/produits-fournisseur/dn-qamiss-sultan-saphir-2/dn-qamiss-sultan-saphir-2.webp"],
@@ -1776,13 +1758,10 @@ const PRODUCT_IMAGES = {
   "dn-sheymagh-1": ["assets/produits-fournisseur/dn-sheymagh-1/dn-sheymagh-1.webp"],
   "dn-sheymagh-2": ["assets/produits-fournisseur/dn-sheymagh-2/dn-sheymagh-2.webp"],
   "dn-miel-nigelle-hibiscus": ["assets/produits-fournisseur/dn-miel-nigelle-hibiscus/dn-miel-nigelle-hibiscus.webp"],
-  "dn-bague-el-emir-brown-diamond": ["assets/produits-fournisseur/dn-bague-el-emir-brown-diamond/dn-bague-el-emir-brown-diamond.webp"],
   "dn-rose-imperial-valley": ["assets/produits-fournisseur/dn-rose-imperial-valley/dn-rose-imperial-valley.webp"],
-  "dn-bague-el-emir-medina": ["assets/produits-fournisseur/dn-bague-el-emir-medina/dn-bague-el-emir-medina.webp"],
   "dn-ismid-medine": ["assets/produits-fournisseur/dn-ismid-medine/dn-ismid-medine.webp"],
   "dn-musc-tahara-grenade": ["assets/produits-fournisseur/dn-musc-tahara-grenade/dn-musc-tahara-grenade.webp"],
   "dn-poudre-de-sidr-50g": ["assets/produits-fournisseur/dn-poudre-de-sidr-50g/dn-poudre-de-sidr-50g.webp"],
-  "dn-bague-emir-el-medina-brown": ["assets/produits-fournisseur/dn-bague-emir-el-medina-brown/dn-bague-emir-el-medina-brown.webp"],
   "dn-pack-tahara-abyad": ["assets/produits-fournisseur/dn-pack-tahara-abyad/dn-pack-tahara-abyad.webp"],
 };
 const getProductImages = id=>PRODUCT_IMAGES[id] || [];
@@ -2468,19 +2447,6 @@ const PRODUCTS = [
   {id:"dn-sandale-homme-11",cat:"chaussures",name:"Sandale hayat (Homme)",tagline:"Sandale Hayat El Médine",desc:["Sandale Hayat El Médine"],benefits:[],compo:"",prov:"Dar Nūr — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("29,90")},
   {id:"dn-lot-nissah-0",cat:"tahara",name:"Lot Nissah Mastoura",tagline:"",desc:["Lot Nissah Mastoura -Niqab -gant -bas-collant -Musc Tahara -chapelet"],benefits:[],compo:"",prov:"Dar Nūr — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("29,90")},
   {id:"dn-lot-nissah-1",cat:"tahara",name:"Coffret Tahara (El Makhmariya)",tagline:"Coffret Tahara",desc:["Coffret Tahara -Musc intime -Musc corporelle -chapelet"],benefits:[],compo:"",prov:"Dar Nūr — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("15,00")},
-  {id:"dn-bague-sultan-0",cat:"bijoux",name:"Bague Sultan (Black Saphir)",tagline:"Bague Sultan Black Saphir",desc:["Bague Sultan Black Saphir"],benefits:[],compo:"",prov:"Dar Nūr — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("19,90")},
-  {id:"dn-bague-sultan-1",cat:"bijoux",name:"Bague Sultan (green saphir)",tagline:"",desc:[],benefits:[],compo:"",prov:"Dar Nūr — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("19,90")},
-  {id:"dn-bague-sultan-2",cat:"bijoux",name:"Bague Sultan (saphir orange)",tagline:"Bague Sultan saphir orange",desc:["Bague Sultan saphir orange Saphir turquoise"],benefits:[],compo:"",prov:"Dar Nūr — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("19,90")},
-  {id:"dn-bague-sultan-3",cat:"bijoux",name:"Bague Sultan (Red Saphir)",tagline:"",desc:[],benefits:[],compo:"",prov:"Dar Nūr — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("19,90")},
-  {id:"dn-bague-ali-0",cat:"bijoux",name:"Bague Ali El Khalifa (Gray Diamond)",tagline:"Bague Ali el khalifa gray Diamond",desc:["Bague Ali el khalifa gray Diamond"],benefits:[],compo:"",prov:"Dar Nūr — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("19,90")},
-  {id:"dn-bague-ali-1",cat:"bijoux",name:"Bague Ali El Khalifa (Green Saphir)",tagline:"Bague El khalifa Green Saphir",desc:["Bague El khalifa Green Saphir"],benefits:[],compo:"",prov:"Dar Nūr — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("19,90")},
-  {id:"dn-bague-ali-2",cat:"bijoux",name:"Bague Ali (Blue Diamond)",tagline:"Bague Ali el khalifa Blue Diamond",desc:["Bague Ali el khalifa Blue Diamond"],benefits:[],compo:"",prov:"Dar Nūr — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("19,90")},
-  {id:"dn-bague-ali-3",cat:"bijoux",name:"Bague Ali El Khalifa (Turquoise Saphir)",tagline:"Bague Ali El Khalifa Turquoise Saphir",desc:["Bague Ali El Khalifa Turquoise Saphir"],benefits:[],compo:"",prov:"Dar Nūr — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("19,90")},
-  {id:"dn-bague-ali-4",cat:"bijoux",name:"Bague Ali El Khalifa (Green Saphir)",tagline:"Bague",desc:["Bague"],benefits:[],compo:"",prov:"Dar Nūr — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("19,90")},
-  {id:"dn-bague-houdeyfa-0",cat:"bijoux",name:"Bague Houdeyfa (Black Diamond)",tagline:"Bague Houdeyfa (Black Diamond) Sultana",desc:["Bague Houdeyfa (Black Diamond) Sultana"],benefits:[],compo:"",prov:"Dar Nūr — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("19,90")},
-  {id:"dn-bague-houdeyfa-1",cat:"bijoux",name:"Bague Houdeyfa (Blue Diamond)",tagline:"Bague Blue Diamond Du sultan",desc:["Bague Blue Diamond Du sultan"],benefits:[],compo:"",prov:"Dar Nūr — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("19,90")},
-  {id:"dn-bague-houdeyfa-2",cat:"bijoux",name:"Bague Houdeyfa (Red Diamond)",tagline:"",desc:[],benefits:[],compo:"",prov:"Dar Nūr — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("19,90")},
-  {id:"dn-bague-houdeyfa-3",cat:"bijoux",name:"Bague Houdeyfa (Mirror Diamond)",tagline:"Bague Houdeyfa El Sultan",desc:["Bague Houdeyfa El Sultan"],benefits:[],compo:"",prov:"Dar Nūr — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("19,90")},
   {id:"dn-qamiss-sultan-saphir-0",cat:"qamis",name:"Qamiss Sultan saphir",tagline:"Qamiss noire et moutarde",desc:["Qamiss noire et moutarde"],benefits:[],compo:"",prov:"Dar Nūr — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("64,90")},
   {id:"dn-qamiss-sultan-saphir-1",cat:"qamis",name:"Qamiss Sultan saphir",tagline:"Qamiss Sultan saphir bleu Ciel",desc:["Qamiss Sultan saphir bleu Ciel"],benefits:[],compo:"",prov:"Dar Nūr — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("59,90")},
   {id:"dn-qamiss-sultan-saphir-2",cat:"qamis",name:"Qamiss Sultan saphir",tagline:"Qamiss Sultan saphir beige",desc:["Qamiss Sultan saphir beige"],benefits:[],compo:"",prov:"Dar Nūr — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("59,90")},
@@ -2489,13 +2455,10 @@ const PRODUCTS = [
   {id:"dn-sheymagh-1",cat:"accessoires",name:"Sheymagh imprimer",tagline:"",desc:["Le shemagh yéménite est bien plus qu'un simple accessoire : il incarne l'élégance, la tradition et le raffinement. Son tissage délicat et ses motifs uniques en font une pièce d'exception qui ajoute une touche de noblesse à votre tenue. Porté avec prestance, il sublime votre allure et vous confère une aura royale. Une véritable signature de style et d'authenticité"],benefits:[],compo:"",prov:"Dar Nūr — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("26,99")},
   {id:"dn-sheymagh-2",cat:"accessoires",name:"Sheymagh yéménite brodé",tagline:"",desc:["Le shemagh yéménite est bien plus qu'un simple accessoire : il incarne l'élégance, la tradition et le raffinement. Son tissage délicat et ses motifs uniques en font une pièce d'exception qui ajoute une touche de noblesse à votre tenue. Porté avec prestance, il sublime votre allure et vous confère une aura royale. Une véritable signature de style et d'authenticité"],benefits:[],compo:"",prov:"Dar Nūr — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("29,99")},
   {id:"dn-miel-nigelle-hibiscus",cat:"miels",name:"Miel Nigelle & Hibiscus",tagline:"Miel Hibiscus Nigelle",desc:["Miel Hibiscus Nigelle"],benefits:[],compo:"",prov:"Dar Nūr — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("25,00")},
-  {id:"dn-bague-el-emir-brown-diamond",cat:"bijoux",name:"Bague El Émir (Brown Diamond)",tagline:"",desc:[],benefits:[],compo:"",prov:"Dar Nūr — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("19,90")},
   {id:"dn-rose-imperial-valley",cat:"parfums",name:"Rosé de l'impérial valley",tagline:"Parfum impérial valley 200ML",desc:["Parfum impérial valley 200ML. L'ambré brut est un parfum oriental boisé lancé en. Il offre un voyage olfactif captivant avec des notes de bergamote de Sicile, poivre rose et davana en tête, ambre blanche et oud au cœur, et une base de cuir, musc et vétiver d'Haïti. Cette fragrance sophistiquée évoque des paysages contrastés, mêlant fraîcheur et chaleur, pour un sillage élégant et séduisant."],benefits:[],compo:"",prov:"Dar Nūr — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("49,90")},
-  {id:"dn-bague-el-emir-medina",cat:"bijoux",name:"Bague El Émir",tagline:"Bague El Émir Médina",desc:["Bague El Émir Médina"],benefits:[],compo:"",prov:"Dar Nūr — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("19,90")},
   {id:"dn-ismid-medine",cat:"poudres",name:"Ismid de Médine",tagline:"",desc:["L'ismid (ou ithmid) est un khôl traditionnel souvent utilisé en médecine prophétique et en cosmétique, principalement dans les pays arabes et asiatiques. Il est généralement composé de sulfure d'antimoine et parfois d'autres minéraux. Voici quelques-uns de ses bienfaits supposés : 1. Amélioration de la vision : selon certaines traditions, l'application régulière d'ismid sur les paupières renforcerait la vue et protégerait les yeux contre les infections. 2. Traitement des maladies oculaires : il est réputé pour aider contre les irritations, les rougeurs et certains problèmes comme la conjonctivite. 3. Renforcement et croissance des cils : il favoriserait la pousse des cils et les rendrait plus épais. 4. Propriétés antibactériennes : il aide à protéger les yeux contre certaines bactéries et infections. 5. Utilisation cosmétique : il donne un regard intense et était utilisé comme maquillage naturel depuis l'Antiquité. 6. Propriétés anti-inflammatoires : certains affirment qu'il peut réduire les inflammations des yeux. Précautions d'utilisation : il est important d'utiliser un ismid pur et naturel, car certains produits contrefaits peuvent contenir des métaux lourds dangereux. Son utilisation est déconseillée aux personnes allergiques aux minéraux ou souffrant de problèmes oculaires graves sans avis médical."],benefits:[],compo:"",prov:"Dar Nūr — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("6,90")},
   {id:"dn-musc-tahara-grenade",cat:"tahara",name:"Musc Tahara Grenade 6ml",tagline:"",desc:["Le musc Tahara, également appelé musc blanc ou musc intime, est un parfum traditionnel originaire du Moyen-Orient. Il est utilisé principalement pour l'hygiène intime féminine et symbolise la pureté, comme son nom l'indique en arabe. Ce produit, souvent sans alcool, se présente sous une texture épaisse et blanche. Il est apprécié pour ses propriétés purifiantes, apaisantes et odorantes, offrant un parfum subtil rappelant le propre. Traditionnellement, il est employé après les ablutions ou les menstruations pour parfumer et purifier le corps"],benefits:[],compo:"",prov:"Dar Nūr — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("8,99")},
   {id:"dn-poudre-de-sidr-50g",cat:"poudres",name:"Poudre De Sidr 50g",tagline:"",desc:["La poudre de sidr, issue des feuilles du jujubier (mentionné dans le Coran), est un ingrédient naturel aux multiples bienfaits. En Islam, elle est utilisée dans des pratiques spirituelles comme la roqya ou la toilette mortuaire. Riche en saponines, elle nettoie en douceur, apaise le cuir chevelu, lutte contre les pellicules et fixe les colorations végétales. Idéale pour tous les types de cheveux, elle apporte force, brillance et volume tout en respectant les traditions religieuses et naturelles."],benefits:[],compo:"",prov:"Dar Nūr — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("5,99")},
-  {id:"dn-bague-emir-el-medina-brown",cat:"bijoux",name:"Bague Émir El Médina (Brown Diamond)",tagline:"Bague brown diamond",desc:["Bague brown diamond"],benefits:[],compo:"",prov:"Dar Nūr — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("19,90")},
   {id:"dn-pack-tahara-abyad",cat:"tahara",name:"Pack Tahara Abyad",tagline:"",desc:[],benefits:[],compo:"",prov:"Dar Nūr — Made in Medina & Cairo",uso:"",precautions:[],price:fixed("19,99")},
 ];
 
@@ -2926,7 +2889,7 @@ function showProduct(id){
   const isBrume = p.cat==="brumes";
   const isWear = p.cat==="qamis" || p.cat==="vetements";
   const isFragrance = ["parfums","tahara","bakhour"].includes(p.cat);
-  const isAccessory = ["bijoux","chaussures","accessoires","chechias"].includes(p.cat);
+  const isAccessory = ["chaussures","accessoires","chechias"].includes(p.cat);
   const productImages = getProductImages(p.id);
   const formatImages = PRODUCT_FORMAT_IMAGES[p.id];
   const initialFormatImg = (formatImages && hasOptions) ? formatImages[p.price.options[0][0]] : null;

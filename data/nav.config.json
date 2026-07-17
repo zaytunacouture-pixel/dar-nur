@@ -49,7 +49,6 @@
       "children": [
         { "id": "qamis", "label": "Qamis", "type": "link", "href": "/qamis/", "scope": "all" },
         { "id": "abayas", "label": "Abayas & Ensembles", "type": "link", "href": "/abayas/", "scope": "all" },
-        { "id": "bijoux", "label": "Bagues & Bijoux", "type": "link", "href": "/bijoux/", "scope": "all" },
         { "id": "chaussures", "label": "Sandales", "type": "link", "href": "/chaussures/", "scope": "all" },
         { "id": "chechias", "label": "Chéchias", "type": "link", "href": "/chechias/", "scope": "all" }
       ]

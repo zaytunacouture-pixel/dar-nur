@@ -44,7 +44,6 @@ export const TARGET_PAGES = [
   'abayas/index.html',
   'accessoires/index.html',
   'bakhour/index.html',
-  'bijoux/index.html',
   'brumes/index.html',
   'chaussures/index.html',
   'chechias/index.html',
