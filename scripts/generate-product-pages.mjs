@@ -127,7 +127,12 @@ function computeMeta(product, catLabel, siblingTaglines) {
 
   const images = Array.isArray(product.images) ? product.images.filter(Boolean) : [];
   const img = images[0] || null;
-  const imageUrl = img ? `https://dar-nur.fr/${img}` : 'https://dar-nur.fr/logo-dar-nur.png';
+  // Une image peut être un chemin relatif au dépôt OU une URL Supabase Storage
+  // déjà absolue (upload admin.html) — ne jamais préfixer une URL déjà absolue
+  // (même bug/même correctif que scripts/generate-parfums.mjs).
+  const imageUrl = img
+    ? (/^https?:\/\//i.test(img) ? img : `https://dar-nur.fr/${img}`)
+    : 'https://dar-nur.fr/logo-dar-nur.png';
   const canonicalUrl = `https://dar-nur.fr/${product.slug}/`;
 
   return {
