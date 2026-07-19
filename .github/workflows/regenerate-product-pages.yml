@@ -1,0 +1,62 @@
+name: Régénère les fiches produit (Supabase → HTML statique)
+
+# Déclenchement à la demande UNIQUEMENT — aucune exécution planifiée (cron) :
+#   - repository_dispatch "regenerate-product-pages" : envoyé automatiquement
+#     par les triggers Postgres Supabase sur `products` (tout produit,
+#     n'importe quelle catégorie) et `categories` (le label d'une catégorie
+#     apparaît sur chaque fiche produit) — voir supabase/sql/webhook_automation.sql.
+#   - workflow_dispatch : bouton manuel "Run workflow" dans l'onglet Actions,
+#     de secours si besoin d'une republication immédiate.
+#
+# Protection anti-boucle : ce workflow n'écoute jamais "push" — son propre
+# commit ne peut donc jamais se re-déclencher lui-même. Le commit est en plus
+# marqué [skip ci] par défense en profondeur.
+on:
+  repository_dispatch:
+    types: [regenerate-product-pages]
+  workflow_dispatch: {}
+
+concurrency:
+  group: regenerate-product-pages
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout du dépôt
+        uses: actions/checkout@v4
+
+      - name: Configurer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Générer les fiches produit depuis Supabase
+        run: node scripts/generate-product-pages.mjs
+
+      - name: Vérifier si le contenu généré a réellement changé
+        id: diff
+        run: |
+          # git add -A sans restriction de chemin : sans risque ici, le
+          # checkout de ce job est toujours neuf (aucun fichier étranger ne
+          # peut être présent), contrairement à un poste de travail persistant.
+          git add -A
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Contenu identique au précédent — aucun commit créé."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::Contenu modifié — commit à venir."
+          fi
+
+      - name: Committer et publier uniquement si changement réel
+        if: steps.diff.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore: régénère les fiches produit depuis Supabase [skip ci]"
+          git push
