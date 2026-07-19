@@ -1222,9 +1222,11 @@ function renderBrands() {
   tbody.innerHTML = allBrands.map(b => {
     const used = allProducts.filter(p => p.brand_slug === b.id).length;
     const safeImg = safeImageSrc(b.image_url);
+    // Pas d'image de marque : logo Dar Nūr sur fond crème plutôt qu'un
+    // carré vide — jamais un simple bloc gris sans identité.
     const thumb = safeImg
       ? `<img src="${safeImg}" alt="${esc(b.name)}" style="width:40px;height:40px;object-fit:cover;border-radius:6px"/>`
-      : `<div style="width:40px;height:40px;border-radius:6px;background:#eee"></div>`;
+      : `<img src="logo-dar-nur.png" alt="${esc(b.name)} (image à venir)" style="width:40px;height:40px;object-fit:contain;border-radius:6px;background:var(--cream);padding:5px"/>`;
     return `<tr>
       <td>${thumb}</td>
       <td>${esc(b.name)}</td>
