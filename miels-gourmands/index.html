@@ -31,6 +31,7 @@
 <link rel="apple-touch-icon" href="/favicon.png" />
 
 <!-- Schema JSON-LD : CollectionPage + BreadcrumbList + ItemList -->
+<!-- AUTO:CATEGORY_JSONLD:START — géré automatiquement par scripts/generate-category-pages.mjs, ne pas éditer à la main -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -48,20 +49,22 @@
   "mainEntity": {
     "@type": "ItemList",
     "name": "Nos Miels Gourmands",
-    "numberOfItems": 8,
+    "numberOfItems": 9,
     "itemListElement": [
-      {"@type": "ListItem", "position": 1, "url": "https://dar-nur.fr/mg-framboise-passion/", "name": "Miel Framboise & Passion"},
-      {"@type": "ListItem", "position": 2, "url": "https://dar-nur.fr/mg-papaye/",             "name": "Miel Papaye"},
-      {"@type": "ListItem", "position": 3, "url": "https://dar-nur.fr/mg-fraise/",             "name": "Miel Fraise"},
-      {"@type": "ListItem", "position": 4, "url": "https://dar-nur.fr/mg-framboise/",          "name": "Miel Framboise"},
-      {"@type": "ListItem", "position": 5, "url": "https://dar-nur.fr/mg-passion/",             "name": "Miel Passion"},
-      {"@type": "ListItem", "position": 6, "url": "https://dar-nur.fr/mg-ananas/",              "name": "Miel Ananas"},
-      {"@type": "ListItem", "position": 7, "url": "https://dar-nur.fr/mg-mangue/",              "name": "Miel Mangue"},
-      {"@type": "ListItem", "position": 8, "url": "https://dar-nur.fr/mg-mangue-fraise/",       "name": "Miel Mangue & Fraise"}
+      {"@type": "ListItem", "position": 1, "url": "https://dar-nur.fr/miel-myrtille/", "name": "MIEL - MYRTILLE"},
+      {"@type": "ListItem", "position": 2, "url": "https://dar-nur.fr/mg-framboise-passion/", "name": "Miel Framboise & Passion"},
+      {"@type": "ListItem", "position": 3, "url": "https://dar-nur.fr/mg-papaye/", "name": "Miel Papaye"},
+      {"@type": "ListItem", "position": 4, "url": "https://dar-nur.fr/mg-fraise/", "name": "Miel Fraise"},
+      {"@type": "ListItem", "position": 5, "url": "https://dar-nur.fr/mg-framboise/", "name": "Miel Framboise"},
+      {"@type": "ListItem", "position": 6, "url": "https://dar-nur.fr/mg-passion/", "name": "Miel Passion"},
+      {"@type": "ListItem", "position": 7, "url": "https://dar-nur.fr/mg-ananas/", "name": "Miel Ananas"},
+      {"@type": "ListItem", "position": 8, "url": "https://dar-nur.fr/mg-mangue/", "name": "Miel Mangue"},
+      {"@type": "ListItem", "position": 9, "url": "https://dar-nur.fr/mg-mangue-fraise/", "name": "Miel Mangue & Fraise"}
     ]
   }
 }
 </script>
+    <!-- AUTO:CATEGORY_JSONLD:END -->
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -370,16 +373,30 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
 -->
 <div class="filter-bar">
   <div class="filter-bar-inner">
-    <p class="results-count" style="padding:0">8 miels gourmands disponibles</p>
+    <!-- AUTO:CATEGORY_COUNT:START — géré automatiquement par scripts/generate-category-pages.mjs, ne pas éditer à la main -->
+    <p class="results-count" style="padding:0">9 miels gourmands disponibles</p>
+    <!-- AUTO:CATEGORY_COUNT:END -->
   </div>
 </div>
 
 <!-- ===== GRILLE PRODUITS (8 produits réels, cartes au niveau homepage) ===== -->
 <section class="products-section" aria-labelledby="products-heading">
   <div class="grid" id="grid">
-
+    <!-- AUTO:CATEGORY_PRODUCTS:START — géré automatiquement par scripts/generate-category-pages.mjs, ne pas éditer à la main -->
+    <a href="https://dar-nur.fr/miel-myrtille/" class="card">
+      <div class="card-image"><img src="https://sxlpgcnjerlayitaxxyv.supabase.co/storage/v1/object/public/product-images/products/miel-myrtille/miel-myrtille-1784483729960.png" alt="MIEL - MYRTILLE — Dar Nūr" loading="eager" width="400" height="400"/></div>
+      <div class="card-body">
+        <div class="cat-tag">Miel gourmand</div>
+        <h3>MIEL - MYRTILLE</h3>
+        <p class="card-tagline">Une alliance gourmande entre miel et myrtille</p>
+        <div class="card-footer">
+          <div class="card-price">25,00 €</div>
+          <span class="card-cta">Voir la fiche</span>
+        </div>
+      </div>
+    </a>
     <a href="https://dar-nur.fr/mg-framboise-passion/" class="card">
-      <div class="card-image"><img src="https://sxlpgcnjerlayitaxxyv.supabase.co/storage/v1/object/public/product-images/products/mg-framboise-passion/mg-framboise-passion-v2.webp" alt="Miel Framboise & Passion — Dar Nūr" loading="eager" width="400" height="400"/></div>
+      <div class="card-image"><img src="https://sxlpgcnjerlayitaxxyv.supabase.co/storage/v1/object/public/product-images/products/mg-framboise-passion/mg-framboise-passion-v2.webp" alt="Miel Framboise &amp; Passion — Dar Nūr" loading="lazy" width="400" height="400"/></div>
       <div class="card-body">
         <div class="cat-tag">Miel gourmand</div>
         <h3>Miel Framboise &amp; Passion</h3>
@@ -390,7 +407,6 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
         </div>
       </div>
     </a>
-
     <a href="https://dar-nur.fr/mg-papaye/" class="card">
       <div class="card-image"><img src="https://sxlpgcnjerlayitaxxyv.supabase.co/storage/v1/object/public/product-images/products/mg-papaye/mg-papaye-v2.webp" alt="Miel Papaye — Dar Nūr" loading="lazy" width="400" height="400"/></div>
       <div class="card-body">
@@ -403,7 +419,6 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
         </div>
       </div>
     </a>
-
     <a href="https://dar-nur.fr/mg-fraise/" class="card">
       <div class="card-image"><img src="https://sxlpgcnjerlayitaxxyv.supabase.co/storage/v1/object/public/product-images/products/mg-fraise/mg-fraise-v2.webp" alt="Miel Fraise — Dar Nūr" loading="lazy" width="400" height="400"/></div>
       <div class="card-body">
@@ -416,7 +431,6 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
         </div>
       </div>
     </a>
-
     <a href="https://dar-nur.fr/mg-framboise/" class="card">
       <div class="card-image"><img src="https://sxlpgcnjerlayitaxxyv.supabase.co/storage/v1/object/public/product-images/products/mg-framboise/mg-framboise-v2.webp" alt="Miel Framboise — Dar Nūr" loading="lazy" width="400" height="400"/></div>
       <div class="card-body">
@@ -429,7 +443,6 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
         </div>
       </div>
     </a>
-
     <a href="https://dar-nur.fr/mg-passion/" class="card">
       <div class="card-image"><img src="https://sxlpgcnjerlayitaxxyv.supabase.co/storage/v1/object/public/product-images/products/mg-passion/mg-passion-v2.webp" alt="Miel Passion — Dar Nūr" loading="lazy" width="400" height="400"/></div>
       <div class="card-body">
@@ -442,9 +455,8 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
         </div>
       </div>
     </a>
-
     <a href="https://dar-nur.fr/mg-ananas/" class="card">
-      <div class="card-image"><img src="https://sxlpgcnjerlayitaxxyv.supabase.co/storage/v1/object/public/product-images/products/mg-ananas/mg-ananas-v2.webp" alt="Miel Ananas — Dar Nūr" loading="lazy" width="400" height="400"/></div>
+      <div class="card-image"><img src="https://sxlpgcnjerlayitaxxyv.supabase.co/storage/v1/object/public/product-images/products/mg-ananas/mg-ananas-1784483316152.png" alt="Miel Ananas — Dar Nūr" loading="lazy" width="400" height="400"/></div>
       <div class="card-body">
         <div class="cat-tag">Miel gourmand</div>
         <h3>Miel Ananas</h3>
@@ -455,7 +467,6 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
         </div>
       </div>
     </a>
-
     <a href="https://dar-nur.fr/mg-mangue/" class="card">
       <div class="card-image"><img src="https://sxlpgcnjerlayitaxxyv.supabase.co/storage/v1/object/public/product-images/products/mg-mangue/mg-mangue-v2.webp" alt="Miel Mangue — Dar Nūr" loading="lazy" width="400" height="400"/></div>
       <div class="card-body">
@@ -468,9 +479,8 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
         </div>
       </div>
     </a>
-
     <a href="https://dar-nur.fr/mg-mangue-fraise/" class="card">
-      <div class="card-image"><img src="https://sxlpgcnjerlayitaxxyv.supabase.co/storage/v1/object/public/product-images/products/mg-mangue-fraise/mg-mangue-fraise-v2.webp" alt="Miel Mangue & Fraise — Dar Nūr" loading="lazy" width="400" height="400"/></div>
+      <div class="card-image"><img src="https://sxlpgcnjerlayitaxxyv.supabase.co/storage/v1/object/public/product-images/products/mg-mangue-fraise/mg-mangue-fraise-1783966157708.png" alt="Miel Mangue &amp; Fraise — Dar Nūr" loading="lazy" width="400" height="400"/></div>
       <div class="card-body">
         <div class="cat-tag">Miel gourmand</div>
         <h3>Miel Mangue &amp; Fraise</h3>
@@ -481,7 +491,7 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
         </div>
       </div>
     </a>
-
+    <!-- AUTO:CATEGORY_PRODUCTS:END -->
   </div>
 </section>
 

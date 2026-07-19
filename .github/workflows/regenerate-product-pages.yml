@@ -1,5 +1,12 @@
 name: Régénère les fiches produit (Supabase → HTML statique)
 
+# Régénère à la fois les fiches produit (/{slug}/) ET les blocs marqués
+# <!-- AUTO:CATEGORY_*:START/END --> des pages catégories couvertes par
+# scripts/generate-category-pages.mjs (Miels Gourmands pour l'instant) — les
+# deux générateurs dépendent exactement des mêmes événements (tout produit,
+# tout changement de catégorie), inutile de dupliquer les triggers Postgres
+# pour ça.
+#
 # Déclenchement à la demande UNIQUEMENT — aucune exécution planifiée (cron) :
 #   - repository_dispatch "regenerate-product-pages" : envoyé automatiquement
 #     par les triggers Postgres Supabase sur `products` (tout produit,
@@ -37,6 +44,9 @@ jobs:
 
       - name: Générer les fiches produit depuis Supabase
         run: node scripts/generate-product-pages.mjs
+
+      - name: Générer les pages catégories (blocs marqués) depuis Supabase
+        run: node scripts/generate-category-pages.mjs
 
       - name: Vérifier si le contenu généré a réellement changé
         id: diff
