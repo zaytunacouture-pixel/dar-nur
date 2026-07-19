@@ -357,6 +357,7 @@ tr:hover td { background: #fafaf8; }
       <div class="section-label">Catalogue</div>
       <a href="#" class="active" onclick="showSection('products',this)">📦 Produits</a>
       <a href="#" onclick="showSection('categories',this)">🏷️ Catégories</a>
+      <a href="#" onclick="showSection('brands',this)">💎 Marques</a>
       <div class="section-label">Marketing</div>
       <a href="#" onclick="showSection('offers',this)">🎁 Offres & Packs</a>
     </nav>
@@ -369,6 +370,7 @@ tr:hover td { background: #fafaf8; }
         <div class="stat-card"><div class="num" id="stat-active">—</div><div class="lbl">Actifs</div></div>
         <div class="stat-card"><div class="num" id="stat-variants">—</div><div class="lbl">Variantes</div></div>
         <div class="stat-card"><div class="num" id="stat-cats">—</div><div class="lbl">Catégories</div></div>
+        <div class="stat-card"><div class="num" id="stat-brands">—</div><div class="lbl">Marques</div></div>
         <div class="stat-card"><div class="num" id="stat-offers">—</div><div class="lbl">Offres actives</div></div>
       </div>
 
@@ -444,6 +446,24 @@ tr:hover td { background: #fafaf8; }
             </thead>
             <tbody id="categories-tbody">
               <tr><td colspan="6" class="loading">Chargement…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Section : Marques -->
+      <div id="section-brands" style="display:none">
+        <div class="toolbar">
+          <div class="spacer"></div>
+          <button class="btn btn-primary" onclick="openBrandModal()">+ Nouvelle marque</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Image</th><th>Nom</th><th>Slug</th><th>Parfums</th><th>Ordre</th><th>Statut</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="brands-tbody">
+              <tr><td colspan="7" class="loading">Chargement…</td></tr>
             </tbody>
           </table>
         </div>
@@ -539,12 +559,16 @@ tr:hover td { background: #fafaf8; }
         <input type="text" id="p-volume"/>
       </div>
       <div class="form-field">
-        <label>Marque <small style="color:var(--muted);font-weight:400">(parfums uniquement — ex: LeCode Paris)</small></label>
-        <input type="text" id="p-brand" placeholder="LeCode Paris"/>
-      </div>
-      <div class="form-field">
-        <label>Slug marque <small style="color:var(--muted);font-weight:400">(URL, ex: lecode-paris — stable après création)</small></label>
-        <input type="text" id="p-brand-slug" placeholder="lecode-paris"/>
+        <label>Marque <small style="color:var(--muted);font-weight:400">(parfums uniquement)</small></label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <select id="p-brand-slug" style="flex:1;min-width:0">
+            <option value="">— Aucune —</option>
+          </select>
+          <button class="btn btn-outline btn-small" type="button"
+            onclick="openBrandModalFromProduct()"
+            title="Créer une nouvelle marque"
+            style="white-space:nowrap;flex-shrink:0">+ Nouvelle</button>
+        </div>
       </div>
       <div class="form-field">
         <label>Ordre d'affichage</label>
@@ -697,6 +721,56 @@ tr:hover td { background: #fafaf8; }
   </div>
 </div>
 
+<!-- ═══════════════════════════════════════════════ MODAL MARQUE ═══ -->
+<div class="overlay" id="brand-modal">
+  <div class="modal" style="max-width:480px">
+    <h2 id="brand-modal-title">Nouvelle marque</h2>
+    <input type="hidden" id="brand-is-new"/>
+
+    <div class="img-section">
+      <label>Image de la marque</label>
+      <div class="img-preview-wrap">
+        <div id="brand-img-placeholder" class="img-placeholder">Aucune<br>image</div>
+        <img id="brand-img-preview" class="img-preview" style="display:none" alt="Aperçu marque"/>
+        <div class="img-actions">
+          <button class="btn btn-outline btn-small" type="button" onclick="document.getElementById('brand-img-file-input').click()">📁 Changer l'image</button>
+          <button class="btn btn-danger btn-small" type="button" id="brand-img-remove-btn" style="display:none" onclick="removeBrandImage()">✕ Supprimer l'image</button>
+          <div class="img-status" id="brand-img-status"></div>
+        </div>
+      </div>
+      <input type="file" id="brand-img-file-input" accept="image/jpeg,image/png,image/webp,image/gif" style="display:none" onchange="handleBrandImageSelect(this.files[0])"/>
+    </div>
+
+    <div class="form-grid" style="grid-template-columns:1fr; gap:14px">
+      <div class="form-field">
+        <label>Slug * <small style="color:var(--muted);font-weight:400">(ex : khamraha — ne peut plus être modifié après création)</small></label>
+        <input type="text" id="brand-id" placeholder="khamraha"/>
+      </div>
+      <div class="form-field">
+        <label>Nom affiché *</label>
+        <input type="text" id="brand-name" placeholder="Khamraha"/>
+      </div>
+      <div class="form-field">
+        <label>Description</label>
+        <textarea id="brand-description" rows="3" placeholder="Univers de la marque, style olfactif…"></textarea>
+      </div>
+      <div class="form-field">
+        <label>Ordre d'affichage</label>
+        <input type="number" id="brand-sort" value="0" min="0"/>
+      </div>
+      <div class="form-field">
+        <label class="toggle-row">
+          <input type="checkbox" id="brand-active" checked/> Active
+        </label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeBrandModal()">Annuler</button>
+      <button class="btn btn-primary" onclick="saveBrandModal()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
@@ -704,6 +778,7 @@ tr:hover td { background: #fafaf8; }
 // ── État global ────────────────────────────────────────────────────────────────
 let allProducts      = [];
 let allCategories    = [];
+let allBrands        = [];
 let allOffers        = [];
 let filteredProducts = [];
 let currentPage      = 1;
@@ -718,6 +793,12 @@ let imageRemoved     = false;
 let offerCurrentImage    = null;
 let offerPendingFile     = null;
 let offerImageRemoved    = false;
+
+// ── État image modal marque ────────────────────────────────────────────────────
+let brandCurrentImage    = null;
+let brandPendingFile     = null;
+let brandImageRemoved    = false;
+let _brandModalFromProduct = false; // true si ouvert depuis le modal produit
 
 function showImgPreview(url) {
   document.getElementById('img-preview').src          = url;
@@ -759,6 +840,49 @@ function removeProductImage() {
   imageRemoved     = true;
   hideImgPreview();
   document.getElementById('img-status').textContent = 'Image supprimée à l\'enregistrement';
+}
+
+// ── Image marque ────────────────────────────────────────────────────────────────
+function showBrandImgPreview(url) {
+  document.getElementById('brand-img-preview').src            = url;
+  document.getElementById('brand-img-preview').style.display    = 'block';
+  document.getElementById('brand-img-placeholder').style.display = 'none';
+  document.getElementById('brand-img-remove-btn').style.display  = 'inline-block';
+}
+
+function hideBrandImgPreview() {
+  document.getElementById('brand-img-preview').src            = '';
+  document.getElementById('brand-img-preview').style.display    = 'none';
+  document.getElementById('brand-img-placeholder').style.display = 'flex';
+  document.getElementById('brand-img-remove-btn').style.display  = 'none';
+}
+
+function resetBrandImageState() {
+  brandCurrentImage = null;
+  brandPendingFile  = null;
+  brandImageRemoved = false;
+  const fi = document.getElementById('brand-img-file-input');
+  if (fi) fi.value = '';
+  const st = document.getElementById('brand-img-status');
+  if (st) st.textContent = '';
+  hideBrandImgPreview();
+}
+
+function handleBrandImageSelect(file) {
+  if (!file) return;
+  brandPendingFile = file;
+  brandImageRemoved = false;
+  showBrandImgPreview(URL.createObjectURL(file));
+  const kb = (file.size / 1024).toFixed(0);
+  document.getElementById('brand-img-status').textContent =
+    `${file.name} (${kb} Ko) — sera uploadé à l'enregistrement`;
+}
+
+function removeBrandImage() {
+  brandPendingFile  = null;
+  brandImageRemoved = true;
+  hideBrandImgPreview();
+  document.getElementById('brand-img-status').textContent = 'Image supprimée à l\'enregistrement';
 }
 
 // ── Auth ───────────────────────────────────────────────────────────────────────
@@ -811,14 +935,16 @@ async function loadAll() {
   const savedPage   = currentPage;
   const savedScrollY = window.scrollY;
 
-  const [prods, cats, offs] = await Promise.all([
+  const [prods, cats, brands, offs] = await Promise.all([
     fetchProducts({ activeOnly: false }),
     fetchAllCategories(),
+    fetchAllBrands(),
     fetchOffers()
   ]);
-  allProducts   = prods || [];
-  allCategories = cats  || [];
-  allOffers     = offs  || [];
+  allProducts   = prods  || [];
+  allCategories = cats   || [];
+  allBrands     = brands || [];
+  allOffers     = offs   || [];
 
   // Stats
   const active       = allProducts.filter(p => p.active).length;
@@ -828,6 +954,7 @@ async function loadAll() {
   document.getElementById('stat-active').textContent   = active;
   document.getElementById('stat-variants').textContent = variants;
   document.getElementById('stat-cats').textContent     = allCategories.length;
+  document.getElementById('stat-brands').textContent   = allBrands.length;
   document.getElementById('stat-offers').textContent   = activeOffers;
 
   // Filtre catégorie — reconstruire puis restaurer la sélection
@@ -845,6 +972,8 @@ async function loadAll() {
     pCat.innerHTML += `<option value="${esc(c.id)}">${esc(c.filter_label)}</option>`;
   });
 
+  buildBrandSelectOptions();
+
   filterProducts(); // remet currentPage = 1, puis applique les filtres restaurés
   // Restaurer la page si elle est toujours valide après le rechargement
   const maxPage = Math.ceil(filteredProducts.length / PAGE_SIZE) || 1;
@@ -856,6 +985,7 @@ async function loadAll() {
   requestAnimationFrame(() => window.scrollTo(0, savedScrollY));
 
   renderCategories();
+  renderBrands();
   renderOffers();
 }
 
@@ -865,6 +995,7 @@ function showSection(name, el) {
   el.classList.add('active');
   document.getElementById('section-products').style.display   = name==='products'   ? 'block' : 'none';
   document.getElementById('section-categories').style.display = name==='categories' ? 'block' : 'none';
+  document.getElementById('section-brands').style.display     = name==='brands'     ? 'block' : 'none';
   document.getElementById('section-offers').style.display     = name==='offers'     ? 'block' : 'none';
   if(window.innerWidth < 768) closeSidebar(); // ferme uniquement sur mobile
   return false;
@@ -1081,6 +1212,165 @@ async function deleteCategoryConfirm(id, name, usedCount) {
   }
 }
 
+// ── Marques — rendu ────────────────────────────────────────────────────────────
+function renderBrands() {
+  const tbody = document.getElementById('brands-tbody');
+  if (!allBrands.length) {
+    tbody.innerHTML = '<tr><td colspan="7" class="loading">Aucune marque. Créez-en une avec « + Nouvelle marque ».</td></tr>';
+    return;
+  }
+  tbody.innerHTML = allBrands.map(b => {
+    const used = allProducts.filter(p => p.brand_slug === b.id).length;
+    const safeImg = safeImageSrc(b.image_url);
+    const thumb = safeImg
+      ? `<img src="${safeImg}" alt="${esc(b.name)}" style="width:40px;height:40px;object-fit:cover;border-radius:6px"/>`
+      : `<div style="width:40px;height:40px;border-radius:6px;background:#eee"></div>`;
+    return `<tr>
+      <td>${thumb}</td>
+      <td>${esc(b.name)}</td>
+      <td><code>${esc(b.id)}</code></td>
+      <td>${used}</td>
+      <td>${b.sort_order}</td>
+      <td><span class="badge ${b.active?'badge-ok':'badge-off'}">${b.active?'Active':'Inactive'}</span></td>
+      <td><div class="actions">
+        <button class="btn btn-outline btn-small btn-edit-brand" data-id="${esc(b.id)}">Éditer</button>
+        <button class="btn btn-danger btn-small btn-delete-brand" data-id="${esc(b.id)}" data-name="${esc(b.name)}" data-used="${used}">Suppr.</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+// Reconstruit le <select> "Marque" du modal produit — appelé après chaque
+// rechargement et après création rapide d'une marque depuis ce modal.
+function buildBrandSelectOptions() {
+  const sel = document.getElementById('p-brand-slug');
+  const current = sel.value;
+  sel.innerHTML = '<option value="">— Aucune —</option>';
+  allBrands.forEach(b => {
+    sel.innerHTML += `<option value="${esc(b.id)}">${esc(b.name)}${b.active ? '' : ' (inactive)'}</option>`;
+  });
+  sel.value = current;
+}
+
+// ── Marques — CRUD ─────────────────────────────────────────────────────────────
+function openBrandModalFromProduct() {
+  _brandModalFromProduct = true;
+  openBrandModal(); // mode création uniquement
+}
+
+function openBrandModal(id) {
+  document.getElementById('brand-modal').classList.add('open');
+  const isNew = !id;
+  document.getElementById('brand-is-new').value = isNew ? '1' : '';
+  resetBrandImageState();
+
+  if (isNew) {
+    document.getElementById('brand-modal-title').textContent = 'Nouvelle marque';
+    document.getElementById('brand-id').value          = '';
+    document.getElementById('brand-id').readOnly        = false;
+    document.getElementById('brand-name').value         = '';
+    document.getElementById('brand-description').value  = '';
+    document.getElementById('brand-sort').value         = '0';
+    document.getElementById('brand-active').checked     = true;
+    return;
+  }
+
+  document.getElementById('brand-modal-title').textContent = 'Modifier la marque';
+  const b = allBrands.find(x => x.id === id);
+  if (!b) return;
+  document.getElementById('brand-id').value          = b.id;
+  document.getElementById('brand-id').readOnly        = true; // slug immuable
+  document.getElementById('brand-name').value         = b.name || '';
+  document.getElementById('brand-description').value  = b.description || '';
+  document.getElementById('brand-sort').value         = b.sort_order ?? 0;
+  document.getElementById('brand-active').checked     = !!b.active;
+
+  brandCurrentImage = b.image_url || null;
+  const safePreview = safeImageSrc(brandCurrentImage);
+  if (safePreview) showBrandImgPreview(safePreview);
+  else hideBrandImgPreview();
+}
+
+function closeBrandModal() {
+  document.getElementById('brand-modal').classList.remove('open');
+  _brandModalFromProduct = false;
+}
+
+async function saveBrandModal() {
+  const isNew = document.getElementById('brand-is-new').value === '1';
+  const id    = document.getElementById('brand-id').value.trim();
+  const name  = document.getElementById('brand-name').value.trim();
+
+  if (!id || !name) {
+    showToast('Slug et nom sont requis.', 'err');
+    return;
+  }
+  if (!/^[a-z0-9-]+$/.test(id)) {
+    showToast('Le slug ne peut contenir que des lettres minuscules, chiffres et tirets.', 'err');
+    return;
+  }
+  if (isNew && allBrands.find(b => b.id === id)) {
+    showToast('Ce slug existe déjà. Choisissez-en un autre.', 'err');
+    return;
+  }
+
+  const brand = {
+    id,
+    name,
+    description: document.getElementById('brand-description').value.trim() || null,
+    sort_order:  parseInt(document.getElementById('brand-sort').value) || 0,
+    active:      document.getElementById('brand-active').checked,
+    image_url:   brandCurrentImage,
+  };
+
+  try {
+    if (brandPendingFile) {
+      const statusEl = document.getElementById('brand-img-status');
+      if (statusEl) statusEl.textContent = 'Upload en cours…';
+      const ext  = brandPendingFile.name.split('.').pop().toLowerCase();
+      const path = `brands/${id}/${id}-${Date.now()}.${ext}`;
+      brand.image_url = await uploadImage(brandPendingFile, path);
+    } else if (brandImageRemoved) {
+      brand.image_url = null;
+    }
+
+    const saved = await saveBrand(brand);
+    showToast(isNew ? 'Marque créée ✓' : 'Marque modifiée ✓', 'ok');
+
+    const fromProduct = _brandModalFromProduct; // lire avant closeBrandModal() qui remet à false
+    closeBrandModal();
+
+    if (fromProduct && isNew) {
+      // Mise à jour légère : le modal produit reste ouvert, aucune saisie perdue
+      allBrands.push(saved);
+      allBrands.sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+      buildBrandSelectOptions();
+      document.getElementById('p-brand-slug').value = saved.id;
+      document.getElementById('stat-brands').textContent = allBrands.length;
+      renderBrands();
+    } else {
+      await loadAll();
+    }
+  } catch(e) {
+    showToast('Erreur : ' + e.message, 'err');
+  }
+}
+
+async function deleteBrandConfirm(id, name, usedCount) {
+  if (usedCount > 0) {
+    alert(`Impossible de supprimer cette marque : des parfums y sont encore rattachés.\n\n${usedCount} parfum(s) utilisent encore « ${name} ».\n\nRéaffectez-les d'abord à une autre marque depuis leur fiche produit.`);
+    return;
+  }
+  if (!confirm(`Supprimer la marque « ${name} » (${id}) ?\nCette action est irréversible.`)) return;
+  try {
+    await deleteBrand(id);
+    showToast('Marque supprimée ✓', 'ok');
+    await loadAll();
+  } catch(e) {
+    showToast('Erreur : ' + e.message, 'err');
+  }
+}
+
 // ── Modal produit ──────────────────────────────────────────────────────────────
 function openProductModal(id) {
   document.getElementById('product-modal').classList.add('open');
@@ -1107,7 +1397,6 @@ function openProductModal(id) {
   document.getElementById('p-precautions').value  = (p.precautions||[]).join('\n');
   document.getElementById('p-weight').value       = p.weight || '';
   document.getElementById('p-volume').value       = p.volume || '';
-  document.getElementById('p-brand').value        = p.brand || '';
   document.getElementById('p-brand-slug').value   = p.brand_slug || '';
   document.getElementById('p-sort').value         = p.sort_order ?? 0;
   document.getElementById('p-active').checked       = !!p.active;
@@ -1129,7 +1418,7 @@ function openProductModal(id) {
 function clearProductModal() {
   ['p-id','p-name','p-slug','p-tagline','p-description','p-benefits','p-benefits-label',
    'p-composition','p-provenance','p-usage','p-precautions','p-weight','p-volume',
-   'p-brand','p-brand-slug']
+   'p-brand-slug']
     .forEach(id => document.getElementById(id).value = '');
   document.getElementById('p-price').value   = '';
   document.getElementById('p-sort').value    = '0';
@@ -1186,8 +1475,8 @@ async function saveProductModal() {
     precautions:    lines(document.getElementById('p-precautions').value),
     weight:         document.getElementById('p-weight').value.trim() || null,
     volume:         document.getElementById('p-volume').value.trim() || null,
-    brand:          document.getElementById('p-brand').value.trim() || null,
-    brand_slug:     document.getElementById('p-brand-slug').value.trim() || null,
+    brand_slug:     document.getElementById('p-brand-slug').value || null,
+    brand:          (allBrands.find(b => b.id === document.getElementById('p-brand-slug').value) || {}).name || null,
     sort_order:     parseInt(document.getElementById('p-sort').value)||0,
     active:         document.getElementById('p-active').checked,
     featured:       document.getElementById('p-featured').checked,
@@ -1570,7 +1859,7 @@ function safeImageSrc(url) {
 // injectée dans une chaîne JS, donc apostrophes, guillemets, accents ou emojis
 // dans un nom de produit ne peuvent plus casser le gestionnaire d'événement.
 document.addEventListener('click', (e) => {
-  const btn = e.target.closest('.btn-delete-product, .btn-delete-category, .btn-delete-offer, .btn-edit-category');
+  const btn = e.target.closest('.btn-delete-product, .btn-delete-category, .btn-delete-offer, .btn-edit-category, .btn-delete-brand, .btn-edit-brand');
   if (!btn) return;
   const { id, name } = btn.dataset;
   if (btn.classList.contains('btn-delete-product')) {
@@ -1581,6 +1870,10 @@ document.addEventListener('click', (e) => {
     deleteOfferConfirm(id, name);
   } else if (btn.classList.contains('btn-edit-category')) {
     openCategoryModal(id);
+  } else if (btn.classList.contains('btn-delete-brand')) {
+    deleteBrandConfirm(id, name, Number(btn.dataset.used));
+  } else if (btn.classList.contains('btn-edit-brand')) {
+    openBrandModal(id);
   }
 });
 

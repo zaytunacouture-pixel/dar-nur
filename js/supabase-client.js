@@ -75,6 +75,30 @@ async function deleteCategory(id) {
   if (error) throw error;
 }
 
+async function fetchAllBrands() {
+  const { data, error } = await _supa
+    .from('brands')
+    .select('*')
+    .order('sort_order');
+  if (error) throw error;
+  return data;
+}
+
+async function saveBrand(brand) {
+  const { data, error } = await _supa
+    .from('brands')
+    .upsert(brand, { onConflict: 'id' })
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+async function deleteBrand(id) {
+  const { error } = await _supa.from('brands').delete().eq('id', id);
+  if (error) throw error;
+}
+
 // ── Produits (écriture admin — nécessite session authentifiée) ─────────────────
 
 async function saveProduct(product) {

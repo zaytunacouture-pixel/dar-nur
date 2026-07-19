@@ -186,33 +186,62 @@ async function fetchParfumsProducts() {
   return res.json();
 }
 
+// Marques actives — table `brands` (voir supabase/sql/brands_migration.sql).
+// Seule source de vérité pour le nom, l'image, la description et l'ordre
+// d'affichage d'une marque. Une marque désactivée ici n'est simplement pas
+// retournée, donc jamais publiée, même si elle a encore des produits actifs.
+async function fetchActiveBrands() {
+  const url = `${SUPABASE_URL}/rest/v1/brands?select=*&active=eq.true&order=sort_order.asc`;
+  const res = await fetch(url, {
+    headers: {
+      apikey: SUPABASE_KEY,
+      Authorization: `Bearer ${SUPABASE_KEY}`,
+    },
+  });
+  if (!res.ok) {
+    throw new Error(`Supabase a répondu ${res.status} ${res.statusText} (table brands)`);
+  }
+  return res.json();
+}
+
 // Garde-fou central de l'architecture multi-marques : on ne publie jamais une
 // fiche sans savoir à quelle marque elle appartient. Voir
-// supabase/sql/parfums_brand_migration.sql pour le rétro-remplissage initial.
+// supabase/sql/brands_migration.sql pour le rétro-remplissage initial.
 function assertAllProductsHaveBrand(products) {
   const missing = products.filter(p => !p.brand_slug || !p.brand);
   if (missing.length) {
     const sample = missing.slice(0, 5).map(p => p.slug).join(', ');
     throw new Error(
       `${missing.length} produit(s) actif(s) de category_id=parfums sans brand/brand_slug renseigné ` +
-      `(ex: ${sample}). Exécutez supabase/sql/parfums_brand_migration.sql si ce n'est pas déjà fait, ` +
-      `et renseignez Marque + Slug marque dans admin.html pour tout nouveau parfum.`
+      `(ex: ${sample}). Renseignez la Marque dans admin.html pour tout nouveau parfum.`
     );
   }
 }
 
 // Regroupement dynamique par marque — aucune liste de marques codée en dur.
-// L'ordre des groupes (et donc des pages/menus) suit l'ordre alphabétique du
-// nom de marque, pour un résultat stable et prévisible.
-function groupByBrand(products) {
+// Un produit dont le brand_slug ne correspond à aucune marque ACTIVE (marque
+// désactivée, ou supprimée) est silencieusement exclu des pages publiques —
+// c'est l'effet attendu de la désactivation d'une marque, pas une erreur.
+// L'ordre des groupes (et donc des pages/menus) suit sort_order de la marque.
+function groupByBrand(products, activeBrands) {
+  const brandById = new Map(activeBrands.map(b => [b.id, b]));
   const groups = new Map();
   for (const p of products) {
+    const brand = brandById.get(p.brand_slug);
+    if (!brand) continue;
     if (!groups.has(p.brand_slug)) {
-      groups.set(p.brand_slug, { brandSlug: p.brand_slug, brandName: p.brand, products: [] });
+      groups.set(p.brand_slug, {
+        brandSlug: brand.id,
+        brandName: brand.name,
+        brandDescription: brand.description || null,
+        brandImageUrl: brand.image_url || null,
+        sortOrder: brand.sort_order,
+        products: [],
+      });
     }
     groups.get(p.brand_slug).products.push(p);
   }
-  return [...groups.values()].sort((a, b) => a.brandName.localeCompare(b.brandName, 'fr'));
+  return [...groups.values()].sort((a, b) => a.sortOrder - b.sortOrder);
 }
 
 function computeVolumeGroups(products) {
@@ -291,7 +320,7 @@ function buildParfumsNavBlock(groups, currentBrandSlug) {
 }
 
 async function renderBrandPage(group, allGroups, commonNav) {
-  const { brandSlug, brandName, products } = group;
+  const { brandSlug, brandName, brandDescription, brandImageUrl, products } = group;
   const imgPrefix = '../../';
   const volumeGroups = computeVolumeGroups(products);
   const formatsText = humanList(sortedVolumes(volumeGroups));
@@ -299,16 +328,23 @@ async function renderBrandPage(group, allGroups, commonNav) {
   const minPrice = prices.length ? Math.min(...prices) : null;
   const canonicalUrl = `https://dar-nur.fr/parfums/${brandSlug}/`;
 
+  // Image : celle de la marque (admin > Marques) en priorité, sinon celle du
+  // premier parfum de la marque, sinon le logo — jamais rien de codé en dur.
   const heroProduct = products[0];
   const heroImages = Array.isArray(heroProduct.images) ? heroProduct.images.filter(Boolean) : [];
-  const heroImageRelative = heroImages[0] ? resolveImagePath(imgPrefix, heroImages[0]) : `${imgPrefix}logo-dar-nur.png`;
-  const heroImageAbsolute = heroImages[0] ? resolveImagePath('https://dar-nur.fr/', heroImages[0]) : 'https://dar-nur.fr/logo-dar-nur.png';
-  const heroImageAlt = `${heroProduct.name} — Parfum ${brandName}`;
+  const fallbackImageRelative = heroImages[0] ? resolveImagePath(imgPrefix, heroImages[0]) : `${imgPrefix}logo-dar-nur.png`;
+  const fallbackImageAbsolute = heroImages[0] ? resolveImagePath('https://dar-nur.fr/', heroImages[0]) : 'https://dar-nur.fr/logo-dar-nur.png';
+  const heroImageRelative = brandImageUrl ? resolveImagePath(imgPrefix, brandImageUrl) : fallbackImageRelative;
+  const heroImageAbsolute = brandImageUrl ? resolveImagePath('https://dar-nur.fr/', brandImageUrl) : fallbackImageAbsolute;
+  const heroImageAlt = `${brandName} — Parfum Dar Nūr`;
 
   const countLabel = pluralize(products.length, 'parfum');
   const metaDescription = `Découvrez les ${products.length} parfums ${brandName}${formatsText ? ` : disponibles en ${formatsText}` : ''}${minPrice != null ? `, à partir de ${minPrice.toFixed(0)} €` : ''}. Commandez sur WhatsApp.`;
   const heroSubtitle = `${countLabel}, disponible${products.length > 1 ? 's' : ''} en ${formatsText}.`;
-  const introText = `La collection Parfum ${brandName} — disponible en ${formatsText}.`;
+  // Description : celle saisie dans admin > Marques en priorité, sinon un
+  // texte générique dérivé des formats réels (comportement précédent, gardé
+  // comme valeur par défaut tant qu'aucune description n'a été renseignée).
+  const introText = brandDescription || `La collection Parfum ${brandName} — disponible en ${formatsText}.`;
 
   const template = await readFile(BRAND_TEMPLATE_PATH, 'utf8');
   const cardsHtml = products.map(p => buildCardHtml(p, brandName, imgPrefix)).join('\n\n');
@@ -323,7 +359,7 @@ async function renderBrandPage(group, allGroups, commonNav) {
     .replaceAll('{{HERO_IMAGE_ABSOLUTE_URL}}', esc(heroImageAbsolute))
     .replaceAll('{{HERO_IMAGE_ALT}}', esc(heroImageAlt))
     .replaceAll('{{JSONLD_NAME}}', escJson(`Parfum ${brandName} — Dar Nūr`))
-    .replaceAll('{{JSONLD_DESCRIPTION}}', escJson(`La collection Parfum ${brandName} — disponible en ${formatsText}.`))
+    .replaceAll('{{JSONLD_DESCRIPTION}}', escJson(introText))
     .replaceAll('{{BRAND_NAME_JSON}}', escJson(brandName))
     .replaceAll('{{BRAND_NAME_JS}}', escJs(brandName))
     .replaceAll('{{BRAND_SLUG_JS}}', escJs(brandSlug))
@@ -347,12 +383,13 @@ async function renderBrandPage(group, allGroups, commonNav) {
 }
 
 function buildBrandCardHtml(group) {
-  const { brandName, brandSlug, products } = group;
+  const { brandName, brandSlug, brandImageUrl, products } = group;
   const imgPrefix = '../';
   const prices = products.map(p => p.price_value).filter(v => v !== null && v !== undefined);
   const minPrice = prices.length ? Math.min(...prices) : null;
   const images = Array.isArray(products[0].images) ? products[0].images.filter(Boolean) : [];
-  const img = images[0] ? resolveImagePath(imgPrefix, images[0]) : `${imgPrefix}logo-dar-nur.png`;
+  const fallbackImg = images[0] ? resolveImagePath(imgPrefix, images[0]) : `${imgPrefix}logo-dar-nur.png`;
+  const img = brandImageUrl ? resolveImagePath(imgPrefix, brandImageUrl) : fallbackImg;
   const priceLabel = minPrice != null ? `à partir de ${formatPriceLabel(minPrice)}` : 'Prix à compléter';
   const countLabel = pluralize(products.length, 'parfum');
 
@@ -537,8 +574,46 @@ async function main() {
     return;
   }
 
-  const groups = groupByBrand(products);
-  log(`  ${groups.length} marque(s) détectée(s) : ${groups.map(g => `${g.brandName} (${g.products.length})`).join(', ')}`);
+  let activeBrands;
+  try {
+    activeBrands = await fetchActiveBrands();
+  } catch (e) {
+    fail(`Échec de la récupération des marques : ${e.message}`);
+    await writeSummary([
+      '## Régénération Parfums — ÉCHEC',
+      '',
+      `- Raison : impossible de lire la table brands (${e.message})`,
+      '- Aucun fichier modifié — la version précédente reste en ligne.',
+    ]);
+    return;
+  }
+
+  if (!activeBrands.length) {
+    fail('Aucune marque active trouvée dans la table brands — abandon pour ne pas publier un hub vide.');
+    await writeSummary([
+      '## Régénération Parfums — ABANDONNÉE',
+      '',
+      '- Raison : 0 marque active retournée par Supabase (table brands).',
+      '- Aucun fichier modifié — la version précédente reste en ligne.',
+      '- Vérifiez qu\'aucune désactivation en masse involontaire n\'a eu lieu dans admin.html > Marques.',
+    ]);
+    return;
+  }
+
+  const groups = groupByBrand(products, activeBrands);
+
+  if (!groups.length) {
+    fail('Aucune marque active n\'a de parfum actif correspondant — abandon pour ne pas publier un hub vide.');
+    await writeSummary([
+      '## Régénération Parfums — ABANDONNÉE',
+      '',
+      '- Raison : les marques actives et les parfums actifs ne se recoupent pas (vérifiez les Marque de chaque parfum dans admin.html).',
+      '- Aucun fichier modifié — la version précédente reste en ligne.',
+    ]);
+    return;
+  }
+
+  log(`  ${groups.length} marque(s) publiée(s) : ${groups.map(g => `${g.brandName} (${g.products.length})`).join(', ')}`);
 
   let commonNav;
   try {
