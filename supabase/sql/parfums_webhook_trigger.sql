@@ -1,4 +1,12 @@
 -- ============================================================================
+-- REMPLACÉ par supabase/sql/webhook_automation.sql (2026-07-19) — ce fichier
+-- n'a jamais été exécuté avec succès (diagnostic confirmé : ni le trigger ni
+-- le secret Vault n'existaient). N'exécutez plus ce fichier seul : utilisez
+-- webhook_automation.sql, qui couvre ce même cas (products -> parfums) en
+-- plus du reste (product-pages, brands, categories). Conservé pour archive.
+-- ============================================================================
+
+-- ============================================================================
 -- Déclenchement automatique de la régénération de /parfums/index.html
 -- UNIQUEMENT quand un produit dont category_id = 'parfums' est créé, modifié,
 -- désactivé/réactivé ou supprimé.

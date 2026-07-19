@@ -1,4 +1,10 @@
 -- ============================================================================
+-- REMPLACÉ par supabase/sql/webhook_automation.sql (2026-07-19) — n'exécutez
+-- plus ce fichier seul : utilisez webhook_automation.sql, qui couvre ce même
+-- cas (brands -> parfums) en plus du reste. Conservé pour archive.
+-- ============================================================================
+
+-- ============================================================================
 -- Étend le déclenchement automatique de régénération de /parfums/ (voir
 -- parfums_webhook_trigger.sql) aux changements sur la table `brands` :
 -- créer, modifier, réordonner, activer/désactiver ou supprimer une marque
