@@ -144,6 +144,13 @@ function pluralize(n, singular, plural = `${singular}s`) {
   return `${n} ${n > 1 ? plural : singular}`;
 }
 
+// Une image de produit peut être un chemin relatif au dépôt (ancienne convention,
+// ex: "assets/produits-fournisseur/...") OU une URL absolue Supabase Storage
+// (ex: uploadImage() dans admin.html) — ne jamais préfixer une URL déjà absolue.
+function resolveImagePath(prefix, path) {
+  return /^https?:\/\//i.test(path) ? path : `${prefix}${path}`;
+}
+
 function slugifyVolume(volume) {
   return String(volume || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'format';
 }
@@ -241,8 +248,8 @@ function buildInfoNoteBlock(volumeGroups) {
 
 function buildCardHtml(p, brandName, imgPrefix) {
   const images = Array.isArray(p.images) ? p.images.filter(Boolean) : [];
-  const img1 = images[0] ? `${imgPrefix}${images[0]}` : `${imgPrefix}logo-dar-nur.png`;
-  const img2 = images[1] ? `${imgPrefix}${images[1]}` : null;
+  const img1 = images[0] ? resolveImagePath(imgPrefix, images[0]) : `${imgPrefix}logo-dar-nur.png`;
+  const img2 = images[1] ? resolveImagePath(imgPrefix, images[1]) : null;
   const line = slugifyVolume(p.volume);
   const priceLabel = formatPriceLabel(p.price_value);
   const priceAttr = p.price_value != null ? String(p.price_value) : '';
@@ -294,8 +301,8 @@ async function renderBrandPage(group, allGroups, commonNav) {
 
   const heroProduct = products[0];
   const heroImages = Array.isArray(heroProduct.images) ? heroProduct.images.filter(Boolean) : [];
-  const heroImageRelative = heroImages[0] ? `${imgPrefix}${heroImages[0]}` : `${imgPrefix}logo-dar-nur.png`;
-  const heroImageAbsolute = heroImages[0] ? `https://dar-nur.fr/${heroImages[0]}` : 'https://dar-nur.fr/logo-dar-nur.png';
+  const heroImageRelative = heroImages[0] ? resolveImagePath(imgPrefix, heroImages[0]) : `${imgPrefix}logo-dar-nur.png`;
+  const heroImageAbsolute = heroImages[0] ? resolveImagePath('https://dar-nur.fr/', heroImages[0]) : 'https://dar-nur.fr/logo-dar-nur.png';
   const heroImageAlt = `${heroProduct.name} — Parfum ${brandName}`;
 
   const countLabel = pluralize(products.length, 'parfum');
@@ -345,7 +352,7 @@ function buildBrandCardHtml(group) {
   const prices = products.map(p => p.price_value).filter(v => v !== null && v !== undefined);
   const minPrice = prices.length ? Math.min(...prices) : null;
   const images = Array.isArray(products[0].images) ? products[0].images.filter(Boolean) : [];
-  const img = images[0] ? `${imgPrefix}${images[0]}` : `${imgPrefix}logo-dar-nur.png`;
+  const img = images[0] ? resolveImagePath(imgPrefix, images[0]) : `${imgPrefix}logo-dar-nur.png`;
   const priceLabel = minPrice != null ? `à partir de ${formatPriceLabel(minPrice)}` : 'Prix à compléter';
   const countLabel = pluralize(products.length, 'parfum');
 
@@ -377,8 +384,8 @@ async function renderHubPage(groups, allProducts, commonNav) {
 
   const heroProduct = allProducts[0];
   const heroImages = heroProduct && Array.isArray(heroProduct.images) ? heroProduct.images.filter(Boolean) : [];
-  const heroImageRelative = heroImages[0] ? `../${heroImages[0]}` : '../logo-dar-nur.png';
-  const heroImageAbsolute = heroImages[0] ? `https://dar-nur.fr/${heroImages[0]}` : 'https://dar-nur.fr/logo-dar-nur.png';
+  const heroImageRelative = heroImages[0] ? resolveImagePath('../', heroImages[0]) : '../logo-dar-nur.png';
+  const heroImageAbsolute = heroImages[0] ? resolveImagePath('https://dar-nur.fr/', heroImages[0]) : 'https://dar-nur.fr/logo-dar-nur.png';
   const heroImageAlt = heroProduct ? `${heroProduct.name} — Univers Parfums Dar Nūr` : 'Univers Parfums Dar Nūr';
 
   const template = await readFile(HUB_TEMPLATE_PATH, 'utf8');
