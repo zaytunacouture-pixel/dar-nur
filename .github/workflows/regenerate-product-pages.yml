@@ -69,4 +69,19 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git commit -m "chore: régénère les fiches produit depuis Supabase [skip ci]"
-          git push
+
+          # main peut avancer entre le checkout et ce push (autre commit
+          # poussé pendant l'exécution du job) : on rebase sur le dernier
+          # main et on retente plusieurs fois avant d'abandonner.
+          for i in 1 2 3 4 5; do
+            if git push; then
+              exit 0
+            fi
+            echo "::warning::Push refusé (main a avancé) — tentative $i/5, rebase sur origin/main et nouvel essai."
+            git fetch origin main
+            git rebase origin/main
+            sleep $((i * 3))
+          done
+
+          echo "::error::Échec du push après 5 tentatives (main avance plus vite que le rebase)."
+          exit 1
