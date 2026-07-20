@@ -570,12 +570,11 @@ section{padding:15px 28px}
 .pp-hero .tagline{font-family:'Cormorant Garamond';font-style:italic;font-size:clamp(1.15rem,2.4vw,1.5rem);color:var(--gold-light);margin-top:18px;max-width:620px;margin-left:auto;margin-right:auto}
 
 .pp-body{max-width:1100px;margin:0 auto;padding:112px 48px 64px;display:grid;grid-template-columns:1.15fr 1fr;gap:76px;align-items:start}
-.pp-visual{position:sticky;top:110px;background:#f6f0e3;border:1px solid var(--line);border-radius:6px;padding:16px;text-align:center;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.pp-visual{background:#f6f0e3;border:1px solid var(--line);border-radius:6px;padding:16px;text-align:center;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center}
 .pp-visual .pp-logo-ph{width:46%;height:46%;object-fit:contain;opacity:.38;margin-bottom:20px}
 .pp-visual .ribbon{font-family:'Cinzel';font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:10px 0;width:100%}
 
 .pp-content h2{font-size:1.05rem;color:var(--green);letter-spacing:.08em;margin:56px 0 20px;display:flex;align-items:center;gap:10px}
-.pp-content h2:first-child{margin-top:0}
 .pp-content h2::before{content:"";width:22px;height:1px;background:var(--gold)}
 .pp-content p{color:#3a3a3a;margin-bottom:14px}
 .pp-benefits{list-style:none;display:grid;gap:12px;margin:6px 0 10px}
@@ -604,12 +603,12 @@ section{padding:15px 28px}
 .usage-note-text{font-family:'Lora',serif;font-size:.9rem;color:#4a4a4a;line-height:1.65}
 @media(max-width:480px){.usage-note{padding:14px 16px}.usage-note-text{font-size:.85rem}}
 
-/* order block */
+/* order block — sélecteur de format + prix + CTA, désormais dans la colonne galerie */
 .order-box{
   background:var(--cream);border:1px solid var(--gold);border-radius:6px;
-  padding:30px;margin-top:40px;box-shadow:var(--shadow);
+  padding:30px;box-shadow:var(--shadow);
 }
-.order-box .label,.pp-format-select .label{font-family:'Cinzel';font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.pp-format-select .label{font-family:'Cinzel';font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
 .order-eyebrow{font-family:'Cinzel';font-size:.66rem;letter-spacing:.22em;text-transform:uppercase;color:var(--gold-dark);margin-bottom:18px}
 .opt-row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:22px}
 .opt{
@@ -742,10 +741,28 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
 .card-logo-placeholder img{width:46%;height:46%;object-fit:contain;opacity:.38}
 .pp-visual.has-photo{padding:18px;background:#f6f0e3}
 .pp-product-img{width:100%;height:100%;object-fit:contain;object-position:center;border-radius:4px}
-.pp-gallery{display:grid;gap:16px;align-self:stretch;align-items:start}
+.pp-gallery{
+  display:grid;gap:16px;align-self:stretch;align-items:start;
+  /* .pp-gallery est volontairement étirée à la hauteur de la ligne de grille par */
+  /* align-self:stretch, afin de donner à .pp-buybox une plage de collage sticky. */
+  /* Cet étirement crée de l'espace libre dans la grille ; sans align-content:start, */
+  /* cet espace se répartit entre les deux rangées implicites (.pp-media/.pp-buybox), */
+  /* repoussant .pp-buybox très loin sous .pp-media et retardant fortement le CTA. */
+  /* Règle intentionnelle : ne pas supprimer lors d'un futur nettoyage CSS. */
+  align-content:start;
+}
+/* .pp-gallery s'étire à la hauteur de .pp-content (align-self:stretch) pour donner à .pp-buybox */
+/* assez de marge pour rester collé ; align-content:start évite que ce surplus de hauteur ne */
+/* s'intercale entre .pp-media et .pp-buybox. Seul .pp-buybox (format + prix + CTA, toujours */
+/* petit) est sticky — .pp-media (image + vignettes, taille variable selon le produit) défile */
+/* normalement, donc rien ici n'a jamais besoin d'être plafonné ni de défiler en interne. */
+.pp-media{display:grid;gap:16px}
+.pp-buybox{display:grid;gap:16px}
+@media(min-width:1025px){
+  .pp-buybox{position:sticky;top:110px;z-index:5}
+}
 .pp-format-select{background:var(--cream);border:1px solid var(--line);border-radius:6px;padding:18px}
-.pp-format-select .opt-row{margin-bottom:14px}
-.format-price{font-family:'Cormorant Garamond';font-size:1.8rem;color:var(--green);font-weight:600}
+.pp-format-select .opt-row{margin-bottom:0}
 .pp-thumbs{display:grid;grid-template-columns:repeat(auto-fit,minmax(64px,1fr));gap:10px}
 .pp-thumb{aspect-ratio:1;border:1px solid var(--line);border-radius:4px;background:#f6f0e3;padding:4px;cursor:pointer}
 .pp-thumb img{width:100%;height:100%;object-fit:cover;object-position:center;border-radius:3px;display:block}
@@ -757,7 +774,7 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
   .family .grid[style*="grid-template-columns:repeat(3"]{grid-template-columns:repeat(2,1fr)!important}
   .pp-body{display:flex;flex-direction:column;align-items:center;gap:36px}
   .pp-gallery{width:100%;max-width:420px;margin:0 auto;gap:12px}
-  .pp-visual{position:static;aspect-ratio:1;padding:38px;width:100%;margin:0 auto}
+  .pp-visual{aspect-ratio:1;padding:38px;width:100%;margin:0 auto}
 }
 @media(max-width:768px){
   header{
@@ -2981,17 +2998,36 @@ function showProduct(id){
 
     <div class="pp-body">
       <div class="pp-gallery">
+      <div class="pp-media">
       <div class="pp-visual${detailImg ? ' has-photo' : ''}">
         ${detailImg ? `<img src="${detailImg}" alt="${p.name}" class="pp-product-img" id="ppGalleryMain"/>` : `<img src="logo-dar-nur.png" alt="Dar Nūr" class="pp-logo-ph"/><div class="ribbon">Dar Nūr · دار النور</div>`}
       </div>
       ${galleryThumbs}
+      </div>
+      <div class="pp-buybox">
       ${hasOptions?`<div class="pp-format-select">
         <div class="label">${optLabel}</div>
         <div class="opt-row" id="optRow">
           ${p.price.options.map((o,i)=>`<button class="opt ${i===0?'sel':''}" onclick="selectOption(${i})">${o[0]}</button>`).join("")}
         </div>
-        <div class="format-price"><span id="ppFormatPrice">${p.price.options[0][1]}€</span></div>
       </div>`:""}
+      <div class="order-box">
+        <div class="order-eyebrow">Votre sélection</div>
+        <div class="order-foot">
+          <div class="order-price"><span id="ppPrice">${startPrice(p)}€</span>${p.price.type==='format'?`<small id="ppFmt">${p.price.options[0][0]}</small>`:(p.price.type==='size'?`<small id="ppFmt">Taille ${p.price.options[0][0]}</small>`:``)}</div>
+          ${p.coming_soon===true
+            ? `<span class="btn-wa dark btn-soon" id="ppBtn">Disponible prochainement</span>`
+            : `<a class="btn-wa dark" id="ppBtn" href="${waLink(p, hasOptions?p.price.options[0][0]:'', startPrice(p))}" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.945C.16 5.335 5.495 0 12.05 0a11.82 11.82 0 018.413 3.488 11.82 11.82 0 013.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.86 9.86 0 001.512 5.26l-.999 3.648 3.985-1.607zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+            Commander
+          </a>`}
+        </div>
+        <div class="order-reassurance">
+          <span><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M21 10c0-7-9-13-9-13S3 3 3 10a9 9 0 0018 0z"/><path d="M9 10l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>Livraison en Île-de-France</span>
+          <span><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke-linecap="round" stroke-linejoin="round"/></svg>Service client WhatsApp</span>
+        </div>
+      </div>
+      </div>
       </div>
       <div class="pp-content">
         ${infoBannerHTML(p)}
@@ -3018,23 +3054,6 @@ function showProduct(id){
           <div class="panel warn">
             <div class="panel-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3l9 16H3z"/><path d="M12 10v4M12 17h.01" stroke-linecap="round"/></svg>${rightTitle}</div>
             <ul>${rightItems.map(r=>`<li>${r}</li>`).join("")}</ul>
-          </div>
-        </div>
-
-        <div class="order-box">
-          <div class="order-eyebrow">Votre sélection</div>
-          <div class="order-foot">
-            <div class="order-price"><span id="ppPrice">${startPrice(p)}€</span>${p.price.type==='format'?`<small id="ppFmt">${p.price.options[0][0]}</small>`:(p.price.type==='size'?`<small id="ppFmt">Taille ${p.price.options[0][0]}</small>`:``)}</div>
-            ${p.coming_soon===true
-              ? `<span class="btn-wa dark btn-soon" id="ppBtn">Disponible prochainement</span>`
-              : `<a class="btn-wa dark" id="ppBtn" href="${waLink(p, hasOptions?p.price.options[0][0]:'', startPrice(p))}" target="_blank" rel="noopener">
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.945C.16 5.335 5.495 0 12.05 0a11.82 11.82 0 018.413 3.488 11.82 11.82 0 013.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.86 9.86 0 001.512 5.26l-.999 3.648 3.985-1.607zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
-              Commander
-            </a>`}
-          </div>
-          <div class="order-reassurance">
-            <span><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M21 10c0-7-9-13-9-13S3 3 3 10a9 9 0 0018 0z"/><path d="M9 10l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>Livraison en Île-de-France</span>
-            <span><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke-linecap="round" stroke-linejoin="round"/></svg>Service client WhatsApp</span>
           </div>
         </div>
       </div>
@@ -3117,8 +3136,6 @@ function selectOption(i){
   document.getElementById("ppPrice").textContent=price+"€";
   const fmt=document.getElementById("ppFmt");
   if(fmt) fmt.textContent = p.price.type==='size'?`Taille ${opt}`:opt;
-  const formatPrice=document.getElementById("ppFormatPrice");
-  if(formatPrice) formatPrice.textContent = price+"€";
   document.getElementById("ppBtn").href = waLink(p, opt, price);
   updateFormatImage(p, opt);
   updateMobileBar();
