@@ -742,25 +742,25 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
 .card-logo-placeholder img{width:46%;height:46%;object-fit:contain;opacity:.38}
 .pp-visual.has-photo{padding:18px;background:#f6f0e3}
 .pp-product-img{width:100%;height:100%;object-fit:contain;object-position:center;border-radius:4px}
-.pp-gallery{
-  display:grid;gap:16px;align-self:stretch;align-items:start;
-  /* .pp-gallery est volontairement étirée à la hauteur de la ligne de grille par */
-  /* align-self:stretch, afin de donner à .pp-buybox une plage de collage sticky. */
-  /* Cet étirement crée de l'espace libre dans la grille ; sans align-content:start, */
-  /* cet espace se répartit entre les deux rangées implicites (.pp-media/.pp-buybox), */
-  /* repoussant .pp-buybox très loin sous .pp-media et retardant fortement le CTA. */
-  /* Règle intentionnelle : ne pas supprimer lors d'un futur nettoyage CSS. */
-  align-content:start;
-}
-/* .pp-gallery s'étire à la hauteur de .pp-content (align-self:stretch) pour donner à .pp-buybox */
-/* assez de marge pour rester collé ; align-content:start évite que ce surplus de hauteur ne */
-/* s'intercale entre .pp-media et .pp-buybox. Seul .pp-buybox (format + prix + CTA, toujours */
-/* petit) est sticky — .pp-media (image + vignettes, taille variable selon le produit) défile */
-/* normalement, donc rien ici n'a jamais besoin d'être plafonné ni de défiler en interne. */
+.pp-gallery{display:grid;gap:16px}
 .pp-media{display:grid;gap:16px}
 .pp-buybox{display:grid;gap:16px}
 @media(min-width:1025px){
-  .pp-buybox{position:sticky;top:110px;z-index:5}
+  /* Desktop : la colonne galerie ENTIÈRE est sticky et bornée à la hauteur visible */
+  /* sous le header, pour que l'image ET le bloc d'achat restent présents pendant */
+  /* toute la lecture, sans que l'un masque l'autre. Répartition par flexbox : seule */
+  /* l'image (.pp-visual) peut se compresser si la place manque ; les vignettes et le */
+  /* bloc d'achat (format + prix + CTA) ne rétrécissent jamais (flex:0 0 auto), donc */
+  /* le CTA n'est jamais poussé hors écran. Aucun overflow interne, aucun JS de mesure. */
+  .pp-gallery{
+    position:sticky;top:110px;z-index:5;align-self:start;
+    display:flex;flex-direction:column;gap:16px;
+    max-height:calc(100vh - 130px);
+  }
+  .pp-media{display:flex;flex-direction:column;gap:16px;flex:0 1 auto;min-height:0}
+  .pp-visual{flex:0 1 auto;min-height:0}
+  .pp-thumbs{flex:0 0 auto}
+  .pp-buybox{flex:0 0 auto}
 }
 .pp-format-select{background:var(--cream);border:1px solid var(--line);border-radius:6px;padding:18px}
 .pp-format-select .opt-row{margin-bottom:0}
