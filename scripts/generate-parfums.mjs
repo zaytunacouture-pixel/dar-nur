@@ -62,17 +62,6 @@ function escJson(str) {
     .replace(/</g, '\\u003C');
 }
 
-// Échappement JS — pour tout texte inséré dans une chaîne littérale à l'intérieur
-// d'un bloc <script> (protège contre un brand/brand_slug qui contiendrait par
-// erreur des backticks ou guillemets).
-function escJs(str) {
-  return String(str ?? '')
-    .replace(/\\/g, '\\\\')
-    .replace(/`/g, '\\`')
-    .replace(/\$\{/g, '\\${')
-    .replace(/</g, '\\x3C');
-}
-
 // Extraction stricte par marqueurs exacts — jamais de correspondance
 // approximative (même principe que build-nav.mjs, réimplémenté ici
 // localement plutôt qu'importé, pour ne créer aucun couplage de code entre
@@ -275,23 +264,23 @@ function buildInfoNoteBlock(volumeGroups) {
   return `  <p class="info-note"><b>Bon à savoir —</b> formats disponibles : ${esc(humanList(volumes))}.</p>`;
 }
 
+// Carte produit : lien vers la vraie fiche statique /{slug}/ générée par
+// scripts/generate-product-pages.mjs — même contrat que les autres catégories
+// (cf. buildCardHtml de scripts/generate-category-pages.mjs). Les attributs
+// data-line / data-price restent nécessaires : ils alimentent le filtre par
+// format et le tri par prix de la page marque.
+// L'id={{slug}} est conservé pour que les anciens liens /parfums/<marque>/#<slug>
+// déjà partagés atterrissent au moins sur la bonne carte.
 function buildCardHtml(p, brandName, imgPrefix) {
   const images = Array.isArray(p.images) ? p.images.filter(Boolean) : [];
   const img1 = images[0] ? resolveImagePath(imgPrefix, images[0]) : `${imgPrefix}logo-dar-nur.png`;
-  const img2 = images[1] ? resolveImagePath(imgPrefix, images[1]) : null;
   const line = slugifyVolume(p.volume);
   const priceLabel = formatPriceLabel(p.price_value);
   const priceAttr = p.price_value != null ? String(p.price_value) : '';
   const format = p.volume || 'Format non précisé';
-  const fullDesc = (p.description && p.description[0]) || '';
-  const teaser = firstSentence(fullDesc);
-  const img2Attr = img2 ? `\n         data-img2="${esc(img2)}"` : '';
+  const teaser = firstSentence((p.description && p.description[0]) || '');
 
-  return `    <div class="card product-card" id="${esc(p.slug)}" data-line="${esc(line)}" data-price="${priceAttr}"
-         data-name="${esc(p.name)}" data-format="${esc(format)}" data-price-label="${esc(priceLabel)}"
-         data-desc="${esc(fullDesc)}"
-         data-img1="${esc(img1)}"${img2Attr}
-         tabindex="0" role="button" aria-label="Voir la fiche de ${esc(p.name)}" onclick="openProductModal(this)" onkeydown="if(event.key==='Enter')openProductModal(this)">
+  return `    <a class="card" href="https://dar-nur.fr/${esc(p.slug)}/" id="${esc(p.slug)}" data-line="${esc(line)}" data-price="${priceAttr}">
       <div class="card-image"><img src="${esc(img1)}" alt="${esc(p.name)} — Parfum ${esc(brandName)}, ${esc(format)}" loading="lazy" width="400" height="400"/></div>
       <div class="card-body">
         <div class="cat-tag">Parfum ${esc(brandName)}</div>
@@ -302,11 +291,11 @@ function buildCardHtml(p, brandName, imgPrefix) {
           <span class="card-cta">Voir la fiche</span>
         </div>
       </div>
-    </div>`;
+    </a>`;
 }
 
 function buildJsonLdItem(p, index, brandName) {
-  return `      {"@type": "ListItem", "position": ${index + 1}, "url": "https://dar-nur.fr/parfums/${p.brand_slug}/#${p.slug}", "name": "${escJson(p.name)} — ${escJson(brandName)}"}`;
+  return `      {"@type": "ListItem", "position": ${index + 1}, "url": "https://dar-nur.fr/${escJson(p.slug)}/", "name": "${escJson(p.name)} — ${escJson(brandName)}"}`;
 }
 
 function buildParfumsNavBlock(groups, currentBrandSlug) {
@@ -361,8 +350,6 @@ async function renderBrandPage(group, allGroups, commonNav) {
     .replaceAll('{{JSONLD_NAME}}', escJson(`Parfum ${brandName} — Dar Nūr`))
     .replaceAll('{{JSONLD_DESCRIPTION}}', escJson(introText))
     .replaceAll('{{BRAND_NAME_JSON}}', escJson(brandName))
-    .replaceAll('{{BRAND_NAME_JS}}', escJs(brandName))
-    .replaceAll('{{BRAND_SLUG_JS}}', escJs(brandSlug))
     .replaceAll('{{BRAND_SLUG}}', esc(brandSlug))
     .replaceAll('{{BRAND_NAME}}', esc(brandName))
     .replaceAll('{{PRODUCT_COUNT}}', String(products.length))

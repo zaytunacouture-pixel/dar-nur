@@ -10,6 +10,21 @@ name: Régénère la page Parfums (Supabase → HTML statique)
 # Protection anti-boucle : ce workflow n'écoute jamais "push" — son propre
 # commit ne peut donc jamais se re-déclencher lui-même. Le commit est en plus
 # marqué [skip ci] par défense en profondeur.
+#
+# Ordre imposé (cartes parfums -> fiches produit) : depuis que les cartes de
+# /parfums/<marque>/ sont des liens vers les vraies fiches /{slug}/, une page
+# marque ne doit JAMAIS être publiée avant la fiche qu'elle référence, sinon
+# le visiteur tombe sur un 404. Or "regenerate-parfums" et
+# "regenerate-product-pages" sont deux workflows indépendants, déclenchés
+# simultanément par deux triggers Postgres distincts sur `products`
+# (webhook_automation.sql, triggers 4a et 5) : rien ne garantit lequel
+# committe en premier.
+# La garantie est donc obtenue ici, à l'intérieur du job : on génère les
+# fiches AVANT les pages marque et on committe les deux ENSEMBLE, dans le même
+# commit atomique. Quel que soit l'ordre réel des deux workflows, tout commit
+# qui publie une carte publie aussi la fiche vers laquelle elle pointe.
+# Ce choix couvre aussi le trigger `brands` (trigger 6), qui déclenche
+# "regenerate-parfums" seul, sans aucun "regenerate-product-pages" en face.
 on:
   repository_dispatch:
     types: [regenerate-parfums]
@@ -34,6 +49,15 @@ jobs:
         with:
           node-version: '20'
 
+      # Prérequis des cartes parfums : chaque carte pointe vers /{slug}/.
+      # Même script que le workflow "regenerate-product-pages" — aucun code
+      # dupliqué, on réutilise le générateur existant. Il ne demande aucun
+      # secret (il lit la clé anon publique depuis js/config.js) et il est
+      # idempotent : si les fiches sont déjà à jour, cette étape ne produit
+      # aucune modification et ne crée donc aucun commit.
+      - name: Générer les fiches produit (prérequis des cartes parfums)
+        run: node scripts/generate-product-pages.mjs
+
       - name: Générer la collection Parfums (hub + pages marque) depuis Supabase
         env:
           PARFUMS_SUPABASE_URL: ${{ secrets.PARFUMS_SUPABASE_URL }}
@@ -43,8 +67,13 @@ jobs:
       - name: Vérifier si le contenu généré a réellement changé
         id: diff
         run: |
-          git add -A -- parfums/ sitemap.xml
-          if git diff --cached --quiet -- parfums/ sitemap.xml; then
+          # Portée élargie aux fiches produit (/{slug}/) : elles doivent partir
+          # dans le MÊME commit que les pages marque qui les référencent.
+          # git add -A sans restriction de chemin, comme dans le workflow
+          # regenerate-product-pages : le checkout de ce job est toujours neuf,
+          # aucun fichier étranger ne peut s'y trouver.
+          git add -A
+          if git diff --cached --quiet; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
             echo "::notice::Contenu identique au précédent — aucun commit créé."
           else
@@ -57,5 +86,22 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git commit -m "chore: régénère la collection Parfums (hub + pages marque) depuis Supabase [skip ci]"
-          git push
+          git commit -m "chore: régénère la collection Parfums (fiches + hub + pages marque) depuis Supabase [skip ci]"
+
+          # Ce commit porte désormais les fiches produit ET les pages marque :
+          # le perdre sur un push refusé republierait des cartes sans leurs
+          # fiches au prochain déclenchement. Même stratégie que le workflow
+          # regenerate-product-pages, qui pousse sur la même branche et peut
+          # faire avancer main pendant ce job.
+          for i in 1 2 3 4 5; do
+            if git push; then
+              exit 0
+            fi
+            echo "::warning::Push refusé (main a avancé) — tentative $i/5, rebase sur origin/main et nouvel essai."
+            git fetch origin main
+            git rebase origin/main
+            sleep $((i * 3))
+          done
+
+          echo "::error::Échec du push après 5 tentatives (main avance plus vite que le rebase)."
+          exit 1
