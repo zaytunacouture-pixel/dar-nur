@@ -94,12 +94,28 @@ function replaceMarkedBlock(html, name, newInner, label) {
 // filtre. Retourne null si aucune règle ne correspond — le garde-fou de
 // generateCategoryPage() abandonne alors sans rien écrire (même philosophie que
 // le garde-fou "produit sans marque" de scripts/generate-parfums.mjs).
+function lineSourceValue(p, cfg) {
+  const field = cfg.lineSource || 'slug';
+  const raw = p[field];
+  return raw === null || raw === undefined ? '' : String(raw).trim();
+}
+
 function resolveLine(p, cfg) {
   if (!cfg.lines) return null;
+  // Valeur vide = non classable. On ne teste surtout pas les regex contre une
+  // chaine vide : "" matcherait n'importe quel motif non ancre, et le produit
+  // serait range dans un groupe arbitraire au lieu d'etre signale.
+  const value = lineSourceValue(p, cfg);
+  if (!value) return null;
   for (const line of cfg.lines) {
-    if (line.match.test(p.slug)) return line.id;
+    if (line.match.test(value)) return line;
   }
   return null;
+}
+
+function resolveLineId(p, cfg) {
+  const line = resolveLine(p, cfg);
+  return line ? line.id : null;
 }
 
 // Un produit a-t-il de vraies déclinaisons (taille, format...) ? Sert au mode
@@ -140,7 +156,9 @@ function buildCardHtml(p, tagLabel, isFirst, cfg) {
   // Attributs de filtre/tri client-side. N'existent que sur les pages qui les
   // utilisent déjà — aucune page n'en reçoit qui n'en avait pas.
   let attrs = '';
-  if (cfg.lines) attrs += ` data-line="${esc(resolveLine(p, cfg))}"`;
+  // Nom d'attribut configurable : data-line (tahara/) ou data-prov (miels/) —
+  // c'est le script de filtre deja present sur la page qui impose le nom.
+  if (cfg.lines) attrs += ` data-${esc(cfg.lineAttribute || 'line')}="${esc(resolveLineId(p, cfg))}"`;
   if (cfg.emitDataPrice && hasPrice) attrs += ` data-price="${Number(p.price_value).toFixed(2)}"`;
 
   // Tagline vide → espace insécable, pour que la carte garde la même hauteur que
@@ -148,11 +166,20 @@ function buildCardHtml(p, tagLabel, isFirst, cfg) {
   const tagline = (p.tagline || '').trim();
   const taglineHtml = tagline ? esc(tagline) : '&nbsp;';
 
+  // Pastille de provenance. Le libelle ne vient pas brut de Supabase : il est
+  // porte par la regle de groupe qui a classe le produit (cfg.lines[].chip),
+  // parce que plusieurs valeurs de provenance partagent le meme libelle affiche
+  // (miels/ : "France" et "Preparation artisanale" -> "Prepare en France").
+  const line = cfg.lines ? resolveLine(p, cfg) : null;
+  const chipHtml = (line && line.chip)
+    ? `\n        <div class="meta-chip">${esc(line.chip)}</div>`
+    : '';
+
   return `    <a href="https://dar-nur.fr/${esc(p.slug)}/" class="card"${attrs}>
       <div class="card-image"><img src="${esc(imgSrc)}" alt="${esc(p.name)} — Dar Nūr" loading="${loading}" width="400" height="400"/></div>
       <div class="card-body">
         <div class="cat-tag">${esc(tagLabel)}</div>
-        <h3>${esc(p.name)}</h3>
+        <h3>${esc(p.name)}</h3>${chipHtml}
         <p class="card-tagline">${taglineHtml}</p>
         <div class="card-footer">
           <div class="card-price">${priceHtml}</div>
@@ -165,9 +192,15 @@ function buildCardHtml(p, tagLabel, isFirst, cfg) {
 // Pilules de filtre, générées depuis cfg.lines pour qu'elles ne puissent pas
 // diverger des attributs data-line des cartes (c'est précisément ce type de
 // dérive main/base que ce pipeline supprime).
-function buildFiltersHtml(cfg) {
-  const buttons = [`      <button class="active" data-line="all">${esc(cfg.allLinesLabel || 'Toutes')}</button>`]
-    .concat(cfg.lines.map(l => `      <button data-line="${esc(l.id)}">${esc(l.label)}</button>`));
+function buildFiltersHtml(cfg, products) {
+  const attr = cfg.lineAttribute || 'line';
+  // cfg.lineCountsInLabels : certaines pages affichent le nombre dans la pilule
+  // ("Tous (18)"). Ce compte est alors derive des produits reellement generes,
+  // il ne peut donc pas diverger de la grille.
+  const count = (id) => products.filter(p => resolveLineId(p, cfg) === id).length;
+  const suffix = (n) => cfg.lineCountsInLabels ? ` (${n})` : '';
+  const buttons = [`      <button class="active" data-${attr}="all">${esc(cfg.allLinesLabel || 'Toutes')}${suffix(products.length)}</button>`]
+    .concat(cfg.lines.map(l => `      <button data-${attr}="${esc(l.id)}">${esc(l.label)}${suffix(count(l.id))}</button>`));
   return ['    <div class="filters" id="filters">', ...buttons, '    </div>'].join('\n');
 }
 
@@ -290,6 +323,56 @@ const CATEGORY_PAGES = [
     pricePrefixOnlyWithVariants: true,
     cardSeparator: '\n\n',
   },
+  {
+    // Canari n°4. Premier cas ou le regroupement ne se fait pas sur le slug mais
+    // sur un champ editorial de Supabase : products.provenance. Trois nouveautes
+    // par rapport aux pages precedentes :
+    //   - attribut de filtre data-prov (et non data-line)  -> lineAttribute
+    //   - pastille .meta-chip sous le titre                -> lines[].chip
+    //   - compteur affiche dans le libelle des pilules     -> lineCountsInLabels
+    //
+    // La correspondance provenance -> groupe n'est PAS un passe-plat : plusieurs
+    // valeurs distinctes partagent un meme libelle affiche. Le garde-fou refuse
+    // de generer si une valeur de provenance ne correspond a aucune regle (ou si
+    // elle est vide), plutot que de ranger le produit dans un groupe arbitraire.
+    categoryId: 'miels',
+    dir: 'miels',
+    canonicalUrl: 'https://dar-nur.fr/miels/',
+    jsonLdName: 'Miels Artisanaux — Dar Nūr',
+    jsonLdDescription: "Collection de miels artisanaux premium — Nigelle, Sidr, Aphrodisiaque, Spiruline, Costus, Shilajit et bien d'autres.",
+    breadcrumbName: 'Miels Artisanaux',
+    itemListName: 'Nos Miels Artisanaux',
+    unitSingular: 'miel',
+    unitPlural: 'miels',
+
+    // categories.label vaut "Miel thérapeutique" en base, mais toute la page est
+    // construite sur "artisanal" (badge du hero, <h1>, <title>, JSON-LD). On garde
+    // le libellé déjà affiché plutôt que d'introduire une incohérence visuelle
+    // entre la pastille d'une carte et le badge juste au-dessus.
+    tagLabel: 'Miel artisanal',
+
+    pricePrefix: 'À partir de',
+    pricePrefixOnlyWithVariants: true,
+    emitDataPrice: true,
+    cardSeparator: '\n\n',
+    buildCountHtml: (n) => `  <p class="results-count" id="products-heading"><span id="resultsCount">${n}</span> miel${n > 1 ? 's' : ''} disponible${n > 1 ? 's' : ''}</p>`,
+
+    // Groupes de provenance : liste fermee, appliquee sur products.provenance.
+    lineSource: 'provenance',
+    lineAttribute: 'prov',
+    lineCountsInLabels: true,
+    allLinesLabel: 'Tous',
+    lines: [
+      // "Preparation artisanale" designe les preparations faites en France a
+      // partir du miel de printemps : meme pastille que "France", conformement
+      // a ce qui etait deja affiche a la main sur la page.
+      { id: 'fr',   label: 'Préparé en France',        chip: 'Préparé en France',
+        match: /^(France|Préparation artisanale)$/ },
+      // Sourcing international selectionne par Dar Nur.
+      { id: 'intl', label: 'Sélection internationale', chip: 'Sélectionné par Dar Nūr',
+        match: /^(Russie|Kirghizistan)$/ },
+    ],
+  },
 ];
 
 async function generateCategoryPage(cfg, creds) {
@@ -337,9 +420,16 @@ async function generateCategoryPage(cfg, creds) {
   // qu'un filtre est cliqué. On abandonne sans rien écrire, en nommant les coupables
   // (même philosophie que le garde-fou "produit sans marque" de generate-parfums.mjs).
   if (cfg.lines) {
-    const unclassified = products.filter(p => resolveLine(p, cfg) === null);
+    const unclassified = products.filter(p => resolveLineId(p, cfg) === null);
     if (unclassified.length) {
-      fail(`${cfg.dir}/ : ${unclassified.length} produit(s) actif(s) ne correspondent à aucune ligne de cfg.lines — abandon, aucun fichier touché. Slugs : ${unclassified.map(p => p.slug).join(', ')}`);
+      // On nomme la valeur du champ source, pas seulement le slug : quand le
+      // classement se fait sur un champ editorial (provenance), c'est la valeur
+      // inconnue — ou vide — qu'il faut voir pour corriger.
+      const field = cfg.lineSource || 'slug';
+      const details = unclassified
+        .map(p => `${p.slug} (${field}=${JSON.stringify(lineSourceValue(p, cfg)) || '""'})`)
+        .join(', ');
+      fail(`${cfg.dir}/ : ${unclassified.length} produit(s) actif(s) ne correspondent à aucune ligne de cfg.lines — abandon, aucun fichier touché. ${details}`);
       return false;
     }
   }
@@ -354,7 +444,7 @@ async function generateCategoryPage(cfg, creds) {
   html = replaceMarkedBlock(html, 'CATEGORY_COUNT', countHtml, `${cfg.dir}/index.html`);
   html = replaceMarkedBlock(html, 'CATEGORY_JSONLD', jsonLdHtml, `${cfg.dir}/index.html`);
   if (cfg.lines) {
-    html = replaceMarkedBlock(html, 'CATEGORY_FILTERS', buildFiltersHtml(cfg), `${cfg.dir}/index.html`);
+    html = replaceMarkedBlock(html, 'CATEGORY_FILTERS', buildFiltersHtml(cfg, products), `${cfg.dir}/index.html`);
   }
 
   await writeFile(pagePath, html, 'utf8');
