@@ -45,7 +45,9 @@ function escJson(str) {
 // (même bug/même correctif que scripts/generate-parfums.mjs et
 // scripts/generate-product-pages.mjs).
 function resolveImagePath(prefix, path) {
-  return /^https?:\/\//i.test(path) ? path : `${prefix}${path}`;
+  if (/^https?:\/\//i.test(path)) return path;          // URL Storage deja absolue
+  if (path.startsWith('/')) return path;                 // deja absolu depuis la racine du site
+  return `${prefix}${path}`;
 }
 
 function formatPriceLabel(priceValue) {
@@ -100,17 +102,38 @@ function resolveLine(p, cfg) {
   return null;
 }
 
+// Un produit a-t-il de vraies déclinaisons (taille, format...) ? Sert au mode
+// cfg.pricePrefixOnlyWithVariants. On exige à la fois un axe déclaré et au moins
+// une variante active : un axe sans variante ne produit aucun choix réel.
+function hasActiveVariants(p) {
+  const axes = Array.isArray(p.variant_axes) ? p.variant_axes : [];
+  const variants = Array.isArray(p.product_variants) ? p.product_variants : [];
+  return axes.length > 0 && variants.some(v => v.active !== false);
+}
+
 function buildCardHtml(p, tagLabel, isFirst, cfg) {
   const images = Array.isArray(p.images) ? p.images.filter(Boolean) : [];
   const img = images[0] || null;
-  const imgSrc = img ? resolveImagePath('../', img) : '../logo-dar-nur.png';
+  // Prefixe d'image propre a la page : tahara/ et miels-gourmands/ ecrivent des
+  // chemins relatifs (`../`), qamis/ des chemins absolus depuis la racine (`/`).
+  // Les deux resolvent vers la meme cible depuis /<categorie>/ ; on suit le
+  // gabarit deja en place sur chaque page plutot que d'en imposer un.
+  const imagePrefix = cfg.imagePrefix || '../';
+  const imgSrc = img ? resolveImagePath(imagePrefix, img) : `${imagePrefix}logo-dar-nur.png`;
   const loading = isFirst ? 'eager' : 'lazy';
   const hasPrice = p.price_value !== null && p.price_value !== undefined;
   const priceLabel = formatPriceLabel(p.price_value);
 
   // Préfixe "À partir de" : choix de gabarit propre à certaines pages (tahara),
   // jamais appliqué quand le prix est absent (sinon "À partir de Prix à compléter").
-  const priceHtml = (cfg.pricePrefix && hasPrice)
+  // Avec cfg.pricePrefixOnlyWithVariants, le préfixe n'est posé que sur les
+  // produits qui ont réellement plusieurs déclinaisons (qamis/ : les Qamis
+  // Saoudiens ont des tailles, les Qamiss Sultan Saphir non — annoncer "à partir
+  // de" sur un prix unique serait faux). Sans cette option, comportement
+  // inchangé : préfixe systématique dès qu'il y a un prix.
+  const showPrefix = cfg.pricePrefix && hasPrice
+    && (!cfg.pricePrefixOnlyWithVariants || hasActiveVariants(p));
+  const priceHtml = showPrefix
     ? `<small>${esc(cfg.pricePrefix)}</small>${esc(priceLabel)}`
     : esc(priceLabel);
 
@@ -241,6 +264,32 @@ const CATEGORY_PAGES = [
       { id: 'alun',      label: "Pierre d'alun",       match: /^pierre-alun-/ },
     ],
   },
+  {
+    // Canari n°3. Page sans pilules ni tri : le gabarit historique n'affiche
+    // qu'un compteur de résultats, comme miels-gourmands/. Trois écarts propres
+    // à cette page, tous couverts par configuration (aucune logique "qamis"
+    // n'entre dans le template générique) :
+    //   - images en chemin absolu depuis la racine   -> imagePrefix
+    //   - pastille "Mode homme" au lieu du label     -> tagLabel
+    //     Supabase "Qamis saoudien"
+    //   - "À partir de" seulement sur les references -> pricePrefixOnlyWithVariants
+    //     qui ont de vraies tailles
+    categoryId: 'qamis',
+    dir: 'qamis',
+    canonicalUrl: 'https://dar-nur.fr/qamis/',
+    jsonLdName: 'Qamis Saoudiens — Dar Nūr',
+    jsonLdDescription: "Qamis saoudiens à la coupe artisanale raffinée, disponibles en plusieurs tailles, et ligne Qamiss Sultan Saphir. Collection Dar Nūr.",
+    breadcrumbName: 'Qamis saoudiens',
+    itemListName: 'Nos Qamis Saoudiens',
+    unitSingular: 'qamis',
+    unitPlural: 'qamis',
+
+    tagLabel: 'Mode homme',
+    imagePrefix: '/',
+    pricePrefix: 'À partir de',
+    pricePrefixOnlyWithVariants: true,
+    cardSeparator: '\n\n',
+  },
 ];
 
 async function generateCategoryPage(cfg, creds) {
@@ -248,7 +297,7 @@ async function generateCategoryPage(cfg, creds) {
   let html = await readFile(pagePath, 'utf8');
 
   const [products, categoryRows] = await Promise.all([
-    fetchJson(`${creds.url}/rest/v1/products?select=*&category_id=eq.${cfg.categoryId}&active=eq.true&order=sort_order.asc`, creds),
+    fetchJson(`${creds.url}/rest/v1/products?select=*,product_variants(*)&category_id=eq.${cfg.categoryId}&active=eq.true&order=sort_order.asc`, creds),
     fetchJson(`${creds.url}/rest/v1/categories?select=label&id=eq.${cfg.categoryId}`, creds),
   ]);
 
@@ -257,7 +306,31 @@ async function generateCategoryPage(cfg, creds) {
     return false;
   }
 
-  const tagLabel = categoryRows[0]?.label || cfg.breadcrumbName;
+  // Libellé de la pastille .cat-tag. Par défaut le label Supabase de la
+  // catégorie ; cfg.tagLabel permet de conserver le libellé déjà affiché sur une
+  // page quand il diffère volontairement (qamis/ affiche "Mode homme" alors que
+  // categories.label vaut "Qamis saoudien").
+  const tagLabel = cfg.tagLabel || categoryRows[0]?.label || cfg.breadcrumbName;
+
+  // Garde-fou : deux produits actifs ne peuvent pas partager un slug — cela
+  // produirait deux cartes vers la même URL et deux ListItem identiques.
+  const slugCounts = new Map();
+  for (const prod of products) slugCounts.set(prod.slug, (slugCounts.get(prod.slug) || 0) + 1);
+  const dupSlugs = [...slugCounts.entries()].filter(([, n]) => n > 1).map(([slug]) => slug);
+  if (dupSlugs.length) {
+    fail(`${cfg.dir}/ : slug(s) dupliqué(s) parmi les produits actifs — abandon, aucun fichier touché : ${dupSlugs.join(', ')}`);
+    return false;
+  }
+
+  // Avertissement non bloquant : des produits homonymes donnent des cartes
+  // visuellement indiscernables (seule la tagline les distingue). C'est une
+  // donnée à corriger côté admin, pas une raison de refuser de publier.
+  const nameCounts = new Map();
+  for (const prod of products) nameCounts.set(prod.name, (nameCounts.get(prod.name) || 0) + 1);
+  const dupNames = [...nameCounts.entries()].filter(([, n]) => n > 1);
+  for (const [name, n] of dupNames) {
+    log(`  ⚠ ${cfg.dir}/ : ${n} produits actifs portent le même nom « ${name} » — cartes indiscernables hors tagline.`);
+  }
 
   // Garde-fou : sur une page à pilules de filtre, un produit actif qu'aucune ligne
   // ne classe serait publié avec data-line="null" et deviendrait invisible dès
