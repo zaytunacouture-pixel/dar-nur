@@ -87,25 +87,65 @@ function replaceMarkedBlock(html, name, newInner, label) {
   return `${before}${newInner}\n    ${after}`;
 }
 
-function buildCardHtml(p, tagLabel, isFirst) {
+// Résout la "ligne" (famille de produits) d'un produit à partir de cfg.lines,
+// utilisée à la fois pour l'attribut data-line des cartes et pour les pilules de
+// filtre. Retourne null si aucune règle ne correspond — le garde-fou de
+// generateCategoryPage() abandonne alors sans rien écrire (même philosophie que
+// le garde-fou "produit sans marque" de scripts/generate-parfums.mjs).
+function resolveLine(p, cfg) {
+  if (!cfg.lines) return null;
+  for (const line of cfg.lines) {
+    if (line.match.test(p.slug)) return line.id;
+  }
+  return null;
+}
+
+function buildCardHtml(p, tagLabel, isFirst, cfg) {
   const images = Array.isArray(p.images) ? p.images.filter(Boolean) : [];
   const img = images[0] || null;
   const imgSrc = img ? resolveImagePath('../', img) : '../logo-dar-nur.png';
   const loading = isFirst ? 'eager' : 'lazy';
+  const hasPrice = p.price_value !== null && p.price_value !== undefined;
   const priceLabel = formatPriceLabel(p.price_value);
 
-  return `    <a href="https://dar-nur.fr/${esc(p.slug)}/" class="card">
+  // Préfixe "À partir de" : choix de gabarit propre à certaines pages (tahara),
+  // jamais appliqué quand le prix est absent (sinon "À partir de Prix à compléter").
+  const priceHtml = (cfg.pricePrefix && hasPrice)
+    ? `<small>${esc(cfg.pricePrefix)}</small>${esc(priceLabel)}`
+    : esc(priceLabel);
+
+  // Attributs de filtre/tri client-side. N'existent que sur les pages qui les
+  // utilisent déjà — aucune page n'en reçoit qui n'en avait pas.
+  let attrs = '';
+  if (cfg.lines) attrs += ` data-line="${esc(resolveLine(p, cfg))}"`;
+  if (cfg.emitDataPrice && hasPrice) attrs += ` data-price="${Number(p.price_value).toFixed(2)}"`;
+
+  // Tagline vide → espace insécable, pour que la carte garde la même hauteur que
+  // ses voisines dans la grille (comportement déjà en place à la main sur tahara/).
+  const tagline = (p.tagline || '').trim();
+  const taglineHtml = tagline ? esc(tagline) : '&nbsp;';
+
+  return `    <a href="https://dar-nur.fr/${esc(p.slug)}/" class="card"${attrs}>
       <div class="card-image"><img src="${esc(imgSrc)}" alt="${esc(p.name)} — Dar Nūr" loading="${loading}" width="400" height="400"/></div>
       <div class="card-body">
         <div class="cat-tag">${esc(tagLabel)}</div>
         <h3>${esc(p.name)}</h3>
-        <p class="card-tagline">${esc(p.tagline || '')}</p>
+        <p class="card-tagline">${taglineHtml}</p>
         <div class="card-footer">
-          <div class="card-price">${esc(priceLabel)}</div>
+          <div class="card-price">${priceHtml}</div>
           <span class="card-cta">Voir la fiche</span>
         </div>
       </div>
     </a>`;
+}
+
+// Pilules de filtre, générées depuis cfg.lines pour qu'elles ne puissent pas
+// diverger des attributs data-line des cartes (c'est précisément ce type de
+// dérive main/base que ce pipeline supprime).
+function buildFiltersHtml(cfg) {
+  const buttons = [`      <button class="active" data-line="all">${esc(cfg.allLinesLabel || 'Toutes')}</button>`]
+    .concat(cfg.lines.map(l => `      <button data-line="${esc(l.id)}">${esc(l.label)}</button>`));
+  return ['    <div class="filters" id="filters">', ...buttons, '    </div>'].join('\n');
 }
 
 function pluralize(n, singular, plural) {
@@ -161,6 +201,46 @@ const CATEGORY_PAGES = [
     unitSingular: 'miel gourmand',
     unitPlural: 'miels gourmands',
   },
+  {
+    // Canari n°2 du pipeline. Cette page avait 10 cartes écrites à la main pour
+    // 34 produits actifs en base — les 24 manquants n'avaient aucun lien entrant.
+    // Elle est la première à utiliser lines/pricePrefix/emitDataPrice, parce que
+    // son gabarit historique porte des pilules de filtre et un tri par prix qui
+    // doivent continuer à fonctionner à l'identique.
+    categoryId: 'tahara',
+    dir: 'tahara',
+    canonicalUrl: 'https://dar-nur.fr/tahara/',
+    jsonLdName: 'Tahara & Hygiène — Dar Nūr',
+    jsonLdDescription: "Muscs Tahara, packs, coffrets, savons noirs, gommages et poudres de soin pour la pureté. Collection Dar Nūr.",
+    breadcrumbName: 'Tahara & Hygiène',
+    itemListName: 'Nos produits Tahara & Hygiène',
+    unitSingular: 'produit',
+    unitPlural: 'produits',
+
+    // Gabarit de carte propre à cette page (déjà en place à la main avant automatisation).
+    pricePrefix: 'À partir de',
+    emitDataPrice: true,
+    cardSeparator: '\n\n',
+
+    // Compteur : structure propre à tahara/ (span ciblé par le script de filtre,
+    // + id référencé par l'aria-labelledby de <section class="products-section">).
+    buildCountHtml: (n) => `  <p class="results-count" id="products-heading"><span id="resultsCount">${n}</span> produit${n > 1 ? 's' : ''} disponible${n > 1 ? 's' : ''}</p>`,
+
+    // Familles réelles, dérivées des préfixes de slug du catalogue — aucune
+    // taxonomie inventée, chaque libellé reprend le nom des produits concernés.
+    // Les 3 premières existaient déjà à l'identique dans la page.
+    // Ordre = ordre d'affichage des pilules.
+    lines: [
+      { id: 'pack',      label: 'Pack Tahara',         match: /^dn-pack-tahara-/ },
+      { id: 'musc',      label: 'Musc Tahara',         match: /^dn-musc-tahara-/ },
+      { id: 'coffret',   label: 'Coffret / Lot',       match: /^dn-lot-nissah-/ },
+      { id: 'savon',     label: 'Savons',              match: /^savon-/ },
+      { id: 'gommage',   label: 'Gommages',            match: /^gommage-/ },
+      { id: 'poudre',    label: 'Poudres',             match: /^poudre-/ },
+      { id: 'chantilly', label: 'Chantilly de karité', match: /^chantilly-karite-/ },
+      { id: 'alun',      label: "Pierre d'alun",       match: /^pierre-alun-/ },
+    ],
+  },
 ];
 
 async function generateCategoryPage(cfg, creds) {
@@ -179,13 +259,30 @@ async function generateCategoryPage(cfg, creds) {
 
   const tagLabel = categoryRows[0]?.label || cfg.breadcrumbName;
 
-  const cardsHtml = products.map((p, i) => buildCardHtml(p, tagLabel, i === 0)).join('\n');
-  const countHtml = `    <p class="results-count" style="padding:0">${esc(pluralize(products.length, cfg.unitSingular, cfg.unitPlural))} disponible${products.length > 1 ? 's' : ''}</p>`;
+  // Garde-fou : sur une page à pilules de filtre, un produit actif qu'aucune ligne
+  // ne classe serait publié avec data-line="null" et deviendrait invisible dès
+  // qu'un filtre est cliqué. On abandonne sans rien écrire, en nommant les coupables
+  // (même philosophie que le garde-fou "produit sans marque" de generate-parfums.mjs).
+  if (cfg.lines) {
+    const unclassified = products.filter(p => resolveLine(p, cfg) === null);
+    if (unclassified.length) {
+      fail(`${cfg.dir}/ : ${unclassified.length} produit(s) actif(s) ne correspondent à aucune ligne de cfg.lines — abandon, aucun fichier touché. Slugs : ${unclassified.map(p => p.slug).join(', ')}`);
+      return false;
+    }
+  }
+
+  const cardsHtml = products.map((p, i) => buildCardHtml(p, tagLabel, i === 0, cfg)).join(cfg.cardSeparator || '\n');
+  const countHtml = cfg.buildCountHtml
+    ? cfg.buildCountHtml(products.length)
+    : `    <p class="results-count" style="padding:0">${esc(pluralize(products.length, cfg.unitSingular, cfg.unitPlural))} disponible${products.length > 1 ? 's' : ''}</p>`;
   const jsonLdHtml = buildJsonLd(cfg, products);
 
   html = replaceMarkedBlock(html, 'CATEGORY_PRODUCTS', cardsHtml, `${cfg.dir}/index.html`);
   html = replaceMarkedBlock(html, 'CATEGORY_COUNT', countHtml, `${cfg.dir}/index.html`);
   html = replaceMarkedBlock(html, 'CATEGORY_JSONLD', jsonLdHtml, `${cfg.dir}/index.html`);
+  if (cfg.lines) {
+    html = replaceMarkedBlock(html, 'CATEGORY_FILTERS', buildFiltersHtml(cfg), `${cfg.dir}/index.html`);
+  }
 
   await writeFile(pagePath, html, 'utf8');
   log(`  ${cfg.dir}/ : ${products.length} produit(s) actif(s) régénéré(s).`);
