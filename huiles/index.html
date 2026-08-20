@@ -31,6 +31,7 @@
 <link rel="apple-touch-icon" href="/favicon.png" />
 
 <!-- Schema JSON-LD : CollectionPage + BreadcrumbList + ItemList -->
+<!-- AUTO:CATEGORY_JSONLD:START — géré automatiquement par scripts/generate-category-pages.mjs, ne pas éditer à la main -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -50,26 +51,27 @@
     "name": "Nos Huiles Naturelles",
     "numberOfItems": 16,
     "itemListElement": [
-      {"@type": "ListItem", "position": 1,  "url": "https://dar-nur.fr/hl-gingembre/",      "name": "Huile de Gingembre"},
-      {"@type": "ListItem", "position": 2,  "url": "https://dar-nur.fr/hl-eucalyptus/",     "name": "Huile d'Eucalyptus"},
-      {"@type": "ListItem", "position": 3,  "url": "https://dar-nur.fr/hl-oliban/",         "name": "Huile d'Oliban"},
-      {"@type": "ListItem", "position": 4,  "url": "https://dar-nur.fr/hl-nigelle/",        "name": "Huile de Nigelle"},
-      {"@type": "ListItem", "position": 5,  "url": "https://dar-nur.fr/hl-fenugrec/",       "name": "Huile de Fenugrec"},
-      {"@type": "ListItem", "position": 6,  "url": "https://dar-nur.fr/hl-costus/",         "name": "Huile de Costus Indien"},
-      {"@type": "ListItem", "position": 7,  "url": "https://dar-nur.fr/hl-pepins-raisin/",  "name": "Huile de Pépins de Raisins"},
-      {"@type": "ListItem", "position": 8,  "url": "https://dar-nur.fr/hl-menthe-poivree/", "name": "Huile de Menthe Poivrée"},
-      {"@type": "ListItem", "position": 9,  "url": "https://dar-nur.fr/hl-lavande/",        "name": "Huile de Lavande"},
+      {"@type": "ListItem", "position": 1, "url": "https://dar-nur.fr/hl-gingembre/", "name": "Huile de Gingembre"},
+      {"@type": "ListItem", "position": 2, "url": "https://dar-nur.fr/hl-eucalyptus/", "name": "Huile d'Eucalyptus"},
+      {"@type": "ListItem", "position": 3, "url": "https://dar-nur.fr/hl-oliban/", "name": "Huile d'Oliban"},
+      {"@type": "ListItem", "position": 4, "url": "https://dar-nur.fr/hl-nigelle/", "name": "Huile de Nigelle"},
+      {"@type": "ListItem", "position": 5, "url": "https://dar-nur.fr/hl-fenugrec/", "name": "Huile de Fenugrec"},
+      {"@type": "ListItem", "position": 6, "url": "https://dar-nur.fr/hl-costus/", "name": "Huile de Costus Indien"},
+      {"@type": "ListItem", "position": 7, "url": "https://dar-nur.fr/hl-pepins-raisin/", "name": "Huile de Pépins de Raisins"},
+      {"@type": "ListItem", "position": 8, "url": "https://dar-nur.fr/hl-menthe-poivree/", "name": "Huile de Menthe Poivrée"},
+      {"@type": "ListItem", "position": 9, "url": "https://dar-nur.fr/hl-lavande/", "name": "Huile de Lavande"},
       {"@type": "ListItem", "position": 10, "url": "https://dar-nur.fr/hl-figue-barbarie/", "name": "Huile de Figue de Barbarie"},
-      {"@type": "ListItem", "position": 11, "url": "https://dar-nur.fr/hl-clou-girofle/",   "name": "Huile de Clou de Girofle"},
-      {"@type": "ListItem", "position": 12, "url": "https://dar-nur.fr/hl-arthrose/",       "name": "Huile Arthrose Polyarthrite"},
-      {"@type": "ListItem", "position": 13, "url": "https://dar-nur.fr/hl-rose-blanc/",     "name": "Huile de Rose Blanc"},
-      {"@type": "ListItem", "position": 14, "url": "https://dar-nur.fr/hl-rose/",           "name": "Huile de Rose"},
-      {"@type": "ListItem", "position": 15, "url": "https://dar-nur.fr/hl-citron/",         "name": "Huile de Citron"},
+      {"@type": "ListItem", "position": 11, "url": "https://dar-nur.fr/hl-clou-girofle/", "name": "Huile de Clou de Girofle"},
+      {"@type": "ListItem", "position": 12, "url": "https://dar-nur.fr/hl-arthrose/", "name": "Huile Arthrose Polyarthrite"},
+      {"@type": "ListItem", "position": 13, "url": "https://dar-nur.fr/hl-rose-blanc/", "name": "Huile de Rose Blanc"},
+      {"@type": "ListItem", "position": 14, "url": "https://dar-nur.fr/hl-rose/", "name": "Huile de Rose"},
+      {"@type": "ListItem", "position": 15, "url": "https://dar-nur.fr/hl-citron/", "name": "Huile de Citron"},
       {"@type": "ListItem", "position": 16, "url": "https://dar-nur.fr/hl-menthe-pouliot/", "name": "Huile de Menthe Pouliot"}
     ]
   }
 }
 </script>
+    <!-- AUTO:CATEGORY_JSONLD:END -->
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -384,14 +386,16 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
 -->
 <div class="filter-bar">
   <div class="filter-bar-inner">
+    <!-- AUTO:CATEGORY_COUNT:START — géré automatiquement par scripts/generate-category-pages.mjs, ne pas éditer à la main -->
     <p class="results-count" id="products-heading" style="padding-top:0">16 huiles disponibles</p>
+    <!-- AUTO:CATEGORY_COUNT:END -->
   </div>
 </div>
 
-<!-- ===== GRILLE PRODUITS (16 huiles réelles, cartes au niveau homepage) ===== -->
+<!-- ===== GRILLE PRODUITS — générée depuis Supabase (voir marqueurs AUTO:CATEGORY_*) ===== -->
 <section class="products-section" aria-labelledby="products-heading">
   <div class="grid" id="grid">
-
+    <!-- AUTO:CATEGORY_PRODUCTS:START — géré automatiquement par scripts/generate-category-pages.mjs, ne pas éditer à la main -->
     <a href="https://dar-nur.fr/hl-gingembre/" class="card">
       <div class="card-image"><img src="../assets/produits-ia/hl-gingembre/hl-gingembre-1.webp" alt="Huile de Gingembre — Dar Nūr" loading="eager" width="400" height="400"/></div>
       <div class="card-body">
@@ -599,7 +603,7 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
         </div>
       </div>
     </a>
-
+    <!-- AUTO:CATEGORY_PRODUCTS:END -->
   </div><!-- /.grid -->
 </section>
 

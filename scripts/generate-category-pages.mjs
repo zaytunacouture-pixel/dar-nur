@@ -153,6 +153,21 @@ function buildCardHtml(p, tagLabel, isFirst, cfg) {
     ? `<small>${esc(cfg.pricePrefix)}</small>${esc(priceLabel)}`
     : esc(priceLabel);
 
+  // Balise portant .card-price. Les pages écrites à la main n'ont pas toutes
+  // choisi le même élément (huiles/ utilise <span>, les autres <div>) ; le
+  // rendu est identique — .card-price est un sélecteur de classe pur et le nœud
+  // est un item flex de .card-footer, donc blockifié dans les deux cas — mais
+  // normaliser silencieusement le markup existant reviendrait à réécrire des
+  // lignes que ce pipeline n'a pas vocation à toucher. Option opt-in : sans
+  // cfg.priceTag, la sortie reste <div>, inchangée pour toutes les pages déjà
+  // générées. Liste fermée : cfg.priceTag n'est pas interpolé tel quel, sinon
+  // une faute de config injecterait du markup arbitraire dans chaque carte.
+  const PRICE_TAGS = ['div', 'span'];
+  const priceTag = cfg.priceTag || 'div';
+  if (!PRICE_TAGS.includes(priceTag)) {
+    throw new Error(`cfg.priceTag="${priceTag}" invalide — valeurs acceptées : ${PRICE_TAGS.join(', ')}`);
+  }
+
   // Attributs de filtre/tri client-side. N'existent que sur les pages qui les
   // utilisent déjà — aucune page n'en reçoit qui n'en avait pas.
   let attrs = '';
@@ -187,7 +202,7 @@ function buildCardHtml(p, tagLabel, isFirst, cfg) {
         <div class="cat-tag">${esc(tagLabel)}</div>
         <h3>${esc(p.name)}</h3>${chipHtml}${taglineBlock}
         <div class="card-footer">
-          <div class="card-price">${priceHtml}</div>
+          <${priceTag} class="card-price">${priceHtml}</${priceTag}>
           <span class="card-cta">Voir la fiche</span>
         </div>
       </div>
@@ -444,6 +459,73 @@ const CATEGORY_PAGES = [
     // omet le paragraphe plutot que d'afficher un espace insecable, qui
     // ajouterait une hauteur de ligne vide sur chaque carte sans rien aligner.
     omitEmptyTagline: true,
+  },
+
+  // ==========================================================================
+  // Lot 2 — trois pages sans filtres ni tri, deja a jour (aucun orphelin).
+  // L'audit contenu prealable (39 produits, champ par champ : slug, nom, prix,
+  // tagline, image, alt, ordre, JSON-LD) n'a releve aucune divergence entre le
+  // HTML ecrit a la main et Supabase : contrairement au Lot 1, aucune donnee
+  // n'a eu besoin d'etre ressaisie en base avant generation.
+  // Un seul ecart de gabarit inedit : huiles/ porte le prix dans un <span> la
+  // ou les autres pages utilisent un <div> -> nouvelle option cfg.priceTag.
+  // ==========================================================================
+  {
+    categoryId: 'gelules',
+    dir: 'gelules',
+    canonicalUrl: 'https://dar-nur.fr/gelules/',
+    jsonLdName: 'Gélules Naturelles — Dar Nūr',
+    jsonLdDescription: 'Collection de 12 gélules végétales premium — Nigelle, Valériane, Termis, Maca, Spiruline, Fenugrec, Chardon Marie, Ashwagandha, Gingembre Curcuma, Moringa, Costus, Aphrodisiaque.',
+    breadcrumbName: 'Gélules naturelles',
+    itemListName: 'Nos Gélules Naturelles',
+    unitSingular: 'gélule',
+    unitPlural: 'gélules',
+    // categories.label vaut "Gélules végétales" (pluriel) en base ; la pastille
+    // de carte est au singulier, comme le badge du hero juste au-dessus.
+    tagLabel: 'Gélule végétale',
+    cardSeparator: '\n\n',
+    buildCountHtml: (n) => `  <p class="results-count" id="products-heading">${n} gélule${n > 1 ? 's' : ''} disponible${n > 1 ? 's' : ''}</p>`,
+  },
+  {
+    categoryId: 'chaussures',
+    dir: 'chaussures',
+    canonicalUrl: 'https://dar-nur.fr/chaussures/',
+    jsonLdName: 'Sandales — Dar Nūr',
+    jsonLdDescription: 'Sandales de Médine pour homme, confort et style. 11 modèles Comera, Étique, Chujara et Hayat, prix unique 29,90 €.',
+    breadcrumbName: 'Sandales',
+    itemListName: 'Nos Sandales',
+    unitSingular: 'paire',
+    unitPlural: 'paires',
+    // Pas de tagLabel : categories.label vaut deja "Sandales", exactement le
+    // libelle affiche sur les 11 cartes.
+    // data-price present sur les cartes alors que la page n'a ni filtre ni tri —
+    // meme reliquat de gabarit que bakhour/, conserve tel quel.
+    emitDataPrice: true,
+    cardSeparator: '\n\n',
+    // Le <span id="resultsCount"> est dormant (la page ne charge que nav.js,
+    // aucun script ne le lit) mais il est dans le HTML publie : on le reproduit
+    // plutot que de le supprimer au passage.
+    buildCountHtml: (n) => `  <p class="results-count" id="products-heading"><span id="resultsCount">${n}</span> paire${n > 1 ? 's' : ''} disponible${n > 1 ? 's' : ''}</p>`,
+  },
+  {
+    categoryId: 'huiles',
+    dir: 'huiles',
+    canonicalUrl: 'https://dar-nur.fr/huiles/',
+    jsonLdName: 'Huiles Naturelles — Dar Nūr',
+    jsonLdDescription: "Collection de 16 huiles essentielles et végétales premium — Nigelle, Oliban, Rose, Lavande, Figue de Barbarie, Gingembre, Costus et bien d'autres.",
+    breadcrumbName: 'Huiles naturelles',
+    itemListName: 'Nos Huiles Naturelles',
+    unitSingular: 'huile',
+    unitPlural: 'huiles',
+    // categories.label vaut "Huile pure" en base ; la page affiche "Huile
+    // naturelle", coherent avec son badge de hero, son <h1> et son <title>.
+    tagLabel: 'Huile naturelle',
+    // Seule page du site dont le prix est porte par un <span> (cf. cfg.priceTag).
+    priceTag: 'span',
+    cardSeparator: '\n\n',
+    // Compteur imbrique dans .filter-bar > .filter-bar-inner : 4 espaces
+    // d'indentation, et un padding-top annule en style inline.
+    buildCountHtml: (n) => `    <p class="results-count" id="products-heading" style="padding-top:0">${n} huile${n > 1 ? 's' : ''} disponible${n > 1 ? 's' : ''}</p>`,
   },
 ];
 

@@ -31,6 +31,7 @@
 <link rel="apple-touch-icon" href="/favicon.png" />
 
 <!-- Schema JSON-LD : CollectionPage + BreadcrumbList + ItemList -->
+<!-- AUTO:CATEGORY_JSONLD:START — géré automatiquement par scripts/generate-category-pages.mjs, ne pas éditer à la main -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -50,22 +51,23 @@
     "name": "Nos Gélules Naturelles",
     "numberOfItems": 12,
     "itemListElement": [
-      {"@type": "ListItem", "position": 1,  "url": "https://dar-nur.fr/gel-nigelle/",           "name": "Gélules de Nigelle"},
-      {"@type": "ListItem", "position": 2,  "url": "https://dar-nur.fr/gel-valeriane/",         "name": "Gélules de Valériane"},
-      {"@type": "ListItem", "position": 3,  "url": "https://dar-nur.fr/gel-termis/",            "name": "Gélules de Termis"},
-      {"@type": "ListItem", "position": 4,  "url": "https://dar-nur.fr/gel-macca/",             "name": "Gélules de Macca"},
-      {"@type": "ListItem", "position": 5,  "url": "https://dar-nur.fr/gel-spiruline/",         "name": "Gélules de Spiruline"},
-      {"@type": "ListItem", "position": 6,  "url": "https://dar-nur.fr/gel-fenugrec/",          "name": "Gélules de Fenugrec"},
-      {"@type": "ListItem", "position": 7,  "url": "https://dar-nur.fr/gel-chardon/",           "name": "Gélules de Chardon Marie"},
-      {"@type": "ListItem", "position": 8,  "url": "https://dar-nur.fr/gel-ashwaganda/",        "name": "Gélules d'Ashwagandha"},
-      {"@type": "ListItem", "position": 9,  "url": "https://dar-nur.fr/gel-gingembre-curcuma/", "name": "Gélules de Gingembre Curcuma"},
-      {"@type": "ListItem", "position": 10, "url": "https://dar-nur.fr/gel-moringa/",           "name": "Gélules de Moringa"},
-      {"@type": "ListItem", "position": 11, "url": "https://dar-nur.fr/gel-costus/",            "name": "Gélules de Costus Indien"},
-      {"@type": "ListItem", "position": 12, "url": "https://dar-nur.fr/gel-aphrodisiaque/",     "name": "Gélules Aphrodisiaques"}
+      {"@type": "ListItem", "position": 1, "url": "https://dar-nur.fr/gel-nigelle/", "name": "Gélules de Nigelle"},
+      {"@type": "ListItem", "position": 2, "url": "https://dar-nur.fr/gel-valeriane/", "name": "Gélules de Valériane"},
+      {"@type": "ListItem", "position": 3, "url": "https://dar-nur.fr/gel-termis/", "name": "Gélules de Termis"},
+      {"@type": "ListItem", "position": 4, "url": "https://dar-nur.fr/gel-macca/", "name": "Gélules de Macca"},
+      {"@type": "ListItem", "position": 5, "url": "https://dar-nur.fr/gel-spiruline/", "name": "Gélules de Spiruline"},
+      {"@type": "ListItem", "position": 6, "url": "https://dar-nur.fr/gel-fenugrec/", "name": "Gélules de Fenugrec"},
+      {"@type": "ListItem", "position": 7, "url": "https://dar-nur.fr/gel-chardon/", "name": "Gélules de Chardon Marie"},
+      {"@type": "ListItem", "position": 8, "url": "https://dar-nur.fr/gel-ashwaganda/", "name": "Gélules d'Ashwagandha"},
+      {"@type": "ListItem", "position": 9, "url": "https://dar-nur.fr/gel-gingembre-curcuma/", "name": "Gélules de Gingembre Curcuma"},
+      {"@type": "ListItem", "position": 10, "url": "https://dar-nur.fr/gel-moringa/", "name": "Gélules de Moringa"},
+      {"@type": "ListItem", "position": 11, "url": "https://dar-nur.fr/gel-costus/", "name": "Gélules de Costus Indien"},
+      {"@type": "ListItem", "position": 12, "url": "https://dar-nur.fr/gel-aphrodisiaque/", "name": "Gélules Aphrodisiaques"}
     ]
   }
 }
 </script>
+    <!-- AUTO:CATEGORY_JSONLD:END -->
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -360,14 +362,16 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
   <p class="info-note"><b>Bon à savoir —</b> chaque flacon contient 60 gélules.</p>
 </section>
 
-<!-- ===== GRILLE PRODUITS ===== -->
+<!-- ===== GRILLE PRODUITS — générée depuis Supabase (voir marqueurs AUTO:CATEGORY_*) ===== -->
 <!-- Pas de barre de pilules : les 12 gélules sont 12 plantes distinctes, sans gamme/préfixe
      répété dans les données réelles (contrairement à abayas : Nouha/Aïcha/Layali/Nissah).
      Inventer un regroupement ici introduirait une taxonomie qui n'existe pas dans le catalogue. -->
 <section class="products-section" aria-labelledby="products-heading">
+  <!-- AUTO:CATEGORY_COUNT:START — géré automatiquement par scripts/generate-category-pages.mjs, ne pas éditer à la main -->
   <p class="results-count" id="products-heading">12 gélules disponibles</p>
+    <!-- AUTO:CATEGORY_COUNT:END -->
   <div class="grid" id="grid">
-
+    <!-- AUTO:CATEGORY_PRODUCTS:START — géré automatiquement par scripts/generate-category-pages.mjs, ne pas éditer à la main -->
     <a href="https://dar-nur.fr/gel-nigelle/" class="card">
       <div class="card-image"><img src="../assets/produits-ia/gel-nigelle/gel-nigelle-1.webp" alt="Gélules de Nigelle — Dar Nūr" loading="eager" width="400" height="400"/></div>
       <div class="card-body">
@@ -523,7 +527,7 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
         </div>
       </div>
     </a>
-
+    <!-- AUTO:CATEGORY_PRODUCTS:END -->
   </div>
 </section>
 
