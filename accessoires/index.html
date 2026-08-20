@@ -29,6 +29,7 @@
 <link rel="apple-touch-icon" href="/favicon.png" />
 
 <!-- Schema JSON-LD : CollectionPage + BreadcrumbList + ItemList -->
+<!-- AUTO:CATEGORY_JSONLD:START — géré automatiquement par scripts/generate-category-pages.mjs, ne pas éditer à la main -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -55,6 +56,7 @@
   }
 }
 </script>
+    <!-- AUTO:CATEGORY_JSONLD:END -->
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -365,14 +367,16 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
 -->
 <div class="filter-bar">
   <div class="filter-bar-inner">
+    <!-- AUTO:CATEGORY_COUNT:START — géré automatiquement par scripts/generate-category-pages.mjs, ne pas éditer à la main -->
     <p class="results-count" style="padding:0">3 pièces disponibles</p>
+    <!-- AUTO:CATEGORY_COUNT:END -->
   </div>
 </div>
 
-<!-- ===== GRILLE PRODUITS (3 pièces réelles, cartes au niveau homepage) ===== -->
+<!-- ===== GRILLE PRODUITS — générée depuis Supabase (voir marqueurs AUTO:CATEGORY_*) ===== -->
 <section class="products-section" aria-labelledby="products-heading">
   <div class="grid grid-few" id="grid">
-
+    <!-- AUTO:CATEGORY_PRODUCTS:START — géré automatiquement par scripts/generate-category-pages.mjs, ne pas éditer à la main -->
     <a href="https://dar-nur.fr/dn-sheymagh-0/" class="card">
       <div class="card-image"><img src="../assets/produits-fournisseur/dn-sheymagh-0/dn-sheymagh-0.webp" alt="Sheymaghs yéménite motif saoudien — Dar Nūr" loading="eager" width="400" height="400"/></div>
       <div class="card-body">
@@ -411,7 +415,7 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
         </div>
       </div>
     </a>
-
+    <!-- AUTO:CATEGORY_PRODUCTS:END -->
   </div>
 </section>
 

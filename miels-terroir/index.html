@@ -31,6 +31,7 @@
 <link rel="apple-touch-icon" href="/favicon.png" />
 
 <!-- Schema JSON-LD : CollectionPage + BreadcrumbList + ItemList -->
+<!-- AUTO:CATEGORY_JSONLD:START — géré automatiquement par scripts/generate-category-pages.mjs, ne pas éditer à la main -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -55,6 +56,7 @@
   }
 }
 </script>
+    <!-- AUTO:CATEGORY_JSONLD:END -->
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -374,9 +376,11 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
   Pas de barre de filtres ni de tri (aucun sens avec un article unique) — simple compteur.
   Grille contrainte (.grid--single) pour centrer la carte unique sans qu'elle paraisse perdue. -->
 <section class="products-section" aria-labelledby="products-heading">
+  <!-- AUTO:CATEGORY_COUNT:START — géré automatiquement par scripts/generate-category-pages.mjs, ne pas éditer à la main -->
   <p class="results-count" id="products-heading">1 miel de terroir disponible</p>
+    <!-- AUTO:CATEGORY_COUNT:END -->
   <div class="grid grid--single" id="grid">
-
+    <!-- AUTO:CATEGORY_PRODUCTS:START — géré automatiquement par scripts/generate-category-pages.mjs, ne pas éditer à la main -->
     <a href="https://dar-nur.fr/miel-printemps/" class="card" data-price="15.00">
       <div class="card-image"><img src="https://sxlpgcnjerlayitaxxyv.supabase.co/storage/v1/object/public/product-images/products/miel-printemps/miel-printemps-1783960512219.png" alt="Miel de printemps — Dar Nūr" loading="eager" width="400" height="400"/></div>
       <div class="card-body">
@@ -389,7 +393,7 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
         </div>
       </div>
     </a>
-
+    <!-- AUTO:CATEGORY_PRODUCTS:END -->
   </div>
 </section>
 
