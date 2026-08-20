@@ -161,10 +161,16 @@ function buildCardHtml(p, tagLabel, isFirst, cfg) {
   if (cfg.lines) attrs += ` data-${esc(cfg.lineAttribute || 'line')}="${esc(resolveLineId(p, cfg))}"`;
   if (cfg.emitDataPrice && hasPrice) attrs += ` data-price="${Number(p.price_value).toFixed(2)}"`;
 
-  // Tagline vide → espace insécable, pour que la carte garde la même hauteur que
-  // ses voisines dans la grille (comportement déjà en place à la main sur tahara/).
+  // Tagline vide → espace insécable par défaut, pour que la carte garde la même
+  // hauteur que ses voisines dans la grille (comportement déjà en place à la main
+  // sur tahara/). Avec cfg.omitEmptyTagline, le paragraphe est omis entièrement :
+  // utile quand AUCUN produit de la catégorie n'a de tagline (chechias/), où un
+  // espace insécable ajouterait une hauteur de ligne vide sur chaque carte sans
+  // rien aligner.
   const tagline = (p.tagline || '').trim();
-  const taglineHtml = tagline ? esc(tagline) : '&nbsp;';
+  const taglineBlock = tagline
+    ? `\n        <p class="card-tagline">${esc(tagline)}</p>`
+    : (cfg.omitEmptyTagline ? '' : '\n        <p class="card-tagline">&nbsp;</p>');
 
   // Pastille de provenance. Le libelle ne vient pas brut de Supabase : il est
   // porte par la regle de groupe qui a classe le produit (cfg.lines[].chip),
@@ -179,8 +185,7 @@ function buildCardHtml(p, tagLabel, isFirst, cfg) {
       <div class="card-image"><img src="${esc(imgSrc)}" alt="${esc(p.name)} — Dar Nūr" loading="${loading}" width="400" height="400"/></div>
       <div class="card-body">
         <div class="cat-tag">${esc(tagLabel)}</div>
-        <h3>${esc(p.name)}</h3>${chipHtml}
-        <p class="card-tagline">${taglineHtml}</p>
+        <h3>${esc(p.name)}</h3>${chipHtml}${taglineBlock}
         <div class="card-footer">
           <div class="card-price">${priceHtml}</div>
           <span class="card-cta">Voir la fiche</span>
@@ -372,6 +377,73 @@ const CATEGORY_PAGES = [
       { id: 'intl', label: 'Sélection internationale', chip: 'Sélectionné par Dar Nūr',
         match: /^(Russie|Kirghizistan)$/ },
     ],
+  },
+
+  // ==========================================================================
+  // Lot 1 — quatre pages sans filtres ni tri, deja a jour (aucun orphelin).
+  // Objectif : sortie strictement identique au contenu ecrit a la main.
+  // Aucune de ces pages n'introduit de type de carte inedit ; les seuls ecarts
+  // sont couverts par des options deja existantes, sauf omitEmptyTagline
+  // (chechias/), ajoutee generiquement pour ce lot.
+  // ==========================================================================
+  {
+    categoryId: 'bakhour',
+    dir: 'bakhour',
+    canonicalUrl: 'https://dar-nur.fr/bakhour/',
+    jsonLdName: 'Bakhour & Encens — Dar Nūr',
+    jsonLdDescription: "L'encens traditionnel arabe pour parfumer vos intérieurs. Le Bakhur Mukhalat, composé de bois d'oud, de rose et de musc.",
+    breadcrumbName: 'Bakhour & Encens',
+    itemListName: 'Nos Bakhour & Encens',
+    unitSingular: 'produit',
+    unitPlural: 'produits',
+    // data-price present sur la carte alors que la page n'a ni filtre ni tri :
+    // reliquat du gabarit d'origine, conserve tel quel.
+    emitDataPrice: true,
+    buildCountHtml: (n) => `  <p class="results-count" id="products-heading">${n} produit${n > 1 ? 's' : ''} disponible${n > 1 ? 's' : ''}</p>`,
+  },
+  {
+    categoryId: 'miels-terroir',
+    dir: 'miels-terroir',
+    canonicalUrl: 'https://dar-nur.fr/miels-terroir/',
+    jsonLdName: 'Miels de terroir — Dar Nūr',
+    jsonLdDescription: 'Collection de miels de terroir — miel pur et naturel, récolté en France.',
+    breadcrumbName: 'Miels de terroir',
+    itemListName: 'Nos Miels de terroir',
+    unitSingular: 'miel de terroir',
+    unitPlural: 'miels de terroir',
+    // categories.label vaut "Miel pur et naturel" en base ; la page affiche
+    // "Miel de terroir", coherent avec son <h1> et son titre.
+    tagLabel: 'Miel de terroir',
+    emitDataPrice: true,
+    buildCountHtml: (n) => `  <p class="results-count" id="products-heading">${n} miel${n > 1 ? 's' : ''} de terroir disponible${n > 1 ? 's' : ''}</p>`,
+  },
+  {
+    categoryId: 'accessoires',
+    dir: 'accessoires',
+    canonicalUrl: 'https://dar-nur.fr/accessoires/',
+    jsonLdName: 'Accessoires — Dar Nūr',
+    jsonLdDescription: "Collection de 3 shemaghs yéménites Dar Nūr — motif saoudien, imprimé, brodé. Pièces d'exception, tissage délicat et motifs uniques.",
+    breadcrumbName: 'Accessoires',
+    itemListName: 'Nos Accessoires',
+    unitSingular: 'pièce',
+    unitPlural: 'pièces',
+    cardSeparator: '\n\n',
+  },
+  {
+    categoryId: 'chechias',
+    dir: 'chechias',
+    canonicalUrl: 'https://dar-nur.fr/chechias/',
+    jsonLdName: 'Chéchias — Dar Nūr',
+    jsonLdDescription: "Collection de 7 chéchias du Caire — Blanc, Noir, Marron, Bleu, Vert, Gris Clair, Beige. L'authenticité à porter.",
+    breadcrumbName: 'Chéchias',
+    itemListName: 'Nos Chéchias',
+    unitSingular: 'chéchia',
+    unitPlural: 'chéchias',
+    cardSeparator: '\n\n',
+    // Aucun des 7 produits n'a de tagline en base : la page ecrite a la main
+    // omet le paragraphe plutot que d'afficher un espace insecable, qui
+    // ajouterait une hauteur de ligne vide sur chaque carte sans rien aligner.
+    omitEmptyTagline: true,
   },
 ];
 
