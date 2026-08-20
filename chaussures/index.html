@@ -31,6 +31,7 @@
 <link rel="apple-touch-icon" href="/favicon.png" />
 
 <!-- Schema JSON-LD : CollectionPage + BreadcrumbList + ItemList -->
+<!-- AUTO:CATEGORY_JSONLD:START — géré automatiquement par scripts/generate-category-pages.mjs, ne pas éditer à la main -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -50,21 +51,22 @@
     "name": "Nos Sandales",
     "numberOfItems": 11,
     "itemListElement": [
-      {"@type": "ListItem", "position": 1,  "url": "https://dar-nur.fr/dn-sandale-homme-0/",  "name": "Sandale Comera white (Homme)"},
-      {"@type": "ListItem", "position": 2,  "url": "https://dar-nur.fr/dn-sandale-homme-1/",  "name": "Sandale Comera Beige (homme)"},
-      {"@type": "ListItem", "position": 3,  "url": "https://dar-nur.fr/dn-sandale-homme-2/",  "name": "Sandale Comera (beige and rail) Homme"},
-      {"@type": "ListItem", "position": 4,  "url": "https://dar-nur.fr/dn-sandale-homme-3/",  "name": "Sandale Comera (military green) Homme"},
-      {"@type": "ListItem", "position": 5,  "url": "https://dar-nur.fr/dn-sandale-homme-4/",  "name": "Sandale Comera Black (Homme)"},
-      {"@type": "ListItem", "position": 6,  "url": "https://dar-nur.fr/dn-sandale-homme-5/",  "name": "Sandales Comera Brown (Homme)"},
-      {"@type": "ListItem", "position": 7,  "url": "https://dar-nur.fr/dn-sandale-homme-6/",  "name": "Sandale Comera Black And White Homme"},
-      {"@type": "ListItem", "position": 8,  "url": "https://dar-nur.fr/dn-sandale-homme-7/",  "name": "Sandale Étique (Homme)"},
-      {"@type": "ListItem", "position": 9,  "url": "https://dar-nur.fr/dn-sandale-homme-8/",  "name": "Sandales Comera (navy blue) Homme"},
+      {"@type": "ListItem", "position": 1, "url": "https://dar-nur.fr/dn-sandale-homme-0/", "name": "Sandale Comera white (Homme)"},
+      {"@type": "ListItem", "position": 2, "url": "https://dar-nur.fr/dn-sandale-homme-1/", "name": "Sandale Comera Beige (homme)"},
+      {"@type": "ListItem", "position": 3, "url": "https://dar-nur.fr/dn-sandale-homme-2/", "name": "Sandale Comera (beige and rail) Homme"},
+      {"@type": "ListItem", "position": 4, "url": "https://dar-nur.fr/dn-sandale-homme-3/", "name": "Sandale Comera (military green) Homme"},
+      {"@type": "ListItem", "position": 5, "url": "https://dar-nur.fr/dn-sandale-homme-4/", "name": "Sandale Comera Black (Homme)"},
+      {"@type": "ListItem", "position": 6, "url": "https://dar-nur.fr/dn-sandale-homme-5/", "name": "Sandales Comera Brown (Homme)"},
+      {"@type": "ListItem", "position": 7, "url": "https://dar-nur.fr/dn-sandale-homme-6/", "name": "Sandale Comera Black And White Homme"},
+      {"@type": "ListItem", "position": 8, "url": "https://dar-nur.fr/dn-sandale-homme-7/", "name": "Sandale Étique (Homme)"},
+      {"@type": "ListItem", "position": 9, "url": "https://dar-nur.fr/dn-sandale-homme-8/", "name": "Sandales Comera (navy blue) Homme"},
       {"@type": "ListItem", "position": 10, "url": "https://dar-nur.fr/dn-sandale-homme-10/", "name": "Sandales Chujara Brown (Homme)"},
       {"@type": "ListItem", "position": 11, "url": "https://dar-nur.fr/dn-sandale-homme-11/", "name": "Sandale hayat (Homme)"}
     ]
   }
 }
 </script>
+    <!-- AUTO:CATEGORY_JSONLD:END -->
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -364,11 +366,13 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
   les articles — donc pas de pilules de filtre ni de tri inventés, uniquement le compteur réel.
 -->
 
-<!-- ===== GRILLE PRODUITS (11 paires réelles, cartes au niveau homepage) ===== -->
+<!-- ===== GRILLE PRODUITS — générée depuis Supabase (voir marqueurs AUTO:CATEGORY_*) ===== -->
 <section class="products-section" aria-labelledby="products-heading">
+  <!-- AUTO:CATEGORY_COUNT:START — géré automatiquement par scripts/generate-category-pages.mjs, ne pas éditer à la main -->
   <p class="results-count" id="products-heading"><span id="resultsCount">11</span> paires disponibles</p>
+    <!-- AUTO:CATEGORY_COUNT:END -->
   <div class="grid" id="grid">
-
+    <!-- AUTO:CATEGORY_PRODUCTS:START — géré automatiquement par scripts/generate-category-pages.mjs, ne pas éditer à la main -->
     <a href="https://dar-nur.fr/dn-sandale-homme-0/" class="card" data-price="29.90">
       <div class="card-image"><img src="../assets/produits-fournisseur/dn-sandale-homme-0/dn-sandale-homme-0.webp" alt="Sandale Comera white (Homme) — Dar Nūr" loading="eager" width="400" height="400"/></div>
       <div class="card-body">
@@ -511,7 +515,7 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
         </div>
       </div>
     </a>
-
+    <!-- AUTO:CATEGORY_PRODUCTS:END -->
   </div>
 </section>
 
