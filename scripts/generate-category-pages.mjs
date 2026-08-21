@@ -127,7 +127,7 @@ function hasActiveVariants(p) {
   return axes.length > 0 && variants.some(v => v.active !== false);
 }
 
-function buildCardHtml(p, tagLabel, isFirst, cfg) {
+function buildCardHtml(p, pageTagLabel, isFirst, cfg) {
   const images = Array.isArray(p.images) ? p.images.filter(Boolean) : [];
   const img = images[0] || null;
   // Prefixe d'image propre a la page : tahara/ et miels-gourmands/ ecrivent des
@@ -196,10 +196,19 @@ function buildCardHtml(p, tagLabel, isFirst, cfg) {
     ? `\n        <div class="meta-chip">${esc(line.chip)}</div>`
     : '';
 
+  // Libelle de la pastille .cat-tag. Trois niveaux, du plus specifique au plus
+  // general : la ligne qui a classe le produit (cfg.lines[].tagLabel), puis le
+  // libelle de page (cfg.tagLabel), puis categories.label — c'est ce dernier
+  // qui est passe ici dans pageTagLabel. Necessaire pour poudres/, dont les
+  // cartes n'affichent pas toutes la meme pastille : "Poudre naturelle" sur la
+  // ligne poudre, "Graine naturelle" sur la ligne graine. Opt-in : aucune page
+  // existante ne declare lines[].tagLabel, leur sortie est donc inchangee.
+  const cardTagLabel = (line && line.tagLabel) || pageTagLabel;
+
   return `    <a href="https://dar-nur.fr/${esc(p.slug)}/" class="card"${attrs}>
       <div class="card-image"><img src="${esc(imgSrc)}" alt="${esc(p.name)} — Dar Nūr" loading="${loading}" width="400" height="400"/></div>
       <div class="card-body">
-        <div class="cat-tag">${esc(tagLabel)}</div>
+        <div class="cat-tag">${esc(cardTagLabel)}</div>
         <h3>${esc(p.name)}</h3>${chipHtml}${taglineBlock}
         <div class="card-footer">
           <${priceTag} class="card-price">${priceHtml}</${priceTag}>
@@ -527,6 +536,78 @@ const CATEGORY_PAGES = [
     // d'indentation, et un padding-top annule en style inline.
     buildCountHtml: (n) => `    <p class="results-count" id="products-heading" style="padding-top:0">${n} huile${n > 1 ? 's' : ''} disponible${n > 1 ? 's' : ''}</p>`,
   },
+
+  // ==========================================================================
+  // Lot 3 — les deux dernieres pages porteuses d'orphelins. Contrairement aux
+  // Lots 1 et 2, la generation change ici du contenu visible : l'audit prealable
+  // a releve sept divergences entre le HTML ecrit a la main et Supabase, toutes
+  // arbitrees en faveur de la base (qui est ce que paie le client sur la fiche
+  // produit) :
+  //   brumes/  5 prix faux sur 5, dont -10 EUR sur br-nila et br-apaisante ;
+  //            "A partir de" affiche alors qu'aucune brume n'a de variante.
+  //   poudres/ pdr-nila affiche 7,00 EUR pour 5,00 EUR en base ; grn-baraka
+  //            porte "Graine Noir" (faute d'accord) et une affiche marketing
+  //            au lieu de sa photo produit.
+  // Aucune donnee Supabase n'a ete modifiee : ce sont les pages qui s'alignent.
+  // ==========================================================================
+  {
+    categoryId: 'brumes',
+    dir: 'brumes',
+    canonicalUrl: 'https://dar-nur.fr/brumes/',
+    jsonLdName: 'Brumes Naturelles — Dar Nūr',
+    jsonLdDescription: 'Collection de brumes naturelles premium — eaux florales, brumes sublimantes et sprays apaisants inspirés des traditions orientales.',
+    breadcrumbName: 'Brumes naturelles',
+    itemListName: 'Nos Brumes Naturelles',
+    unitSingular: 'brume',
+    unitPlural: 'brumes',
+    // Pas de tagLabel : categories.label vaut deja "Brume & soin", exactement le
+    // libelle affiche sur les cartes.
+    // Chemins d'image absolus depuis la racine, comme qamis/.
+    imagePrefix: '/',
+    // Le gabarit ecrit a la main preffixait les 5 prix de "A partir de" alors
+    // qu'aucune brume n'a de variante active en base : le prefixe annoncait un
+    // prix d'appel qui n'existe nulle part. Avec cette option il ne s'affichera
+    // que le jour ou une brume aura de vraies declinaisons.
+    pricePrefix: 'À partir de',
+    pricePrefixOnlyWithVariants: true,
+    cardSeparator: '\n\n',
+    // Compteur au format par defaut du generateur (.filter-bar-inner,
+    // style="padding:0") : aucun buildCountHtml necessaire.
+  },
+  {
+    categoryId: 'poudres',
+    dir: 'poudres',
+    canonicalUrl: 'https://dar-nur.fr/poudres/',
+    jsonLdName: 'Poudres & Graines Naturelles — Dar Nūr',
+    jsonLdDescription: 'Collection de poudres et graines naturelles premium — Nigelle, Costus, Moringa, Gingembre, Chia, Oliban, Baraka, Psyllium, Gomme Arabique et bien d\'autres.',
+    breadcrumbName: 'Poudres & Graines',
+    itemListName: 'Nos Poudres & Graines Naturelles',
+    unitSingular: 'poudre',
+    unitPlural: 'poudres',
+
+    emitDataPrice: true,
+    cardSeparator: '\n\n',
+    // <span id="resultsCount"> reellement pilote par le script de filtre de la
+    // page (contrairement a chaussures/, ou il est dormant) : le supprimer
+    // casserait la mise a jour du compteur au clic sur une pilule.
+    buildCountHtml: (n) => `  <p class="results-count" id="products-heading"><span id="resultsCount">${n}</span> poudre${n > 1 ? 's' : ''} &amp; graine${n > 1 ? 's' : ''} disponible${n > 1 ? 's' : ''}</p>`,
+
+    // Deux familles reelles, deja materialisees par data-line dans le gabarit
+    // d'origine. Elles portent chacune leur propre pastille : la page n'affiche
+    // pas le meme .cat-tag sur une poudre et sur une graine.
+    //
+    // La regle de la ligne "poudre" combine le prefixe historique ^pdr- et les
+    // deux slugs qui n'ont jamais suivi cette convention, ancres explicitement.
+    // Pas de motif large type ^dn- : il classerait n'importe quel futur produit
+    // sans qu'on l'ait decide. Tout slug inconnu reste non classable, et le
+    // garde-fou abandonne la generation en le nommant.
+    lines: [
+      { id: 'poudre', label: 'Poudres', tagLabel: 'Poudre naturelle',
+        match: /^(pdr-|dn-ismid-medine$|dn-poudre-de-sidr-50g$)/ },
+      { id: 'graine', label: 'Graines', tagLabel: 'Graine naturelle',
+        match: /^grn-/ },
+    ],
+  },
 ];
 
 async function generateCategoryPage(cfg, creds) {
@@ -546,8 +627,9 @@ async function generateCategoryPage(cfg, creds) {
   // Libellé de la pastille .cat-tag. Par défaut le label Supabase de la
   // catégorie ; cfg.tagLabel permet de conserver le libellé déjà affiché sur une
   // page quand il diffère volontairement (qamis/ affiche "Mode homme" alors que
-  // categories.label vaut "Qamis saoudien").
-  const tagLabel = cfg.tagLabel || categoryRows[0]?.label || cfg.breadcrumbName;
+  // categories.label vaut "Qamis saoudien"). Une ligne peut encore le surcharger
+  // carte par carte via cfg.lines[].tagLabel (cf. buildCardHtml).
+  const pageTagLabel = cfg.tagLabel || categoryRows[0]?.label || cfg.breadcrumbName;
 
   // Garde-fou : deux produits actifs ne peuvent pas partager un slug — cela
   // produirait deux cartes vers la même URL et deux ListItem identiques.
@@ -588,7 +670,7 @@ async function generateCategoryPage(cfg, creds) {
     }
   }
 
-  const cardsHtml = products.map((p, i) => buildCardHtml(p, tagLabel, i === 0, cfg)).join(cfg.cardSeparator || '\n');
+  const cardsHtml = products.map((p, i) => buildCardHtml(p, pageTagLabel, i === 0, cfg)).join(cfg.cardSeparator || '\n');
   const countHtml = cfg.buildCountHtml
     ? cfg.buildCountHtml(products.length)
     : `    <p class="results-count" style="padding:0">${esc(pluralize(products.length, cfg.unitSingular, cfg.unitPlural))} disponible${products.length > 1 ? 's' : ''}</p>`;
