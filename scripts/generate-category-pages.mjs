@@ -136,6 +136,24 @@ function buildCardHtml(p, pageTagLabel, isFirst, cfg) {
   // gabarit deja en place sur chaque page plutot que d'en imposer un.
   const imagePrefix = cfg.imagePrefix || '../';
   const imgSrc = img ? resolveImagePath(imagePrefix, img) : `${imagePrefix}logo-dar-nur.png`;
+
+  // Dimensions intrinseques annoncees sur <img>. Defaut 400x400 : le ratio 1/1
+  // impose par .card-image sur toutes les pages passees au pipeline jusqu'ici.
+  // Une page dont la grille n'est pas carree doit annoncer SON ratio, sinon le
+  // navigateur reserve une boite au mauvais rapport avant le decodage de
+  // l'image (saut de mise en page). Opt-in : sans cfg.imageWidth/imageHeight la
+  // sortie reste 400x400, strictement inchangee pour les pages deja generees.
+  // Validation stricte, dans le meme esprit que la liste fermee de cfg.priceTag :
+  // une faute de config ne doit pas ecrire "NaN" ou un attribut vide dans
+  // chaque carte de la page.
+  const imageWidth = cfg.imageWidth ?? 400;
+  const imageHeight = cfg.imageHeight ?? 400;
+  for (const [key, value] of [['imageWidth', imageWidth], ['imageHeight', imageHeight]]) {
+    if (!Number.isInteger(value) || value <= 0) {
+      throw new Error(`cfg.${key}=${JSON.stringify(value)} invalide — entier strictement positif attendu.`);
+    }
+  }
+
   const loading = isFirst ? 'eager' : 'lazy';
   const hasPrice = p.price_value !== null && p.price_value !== undefined;
   const priceLabel = formatPriceLabel(p.price_value);
@@ -206,7 +224,7 @@ function buildCardHtml(p, pageTagLabel, isFirst, cfg) {
   const cardTagLabel = (line && line.tagLabel) || pageTagLabel;
 
   return `    <a href="https://dar-nur.fr/${esc(p.slug)}/" class="card"${attrs}>
-      <div class="card-image"><img src="${esc(imgSrc)}" alt="${esc(p.name)} — Dar Nūr" loading="${loading}" width="400" height="400"/></div>
+      <div class="card-image"><img src="${esc(imgSrc)}" alt="${esc(p.name)} — Dar Nūr" loading="${loading}" width="${imageWidth}" height="${imageHeight}"/></div>
       <div class="card-body">
         <div class="cat-tag">${esc(cardTagLabel)}</div>
         <h3>${esc(p.name)}</h3>${chipHtml}${taglineBlock}
@@ -606,6 +624,85 @@ const CATEGORY_PAGES = [
         match: /^(pdr-|dn-ismid-medine$|dn-poudre-de-sidr-50g$)/ },
       { id: 'graine', label: 'Graines', tagLabel: 'Graine naturelle',
         match: /^grn-/ },
+    ],
+  },
+
+  // ==========================================================================
+  // Lot 4 — abayas/, la derniere grosse page categorie et la plus lourde du
+  // site : 62 produits actifs, 12 groupes, 13 pilules. L'audit prealable a
+  // confirme la parite (62 cartes = 62 produits actifs, meme ordre que
+  // sort_order, memes prix, memes images, memes taglines) : contrairement aux
+  // Lots 1 a 3, il n'y avait ni orphelin ni donnee fausse a arbitrer.
+  //
+  // Deux ecarts seulement entre le HTML ecrit a la main et cette configuration :
+  //   - vt-layali-beige portait "A partir de" alors qu'aucune des 61 autres
+  //     cartes ne l'affichait. Les 12 produits a variantes ont exactement le
+  //     meme prix sur leurs 4 tailles : le prefixe annoncait un prix d'appel qui
+  //     n'existe pas. Choix : pas de pricePrefix ici, les 62 cartes affichent
+  //     leur prix nu. (Les fiches produit, elles, continuent d'afficher leur
+  //     propre libelle — chantier separe, hors de ce pipeline.)
+  //   - c'est la seule grille du site en aspect-ratio 3/4 (vetements
+  //     photographies en pied) au lieu de 1/1 -> cfg.imageHeight.
+  // ==========================================================================
+  {
+    categoryId: 'vetements',
+    dir: 'abayas',
+    canonicalUrl: 'https://dar-nur.fr/abayas/',
+    jsonLdName: 'Abayas & Ensembles — Dar Nūr',
+    jsonLdDescription: "Collection d'abayas et d'ensembles islamiques pour femme — coupes fluides et pudiques, coloris intemporels ou lumineux, livrés en France.",
+    breadcrumbName: 'Abayas & Ensembles',
+    itemListName: 'Nos Abayas & Ensembles',
+    unitSingular: 'pièce',
+    unitPlural: 'pièces',
+
+    // Grille portrait : .card-image est en aspect-ratio:3/4 sur cette page (et
+    // sur elle seule). 400 x 4/3 = 533. Annoncer 400x400 ferait reserver au
+    // navigateur une boite carree avant le decodage, donc un saut de mise en
+    // page sur les 62 cartes.
+    imageWidth: 400,
+    imageHeight: 533,
+
+    // Le tri par prix de la page lit data-price : sans cette option, le
+    // <select> deviendrait inoperant.
+    emitDataPrice: true,
+    cardSeparator: '\n\n',
+
+    // Pilules avec effectif affiche ("Toutes (62)", "Abaya Nouha (4)"...),
+    // comme miels/. Les comptes sont derives des produits reellement generes.
+    lineCountsInLabels: true,
+    allLinesLabel: 'Toutes',
+
+    buildCountHtml: (n) => `  <p class="results-count" id="products-heading"><span id="resultsCount">${n}</span> pièce${n > 1 ? 's' : ''} disponible${n > 1 ? 's' : ''}</p>`,
+
+    // 12 familles reelles, deja materialisees par data-line dans le gabarit
+    // ecrit a la main. Chacune porte sa propre pastille : la page n'affiche pas
+    // le meme .cat-tag sur une abaya et sur un ensemble (et aucune n'affiche
+    // categories.label, qui vaut "Couture femme").
+    //
+    // Toutes les regles sont ancrees sur ^ et sur le prefixe complet. Deux
+    // pieges que cela neutralise :
+    //   - "demi-papillon" contient "papillon" : une regle non ancree pour
+    //     farasha capterait les 3 abayas demi-papillon. L'ancrage les rend
+    //     disjointes, et l'ordre (demi-papillon avant farasha) ajoute une
+    //     seconde barriere puisque resolveLine() retourne la 1re correspondance.
+    //   - ^vt- seul capterait Nouha, Aicha, Layali et Nissah indifferemment.
+    // Le catalogue porte deux conventions de slug (vt- historique, dn-abaya-
+    // fournisseur) : un futur produit qui n'entre dans aucune des 12 regles
+    // reste non classable, et le garde-fou abandonne la generation en le
+    // nommant — c'est exactement le comportement voulu.
+    lines: [
+      { id: 'nouha',         label: 'Abaya Nouha',         tagLabel: 'Abaya femme',    match: /^vt-abaya-nouha-/ },
+      { id: 'aicha',         label: 'Ensemble Aïcha',      tagLabel: 'Ensemble femme', match: /^vt-aicha-/ },
+      { id: 'layali',        label: 'Ensemble Layali',     tagLabel: 'Ensemble femme', match: /^vt-layali-/ },
+      { id: 'nissah',        label: 'Nissah Mastoura',     tagLabel: 'Ensemble femme', match: /^vt-nissah-/ },
+      { id: 'demi-papillon', label: 'Abaya Demi-Papillon', tagLabel: 'Abaya femme',    match: /^dn-abaya-demi-papillon-/ },
+      { id: 'farasha',       label: 'Abaya Farasha',       tagLabel: 'Abaya femme',    match: /^dn-abaya-papillon-/ },
+      { id: 'roumeyssa',     label: 'Abaya Roumeyssa',     tagLabel: 'Abaya femme',    match: /^dn-abaya-saoudienne-/ },
+      { id: 'iltihad',       label: 'Abaya Iltihad',       tagLabel: 'Abaya femme',    match: /^dn-abaya-iltihad-/ },
+      { id: 'mme-dar-nur',   label: 'Abaya Mme Dar Nūr',   tagLabel: 'Abaya femme',    match: /^dn-abaya-mme-dn-/ },
+      { id: 'chita',         label: 'Abaya Chita',         tagLabel: 'Abaya femme',    match: /^dn-abaya-chita-/ },
+      { id: 'seyra',         label: 'Abaya Kimono Seyra',  tagLabel: 'Abaya femme',    match: /^dn-abaya-kimono-seyra-/ },
+      { id: 'nilla',         label: 'Abaya Nilla',         tagLabel: 'Abaya femme',    match: /^dn-abaya-nilla-/ },
     ],
   },
 ];
