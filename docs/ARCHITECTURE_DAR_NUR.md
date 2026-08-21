@@ -1,35 +1,208 @@
 # Architecture Dar Nūr — mémoire vivante du projet
 
 > Ce fichier est la mémoire vivante du projet, à lire en premier avant toute tâche de développement ou de design sur Dar Nūr (voir la compétence `dar-nur-architect`). Il doit être tenu à jour à la fin de chaque session qui découvre un fait durable sur l'architecture.
+>
+> **Note sur cette version (2026-08-21).** Les sections d'état ci-dessous sont une **reconstruction factuelle neuve**, établie en relisant le dépôt, les scripts, les workflows, les pages publiées, l'historique Git et la base Supabase. Elle fait suite à la perte accidentelle d'un ajout non commité de 24 lignes à ce fichier (écrasé par un `git checkout` trop large pendant le chantier Lot 4). **Ce texte ne restaure pas les lignes perdues et n'en devine pas le contenu** : elles ne sont pas récupérables, et rien ici ne prétend en reprendre la formulation ni les intentions. Le journal en fin de document, lui, est resté intact et n'a pas été réécrit.
 
 ## Vue d'ensemble
 
-- **Type de site** : e-commerce, multi-pages HTML statiques (un fichier `.html` par page). Pas de framework JS, pas d'outil de build.
-- **Homepage** (`index.html`, ~3100+ lignes) : Single Page App maison — une seule page qui bascule entre plusieurs "vues" (accueil, boutique filtrée, fiche produit) via JS (`showHome()`, `goCat()`, `showProduct()`), sans changement d'URL réelle (ancres `#`).
-- **Pages catégories statiques** : `abayas/`, `miels/`, `huiles/`, `poudres/`, `gelules/`, `brumes/`, `qamis/` — chacune un `index.html` autonome, SEO-first, avec un sous-ensemble de produits **hardcodés en HTML** (pas de JS de rendu), qui renvoient vers la homepage via des ancres (`https://dar-nur.fr/#vt-abaya-nouha-gris-argente`) pour la fiche produit détaillée.
-- **Backend** : Supabase (catégories dynamiques ; produits actuellement hardcodés dans `index.html`, voir section Supabase ci-dessous).
-- **Hébergement** : GitHub Pages, domaine `dar-nur.fr` (fichier `CNAME` à la racine).
-- **Design** : pas de charte graphique séparée pour le site — les variables CSS `:root` de `index.html` sont la seule source de vérité du design "Émeraude & Or" (refonte homepage validée et déployée, PR #2 mergée).
+- **Type de site** : e-commerce, multi-pages HTML statiques (un fichier `index.html` par page), servi tel quel. Pas de framework JS et pas de bundler — mais **il y a bien une chaîne de build** : quatre générateurs Node sans dépendance npm, deux scripts de vérification, et deux workflows GitHub Actions (voir « Pipelines de génération »).
+- **Source de vérité du catalogue** : **Supabase**. Aucune donnée produit n'est écrite à la main dans les pages publiées.
+- **Homepage** (`index.html`) : Single Page App maison — une seule page qui bascule entre plusieurs vues (accueil, boutique filtrée, fiche produit) via JS (`showHome()`, `goCat()`, `showProduct()`). Elle charge son catalogue depuis Supabase au démarrage ; le tableau `PRODUCTS` codé en dur dans le fichier n'est qu'un filet de secours jamais affiché en conditions normales (voir « Dette connue »).
+- **Pages catégories** : 14 pages `<categorie>/index.html`, **générées depuis Supabase** par `scripts/generate-category-pages.mjs`. Le fichier committé est à la fois la source (nav, hero, texte éditorial, CSS, footer) et la sortie : seuls les blocs délimités par des marqueurs `<!-- AUTO:CATEGORY_*:START/END -->` sont réécrits.
+- **Fiches produit** : **237 pages statiques `/{slug}/`**, une par produit actif, générées par `scripts/generate-product-pages.mjs`. Chaque carte de page catégorie pointe vers `https://dar-nur.fr/<slug>/` — une vraie URL crawlable, pas une ancre.
+- **Parfums** : hub + une page par marque, générés par `scripts/generate-parfums.mjs` (pipeline séparé, voir sa section).
+- **Hébergement** : **GitHub Pages** pour la production (`dar-nur.fr`, fichier `CNAME` à la racine). **Netlify** sert les deploy previews des pull requests.
+- **Design** : les variables CSS `:root` de `index.html` sont la seule source de vérité du design « Émeraude & Or ».
+
+## État du catalogue et de la génération (2026-08-21)
+
+| Mesure | Valeur |
+|---|---|
+| Commit de production | `87f1022e405072cf728d40c7fa0165e2fd11bdb8` |
+| Produits actifs en base | **237** |
+| Produits avec au moins un lien entrant | **237** |
+| Orphelins | **0** |
+| Fiches produit statiques `/{slug}/` | **237** |
+| Catégories Supabase | **15** |
+| Catégories automatisées | **15 / 15** |
+| — via `generate-category-pages.mjs` | 14 |
+| — via `generate-parfums.mjs` | 1 (`parfums`) |
+
+**Plus aucune page catégorie n'est maintenue à la main.** Un produit ajouté, modifié ou désactivé dans Supabase se répercute sur sa page catégorie, sa fiche produit et le JSON-LD par simple régénération — déclenchée automatiquement par le workflow (voir plus bas).
 
 ## Pages connues
 
-| Page | Fichier | Spécifique |
-|---|---|---|
-| Accueil (SPA) | `index.html` | Nav + hero + trust-bar + boutique filtrée + fiche produit + footer, tout en une page |
-| Abayas & Ensembles | `abayas/index.html` | 22 produits hardcodés, header/footer **différents** de la homepage (mini-nav propre à la page) |
-| Miels | `miels/index.html` | 16 produits hardcodés |
-| Miels Gourmands | `miels-gourmands/index.html` | Catégorie Supabase `miels-gourmands` (distincte de `miels`), 8 produits (préparations miel + fruits, 200g/24,99€ uniformes, images Supabase Storage). Pas de filtre (attributs uniformes, aucun regroupement réel). Univers séparé de `miels/`, gabarit copié de `brumes/index.html`. |
-| Huiles | `huiles/index.html` | idem |
-| Poudres & Graines | `poudres/index.html` | idem |
-| Gélules | `gelules/index.html` | idem |
-| Brumes | `brumes/index.html` | idem |
-| Qamis | `qamis/index.html` | idem |
-| Bakhour & Encens | `bakhour/index.html` | **1 seul produit réel** (Bakhur Mukhalat). Pas de barre de filtres/tri (non pertinent à 1 article), grille `.grid--single` centrée/contrainte pour éviter l'effet de grille cassée. Note corrigée (2026-07-15, vérifié empiriquement lors du rollout D5c) : la mention historique d'un nav méga-menu/footer homepage propre à cette page était obsolète — `bakhour/` utilise en réalité le même composant nav.css mutualisé que les 13 autres pages catégories (D5b.1a/b), confirmé par grep direct du markup `<header>`. |
-| Parfums (hub multi-marques) | `parfums/index.html` + `parfums/<brand_slug>/index.html` | **100 % généré**, jamais édité à la main — voir section dédiée ci-dessous. |
-| Admin | `admin.html` | Interface de gestion produits/catégories/offres (écrit dans Supabase) |
-| CGV / Confidentialité / Mentions légales | `cgv.html`, `confidentialite.html`, `mentions-legales.html` | Statiques |
+| Page | Fichier | Génération | Contenu au 2026-08-21 |
+|---|---|---|---|
+| Accueil (SPA) | `index.html` | Manuel (données Supabase au runtime) | Nav + hero + trust-bar + boutique filtrée + fiche produit + footer |
+| Abayas & Ensembles | `abayas/index.html` | `generate-category-pages.mjs` | 62 produits, 12 groupes, 13 pilules, tri par prix |
+| Tahara & Hygiène | `tahara/index.html` | idem | 34 produits, 8 groupes, tri par prix |
+| Poudres & Graines | `poudres/index.html` | idem | 20 produits, 2 groupes, tri par prix |
+| Miels Artisanaux | `miels/index.html` | idem | 18 produits, 2 groupes (par `provenance`), tri par prix |
+| Huiles | `huiles/index.html` | idem | 16 produits, sans pilules |
+| Gélules | `gelules/index.html` | idem | 12 produits, sans pilules |
+| Sandales | `chaussures/index.html` | idem | 11 produits, sans pilules |
+| Miels Gourmands | `miels-gourmands/index.html` | idem | 9 produits, sans pilules |
+| Qamis | `qamis/index.html` | idem | 8 produits, sans pilules |
+| Chéchias | `chechias/index.html` | idem | 7 produits, sans pilules |
+| Brumes | `brumes/index.html` | idem | 5 produits, sans pilules |
+| Accessoires | `accessoires/index.html` | idem | 3 produits, sans pilules |
+| Bakhour & Encens | `bakhour/index.html` | idem | 1 produit, grille `.grid--single` centrée |
+| Miels de terroir | `miels-terroir/index.html` | idem | 1 produit |
+| Parfums (hub multi-marques) | `parfums/index.html` + `parfums/<brand_slug>/index.html` | `generate-parfums.mjs` | 30 produits, 4 marques (`khair`, `khamraha`, `lattafa`, `lecode`) |
+| **Fiches produit** | `<slug>/index.html` × **237** | `generate-product-pages.mjs` | Une page par produit actif, URL propre et indexable |
+| Admin | `admin.html` | Manuel | Gestion produits/catégories/marques/offres (écrit dans Supabase) |
+| CGV / Confidentialité / Mentions légales | `cgv.html`, `confidentialite.html`, `mentions-legales.html` | Manuel | Statiques, mini-header « Retour » sans nav |
 
-**Constat important pour tout travail sur les pages catégories** : leur header/footer/hero ne reprennent PAS le composant de nav riche de la homepage (méga-menu déroulant "Bien-être"/"Mode", burger mobile, footer 3 colonnes). Elles utilisent une nav minimaliste propre (`abayas/index.html` a son propre `<style>` avec ses propres tokens locaux `--green/--green2/--gold/--gold2/--cream/--cream2/--text/--muted`, proches mais pas identiques à ceux de la homepage). C'est un écart de cohérence identifié lors de l'analyse pour la refonte des pages collections (juillet 2026).
+**Navigation mutualisée** : les 14 pages catégories, les pages parfums et la homepage partagent `/nav.css` et `/js/nav.js`. En revanche, la navigation commune y arrive par **deux mécanismes distincts** :
+
+- **Marqueurs `<!-- AUTO:NAV:START/END -->`** — présents sur **252 fichiers** : la homepage `index.html`, les **14** pages catégories, et les **237** fiches produit (qui les héritent du gabarit de `generate-product-pages.mjs`). C'est dans ces zones, et seulement elles, que `scripts/build-nav.mjs` injecte le contenu de navigation.
+- **Jetons de gabarit** — les pages parfums **n'utilisent pas `AUTO:NAV`** (vérifié : aucune des 5 pages `parfums/` ne contient ce marqueur). Elles reçoivent la navigation commune par le mécanisme propre à `generate-parfums.mjs`, qui lit `partials/nav-common.generated.html` et en insère les deux fragments via les jetons `{{COMMON_NAV_BEFORE_PARFUMS}}`/`{{COMMON_NAV_AFTER_PARFUMS}}` de `parfums/_hub_template.html` et `parfums/_brand_template.html`.
+
+Les tokens `:root` d'`abayas/index.html` sont aujourd'hui **identiques** à ceux d'`index.html` — l'écart de cohérence relevé lors des premiers audits n'existe plus.
+
+## Pipelines de génération
+
+Quatre générateurs coexistent. Chacun est **propriétaire exclusif** de ses fichiers de sortie ; aucun n'écrit dans le périmètre d'un autre. Tous sont en Node ≥18, **sans aucune dépendance npm** (`fetch` natif).
+
+| Script | Source | Écrit | Déclenchement |
+|---|---|---|---|
+| `scripts/generate-product-pages.mjs` | Supabase `products` | les 237 `<slug>/index.html` | workflow `regenerate-product-pages.yml` |
+| `scripts/generate-category-pages.mjs` | Supabase `products` + `categories` | les blocs `AUTO:CATEGORY_*` des 14 pages catégories | même workflow, juste après |
+| `scripts/generate-parfums.mjs` | Supabase `products` (`category_id='parfums'`), groupés par `brand_slug` | `parfums/index.html`, `parfums/<brand_slug>/index.html`, bloc `AUTO:PARFUMS` de `sitemap.xml` | workflow `regenerate-parfums.yml` |
+| `scripts/build-nav.mjs` | `data/nav.config.json` | `partials/nav-common.generated.html` + blocs `AUTO:NAV` | manuel, rare (uniquement si la config nav change) |
+
+**Particularité de `generate-category-pages.mjs`** : contrairement aux deux autres générateurs de pages, il n'a **pas de gabarit séparé**. Le fichier `<dir>/index.html` committé est à la fois la source et la sortie ; seuls les blocs marqués sont réécrits en place, tout le reste (nav, hero, texte éditorial, CSS, tri, footer) n'est jamais touché. Ajouter une catégorie au pipeline = ajouter une entrée à `CATEGORY_PAGES` + poser les 4 marqueurs une fois dans le fichier existant. Jamais de refonte du fichier.
+
+**Idempotence** : les quatre générateurs sont idempotents — deux exécutions consécutives sans changement de données produisent des fichiers strictement identiques. C'est ce qui permet au workflow de ne committer que si le contenu a réellement changé.
+
+## `generate-category-pages.mjs` — options et garde-fous
+
+### Les 4 blocs marqués
+
+`AUTO:CATEGORY_PRODUCTS` (la grille), `AUTO:CATEGORY_COUNT` (le compteur de résultats), `AUTO:CATEGORY_JSONLD` (le `CollectionPage`/`ItemList` en `<head>`), et `AUTO:CATEGORY_FILTERS` (les pilules, seulement sur les pages qui en ont). Le `<label class="sort-select">` du tri par prix reste **hors** des blocs AUTO sur toutes les pages concernées : le tri est écrit à la main, le générateur ne le réécrit jamais.
+
+### Options de configuration (`CATEGORY_PAGES`)
+
+Identité et SEO : `categoryId`, `dir`, `canonicalUrl`, `jsonLdName`, `jsonLdDescription`, `breadcrumbName`, `itemListName`, `unitSingular`, `unitPlural`.
+
+Gabarit de carte : `tagLabel` (libellé de la pastille `.cat-tag` quand il diffère volontairement de `categories.label`), `imagePrefix` (`../` par défaut, `/` pour les pages à chemins absolus), `imageWidth` / `imageHeight` (défaut `400`/`400` ; `abayas/` déclare `400`/`533`, seule grille du site en `aspect-ratio:3/4`), `priceTag` (`div` par défaut, `span` pour `huiles/`), `pricePrefix` (« À partir de »), `pricePrefixOnlyWithVariants` (n'affiche le préfixe que si le produit a au moins un axe de variante **et** une variante active), `emitDataPrice` (attribut `data-price`, indispensable dès qu'il y a un tri), `cardSeparator`, `omitEmptyTagline`.
+
+Compteur : `buildCountHtml` — fonction rendant le HTML exact du compteur, car chaque page a sa propre structure (`<span id="resultsCount">` piloté ou dormant, indentation, unité au singulier/pluriel).
+
+Groupes et pilules : `lines` (liste ordonnée de règles), `lineSource` (champ testé, `slug` par défaut, `provenance` pour `miels/`), `lineAttribute` (`line` par défaut, `prov` pour `miels/`), `lineCountsInLabels` (affiche l'effectif dans le libellé, ex. `Toutes (62)`), `allLinesLabel`. Chaque entrée de `lines` porte `id`, `label`, `match` (expression régulière), et optionnellement `chip` (pastille `.meta-chip`) et `tagLabel` (pastille `.cat-tag` propre à ce groupe).
+
+### Garde-fous bloquants — abandon **avant** toute écriture
+
+| Situation | Comportement |
+|---|---|
+| 0 produit actif pour la catégorie | Abandon, `exit 1` — refuse de publier une collection vide |
+| Deux produits actifs partageant un slug | Abandon, slugs nommés |
+| Produit actif ne correspondant à aucune règle de `cfg.lines` | Abandon, produit **et** valeur du champ source nommés |
+| Marqueur `AUTO:*` absent, ou END trouvé avant son START | Exception, marqueur nommé |
+| `priceTag` hors de la liste fermée (`div`, `span`) | Exception |
+| `imageWidth` / `imageHeight` non entier strictement positif | Exception |
+| Supabase injoignable ou en erreur HTTP | Exception, aucun fichier touché |
+
+Aucun de ces cas n'écrit un seul octet. C'est délibéré : **une page publiée fausse coûte plus cher qu'une génération qui échoue.**
+
+### Avertissement non bloquant
+
+**Noms homonymes** : quand plusieurs produits actifs d'une catégorie portent le même `name`, le générateur émet un avertissement (`⚠ … portent le même nom`) et **poursuit**. Des cartes visuellement indiscernables sont une donnée à corriger côté admin, pas une raison de refuser de publier. Au 2026-08-21 : 5 avertissements sur `abayas/`, 1 sur `qamis/`.
+
+## Génération automatique (workflows GitHub Actions)
+
+Deux workflows, tous deux **sans aucun cron**.
+
+**`.github/workflows/regenerate-product-pages.yml`** — exécute `generate-product-pages.mjs` **puis** `generate-category-pages.mjs`. Il couvre donc à la fois les 237 fiches et les 14 pages catégories : les deux générateurs dépendent exactement des mêmes événements (tout produit, tout changement de catégorie).
+
+**`.github/workflows/regenerate-parfums.yml`** — exécute `generate-parfums.mjs`.
+
+Règles communes :
+
+- **Déclenchement** : `repository_dispatch` (émis par les triggers Postgres Supabase, voir `supabase/sql/webhook_automation.sql` et `parfums_webhook_trigger.sql`) et `workflow_dispatch` (bouton manuel de secours).
+- **Protection anti-boucle** : aucun workflow n'écoute `push` — son propre commit ne peut jamais se re-déclencher. Le commit est en plus marqué `[skip ci]` par défense en profondeur, et un `concurrency group` sérialise les déclenchements rapprochés.
+- **Commit conditionnel** : un step vérifie que le contenu a réellement changé ; sans changement, rien n'est committé.
+
+Ces workflows tournent réellement en production : l'historique de `main` contient de nombreux commits `chore: régénère … depuis Supabase [skip ci]`.
+
+## Scripts de vérification
+
+À lancer avant tout commit touchant aux pages générées :
+
+- **`scripts/verify-product-pages.mjs`** — conformité des fiches statiques. État actuel : **237/237 conformes**.
+- **`scripts/verify-page-titles.mjs`** — `<title>`, longueurs, canonical, doublons. État actuel : **258 pages vérifiées, 0 erreur**, 2 doublons connus et documentés (`Abaya Iltihad` ×3, `Abaya Nilla white and Gold` ×6 — voir « Dette connue »), 0 doublon non justifié.
+
+## Sitemap et robots
+
+- **`sitemap.xml`** : 257 URLs, aucun doublon. Le bloc délimité `<!-- AUTO:PARFUMS:START/END -->` appartient exclusivement à `generate-parfums.mjs` ; **tout le reste du fichier est maintenu à la main**. Conséquence pratique : ajouter une catégorie ou un produit impose de mettre le sitemap à jour manuellement — aucun générateur ne le fait à votre place hors du bloc parfums.
+- **`robots.txt`** : autorise l'ensemble du site, déclare le sitemap, aucun `Disallow` actif. Aucun `noindex` nulle part sur les pages publiques.
+
+## Catégories réelles (15, source Supabase `categories`)
+
+`miels`, `miels-gourmands`, `miels-terroir`, `gelules`, `poudres`, `huiles`, `brumes`, `bakhour`, `tahara`, `parfums`, `qamis`, `vetements` (Abayas & Ensembles), `chaussures` (Sandales), `chechias`, `accessoires` — plus l'entrée virtuelle `all` (« Tous les Produits ») côté homepage uniquement.
+
+Chaque catégorie a : `id`, `label` (badge fiche produit/breadcrumb/SEO), `filter_label` (bouton de filtre boutique), `sort_order`. Descriptions éditoriales des collections toujours **hardcodées côté front** (`_COLLECTION_DESCS`), pas en base — à ne pas réinventer, à reprendre telles quelles.
+
+Deux correspondances à connaître : `index.html` porte `_CAT_SLUG_OVERRIDES = { vetements: "abayas" }` (l'id Supabase `vetements` sert l'URL `/abayas/`) ; et plusieurs pages affichent volontairement une pastille différente de `categories.label` via `cfg.tagLabel` ou `cfg.lines[].tagLabel` (ex. `vetements` a pour label « Couture femme » en base, mais les cartes affichent « Abaya femme » ou « Ensemble femme »).
+
+## Supabase
+
+- **Tables confirmées** : `products` (avec relation `product_variants`), `product_variants`, `categories`, `offers` (avec relation `offer_products`), `offer_products`.
+- **Client** : `js/supabase-client.js` (dépend de `js/config.js` pour `SUPABASE_URL`/`SUPABASE_ANON`), fonctions `fetchProducts`, `fetchProduct`, `fetchCategories`, `fetchAllCategories`, `saveProduct`, `saveVariant`, `fetchActiveOffers`, etc. Storage : bucket `product-images` (`uploadImage`).
+- **Auth** : Supabase Auth email/mot de passe (`signIn`/`signOut`/`getSession`), utilisé pour `admin.html` uniquement (pas de compte client public identifié à ce jour).
+- **Correction importante (2026-07-09, vérifiée empiriquement via requêtes réseau réelles)** : contrairement à ce qu'indiquait cette fiche jusqu'ici, **Supabase EST la source principale du catalogue homepage, y compris pour `PRODUCTS`** — pas seulement pour les catégories. Le commentaire du code (`index.html`, fonction `loadFromSupabase()`) le dit explicitement : *« Supabase : source principale — fallback hardcodé uniquement en cas d'erreur »* et *« les produits hardcodés ne s'affichent jamais »*. Au chargement, `PRODUCTS.length = 0` puis le tableau est entièrement repeuplé depuis `_sb.from('products').select(...)`. Le tableau JS hardcodé dans `index.html` n'est qu'un **filet de secours affiché uniquement si le fetch Supabase échoue** (catch), jamais la donnée réelle vue par un visiteur normal. **Conséquence pratique** : ajouter un produit uniquement dans le tableau `PRODUCTS`/`PRODUCT_IMAGES` hardcodé de `index.html` ne le fait PAS apparaître dans la boutique filtrée de la homepage, la recherche, ni la fiche produit SPA en production — il faut l'insérer réellement dans la table Supabase `products` (via `admin.html`, authentification requise) pour qu'il y apparaisse. **Mise à jour 2026-08-21** : ce paragraphe se terminait à l'origine par une phrase décrivant les pages catégories comme « de vrais instantanés HTML indépendants de Supabase, synchronisés manuellement », et renvoyant au risque de désynchronisation documenté dans `AUDIT_COMPLET_ABAYAS_DAR_NUR.md` et `AUDIT_PREMIUM_ABAYAS_DAR_NUR.md`. Cette phrase a été retirée : les 14 pages catégories et les 237 fiches produit sont désormais **générées depuis Supabase**, et ce risque est supprimé par construction.
+- Avant toute modification de schéma : traiter comme changement structurant (voir SKILL.md étape 3), car les pages catégories ET la homepage lisent potentiellement les mêmes données.
+- **Accès Dashboard (piège découvert le 2026-07-10, voir `TICKET_SUPPORT_SUPABASE.md`)** : « Sign in with GitHub » (`zaytunacouture-pixel`) ouvre un **deuxième compte Supabase, vide** (créé le 2026-07-10 15:25 UTC, aucune organisation → redirection systématique vers `/dashboard/new`). Le compte propriétaire du projet `sxlpgcnjerlayitaxxyv` est **confirmé** (reconnexion réussie le 2026-07-13 après reset du mot de passe) : `zahi.youcef@hotmail.fr` en e-mail + mot de passe, organisation « Dar Nur » (plan Free). Toujours se connecter au Dashboard par e-mail/mot de passe, jamais par GitHub. Vérifié empiriquement le 2026-07-10 : aucune voie d'exécution SQL sans ce compte (aucune RPC exposée par PostgREST, pas de service_role/db password sur la machine, Management API = PAT d'un compte membre de l'org uniquement). *(Mise à jour 2026-08-21 : la migration a été exécutée le 2026-07-13 par l'utilisateur dans le SQL Editor. Le script de secours `scripts/run-parfums-migration-management-api.mjs`, écrit pour la faire passer par l'API Management, est donc devenu sans objet — il n'est d'ailleurs pas suivi par Git.)*
+- **Colonnes `brand`/`brand_slug` sur `products`** : nullables, n'ont de sens que pour `category_id='parfums'` (toutes les autres catégories restent NULL, c'est attendu). **Migration `supabase/sql/parfums_brand_migration.sql` EXÉCUTÉE le 2026-07-13** (SQL Editor, après récupération de l'accès Dashboard) — vérifié empiriquement : REST `select=brand` → 200 (plus d'erreur 42703), répartition exacte 21 `lecode` / 3 `khair` sur 24 parfums actifs, PATCH avec `brand` accepté par le cache PostgREST (plus de PGRST204), champs « Marque »/« Slug marque » d'`admin.html` correctement peuplés à l'ouverture d'une fiche. Rollback disponible : `parfums_brand_migration_rollback.sql` (jamais exécuté).
+
+## Filtres — logique métier réelle à préserver
+
+Deux systèmes de filtre coexistent, tous deux par pastilles (`.filters button`, état `.active`).
+
+**Homepage** (`index.html`) : filtre par catégorie. `FILTERS` = tableau `[id, filter_label]` + `["all","Tous"]` ; `renderFilters()` génère les boutons ; `setFilter(f)` met à jour `currentFilter` et ré-affiche via `renderGrid()` ; `renderGrid()` filtre `PRODUCTS` par `p.cat` ; `goCat(f)` est le raccourci nav/footer.
+
+**Pages catégories** : filtre par famille de produits **à l'intérieur** d'une catégorie. 4 pages en ont aujourd'hui — `abayas/` (13 pilules / 12 groupes), `tahara/` (9 / 8), `miels/` (3 / 2), `poudres/` (3 / 2) — chacune accompagnée d'un tri par prix croissant/décroissant. Les 10 autres pages catégories n'ont ni pilules ni tri, par choix de gabarit.
+
+Point structurant : **les pilules ne sont plus écrites à la main**. Elles sont générées depuis `cfg.lines` par le même passage que les cartes, donc leurs libellés, leurs identifiants et leurs effectifs **ne peuvent pas diverger** des attributs `data-line` (ou `data-prov`) de la grille. C'est précisément le type de dérive main/base que ce pipeline supprime. Le script de filtre de chaque page, lui, reste écrit à la main et lit uniquement ces attributs : il n'a jamais besoin d'être modifié quand le catalogue change.
+
+Le rendu initial reste du HTML statique complet : le filtrage et le tri ne font que masquer/réordonner des cartes déjà présentes dans la source. À préserver — c'est ce qui rend le contenu indexable sans exécution JS.
+
+## SEO — éléments à préserver sur toute page catégorie
+
+- `<title>` et `<meta name="description">` spécifiques par catégorie, Open Graph + Twitter Cards complets, `<link rel="canonical">` auto-référent, un seul `<h1>`.
+- JSON-LD : `CollectionPage` (name, description, url, breadcrumb, mainEntity), `BreadcrumbList` (Accueil → Catégorie), `ItemList` (chaque produit avec position/url/name, positions continues sans trou).
+- Toutes les pages sont dans `sitemap.xml`, autorisées par `robots.txt`, aucun `noindex`.
+
+**Règle sur les compteurs et les prix — apprise au Lot 4, à respecter partout.** Un nombre de produits ou un prix d'appel ne doit **jamais** être figé dans un `<title>`, une `meta description`, un `og:description`, un `twitter:description`, un `<h2>` ou une `jsonLdDescription`. Ces valeurs deviennent fausses au premier produit ajouté ou retiré, sans que rien ne le signale. Les compteurs légitimes sont **uniquement** ceux que le générateur dérive des produits réels : `numberOfItems`, les `ListItem`, les effectifs des pilules, le compteur de résultats. `abayas/` portait « 62 » figé à cinq endroits et un « à partir de 39,90 € » dans trois descriptions : tous retirés lors de sa mise sous pipeline.
+
+Même principe pour les affirmations vérifiables : ne pas écrire qu'un catalogue est disponible « en plusieurs tailles et couleurs » si la base ne le dit pas. Sur `abayas/`, 50 produits sur 62 n'ont aucune variante — l'affirmation a été reformulée en « les tailles et déclinaisons disponibles varient selon les modèles ».
+
+## Parfums — architecture multi-marques
+
+`parfums/` est **100 % généré** par `scripts/generate-parfums.mjs` depuis Supabase, jamais édité à la main. Le pipeline produit :
+
+- `parfums/index.html` — hub éditorial (une carte par marque, aucune fiche produit dessus pour éviter la duplication de contenu avec les pages marque).
+- `parfums/<brand_slug>/index.html` — une page complète par marque (grille produits, filtres par format, SEO propre).
+
+**Au 2026-08-21 : 30 produits actifs, 4 marques** — `lecode` (LeCode Paris, 21), `lattafa` (Lattafa, 4), `khair` (Khair by Ameerate, 3), `khamraha` (Khamraha, 2). Convention `brand_slug` **courte** (`lecode`, `khair`), décidée le 2026-07-10.
+
+- **Aucune marque n'est codée en dur nulle part.** Le générateur regroupe dynamiquement par `brand_slug` — ajouter une 5ᵉ ou une 20ᵉ marque ne demande **aucune modification de script ni de template**, uniquement des produits créés avec `brand`/`brand_slug` renseignés.
+- **Gabarits** : `parfums/_brand_template.html` et `parfums/_hub_template.html` — un seul gabarit générique par type de page.
+- **Garde-fou critique** : le générateur refuse de régénérer quoi que ce soit (aucun fichier touché) si un produit actif de `category_id='parfums'` n'a pas de `brand`/`brand_slug` — empêche qu'un nouveau parfum soit publié sous la mauvaise marque par défaut.
+- **Cartes** : depuis le 2026-07-21, les cartes sont des `<a href="https://dar-nur.fr/{slug}/">` vers les fiches statiques, comme partout ailleurs sur le site. L'ancienne modale JS et les URLs `#slug` ont été supprimées.
+- **Nav interne** : chaque page a un dropdown « Parfums » généré automatiquement (hub + toutes les marques détectées, entrée courante active), via `buildParfumsNavBlock()`. La navigation *commune* provient, elle, de `partials/nav-common.generated.html`.
+- **Sitemap** : bloc `<!-- AUTO:PARFUMS:START/END -->` entièrement régénéré à chaque exécution. Nettoyage automatique : un dossier `parfums/<ancien-slug>/` dont la marque n'a plus de produit actif est supprimé, pour ne jamais laisser une page orpheline en ligne.
+- **Données** : colonnes `brand`/`brand_slug` sur `products` (voir section Supabase). Une table `brands` et son interface d'administration ont été ajoutées le 2026-07-19.
+
+## Hébergement et déploiement
+
+- **Production : GitHub Pages**, branche `main`, déploiement direct des fichiers statiques. `CNAME` pointe vers `dar-nur.fr`. Vérifiable : `curl -sI https://dar-nur.fr/…` renvoie `Server: GitHub.com`. Les fichiers sont servis **bruts**, tels qu'ils sont dans le commit.
+- **Deploy previews : Netlify**, deux sites branchés sur le dépôt (`dar-nur` et `creative-beijinho-14efe6`). **Aucune configuration Netlify n'est versionnée** (pas de `netlify.toml`, `_redirects` ni `_headers`) : tout est réglé côté Netlify.
+- **Piège vérifié — la preview n'est pas le miroir exact de la production.** Netlify applique un post-traitement « Pretty URLs » au HTML servi (`href="/mentions-legales.html"` devient `href='/mentions-legales'`, guillemets réécrits) et injecte un `<div data-netlify-deploy-id>` plus un script CDP avant `</body>`. GitHub Pages ne fait rien de tout cela. **Comparer une preview au blob Git échoue donc toujours** : pour une vérification de non-régression, comparer preview ↔ production, ou neutraliser explicitement ces écarts de plateforme.
+- **Pas de redirections serveur.** GitHub Pages n'en offre pas : une URL renommée est une URL cassée (voir « Décisions structurantes »).
+- Chemins d'assets : mélange d'absolus (`/favicon.ico`) et de relatifs (`../assets/...`) — cohérent avec un hébergement à la racine du domaine custom.
 
 ## Identité visuelle "Émeraude & Or" (tokens réels, `index.html` `:root`)
 
@@ -63,72 +236,14 @@
 - `.design-brief.md` — ground truth post-refonte homepage (tokens, page structure, risques identifiés)
 - `DAR-NUR-BRAND-GUIDELINES.md` — spec packaging/étiquettes (pas la charte du site, mais mêmes tokens couleur/typo)
 - `design_handoff_accueil/` — dossier de handoff de la refonte homepage (README + prototype HTML `dar-nur-accueil.html`), **le patron du workflow** design → validation → implémentation à répliquer pour les collections.
-- `docs/DESIGN_HANDOFF_COLLECTIONS/` *(à créer/consulter selon l'avancement)* — équivalent pour la Phase 1 "pages collections".
-
-## Catégories réelles (14, source `index.html` fallback + Supabase `categories`)
-
-`miels, gelules, poudres, huiles, brumes, qamis, vetements (Abayas & Ensembles), parfums, tahara (Tahara & Hygiène, packs/coffrets), bakhour (Bakhour & Encens), bijoux, chaussures, chechias, accessoires` — plus l'entrée virtuelle `all` ("Tous les Produits").
-
-Chaque catégorie a : `id`, `label` (badge fiche produit/breadcrumb/SEO), `filter_label` (bouton de filtre boutique), `sort_order`. Descriptions éditoriales des collections actuellement **hardcodées côté front** (`_COLLECTION_DESCS`), pas en base — à ne pas réinventer, à reprendre telles quelles.
-
-## Supabase
-
-- **Tables confirmées** : `products` (avec relation `product_variants`), `product_variants`, `categories`, `offers` (avec relation `offer_products`), `offer_products`.
-- **Client** : `js/supabase-client.js` (dépend de `js/config.js` pour `SUPABASE_URL`/`SUPABASE_ANON`), fonctions `fetchProducts`, `fetchProduct`, `fetchCategories`, `fetchAllCategories`, `saveProduct`, `saveVariant`, `fetchActiveOffers`, etc. Storage : bucket `product-images` (`uploadImage`).
-- **Auth** : Supabase Auth email/mot de passe (`signIn`/`signOut`/`getSession`), utilisé pour `admin.html` uniquement (pas de compte client public identifié à ce jour).
-- **Correction importante (2026-07-09, vérifiée empiriquement via requêtes réseau réelles)** : contrairement à ce qu'indiquait cette fiche jusqu'ici, **Supabase EST la source principale du catalogue homepage, y compris pour `PRODUCTS`** — pas seulement pour les catégories. Le commentaire du code (`index.html`, fonction `loadFromSupabase()`) le dit explicitement : *« Supabase : source principale — fallback hardcodé uniquement en cas d'erreur »* et *« les produits hardcodés ne s'affichent jamais »*. Au chargement, `PRODUCTS.length = 0` puis le tableau est entièrement repeuplé depuis `_sb.from('products').select(...)`. Le tableau JS hardcodé dans `index.html` n'est qu'un **filet de secours affiché uniquement si le fetch Supabase échoue** (catch), jamais la donnée réelle vue par un visiteur normal. **Conséquence pratique** : ajouter un produit uniquement dans le tableau `PRODUCTS`/`PRODUCT_IMAGES` hardcodé de `index.html` ne le fait PAS apparaître dans la boutique filtrée de la homepage, la recherche, ni la fiche produit SPA en production — il faut l'insérer réellement dans la table Supabase `products` (via `admin.html`, authentification requise) pour qu'il y apparaisse. Les pages catégories statiques (`abayas/`, `miels/`...) restent, elles, de vrais instantanés HTML indépendants de Supabase, synchronisés manuellement (source de risque de désynchronisation déjà documentée dans les audits `AUDIT_COMPLET_ABAYAS_DAR_NUR.md`, `AUDIT_PREMIUM_ABAYAS_DAR_NUR.md`).
-- Avant toute modification de schéma : traiter comme changement structurant (voir SKILL.md étape 3), car les pages catégories ET la homepage lisent potentiellement les mêmes données.
-- **Accès Dashboard (piège découvert le 2026-07-10, voir `TICKET_SUPPORT_SUPABASE.md`)** : « Sign in with GitHub » (`zaytunacouture-pixel`) ouvre un **deuxième compte Supabase, vide** (créé le 2026-07-10 15:25 UTC, aucune organisation → redirection systématique vers `/dashboard/new`). Le compte propriétaire du projet `sxlpgcnjerlayitaxxyv` est **confirmé** (reconnexion réussie le 2026-07-13 après reset du mot de passe) : `zahi.youcef@hotmail.fr` en e-mail + mot de passe, organisation « Dar Nur » (plan Free). Toujours se connecter au Dashboard par e-mail/mot de passe, jamais par GitHub. Vérifié empiriquement le 2026-07-10 : aucune voie d'exécution SQL sans ce compte (aucune RPC exposée par PostgREST, pas de service_role/db password sur la machine, Management API = PAT d'un compte membre de l'org uniquement). Script prêt pour exécuter la migration via l'API Management une fois un PAT disponible : `scripts/run-parfums-migration-management-api.mjs`.
-- **Colonnes `brand`/`brand_slug` sur `products`** : nullables, n'ont de sens que pour `category_id='parfums'` (toutes les autres catégories restent NULL, c'est attendu). **Migration `supabase/sql/parfums_brand_migration.sql` EXÉCUTÉE le 2026-07-13** (SQL Editor, après récupération de l'accès Dashboard) — vérifié empiriquement : REST `select=brand` → 200 (plus d'erreur 42703), répartition exacte 21 `lecode` / 3 `khair` sur 24 parfums actifs, PATCH avec `brand` accepté par le cache PostgREST (plus de PGRST204), champs « Marque »/« Slug marque » d'`admin.html` correctement peuplés à l'ouverture d'une fiche. Rollback disponible : `parfums_brand_migration_rollback.sql` (jamais exécuté).
-
-## Filtres — logique métier réelle à préserver
-
-Système de filtre par pastilles (pills), implémenté uniquement sur la homepage aujourd'hui :
-- `FILTERS` = tableau `[id, filter_label]` par catégorie + `["all","Tous"]`.
-- `renderFilters()` génère les boutons `.filters button` (état `.active`).
-- `setFilter(f)` met à jour `currentFilter` et ré-affiche via `renderGrid()`.
-- `renderGrid()` filtre `PRODUCTS` par `p.cat === currentFilter` (ou tout si `all`) et injecte les cartes `.card[data-cat=...]`.
-- `goCat(f)` = raccourci nav/footer : bascule sur la vue boutique + applique le filtre + scroll.
-
-Les pages catégories statiques n'ont **pas** ce système de pilules — elles affichent une liste fixe pré-filtrée d'une seule catégorie. C'est un choix pertinent pour le SEO (une URL par catégorie, contenu indexable sans JS), mais rien n'empêche d'ajouter des sous-filtres (couleur/taille/prix) côté page catégorie sans casser ce modèle — à condition de garder le rendu initial en HTML statique (pas de contenu qui n'existe qu'après exécution JS, pour le SEO).
-
-## SEO — éléments à préserver sur toute page catégorie
-
-- `<title>` et `<meta name="description">` spécifiques par catégorie, avec nombre de produits + prix d'appel + mention WhatsApp.
-- Open Graph + Twitter Cards complets.
-- `<link rel="canonical">` auto-référent.
-- JSON-LD : `CollectionPage` (name, description, url, breadcrumb, mainEntity), `BreadcrumbList` (Accueil → Catégorie), `ItemList` (chaque produit avec position/url/name).
-- Toutes les pages catégories sont dans `sitemap.xml`, autorisées par `robots.txt`, aucun `noindex`.
-
-## Parfums — architecture multi-marques (pipeline généralisé, 2026-07-10)
-
-**État réel (mis à jour 2026-07-14, corrige les affirmations obsolètes ci-dessous datées du 10 juillet) :** le hub multi-marques **est en ligne** — `parfums/index.html`, `parfums/khair/index.html`, `parfums/lecode/index.html` sont bien générés par `scripts/generate-parfums.mjs` depuis Supabase (`brand`/`brand_slug` migrés et actifs), pas une page unique éditée à la main. Le pipeline a bien tourné (vérifié par régénération réelle le 2026-07-14, idempotente sur 2 exécutions consécutives). Voir la section « Intégration build-nav.mjs / generate-parfums.mjs » plus bas pour l'architecture de navigation désormais partagée avec le reste du site.
-
-**Architecture cible (code prêt, pas encore active)** : `parfums/` devient un **pipeline de génération** produisant :
-- `parfums/index.html` — hub éditorial (une carte par marque, aucune fiche produit dessus pour éviter toute duplication de contenu avec les pages marque).
-- `parfums/<brand_slug>/index.html` — une page complète par marque (grille produits, filtres par format, modal fiche, SEO propre). Convention `brand_slug` décidée le 2026-07-10 : **courte** (`lecode`, `khair`), pas `lecode-paris`/`khair-by-ameerate` comme évoqué dans un brouillon antérieur jamais exécuté — voir `supabase/sql/parfums_brand_migration.sql` à jour.
-
-**Aucune marque n'est codée en dur nulle part.** Le générateur (`scripts/generate-parfums.mjs`) regroupe dynamiquement les produits Supabase `category_id='parfums', active=true` par le champ `brand_slug` — ajouter une 3ᵉ, 10ᵉ ou 20ᵉ marque ne demande **aucune modification de script ni de template**, uniquement des produits créés dans `admin.html` avec `brand`/`brand_slug` renseignés.
-
-- **Gabarits** : `parfums/_brand_template.html` (une page marque) et `parfums/_hub_template.html` (le hub) — remplacent l'ancien `_template.html` mono-marque (supprimé). Aucun template par marque : un seul gabarit générique par type de page, réutilisé pour toutes les marques.
-- **Garde-fou critique** : le générateur refuse de régénérer quoi que ce soit (aucun fichier touché) si un produit actif de `category_id='parfums'` n'a pas de `brand`/`brand_slug` renseigné — empêche qu'un nouveau parfum soit publié sous la mauvaise marque par défaut.
-- **Nav interne** : chaque page (hub et marques) a un dropdown "Parfums" généré automatiquement listant le hub + toutes les marques détectées, avec l'entrée courante marquée active. Depuis la refonte de navigation (Phase 3.6, voir section dédiée), la navigation *commune* (Boutique, Bien-être, Mode & Accessoires, Tahara, Accessoires, éditorial) de ces 3 pages provient de `partials/nav-common.generated.html` (produit par `build-nav.mjs`) — seul le dropdown Parfums par marque reste géré ici, par `buildParfumsNavBlock()`.
-- **Sitemap** : bloc délimité (`<!-- AUTO:PARFUMS:START/END -->`) dans `sitemap.xml`, entièrement régénéré à chaque exécution (hub + une entrée par marque) — le reste du fichier n'est jamais touché. Nettoyage automatique : un dossier `parfums/<ancien-slug>/` dont la marque n'a plus de produit actif est supprimé automatiquement (comparé à l'ancien bloc sitemap), pour ne jamais laisser une page orpheline en ligne.
-- **Workflow GitHub Actions** (`regenerate-parfums.yml`, déclenchement `repository_dispatch`/`workflow_dispatch` uniquement, toujours aucun cron) : commit désormais `parfums/` (tous les fichiers, y compris nouveaux dossiers/suppressions) et `sitemap.xml` ensemble, pas seulement `parfums/index.html` comme avant.
-- **Données Supabase** : colonnes `brand`/`brand_slug` sur `products` (voir section Supabase ci-dessus). Migration/backfill des 24 produits existants (21 → `brand_slug='lecode'`, 3 → `brand_slug='khair'`) : `supabase/sql/parfums_brand_migration.sql` — **EXÉCUTÉE le 2026-07-13 via SQL Editor** (comptages vérifiés : 21/3, aucune erreur). Rollback disponible mais jamais exécuté : `supabase/sql/parfums_brand_migration_rollback.sql`. Le générateur a tourné et le hub multi-marques est publié (vérifié 2026-07-14).
-- **Mise à jour 2026-07-14** : les deux points ci-dessous, vrais au 10 juillet, sont désormais **corrigés** par la refonte de navigation (Phases 3.1-3.7, voir section dédiée) : le footer de `index.html` lie bien « Parfums & Muscs » vers `/parfums/` (plus `/tahara/`), et le méga-menu de la homepage a bien une entrée « Parfums » (dans le groupe Bien-être). La sous-entrée par marque reste générée automatiquement, comme avant, uniquement sur les 3 pages parfums elles-mêmes (pas dans le menu commun, par choix architectural — voir Phase 3.6).
-- **Vérifié** (générateur exécuté en local contre un mock du endpoint Supabase reproduisant les 24 produits réels avec brand/brand_slug) : rendu hub + 2 pages marque conformes, JSON-LD valide et dénombrement exact sur les 3 pages, filtres par format corrects (pilules générées dynamiquement à partir des volumes réels, absentes si une seule valeur), idempotence confirmée (2 exécutions consécutives → fichiers strictement identiques), suppression automatique d'un dossier de marque simulée comme disparue, garde-fou "produit sans marque" testé (abandon propre, aucun fichier touché), aucune erreur console en navigateur (desktop et mobile), modal + lien WhatsApp corrects par marque.
-
-## Hébergement et déploiement
-
-- GitHub Pages, branche `main`, déploiement direct des fichiers statiques (pas de pipeline de build détecté). `CNAME` pointe vers `dar-nur.fr`.
-- Chemins d'assets : mélange d'absolus (`/dar-nur-abaya-....jpg`, `/favicon.ico`) et de relatifs à la racine — cohérent avec un hébergement à la racine du domaine custom (pas de sous-dossier `username.github.io/dar-nur`).
+- `design_handoff_collections/` — équivalent pour les pages collections (le chemin `docs/DESIGN_HANDOFF_COLLECTIONS/` évoqué dans une version antérieure de cette fiche n'a jamais été créé).
 
 ## Conventions observées
 
-- **CSS** : pas de framework, variables `:root` custom properties, nommage utilitaire court (`.card`, `.hero`, `.foot-col`...), pas de BEM strict.
-- **JS** : essentiellement inline dans `index.html` (un seul gros `<script>` en fin de fichier : données produits + logique SPA). Pages catégories : aucun JS de rendu (tout est HTML statique écrit à la main).
-- **Convention de contenu** : toute copy éditoriale (descriptions collections, taglines produits) vit dans le code (pas de CMS de contenu séparé) — à traiter comme donnée réelle à préserver, jamais à réinventer.
+- **CSS** : pas de framework, variables `:root` custom properties, nommage utilitaire court (`.card`, `.hero`, `.foot-col`...), pas de BEM strict. Le composant de navigation (`.nav-portal`/`.nav-links`/`.nav-dropdown*`/`.burger*`) est mutualisé dans `/nav.css`.
+- **JS** : essentiellement inline dans `index.html` (un gros `<script>` en fin de fichier : données de secours + logique SPA). Le toggle du burger est mutualisé dans `/js/nav.js`. Les pages catégories n'ont **aucun JS de rendu** — leur grille est du HTML statique **généré**, jamais écrit à la main dans les blocs marqués ; seuls leurs scripts de filtre et de tri sont écrits à la main, et ne lisent que des attributs `data-*`.
+- **Les artefacts générés ne sont jamais édités manuellement.** `partials/nav-common.generated.html`, les fiches `/{slug}/`, les pages `parfums/*`, et les blocs `AUTO:*` des pages catégories sont des sorties, jamais des sources. Toute correction se fait à la source (Supabase, `nav.config.json`, un gabarit, ou le générateur concerné), sous peine de perdre la modification à la prochaine régénération — qui peut être déclenchée automatiquement par un simple changement en base.
+- **Convention de contenu** : toute copy éditoriale (descriptions de collections, textes d'intro) vit dans le code ou en base, pas dans un CMS séparé — à traiter comme donnée réelle à préserver, jamais à réinventer.
 - **Workflow de refonte design** (établi lors de la refonte homepage, à répliquer) :
   1. Analyser l'existant en profondeur (comme ce document).
   2. Créer un prototype HTML autonome à haute fidélité dans un dossier `design_handoff_<zone>/`, avec un `README.md` décrivant sections/tokens/interactions/état.
@@ -136,21 +251,62 @@ Les pages catégories statiques n'ont **pas** ce système de pilules — elles a
   4. Attendre validation utilisateur explicite.
   5. Implémenter dans le projet réel seulement après validation, en respectant logique métier/filtres/données réelles/SEO/perf existants.
 
-## Intégration build-nav.mjs / generate-parfums.mjs — gouvernance des zones (Phase 3.6, architecture figée, non implémentée)
+## Gouvernance des générateurs — répartition des zones
 
-Deux générateurs coexistent désormais sur ce projet : `scripts/build-nav.mjs` (navigation commune, source `data/nav.config.json`) et `scripts/generate-parfums.mjs` (navigation par marque des pages parfums, source Supabase). Ils ne doivent **jamais** écrire dans un fichier possédé par l'autre. Architecture retenue (version finale, révisée deux fois avec l'utilisateur) :
+Quatre générateurs coexistent sur ce projet. Ils ne doivent **jamais** écrire dans un fichier possédé par un autre. Architecture retenue (révisée deux fois avec l'utilisateur, considérée comme figée depuis le 2026-07-14, et implémentée depuis) :
 
-- **`build-nav.mjs`** écrit exclusivement son propre artefact, **un seul fichier** : **`partials/nav-common.generated.html`**. Ce fichier contient **deux fragments nommés**, délimités par des marqueurs internes (`<!-- COMMON_NAV_BEFORE_PARFUMS -->...<!-- /COMMON_NAV_BEFORE_PARFUMS -->` et `<!-- COMMON_NAV_AFTER_PARFUMS -->...<!-- /COMMON_NAV_AFTER_PARFUMS -->`) plutôt que deux fichiers séparés — un seul artefact à versionner/ignorer, une seule génération, une seule validation. Le point de coupure entre les deux fragments est **purement structurel** : la position de l'entrée dont l'`id` vaut `parfums` dans le tableau `entries` de `nav.config.json` — `build-nav.mjs` ne connaît ni Khair, ni LeCode, ni aucune marque, seulement la structure ordonnée de sa propre configuration. `build-nav.mjs` ne lit et n'écrit jamais un octet de `parfums/_brand_template.html`/`_hub_template.html`/`parfums/*/index.html`/`sitemap.xml`.
-- **`generate-parfums.mjs`** reste seul propriétaire de `parfums/_brand_template.html`, `parfums/_hub_template.html`, `parfums/*/index.html` et du bloc `AUTO:PARFUMS` de `sitemap.xml`. Il lit `partials/nav-common.generated.html` comme une entrée de plus (au même titre que Supabase), en extrait les deux fragments nommés, et les insère via ses jetons `{{COMMON_NAV_BEFORE_PARFUMS}}`/`{{COMMON_NAV_AFTER_PARFUMS}}` dans ses templates — son propre dropdown « Parfums » (`{{PARFUMS_NAV_BLOCK}}`) restant placé entre les deux, inchangé.
-- **`data/nav.config.json`** reste l'unique source de la navigation commune, sans jamais connaître les marques. **Aucune notion de nav commune n'entre dans Supabase ni dans la logique de `generate-parfums.mjs`.**
-- **Règle de gouvernance supplémentaire (à respecter par tout futur développeur, humain ou agent)** : **les artefacts générés ne doivent jamais être édités manuellement.** `partials/nav-common.generated.html` n'est jamais une source, toujours une sortie — toute correction se fait à la source (`nav.config.json`, `partials/nav.html`, ou le générateur concerné), jamais directement sur le fichier généré, sous peine de perdre la modification au prochain build.
-- Ordre recommandé : `build-nav.mjs` (manuel, rare — seulement si `nav.config.json` change) avant `generate-parfums.mjs` (automatique, fréquent, déclenché par le webhook Supabase). Aucune dépendance d'exécution stricte à chaque run — si `generate-parfums.mjs` tourne avant une mise à jour de `partials/nav-common.generated.html`, il utilise simplement la dernière version connue du fragment (propriété de latence acceptée, pas un défaut d'idempotence).
-- Aucun changement du workflow `.github/workflows/regenerate-parfums.yml` : il continue de n'exécuter que `generate-parfums.mjs`.
-- Question de conception restant ouverte pour l'implémentation : `aria-current="page"` n'a de sens que pour une page précise (hub vs. page marque) ; `build-nav.mjs` ne peut pas le déterminer pour un fragment partagé entre plusieurs pages de destination — à trancher lors de l'implémentation, pas ici.
-- Rejeté explicitement : (1) `generate-parfums.mjs` important `buildNavHtml()` comme une bibliothèque — couplage de code inutile entre deux outils voulus indépendants ; (2) `build-nav.mjs` écrivant des marqueurs `AUTO:NAV` directement dans les templates parfums — fonctionnel mais crée une dépendance d'écriture implicite (un générateur modifie les entrées de l'autre) ; (3) deux fichiers fragments séparés (`COMMON_NAV_BEFORE_PARFUMS.html`/`COMMON_NAV_AFTER_PARFUMS.html`) plutôt qu'un seul fichier à deux fragments nommés — retenu un seul artefact pour n'avoir qu'une génération/validation/horodatage à gérer.
-- **Architecture considérée comme figée par l'utilisateur** (2026-07-14) : plus de débat d'architecture attendu sur ce point ; la suite est une implémentation phase par phase (une sous-phase = un objectif = un commit atomique, validation avant l'étape suivante), à lancer sur prompt dédié.
+- **`build-nav.mjs`** a deux sorties, et deux seulement. (1) Il **génère l'artefact `partials/nav-common.generated.html`**. (2) Il **injecte ensuite le contenu de navigation dans les fichiers qui portent les marqueurs `AUTO:NAV`** — et **ne doit modifier que ces zones**, jamais un octet en dehors. Cet artefact contient **deux fragments nommés**, délimités par des marqueurs internes (`<!-- COMMON_NAV_BEFORE_PARFUMS -->...<!-- /COMMON_NAV_BEFORE_PARFUMS -->` et `<!-- COMMON_NAV_AFTER_PARFUMS -->...<!-- /COMMON_NAV_AFTER_PARFUMS -->`) plutôt que deux fichiers séparés — un seul artefact à versionner, une seule génération, une seule validation. Le point de coupure entre les deux fragments est **purement structurel** : la position de l'entrée dont l'`id` vaut `parfums` dans le tableau `entries` de `nav.config.json`. `build-nav.mjs` ne connaît ni Khair, ni LeCode, ni aucune marque, seulement la structure ordonnée de sa propre configuration. Il ne lit et n'écrit jamais un octet des gabarits ou des pages parfums, ni de `sitemap.xml`.
+- **`generate-parfums.mjs`** reste seul propriétaire de `parfums/_brand_template.html`, `parfums/_hub_template.html`, `parfums/*/index.html` et du bloc `AUTO:PARFUMS` de `sitemap.xml`. Il lit `partials/nav-common.generated.html` comme une entrée de plus (au même titre que Supabase), en extrait les deux fragments nommés, et les insère via ses jetons `{{COMMON_NAV_BEFORE_PARFUMS}}`/`{{COMMON_NAV_AFTER_PARFUMS}}` — son propre dropdown « Parfums » (`{{PARFUMS_NAV_BLOCK}}`) restant placé entre les deux.
+- **`generate-product-pages.mjs`** est seul propriétaire des 237 `<slug>/index.html`.
+- **`generate-category-pages.mjs`** est seul propriétaire des blocs `AUTO:CATEGORY_*` des 14 pages catégories, et **de rien d'autre dans ces fichiers**.
+- **`data/nav.config.json`** reste l'unique source de la navigation commune, sans jamais connaître les marques. **Aucune notion de nav commune n'entre dans Supabase.**
+- Ordre recommandé : `build-nav.mjs` (manuel, rare) avant les générateurs de contenu (automatiques, fréquents). Aucune dépendance d'exécution stricte à chaque run : un générateur qui tourne avant une mise à jour du fragment commun utilise simplement la dernière version connue (latence acceptée, pas un défaut d'idempotence).
+- Rejeté explicitement : (1) `generate-parfums.mjs` important `buildNavHtml()` comme une bibliothèque — couplage inutile entre deux outils voulus indépendants ; (2) `build-nav.mjs` écrivant des marqueurs directement dans les gabarits parfums — crée une dépendance d'écriture implicite ; (3) deux fichiers fragments séparés plutôt qu'un seul à deux fragments nommés.
+
+## Décisions structurantes à respecter
+
+Cinq règles issues des chantiers de migration successifs. Elles ne sont pas des préférences de style : chacune corrige une erreur réellement rencontrée.
+
+1. **Ne jamais modifier une URL existante sans stratégie de redirection.** GitHub Pages ne propose aucune redirection serveur. Renommer un slug produit ou un dossier catégorie casse simultanément les liens entrants du site, le `sitemap.xml`, le JSON-LD et les liens externes — sans le moindre signal. Chaque migration de page catégorie menée jusqu'ici s'est faite à **URL constante**, et c'est ce qui a rendu ces migrations sûres.
+
+2. **Toute nouvelle catégorie ou tout nouveau schéma de slug doit être classé explicitement.** Le catalogue porte déjà deux conventions de nommage (`vt-` historique, `dn-abaya-` fournisseur, et d'autres selon les familles). Les règles de `cfg.lines` sont **ancrées sur `^` et sur le préfixe complet** — jamais de motif large type `^dn-`, qui classerait n'importe quel futur produit sans qu'on l'ait décidé. Un slug inconnu **doit** rester non classable : c'est le signal qui protège contre une publication silencieuse dans le mauvais groupe. Attention particulière aux préfixes qui s'englobent (`demi-papillon` contient `papillon`) : l'ancrage les rend disjoints, et l'ordre de la liste sert de seconde barrière puisque la première règle qui correspond l'emporte.
+
+3. **Ne pas contourner un garde-fou.** Un abandon de génération est un signal, pas un obstacle. La réponse correcte est de corriger la donnée en base ou d'ajouter une règle explicite — jamais d'élargir une expression régulière « pour faire passer », ni de supprimer une vérification. Les garde-fous existent parce que l'alternative est une page publiée fausse que personne ne voit.
+
+4. **Migrer une page manuelle exige une comparaison HTML ↔ Supabase, champ par champ, avant génération.** Slug, nom, prix, tagline, image, `alt`, pastille, variantes, ordre d'affichage, attributs `data-*` : toute divergence réelle doit être arbitrée **avant** de générer, jamais découverte après coup. Cette règle a payé : le Lot 3 a révélé sept prix faux sur les pages `brumes/` et `poudres/` (dont −10 € sur deux références), et le Lot 4 un « À partir de » incohérent sur une carte des 62 d'`abayas/`. Corollaire : ce qui n'existe que dans le HTML manuel et pas en base doit être identifié explicitement, et son sort décidé.
+
+5. **Supabase reste la source de vérité — pas d'exception codée en dur.** Aucun nom de produit, prix, marque ou identifiant métier ne doit apparaître dans un générateur ou un gabarit. Les seules valeurs littérales admises en configuration sont les libellés d'affichage (pilules, pastilles, titres SEO) et les règles de classement. Quand une page affiche autre chose que `categories.label`, cela passe par une option générique (`tagLabel`), jamais par un `if` sur un identifiant de catégorie.
+
+## Dette connue — non traitée
+
+Sujets identifiés, mesurés, et **volontairement laissés en l'état**. Aucun n'est traité dans le chantier en cours.
+
+- **Fiches produit très lourdes** — environ **292 Ko par fiche**, soit près de **69 Mo** de HTML pour les 237 pages. Chaque fiche embarque le gabarit complet. Pas d'impact fonctionnel constaté, mais un coût de dépôt et de bande passante notable.
+- **Fallback `PRODUCTS` dupliqué** — un tableau de produits reste codé en dur dans `index.html`, jamais affiché en conditions normales (Supabase le remplace intégralement au chargement). Cela maintient deux représentations du catalogue, dont une qui dérive en silence.
+- **Migration Astro envisagée** — évoquée, non commencée, aucune décision prise, aucun code écrit.
+- **Dette catalogue Abayas** — 9 fiches à `<title>` dupliqué (`Abaya Iltihad` ×3, `Abaya Nilla white and Gold` ×6, noms *et* taglines identiques en base) ; faute « Egytptian » répétée sur 6 taglines ; « Black and Rad » pour « Red » sur `dn-abaya-mme-dn-2` ; casse incohérente des `Abaya chita`/`Abaya Chita` ; `dn-abaya-kimono-seyra-1` sans « Médine » contrairement à ses voisins ; `dn-abaya-papillon-2` nommé « Abaya Farasha » mais avec une tagline « Abaya saoudienne Bleu » ; **50 produits sur 62 sans aucune variante de taille en base**.
+- **Incohérence `coming_soon` des huiles** — **les 16 huiles actives ont toutes `coming_soon = true`** alors qu'elles ont un prix et une image, et sont publiées comme des cartes normales sur `/huiles/`. Le générateur **ignore totalement le champ `coming_soon`** : il ne pilote aucun affichage nulle part. Un cas identique existe sur `miels-gourmands`. À trancher : soit le champ est faux en base, soit il devrait avoir un effet.
+- **Débordement de navigation entre ~769 px et ~1024 px** — mesuré : à 800 px, `document.scrollWidth` vaut 990 pour un `clientWidth` de 785. Le coupable est `ul.nav-links`, **hors de la grille produits**. Reproduit à l'identique sur une page non modifiée (`poudres/`) : le défaut est global au header, pas lié à une catégorie. Invisible à 768 px (nav masquée) et à 1280 px (nav qui tient). Rejoint le chantier « refonte du header desktop » ouvert en juillet.
+- **`TARGET_PAGES` de `build-nav.mjs` désaligné** — la liste contient `parfums/index.html`, `parfums/lecode/index.html` et `parfums/khair/index.html`, alors qu'aucune page parfums ne porte de marqueur `AUTO:NAV` (elles reçoivent leur navigation par jetons de gabarit) : une exécution échouerait sur ces trois entrées avec « Marqueurs AUTO:NAV absents — bootstrap requis avant injection ». La liste ignore par ailleurs `parfums/khamraha/` et `parfums/lattafa/`, ajoutées depuis. Le commentaire d'en-tête du script affirme encore qu'il « n'écrit ENCORE aucun fichier », ce que son corps contredit. Sans effet en production : ce script est manuel et n'est lancé que si `nav.config.json` change. **Script non corrigé, hors périmètre.**
+- **Autres, hérités** : code mort `_origShowProduct`/`_origShowHome` dans `index.html` ; 6 produits `tahara` sans `price_value` (gommages et chantillys de karité) ; 7 produits sans image, servis avec le fallback logo du générateur.
 
 ## Journal des mises à jour
+
+> **Historique.** Les entrées ci-dessous sont datées et décrivent l'état du projet au moment où elles ont été écrites. Elles peuvent donc contenir des informations aujourd'hui dépassées. L'état courant et les règles à suivre sont décrits dans les sections précédentes.
+
+- **2026-08-21 — Lot 4 : `abayas/` générée, 15/15 catégories automatisées (PR #20, merge `87f1022`).** Dernière page catégorie mise sous pipeline, et la plus lourde : 62 produits actifs, 12 groupes, 13 pilules. L'audit préalable a confirmé la parité (62 cartes = 62 produits actifs, même ordre que `sort_order`, mêmes prix, images et taglines) — contrairement aux lots précédents, ni orphelin ni donnée fausse à corriger. Deux écarts seulement, tous deux arbitrés : `vt-layali-beige` était la seule des 62 cartes à porter « À partir de » alors que les 12 produits à variantes ont le même prix sur leurs 4 tailles (préfixe retiré, pas de `pricePrefix` sur cette page) ; et `abayas/` est la seule grille du site en `aspect-ratio:3/4`, d'où une **nouvelle option générique du générateur : `cfg.imageWidth`/`cfg.imageHeight`** (défaut `400`/`400`, validation entier strictement positif, opt-in). Non-régression prouvée avant ajout de la configuration Abayas : les 13 pages déjà automatisées, qui ne déclarent rien, sortent au bit près identiques à leur baseline (13/13 par comparaison de hash d'objet Git). Nettoyage SEO au passage : suppression du compteur « 62 » figé à cinq endroits (meta description, `og:description`, `twitter:description`, description JSON-LD, `<h2>`) et du prix minimum « 39,90 € » dans trois descriptions, ainsi que de deux affirmations fausses sur les tailles (50 des 62 produits n'ont aucune variante en base). Fichiers modifiés : `abayas/index.html`, `scripts/generate-category-pages.mjs`.
+- **2026-08-21 — Lot 3 : `brumes/` et `poudres/` générées, **0 orphelin atteint** (PR #19, merge `e5f4406`).** Les deux dernières pages porteuses d'orphelins. Contrairement aux lots 1 et 2, la génération change ici du contenu visible : l'audit préalable a relevé sept divergences entre le HTML écrit à la main et Supabase, toutes arbitrées en faveur de la base — `brumes/` avait 5 prix faux sur 5 (dont −10 € sur `br-nila` et `br-apaisante`) et affichait « À partir de » alors qu'aucune brume n'a de variante ; `poudres/` affichait 7,00 € pour 5,00 € en base sur `pdr-nila`, et `grn-baraka` portait une faute d'accord plus une affiche marketing au lieu de sa photo produit. Aucune donnée Supabase modifiée : ce sont les pages qui se sont alignées. À l'issue de ce lot, **les 3 derniers orphelins du site** (`spray-brumisateur-hibiscus-nigelle`, `dn-poudre-de-sidr-50g`, `dn-ismid-medine`) ont un lien entrant.
+- **2026-08-20 — Lot 2 : `gelules/`, `chaussures/`, `huiles/` générées (PR #18, merge `2d71542`).** Trois pages sans filtres ni tri, déjà à jour : aucun orphelin avant, aucun après. L'audit contenu préalable (39 produits, champ par champ) n'a relevé aucune divergence — contrairement au Lot 1, aucune donnée n'a eu besoin d'être ressaisie. Un seul écart de gabarit inédit : `huiles/` porte le prix dans un `<span>` là où les autres pages utilisent un `<div>`, d'où la nouvelle option `cfg.priceTag` (liste fermée `div`/`span`, pour qu'une faute de configuration ne puisse pas injecter de markup arbitraire).
+- **2026-08-20 — Lot 1 : `bakhour/`, `miels-terroir/`, `accessoires/`, `chechias/` générées (PR #17, merge `9eec81e`).** Quatre pages sans filtres ni tri, déjà à jour (0 orphelin avant comme après). Objectif : vérifier que le générateur reproduit à l'identique des pages écrites à la main. Une seule option nouvelle, générique : `cfg.omitEmptyTagline` (aucun des 7 produits de `chechias/` n'a de tagline en base ; la page omettait le paragraphe plutôt que d'afficher un espace insécable sur chaque carte).
+- **2026-08-20 — `miels/` générée : regroupement sur un champ éditorial (PR #16, merge `a61988f`).** Premier cas où les groupes ne dérivent pas du slug mais de `products.provenance`, d'où trois options nouvelles : `cfg.lineSource` (champ testé), `cfg.lineAttribute` (`data-prov` et non `data-line`, imposé par le script de filtre déjà en place) et `cfg.lineCountsInLabels` (effectif affiché dans le libellé de la pilule). La correspondance provenance → groupe n'est pas un passe-plat : plusieurs valeurs distinctes partagent un même libellé affiché (« France » et « Préparation artisanale » → « Préparé en France »). **2 orphelins supprimés** (`miel-lavande`, `dn-miel-nigelle-hibiscus`).
+- **2026-08-19 — `qamis/` générée (PR #15, merge `0ccad15`).** Trois écarts propres à cette page, tous couverts par configuration sans qu'aucune logique « qamis » n'entre dans le template générique : images en chemin absolu (`cfg.imagePrefix`), pastille « Mode homme » au lieu du label Supabase « Qamis saoudien » (`cfg.tagLabel`), et « À partir de » réservé aux références ayant de vraies tailles (`cfg.pricePrefixOnlyWithVariants` — les Qamis Saoudiens ont des tailles, les Qamiss Sultan Saphir non). **4 orphelins supprimés** (`dn-qamiss-sultan-saphir-0` à `-3`).
+- **2026-08-19 — `tahara/` générée, premier vrai canari du pipeline (PR #14, merge `cb5e6b1`).** La page avait dérivé : **10 cartes écrites à la main pour 34 produits actifs en base**. **24 orphelins supprimés** (savons noirs, gommages, poudres, chantillys de karité, pierre d'alun) — ils n'avaient aucun lien entrant et n'étaient atteignables que par le sitemap. Première page à utiliser `cfg.lines`, `cfg.pricePrefix` et `cfg.emitDataPrice`, parce que son gabarit historique porte des pilules de filtre et un tri par prix qui devaient continuer à fonctionner à l'identique.
+- **2026-08-19 → 2026-08-21 — Bilan du rollout « pages catégories générées » (PR #14 à #20).** Sept pull requests, une catégorie ou un lot par PR, chacune précédée d'un audit contenu HTML ↔ Supabase et suivie d'une vérification en navigateur. **33 produits orphelins supprimés au total** : 24 (`tahara`) + 4 (`qamis`) + 2 (`miels`) + 3 (`brumes`/`poudres`) — les lots 1 et 2 n'en portaient aucun. Aucune URL changée, aucune donnée Supabase modifiée, `sitemap.xml` inchangé sur toute la campagne. Le générateur a gagné exactement une option nouvelle par besoin réellement démontré, jamais par anticipation : `omitEmptyTagline`, `priceTag`, `lineSource`/`lineAttribute`/`lineCountsInLabels`, `imagePrefix`/`tagLabel`/`pricePrefixOnlyWithVariants`, `lines[].tagLabel`, `imageWidth`/`imageHeight`. **État final : 15/15 catégories automatisées, 237 produits actifs, 237 avec lien entrant, 0 orphelin.**
+- **2026-07-19 — Création de `scripts/generate-category-pages.mjs` (commit `0b23304`), canari `miels-gourmands/`.** Introduction du modèle « blocs marqués » pour les pages catégories : le fichier committé reste la source (nav, hero, éditorial, CSS, footer) et devient la sortie pour les seules zones `AUTO:CATEGORY_*`. Même principe que `AUTO:NAV` et `AUTO:PARFUMS`, mais sans gabarit séparé — choix explicite pour ne jamais avoir à refondre un fichier existant. Le même jour : automatisation complète des webhooks Supabase consolidée en un script (`91df5ea`, puis `eced155` séparant les triggers par type d'événement) et ajout du workflow de régénération des fiches produit (`01e999f`).
+- **2026-07-17 — Les fiches produit deviennent de vraies pages statiques (commit `adb7c7f`).** Fin du modèle « URL à fragment » : les liens produits `#slug` sont remplacés par de vraies pages `/{slug}/`, générées depuis Supabase par le nouveau `scripts/generate-product-pages.mjs`. C'est le changement d'architecture le plus structurant de la période : il rend chaque produit indexable à son URL propre, et il crée la notion d'« orphelin » (une fiche existante sans lien entrant) qui structurera tout le rollout d'août. Ajoutés le même jour : `scripts/verify-product-pages.mjs` (`2cd0d37`) et `scripts/verify-page-titles.mjs` (`0c278a8`), plus la validation du sitemap généré (`eb84088`). Deux évolutions catalogue le même jour : synchronisation de la page abayas avec les produits actifs (`46ef9bc`) et **retrait de la collection bijoux, abandonnée** (`9497979`) — c'est pourquoi `bijoux` ne figure plus ni dans Supabase ni dans le dépôt.
+- **2026-07-19 à 2026-08-12 — L'automatisation tourne réellement en production.** L'historique de `main` porte de nombreux commits `chore: régénère … depuis Supabase [skip ci]` produits par les workflows sur déclenchement Supabase, ainsi qu'un correctif de robustesse du workflow (`8d50fff`, retry du push avec rebase pour les déclenchements rapprochés). Ce sont ces commits qui prouvent que la chaîne trigger Postgres → `repository_dispatch` → GitHub Actions → commit fonctionne de bout en bout.
+- **2026-07-21 — Les cartes parfums pointent vers les vraies fiches (PR #13, merge `a027d5e`).** Les cartes de `parfums/<marque>/` ouvraient une modale JS au lieu de mener à une fiche avec sa propre URL, contrairement à toutes les autres catégories. Les 30 fiches statiques existaient déjà et étaient dans le sitemap, mais restaient sans aucun lien entrant. Corrigé : les cartes deviennent des `<a href="/{slug}/">` (même contrat que `generate-category-pages.mjs`), le JSON-LD `ItemList` pointe sur les vraies URLs au lieu de `#slug`, et le HTML/CSS/JS de la modale est supprimé des gabarits (~120 lignes) avec le code devenu mort. Le même jour, la fiche produit reçoit un buy-box sticky séparé de la galerie (`66caa5b`, `7a56cbf`, `fc8dc08`), avec régénération des 237 pages.
+- **2026-07-16 — Mutualisation de la navigation, refonte du header et correctifs mobile (PR #11, merge du chantier D5e).** Aboutissement du chantier ouvert mi-juillet : `/nav.css` et `/js/nav.js` partagés, header desktop refondu pour absorber la nouvelle arborescence, correctifs de navigation mobile. Suivi le même jour d'un footer mobile compacté (PR #12). C'est ce chantier qui a supprimé l'écart de cohérence entre le gabarit des pages catégories et celui de la homepage, relevé par les premiers audits : les tokens `:root` d'`abayas/index.html` sont depuis identiques à ceux d'`index.html`.
 
 - **2026-07-15 — Dette « Breakpoint navigation 768px→1024px » requalifiée et close sans implémentation ; nouveau chantier ouvert : « Refonte du header desktop adaptée à la nouvelle navigation ».** Investigation (lecture seule, aucun code modifié) menée avant toute implémentation du passage de seuil, à la demande explicite de l'utilisateur qui a contesté le diagnostic initial à chaque étape.
   - **Constat** : le problème n'est pas lié au breakpoint — c'est l'évolution de l'arborescence de navigation (Phase 3.6/3.7, passage de 7 à 9 entrées de premier niveau + intitulés plus longs) qui ne rentre plus dans le layout desktop historique (`nav{max-width:1240px}`), à *aucune* largeur, y compris les plus larges (1920px inclus).
