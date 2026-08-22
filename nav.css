@@ -116,7 +116,14 @@ nav{display:flex;align-items:center;justify-content:center;max-width:1520px;marg
 .nav-dropdown-title:focus-visible{outline:1px solid var(--gold-light);outline-offset:4px;border-radius:2px}
 .nav-dropdown-menu a:focus-visible{outline:1px solid var(--gold-light);outline-offset:-2px}
 
-@media(max-width:768px){
+/* Seuil de bascule desktop -> mobile. Porté de 768px à 1239px : la rangée
+   navigation desktop (.nav-links, 9 items, white-space:nowrap, gap:44px)
+   a une largeur intrinsèque incompressible de ~1194px ; en dessous de
+   cette largeur de viewport elle débordait horizontalement du document
+   (mesuré : +205px à 785px de viewport, +54px à 1085px). Le mode mobile
+   couvre donc désormais toute la plage < 1240px, borne basse de la plage
+   desktop de référence D1 (1240-1920) déjà documentée plus haut. */
+@media(max-width:1239px){
   /* Neutralise les rangées desktop (D5c.1) : header redevient une
      rangée unique flex (logo + burger), comme avant l'introduction de
      .row-identity. Mobile hors périmètre D5c/D5c.1-3 (voir D5e). */

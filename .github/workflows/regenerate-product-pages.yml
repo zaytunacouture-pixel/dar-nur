@@ -14,11 +14,31 @@ name: Régénère les fiches produit (Supabase → HTML statique)
 #     apparaît sur chaque fiche produit) — voir supabase/sql/webhook_automation.sql.
 #   - workflow_dispatch : bouton manuel "Run workflow" dans l'onglet Actions,
 #     de secours si besoin d'une republication immédiate.
+#   - push sur main touchant index.html à la racine : index.html est le
+#     GABARIT des 237 fiches (scripts/generate-product-pages.mjs le lit tel
+#     quel et n'en réécrit que le <head> et #productView). Sans ce trigger,
+#     toute modification de index.html désynchronisait silencieusement les
+#     237 fiches jusqu'au prochain événement Supabase sans rapport.
+#     Restreint à main : la boucle de publication ci-dessous rebase en dur
+#     sur origin/main, elle serait incorrecte sur une branche de travail.
 #
-# Protection anti-boucle : ce workflow n'écoute jamais "push" — son propre
-# commit ne peut donc jamais se re-déclencher lui-même. Le commit est en plus
-# marqué [skip ci] par défense en profondeur.
+# Protection anti-boucle — deux barrières indépendantes :
+#   1. Le filtre `paths` ne retient que "index.html" à la racine. Les motifs
+#      `paths` de GitHub sont ancrés à la racine du dépôt : "index.html" ne
+#      matche QUE ce fichier, jamais "<slug>/index.html" ni
+#      "<catégorie>/index.html" (il faudrait "**/index.html" pour cela).
+#      Or le commit de ce workflow ne peut contenir que : <slug>/index.html,
+#      <catégorie>/index.html, sitemap.xml et
+#      scripts/.generated-product-slugs.json — ce sont les seules cibles
+#      d'écriture des deux générateurs, index.html racine n'y étant ouvert
+#      qu'en LECTURE. Son propre commit ne peut donc pas le redéclencher.
+#   2. Le commit reste marqué [skip ci] : même si la barrière 1 cédait un
+#      jour, GitHub n'ouvrirait aucun run pour ce push.
 on:
+  push:
+    branches: [main]
+    paths:
+      - index.html
   repository_dispatch:
     types: [regenerate-product-pages]
   workflow_dispatch: {}

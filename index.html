@@ -160,7 +160,12 @@ nav{
 .nav-dropdown-menu a:hover{opacity:1;color:var(--gold);border-left-color:var(--gold);background:rgba(200,168,75,.06)}
 .nav-dropdown-title{display:block;font-family:'Cinzel';font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--cream);opacity:.82;cursor:pointer;padding:4px 0;transition:opacity .25s,color .25s;position:relative}
 .nav-dropdown-title:hover{opacity:1;color:var(--gold)}
-@media(max-width:768px){
+/* Seuil de bascule desktop -> mobile de la navigation, porte de 768px a
+   1239px : voir le commentaire du bloc @media(max-width:1239px) de la
+   section RESPONSIVE plus bas. Les deux blocs nav doivent partager le meme
+   seuil, sinon les dropdowns resteraient en mode desktop a l'interieur du
+   panneau burger. */
+@media(max-width:1239px){
   .nav-dropdown{display:flex;flex-direction:column;width:100%;margin-bottom:0}
   .nav-dropdown-title{display:block;padding:8px 0;opacity:.7;font-size:.82rem;text-transform:uppercase;letter-spacing:.16em;color:var(--cream)}
   .nav-dropdown-menu{position:static !important;display:flex !important;flex-direction:column;width:100%;padding:0;margin:0;background:transparent;border:none;visibility:visible !important;opacity:1 !important}
@@ -776,7 +781,18 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
   .pp-gallery{width:100%;max-width:420px;margin:0 auto;gap:12px}
   .pp-visual{aspect-ratio:1;padding:38px;width:100%;margin:0 auto}
 }
-@media(max-width:768px){
+/* Seuil de bascule desktop -> mobile de la NAVIGATION uniquement, porte de
+   768px a 1239px. La rangee de liens desktop (.nav-links, 9 items) a une
+   largeur intrinseque de ~874px qui, ajoutee au lockup de marque (155px) et
+   aux paddings de nav (2x28px), exige ~1085px de viewport ; en dessous elle
+   debordait horizontalement du document (mesure : +173px a 785px de
+   viewport). Le seuil retenu (1239px) est aligne sur celui de nav.css, ou
+   la nav des pages categories exige ~1194px - un seuil commun evite deux
+   modes de navigation differents selon le type de page, et 1240px est la
+   borne basse de la plage desktop de reference D1 (1240-1920).
+   Les regles non-nav de ce bloc restent a 768px (bloc suivant) : elles ne
+   sont pas concernees par ce debordement. */
+@media(max-width:1239px){
   header{
     backdrop-filter:none;
   }
@@ -797,6 +813,8 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
   .burger.x span:nth-child(1){transform:translateY(7px) rotate(45deg)}
   .burger.x span:nth-child(2){opacity:0}
   .burger.x span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+}
+@media(max-width:768px){
   section{padding:12px 22px}
   .about-points,.steps-simple,.faq-grid{grid-template-columns:1fr}
   .trust-grid{grid-template-columns:repeat(2,1fr);max-width:340px}
