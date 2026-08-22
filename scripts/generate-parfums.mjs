@@ -94,7 +94,7 @@ async function loadCommonNavFragments() {
   } catch (e) {
     throw new Error(
       `Impossible de lire partials/nav-common.generated.html (${e.message}) — ` +
-      `exécutez d'abord "node scripts/build-nav.mjs" pour produire cet artefact.`
+      `exécutez d'abord "node scripts/build-nav.mjs --write-artifact" pour produire cet artefact.`
     );
   }
   const label = 'partials/nav-common.generated.html';

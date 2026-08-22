@@ -1,11 +1,25 @@
 #!/usr/bin/env node
 // Génère le HTML de navigation depuis data/nav.config.json + partials/nav.html.
 //
-// Phase 3.3 : ce script ne fait qu'un rendu EN MÉMOIRE et une auto-vérification
-// (idempotence, absence de jeton oublié). Il n'écrit ENCORE aucun fichier —
-// l'injection réelle dans les 19 pages (via les marqueurs <!-- AUTO:NAV:START/
-// END --> à poser sur chaque page) est prévue pour une phase ultérieure
-// (Phase 3.4, canari, puis rollout), pas ici.
+// CLI — deux modes, et deux seulement :
+//
+//   node scripts/build-nav.mjs
+//     Vérification, LECTURE SEULE. Rend la navigation en mémoire, contrôle
+//     l'idempotence, puis compare partials/nav-common.generated.html à ce que
+//     produisent aujourd'hui data/nav.config.json + partials/nav.html.
+//     Rapporte CONFORME, DÉRIVE ou ABSENT ; sort en code 1 sur les deux
+//     derniers. N'écrit aucun fichier.
+//
+//   node scripts/build-nav.mjs --write-artifact
+//     Régénère et écrit partials/nav-common.generated.html — le SEUL fichier
+//     que ce mode puisse écrire. C'est la procédure à suivre quand
+//     nav.config.json ou partials/nav.html a changé : generate-parfums.mjs lit
+//     cet artefact comme une entrée et ne sait pas le produire lui-même.
+//
+// L'injection des blocs <!-- AUTO:NAV:START/END --> dans les pages servies
+// reste disponible via la fonction exportée injectIntoPage(), mais n'est
+// câblée à aucun mode CLI et n'est appelée nulle part dans le dépôt : elle
+// n'écrit que si un appelant lui passe explicitement write:true.
 //
 // Convention reprise de scripts/generate-parfums.mjs : zéro dépendance npm,
 // fetch/fs natifs de Node (>=18), aucune valeur métier codée en dur — tout
@@ -489,13 +503,20 @@ export async function writeCommonNavArtifact({ write = false, ...opts } = {}) {
 }
 
 // ============================================================
-// Rapport de vérification (dry-run) — lecture seule, aucune écriture.
-// Exécuté uniquement à l'appel manuel de ce script (node scripts/build-nav.mjs),
-// jamais déclenché automatiquement par un workflow à ce stade de la Phase 3.
+// Point d'entrée CLI. Sans argument : vérification en lecture seule, aucune
+// écriture. Avec --write-artifact : écrit partials/nav-common.generated.html,
+// et lui seul. Exécuté uniquement à l'appel manuel — aucun workflow n'invoque
+// ce script (aucune occurrence de build-nav dans .github/).
 // ============================================================
 
+const WRITE_ARTIFACT_FLAG = '--write-artifact';
+
 async function main() {
-  log('build-nav.mjs — rendu à blanc (Phase 3.3, aucune écriture disque)\n');
+  const writeArtifact = process.argv.slice(2).includes(WRITE_ARTIFACT_FLAG);
+
+  log(writeArtifact
+    ? `build-nav.mjs — mode ${WRITE_ARTIFACT_FLAG} : seul partials/nav-common.generated.html peut être écrit\n`
+    : 'build-nav.mjs — mode vérification (lecture seule, aucune écriture disque)\n');
 
   const html1 = await buildNavHtml();
   log('✔ Rendu complet réussi (config valide, template extrait, aucun jeton oublié).');
@@ -506,6 +527,35 @@ async function main() {
     ? '✔ Idempotence confirmée : deux exécutions successives produisent un HTML strictement identique.'
     : '✘ ÉCHEC idempotence : deux exécutions ont produit des résultats différents.');
   if (!idempotent) process.exitCode = 1;
+
+  // Présence relevée AVANT tout appel : en mode écriture, un artefact absent
+  // existerait déjà au moment du diagnostic si on la relevait après.
+  let artefactPresent = true;
+  try {
+    await readFile(COMMON_NAV_ARTIFACT_PATH, 'utf8');
+  } catch {
+    artefactPresent = false;
+  }
+
+  // write:false en mode vérification — la branche d'écriture de
+  // writeCommonNavArtifact n'est alors jamais atteinte (cf. son `if (write)`).
+  const { changed } = await writeCommonNavArtifact({ write: writeArtifact });
+
+  log('\nArtefact partials/nav-common.generated.html :');
+  if (writeArtifact) {
+    log(changed
+      ? '  ✔ ÉCRIT — le contenu différait (ou le fichier était absent) ; il a été régénéré.'
+      : '  ✔ ÉCRIT — contenu déjà identique, aucun changement effectif.');
+  } else if (!artefactPresent) {
+    log(`  ✘ ABSENT — relancer avec ${WRITE_ARTIFACT_FLAG} pour le produire.`);
+    process.exitCode = 1;
+  } else if (changed) {
+    log('  ✘ DÉRIVE — ne correspond plus à data/nav.config.json + partials/nav.html.');
+    log(`     Relancer avec ${WRITE_ARTIFACT_FLAG} pour le régénérer.`);
+    process.exitCode = 1;
+  } else {
+    log('  ✔ CONFORME — identique à ce que produisent nav.config.json + nav.html.');
+  }
 
   const liCount = (html1.match(/<li /g) || []).length;
   log(`\nRésumé du rendu :`);
