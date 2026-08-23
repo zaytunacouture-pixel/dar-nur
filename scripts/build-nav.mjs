@@ -39,19 +39,38 @@ const NAV_CONFIG_PATH = new URL('data/nav.config.json', ROOT);
 const NAV_TEMPLATE_PATH = new URL('partials/nav.html', ROOT);
 
 // ============================================================
-// Liste des pages servies concernées par l'injection de la nav.
-// Isolée dans cette unique constante (recommandation explicite) plutôt que
-// dispersée dans le code — toute évolution (nouvelle page catégorie, nouvelle
-// marque parfums) se fait ici et nulle part ailleurs dans ce script.
+// Liste des pages servies que build-nav.mjs est censé injecter, c'est-à-dire
+// celles qui portent une paire de marqueurs <!-- AUTO:NAV:START/END --> dont
+// aucun autre générateur n'est propriétaire : la homepage et les 14 pages
+// catégories. Isolée dans cette unique constante plutôt que dispersée dans le
+// code — toute évolution (nouvelle page catégorie) se fait ici et nulle part
+// ailleurs dans ce script.
+//
+// Deux familles de pages en sont volontairement absentes :
+//
+//   - Les 237 fiches produit (<slug>/index.html). Elles portent bien des
+//     marqueurs AUTO:NAV, mais leur bloc est une copie conforme de celui de
+//     index.html : generate-product-pages.mjs duplique le gabarit entier, il
+//     est seul propriétaire de ces fichiers. Les inscrire ici créerait un
+//     second écrivain sur des fichiers déjà possédés, et serait redondant —
+//     corriger index.html puis régénérer suffit à les mettre à jour.
+//
+//   - Les pages parfums (hub + une par marque). Elles ne portent AUCUN
+//     marqueur AUTO:NAV et n'en ont jamais porté. Leur navigation commune
+//     passe par les jetons {{COMMON_NAV_BEFORE_PARFUMS}} /
+//     {{COMMON_NAV_AFTER_PARFUMS}} de parfums/_hub_template.html et
+//     parfums/_brand_template.html, que generate-parfums.mjs substitue depuis
+//     partials/nav-common.generated.html. Ce mécanisme suit d'ailleurs les
+//     marques de Supabase, qu'une liste codée en dur ne pourrait pas suivre.
 //
 // Ne peut pas être dérivée de data/nav.config.json : ce fichier décrit CE QUE
-// dit la navigation (ses entrées), pas OÙ elle doit être injectée — par
-// exemple parfums/lecode/ et parfums/khair/ ne sont pas des entrées de
-// nav.config.json (une seule entrée "parfums" pointe vers le hub), mais sont
-// bien deux pages servies qui doivent recevoir le même bloc de navigation.
+// dit la navigation (ses entrées), pas OÙ elle doit être injectée.
 //
-// Non consommée par ce script en Phase 3.3 (aucune écriture n'a lieu) —
-// préparée pour la Phase 3.4+.
+// Liste préparatoire : aucun mode CLI ne la consomme aujourd'hui (seul son
+// .length est affiché dans le rapport), et injectIntoPage() n'est appelée
+// nulle part. Remettre l'injection en service suppose au préalable de mettre
+// partials/nav.html à jour du header à deux rangées (.row-identity /
+// .row-nav), que le gabarit ne connaît pas encore.
 // ============================================================
 export const TARGET_PAGES = [
   'index.html',
@@ -69,9 +88,6 @@ export const TARGET_PAGES = [
   'poudres/index.html',
   'qamis/index.html',
   'tahara/index.html',
-  'parfums/index.html',
-  'parfums/lecode/index.html',
-  'parfums/khair/index.html',
 ];
 
 function log(msg) { console.log(msg); }
