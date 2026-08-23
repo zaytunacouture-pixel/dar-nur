@@ -223,11 +223,23 @@ function buildCardHtml(p, pageTagLabel, isFirst, cfg) {
   // existante ne declare lines[].tagLabel, leur sortie est donc inchangee.
   const cardTagLabel = (line && line.tagLabel) || pageTagLabel;
 
+  // Etat "Disponible prochainement", pilote uniquement par products.coming_soon.
+  // Donnee metier generique : aucune categorie, aucun slug, aucune liste n'est
+  // traite a part — la carte se marque des que le champ vaut true, pour
+  // n'importe quel produit, aujourd'hui ou demain. Comparaison stricte a true
+  // et non coercition, meme defensive que index.html (`p.coming_soon || false`)
+  // : une valeur absente ou null vaut donc false.
+  // La carte reste un lien vers la fiche et garde son prix — c'est la fiche qui
+  // neutralise le bouton de commande (cf. index.html, `p.coming_soon===true`).
+  const comingSoonBlock = p.coming_soon === true
+    ? '\n        <div class="card-soon">Disponible prochainement</div>'
+    : '';
+
   return `    <a href="https://dar-nur.fr/${esc(p.slug)}/" class="card"${attrs}>
       <div class="card-image"><img src="${esc(imgSrc)}" alt="${esc(p.name)} — Dar Nūr" loading="${loading}" width="${imageWidth}" height="${imageHeight}"/></div>
       <div class="card-body">
         <div class="cat-tag">${esc(cardTagLabel)}</div>
-        <h3>${esc(p.name)}</h3>${chipHtml}${taglineBlock}
+        <h3>${esc(p.name)}</h3>${chipHtml}${taglineBlock}${comingSoonBlock}
         <div class="card-footer">
           <${priceTag} class="card-price">${priceHtml}</${priceTag}>
           <span class="card-cta">Voir la fiche</span>
