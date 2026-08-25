@@ -67,6 +67,37 @@ p strong {
   color: var(--green);
   font-weight: 600;
 }
+h2 {
+  font-family: 'Cinzel', serif;
+  font-size: 1.05rem;
+  color: var(--green);
+  letter-spacing: 0.06em;
+  margin: 40px 0 18px;
+}
+.cgv-places {
+  list-style: none;
+  margin: 0 0 24px;
+  padding: 0;
+  max-width: 560px;
+}
+.cgv-places li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 0;
+  border-bottom: 1px dashed var(--line);
+  color: #3a3a3a;
+}
+.cgv-places li:last-child { border-bottom: none; }
+.cgv-places .pr {
+  font-family: 'Cinzel', serif;
+  font-size: 0.76rem;
+  letter-spacing: 0.08em;
+  color: var(--green);
+  white-space: nowrap;
+  flex: none;
+}
 a:not(header a) {
   color: var(--gold);
   text-decoration: none;
@@ -118,8 +149,63 @@ footer{background:#0a160f;color:var(--cream);padding:46px 28px 26px}
 Les produits proposés sur le site Dar Nūr sont vendus par Dar Nūr.
 </p>
 
+<h2>Commande</h2>
+
 <p>
-Les commandes sont payables à la validation de l'achat.
+Les commandes sont passées sur WhatsApp. Dar Nūr confirme la disponibilité du produit,
+puis convient avec le client du mode de livraison, du lieu et de l'horaire.
+</p>
+
+<h2>Zone de livraison</h2>
+
+<p>
+<strong>Les livraisons Dar Nūr sont, pour le moment, limitées à l'Île-de-France.</strong>
+Aucune livraison n'est proposée en dehors de cette zone.
+</p>
+
+<h2>Modes de livraison et tarifs</h2>
+
+<p>
+Les tarifs de livraison, en Île-de-France uniquement, sont les suivants :
+</p>
+
+<ul class="cgv-places">
+  <li><span>À Chelles : livraison à domicile, ou remise sur rendez-vous près de la mosquée</span><span class="pr">Gratuit</span></li>
+  <li><span>À Lognes : remise sur rendez-vous au 8 allée des Palombes</span><span class="pr">Gratuit</span></li>
+  <li><span>Remise sur rendez-vous près d'une autre mosquée d'Île-de-France, au choix du client</span><span class="pr">10 €</span></li>
+  <li><span>Livraison à domicile ailleurs qu'à Chelles, partout en Île-de-France</span><span class="pr">20 €</span></li>
+</ul>
+
+<p>
+Les deux modes payants (10 € et 20 €) sont proposés <strong>à partir de 20 € de
+commande</strong>. Les options gratuites ne sont soumises à aucun minimum de commande.
+</p>
+
+<p>
+Le point de rendez-vous de Lognes se situe en face d'Office Depot / Gifi, à côté du
+magasin Boulanger. Cette indication est donnée à titre de repère géographique
+uniquement.
+</p>
+
+<p>
+Le lieu exact et l'horaire de la remise sont convenus avec le client lors de la commande,
+et la remise se fait de la main à la main. Les mosquées et les commerces mentionnés
+servent uniquement de point de repère géographique : ils ne réceptionnent aucune
+commande, n'interviennent à aucun titre dans la vente et ne sont pas partenaires de
+Dar Nūr.
+</p>
+
+<p>
+Les frais de livraison indiqués ci-dessus s'ajoutent au prix des produits et sont réglés
+en même temps que la commande, au moment de la réception.
+</p>
+
+<h2>Paiement à la réception</h2>
+
+<p>
+<strong>Aucun paiement n'est demandé à l'avance.</strong> Le client règle sa commande
+uniquement après avoir réceptionné ses produits, par Revolut ou en espèces, selon sa
+préférence.
 </p>
 
 <p>
@@ -153,7 +239,7 @@ dar_nur_001@outlook.com
   </div>
   <div class="footer-trust">
     <span>Service client WhatsApp</span>
-    <span>Paiement sécurisé</span>
+    <span>Paiement à la réception</span>
   </div>
   <div class="foot-bottom">© 2026 Dar Nūr — Tous droits réservés</div>
 </footer>
