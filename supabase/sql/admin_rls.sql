@@ -215,6 +215,39 @@ comment on function public.is_admin() is
 
 grant execute on function public.is_admin() to anon, authenticated;
 
+-- Garde-fou 4 — le point de défaillance silencieuse le plus dangereux du
+-- montage : `public.admins` a la RLS activée et n'accorde à personne le droit
+-- de lire les lignes des autres. `is_admin()` ne peut donc lire la table que
+-- parce qu'elle s'exécute avec les droits de son propriétaire, et qu'un
+-- propriétaire de table contourne la RLS. Si la fonction et la table
+-- appartenaient à deux rôles différents, `is_admin()` renverrait `false` pour
+-- TOUT LE MONDE, y compris vous — plus aucune écriture possible nulle part,
+-- sans le moindre message d'erreur. On le vérifie avant d'appliquer les
+-- politiques, tant que la transaction peut encore être annulée.
+do $$
+declare
+  proprio_table text;
+  proprio_fonction text;
+begin
+  select pg_get_userbyid(relowner) into proprio_table
+  from pg_class where oid = 'public.admins'::regclass;
+
+  select pg_get_userbyid(proowner) into proprio_fonction
+  from pg_proc where oid = 'public.is_admin()'::regprocedure;
+
+  if proprio_table is distinct from proprio_fonction then
+    raise exception E'Incohérence de propriétaire : public.admins appartient à "%", public.is_admin() à "%".\nLa fonction ne pourrait pas lire la table (RLS), et personne ne pourrait plus écrire.\nAucune modification appliquée.', proprio_table, proprio_fonction;
+  end if;
+
+  -- Contrôle de bon sens : la requête que la fonction exécute doit voir la
+  -- ligne qu'on vient d'insérer.
+  if not exists (select 1 from public.admins) then
+    raise exception 'public.admins est vide au moment de poser les politiques — annulation.';
+  end if;
+
+  raise notice 'Garde-fou 4 : table et fonction appartiennent toutes deux à "%".', proprio_table;
+end $$;
+
 
 -- ────────────────────────────────────────────────────────────────────────────
 -- 5) Remplacement des politiques d'écriture
@@ -290,16 +323,34 @@ end $$;
 --    le bucket est public, les fichiers doivent rester servis au visiteur.
 --    Seule l'écriture (upload, remplacement, suppression) devient réservée.
 --
---    Si cette section échoue avec « must be owner of table objects », votre
---    rôle n'a pas les droits sur les politiques de storage : appliquez la même
---    règle depuis Dashboard > Storage > Policies (voir la note en bas).
+--    Un manque de droits sur storage.objects ne doit PAS faire échouer tout le
+--    reste : la sécurisation des 6 tables, qui est l'essentiel, serait annulée
+--    par le rollback de la transaction. L'erreur est donc rattrapée ici et
+--    transformée en avertissement explicite, avec la marche à suivre.
 -- ────────────────────────────────────────────────────────────────────────────
-drop policy if exists "admin_write_product_images" on storage.objects;
-drop policy if exists "admin_only_product_images" on storage.objects;
-create policy "admin_only_product_images"
-  on storage.objects for all to authenticated
-  using      (bucket_id = 'product-images' and public.is_admin())
-  with check (bucket_id = 'product-images' and public.is_admin());
+do $$
+begin
+  execute 'drop policy if exists "admin_write_product_images" on storage.objects';
+  execute 'drop policy if exists "admin_only_product_images" on storage.objects';
+  execute $p$
+    create policy "admin_only_product_images"
+      on storage.objects for all to authenticated
+      using      (bucket_id = 'product-images' and public.is_admin())
+      with check (bucket_id = 'product-images' and public.is_admin())
+  $p$;
+  raise notice 'Bucket product-images : ecriture reservee a l''administrateur.';
+exception
+  when insufficient_privilege or undefined_table then
+    raise warning E'\n>>> ACTION MANUELLE REQUISE <<<\nImpossible de modifier les politiques de storage.objects depuis le SQL Editor (droits insuffisants).\nLes 6 tables du catalogue SONT sécurisées, mais le bucket product-images ne l''est PAS encore.\nAppliquez la même règle depuis Dashboard > Storage > product-images > Policies (voir la note en bas de ce fichier).';
+end $$;
+
+-- Récapitulatif de fin de transaction.
+do $$
+declare liste text;
+begin
+  select string_agg(coalesce(email, user_id::text), ', ' order by created_at) into liste from public.admins;
+  raise notice 'Administrateurs declares : %', liste;
+end $$;
 
 commit;
 

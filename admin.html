@@ -163,6 +163,24 @@ tr:hover td { background: #fafaf8; }
 }
 .toggle-row input[type=checkbox] { width: 16px; height: 16px; cursor: pointer; }
 
+/* ── Adresse de la fiche (slug) ── */
+.slug-note {
+  font-size: .76rem; line-height: 1.45; color: var(--muted);
+  margin-top: 5px;
+}
+.slug-note code {
+  background: #f2f0ea; border-radius: 4px; padding: 1px 5px;
+  font-size: .95em; word-break: break-all;
+}
+.slug-note.err  { color: var(--red); font-weight: 600; }
+.slug-note.lock { color: var(--gold-dark, #8a6a26); }
+#p-slug[readonly] {
+  background: #f2f0ea; color: var(--muted); cursor: not-allowed;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: .86rem;
+}
+#p-slug.invalid { border-color: var(--red); }
+
 /* ── Variants section ── */
 .variants-section { margin-top: 20px; }
 .variants-section h3 {
@@ -519,11 +537,12 @@ tr:hover td { background: #fafaf8; }
     <div class="form-grid">
       <div class="form-field">
         <label>Nom *</label>
-        <input type="text" id="p-name" placeholder="Miel de Nigelle"/>
+        <input type="text" id="p-name" placeholder="Miel de Nigelle" oninput="onProductNameInput()"/>
       </div>
       <div class="form-field">
-        <label>Slug * (URL)</label>
-        <input type="text" id="p-slug" placeholder="miel-nigelle"/>
+        <label>Adresse de la fiche * <small style="color:var(--muted);font-weight:400">(identifiant technique)</small></label>
+        <input type="text" id="p-slug" placeholder="miel-nigelle" oninput="onSlugInput()"/>
+        <div class="slug-note" id="slug-note"></div>
       </div>
       <div class="form-field">
         <label>Catégorie *</label>
@@ -1431,12 +1450,132 @@ async function deleteBrandConfirm(id, name, usedCount) {
   }
 }
 
+// ── Adresse de la fiche (slug) ─────────────────────────────────────────────────
+//
+// Décision V1 : le slug d'un produit DÉJÀ CRÉÉ n'est pas modifiable. Ce n'est
+// pas une précaution excessive, c'est la conséquence directe de l'hébergement :
+// GitHub Pages ne propose aucune redirection. Renommer un slug ferait, en une
+// seule régénération et sans le moindre avertissement :
+//   - supprimer le dossier /ancien-slug/ (le générateur nettoie d'après son
+//     manifeste) -> 404 définitif sur une URL indexée par Google et déjà
+//     partagée sur WhatsApp ;
+//   - rompre les lignes offer_products.product_slug, qui référencent le produit
+//     en texte libre, sans clé étrangère : le produit disparaît de ses packs ;
+//   - potentiellement rendre le produit non classable par
+//     generate-category-pages.mjs (plusieurs pages regroupent les produits
+//     d'après le préfixe de leur slug), ce qui fait échouer la génération de
+//     TOUTE la page catégorie.
+// Une modification volontaire de slug reste possible, mais elle se fait en
+// connaissance de cause, hors de l'administration, avec la mise à jour des
+// références qui vont avec.
+//
+// Un produit NOUVEAU, lui, n'a encore aucune URL publiée : son slug est libre,
+// proposé automatiquement d'après le nom, et validé avant enregistrement.
+
+// Noms déjà pris à la racine du dépôt. generate-product-pages.mjs refuse de
+// générer une fiche dont le slug entre en collision avec l'un d'eux (il compare
+// avec le contenu réel du dossier — cette liste en est le reflet à jour, elle
+// sert à prévenir ici plutôt qu'à découvrir l'échec après coup).
+const RESERVED_SLUGS = new Set([
+  'abayas','accessoires','assets','bakhour','brumes','chaussures','chechias',
+  'data','docs','gelules','huiles','js','miels','miels-gourmands','miels-terroir',
+  'mockups','parfums','partials','poudres','qamis','scripts','supabase','tahara',
+  'scratch','admin','index',
+]);
+
+// true dès que l'utilisateur a saisi le slug à la main : on cesse alors de le
+// déduire du nom, pour ne pas écraser sa saisie.
+let slugTouched = false;
+
+function slugify(name) {
+  return String(name || '')
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')  // accents
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60)
+    .replace(/-+$/, '');
+}
+
+// Retourne un message d'erreur, ou null si le slug est utilisable.
+function validateSlug(slug, currentProductId) {
+  if (!slug) return "L'adresse de la fiche est obligatoire.";
+  if (slug.length > 60) return 'Adresse trop longue (60 caractères maximum).';
+  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
+    return 'Uniquement des lettres minuscules non accentuées, des chiffres et des tirets simples (ni espace, ni accent, ni tiret en début, fin ou doublé).';
+  }
+  if (RESERVED_SLUGS.has(slug)) {
+    return `« ${slug} » est déjà utilisé par une page du site : la fiche ne serait jamais générée.`;
+  }
+  const collision = allProducts.find(p => p.slug === slug && p.id !== currentProductId);
+  if (collision) return `Déjà utilisé par « ${collision.name} ». Chaque adresse doit être unique.`;
+  return null;
+}
+
+// Verrouille le champ et explique pourquoi (produit existant).
+function lockSlugField(slug) {
+  const input = document.getElementById('p-slug');
+  input.readOnly = true;
+  input.classList.remove('invalid');
+  const note = document.getElementById('slug-note');
+  note.className = 'slug-note lock';
+  note.innerHTML =
+    `🔒 <code>dar-nur.fr/${esc(slug)}/</code><br>`
+    + `Non modifiable : cette adresse est publiée, indexée et peut avoir été partagée. `
+    + `La changer supprimerait l'ancienne page (erreur 404, sans redirection possible) `
+    + `et détacherait le produit de ses packs.`;
+}
+
+// Déverrouille le champ pour un produit en cours de création.
+function unlockSlugField() {
+  const input = document.getElementById('p-slug');
+  input.readOnly = false;
+  input.classList.remove('invalid');
+  renderSlugFeedback();
+}
+
+function renderSlugFeedback() {
+  const input = document.getElementById('p-slug');
+  if (input.readOnly) return;
+  const note = document.getElementById('slug-note');
+  const slug = input.value.trim();
+  if (!slug) {
+    note.className = 'slug-note';
+    note.textContent = "Proposée automatiquement d'après le nom. Elle deviendra l'adresse publique de la fiche et ne pourra plus être modifiée ensuite.";
+    input.classList.remove('invalid');
+    return;
+  }
+  const err = validateSlug(slug, document.getElementById('p-id').value || null);
+  if (err) {
+    note.className = 'slug-note err';
+    note.textContent = err;
+    input.classList.add('invalid');
+  } else {
+    note.className = 'slug-note';
+    note.innerHTML = `Adresse publique : <code>dar-nur.fr/${esc(slug)}/</code><br>Définitive après la création.`;
+    input.classList.remove('invalid');
+  }
+}
+
+function onProductNameInput() {
+  const input = document.getElementById('p-slug');
+  if (input.readOnly || slugTouched) return;   // jamais sur un produit existant
+  input.value = slugify(document.getElementById('p-name').value);
+  renderSlugFeedback();
+}
+
+function onSlugInput() {
+  slugTouched = true;
+  renderSlugFeedback();
+}
+
 // ── Modal produit ──────────────────────────────────────────────────────────────
 function openProductModal(id) {
   document.getElementById('product-modal').classList.add('open');
   clearProductModal();
   if (!id) {
     document.getElementById('modal-title').textContent = 'Nouveau produit';
+    unlockSlugField();   // produit neuf : aucune URL publiée, slug libre
     return;
   }
   document.getElementById('modal-title').textContent = 'Modifier le produit';
@@ -1445,6 +1584,7 @@ function openProductModal(id) {
   document.getElementById('p-id').value            = p.id;
   document.getElementById('p-name').value          = p.name || '';
   document.getElementById('p-slug').value          = p.slug || '';
+  lockSlugField(p.slug || '');   // produit existant : adresse figée
   document.getElementById('p-cat').value           = p.category_id || '';
   document.getElementById('p-price').value         = p.price_value ?? '';
   document.getElementById('p-tagline').value       = p.tagline || '';
@@ -1507,6 +1647,8 @@ function clearProductModal() {
   document.getElementById('p-gift-her').checked   = false;
   document.getElementById('variants-list').innerHTML = '';
   pendingVariantDeletions = [];
+  slugTouched = false;
+  unlockSlugField();
   resetImageState();
 }
 
@@ -1596,10 +1738,26 @@ async function saveProductModal() {
   const id = document.getElementById('p-id').value;
   const lines = s => s.split('\n').map(x=>x.trim()).filter(Boolean);
 
+  // ── Adresse de la fiche ────────────────────────────────────────────────────
+  // Pour un produit existant, le slug de référence vient de la donnée chargée,
+  // JAMAIS du champ du formulaire, et il n'est pas inclus dans la charge utile
+  // envoyée à Supabase. Le champ est en lecture seule, mais un attribut HTML ne
+  // protège rien : ne pas transmettre la colonne est la seule garantie réelle
+  // qu'une URL publiée ne peut pas être renommée depuis cet écran.
+  const isNewProduct = !id;
+  const existing     = isNewProduct ? null : allProducts.find(p => p.id === id);
+  const slug         = isNewProduct
+    ? document.getElementById('p-slug').value.trim()
+    : (existing?.slug || '');
+
+  if (!isNewProduct && !slug) {
+    showToast("Produit introuvable en mémoire — rechargez la page avant d'enregistrer.", 'err');
+    return;
+  }
+
   const product = {
     id:             id || undefined,
     name:           document.getElementById('p-name').value.trim(),
-    slug:           document.getElementById('p-slug').value.trim(),
     category_id:    document.getElementById('p-cat').value,
     price_value:    parseFloat(document.getElementById('p-price').value) || null,
     tagline:        document.getElementById('p-tagline').value.trim() || null,
@@ -1626,8 +1784,20 @@ async function saveProductModal() {
     images:         [],
   };
 
-  if (!product.name || !product.slug || !product.category_id) {
-    showToast('Nom, slug et catégorie sont requis.', 'err'); return;
+  if (!product.name || !product.category_id) {
+    showToast('Nom et catégorie sont requis.', 'err'); return;
+  }
+
+  if (isNewProduct) {
+    // Le slug n'est écrit qu'ici, à la création, et plus jamais ensuite.
+    const slugErr = validateSlug(slug, null);
+    if (slugErr) {
+      showToast(slugErr, 'err');
+      renderSlugFeedback();
+      document.getElementById('p-slug').focus();
+      return;
+    }
+    product.slug = slug;
   }
 
   // ── Lecture et validation des variantes AVANT toute écriture ────────────────
@@ -1688,7 +1858,9 @@ async function saveProductModal() {
       const statusEl = document.getElementById('img-status');
       if (statusEl) statusEl.textContent = 'Upload en cours…';
       const ext  = pendingImageFile.name.split('.').pop().toLowerCase();
-      const path = `products/${product.slug}/${product.slug}-${Date.now()}.${ext}`;
+      // `slug` et non `product.slug` : la colonne n'est plus transmise pour un
+      // produit existant, mais le chemin de stockage en a toujours besoin.
+      const path = `products/${slug}/${slug}-${Date.now()}.${ext}`;
       const url  = await uploadImage(pendingImageFile, path);
       // Remplace la première image, conserve les autres
       finalImages = [url, ...finalImages.slice(1)];
@@ -2118,6 +2290,6 @@ function closeSidebar() {
   font-size:.72rem; font-family:monospace; padding:4px 12px;
   border-radius:20px; pointer-events:none; z-index:9999;
   white-space:nowrap;
-">Admin version : variantes non destructives (Lot 1)</div>
+">Admin version : variantes non destructives + URL protégée</div>
 </body>
 </html>

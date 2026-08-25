@@ -141,6 +141,26 @@ drop policy if exists "public_read_active_variants" on public.product_variants;
 create policy "public_read_active_variants"
   on public.product_variants for select to anon, authenticated using (active = true);
 
+-- ⚠⚠ SECTION PÉRIMÉE — NE PAS RÉEXÉCUTER ⚠⚠
+--
+-- Les politiques `admin_all_*` ci-dessous ont été REMPLACÉES le 2026-08-25 par
+-- supabase/sql/admin_rls.sql. Elles sont conservées ici uniquement parce que ce
+-- fichier documente le schéma d'origine.
+--
+-- Pourquoi elles étaient dangereuses : `to authenticated using (true)` accorde
+-- l'écriture à TOUT compte connecté, quel qu'il soit. Le NB en bas de section
+-- supposait que l'inscription publique serait désactivée dans Auth > Providers
+-- — ce qui n'a jamais été fait. Vérifié le 2026-08-25 :
+-- `GET /auth/v1/settings` renvoyait `"disable_signup": false`. N'importe qui
+-- pouvait donc créer un compte avec la clé anon publique et écrire tout le
+-- catalogue.
+--
+-- Réexécuter ce fichier sur la base de production RÉOUVRIRAIT la faille.
+-- Si vous devez repartir d'un schéma neuf : exécutez ce fichier, PUIS
+-- immédiatement supabase/sql/admin_rls.sql, qui remplace ces trois politiques
+-- (et celles de brands/offers/offer_products/storage) par une condition
+-- explicite `public.is_admin()`.
+--
 -- Admin connecté : voit TOUT (y compris désactivés) et peut tout modifier
 drop policy if exists "admin_all_categories" on public.categories;
 create policy "admin_all_categories"
@@ -157,6 +177,11 @@ create policy "admin_all_variants"
 -- NB : "authenticated" = toute personne connectée via Supabase Auth.
 -- Comme tu crées UN SEUL compte admin (et que l'inscription publique
 -- sera désactivée dans Auth → Providers), seul toi peux écrire.
+--
+-- ⚠ CETTE HYPOTHÈSE N'A JAMAIS ÉTÉ VÉRIFIÉE, ET ELLE ÉTAIT FAUSSE.
+--   L'inscription publique est restée active. Voir supabase/sql/admin_rls.sql :
+--   l'écriture ne doit dépendre QUE de public.is_admin(), jamais du seul fait
+--   d'être connecté.
 
 -- ---------------------------------------------------------------------
 -- 6) STOCKAGE DES PHOTOS

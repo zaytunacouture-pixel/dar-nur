@@ -351,16 +351,31 @@ function validateSitemapXml(xml) {
 // remplace par un bloc délimité unique — même principe que le bloc
 // AUTO:PARFUMS de scripts/generate-parfums.mjs, régénéré intégralement à
 // chaque run, sans jamais toucher au reste du fichier (homepage, catégories).
-async function updateSitemap(products) {
-  let sitemap = await readFile(SITEMAP_PATH, 'utf8');
-  const lastmod = new Date().toISOString().slice(0, 10);
+// Transformation PURE du sitemap : même entrée -> même sortie, aucun accès
+// disque, aucune horloge (lastmod est un paramètre). C'est ce qui permet de
+// vérifier l'idempotence en mémoire, à chaque exécution, avant d'écrire quoi
+// que ce soit — voir updateSitemap().
+function buildSitemapXml(sitemap, products, lastmod) {
+  // `\r?` : le fichier est en CRLF dans le dépôt. Sans lui, le `\n?` final ne
+  // consommait pas le saut de ligne du marqueur de fin, qui restait sur place
+  // pendant qu'un nouveau bloc était réinséré : UNE LIGNE VIDE S'AJOUTAIT À
+  // CHAQUE EXÉCUTION. Le fichier en portait 10 accumulées au 2026-08-25.
+  const legacyEntryRegex = /[ \t]*<url>\s*<loc>https:\/\/dar-nur\.fr#[^<]*<\/loc>[\s\S]*?<\/url>[ \t]*\r?\n?/g;
+  const legacyCount = (sitemap.match(legacyEntryRegex) || []).length;
+  let out = sitemap.replace(legacyEntryRegex, '');
 
-  const legacyEntryRegex = /[ \t]*<url>\s*<loc>https:\/\/dar-nur\.fr#[^<]*<\/loc>[\s\S]*?<\/url>\n?/g;
-  const legacyMatches = sitemap.match(legacyEntryRegex) || [];
-  sitemap = sitemap.replace(legacyEntryRegex, '');
+  const markerRegex = /[ \t]*<!-- AUTO:PRODUCTS:START[\s\S]*?AUTO:PRODUCTS:END -->[ \t]*\r?\n?/;
+  out = out.replace(markerRegex, '');
 
-  const markerRegex = /<!-- AUTO:PRODUCTS:START[\s\S]*?AUTO:PRODUCTS:END -->\n?/;
-  sitemap = sitemap.replace(markerRegex, '');
+  if (!out.includes('</urlset>')) {
+    throw new Error('Balise </urlset> introuvable dans sitemap.xml — abandon pour ne pas corrompre le fichier.');
+  }
+
+  // Normalise l'espacement qui précède immédiatement </urlset>, quel que soit
+  // l'état du fichier en entrée : exactement une ligne vide avant le bloc.
+  // Rend la sortie indépendante de l'historique du fichier (et nettoie au
+  // passage les lignes vides déjà accumulées).
+  out = out.replace(/(?:[ \t]*\r?\n)+(?=<\/urlset>)/, '\n\n');
 
   const entries = products
     .filter(p => p.slug)
@@ -368,15 +383,31 @@ async function updateSitemap(products) {
     .join('\n');
   const block = `<!-- AUTO:PRODUCTS:START — géré automatiquement par scripts/generate-product-pages.mjs, ne pas éditer à la main -->\n${entries}\n  <!-- AUTO:PRODUCTS:END -->\n`;
 
-  if (!sitemap.includes('</urlset>')) {
-    throw new Error('Balise </urlset> introuvable dans sitemap.xml — abandon pour ne pas corrompre le fichier.');
+  out = out.replace('</urlset>', `${block}</urlset>`);
+  return { xml: out, legacyCount };
+}
+
+async function updateSitemap(products) {
+  const original = await readFile(SITEMAP_PATH, 'utf8');
+  const lastmod = new Date().toISOString().slice(0, 10);
+
+  const first  = buildSitemapXml(original, products, lastmod);
+  // Garde-fou d'idempotence, dans l'esprit de celui de scripts/build-nav.mjs :
+  // réappliquer la transformation à son propre résultat doit redonner le même
+  // fichier, au caractère près. Si ce n'est pas le cas, le fichier dérive à
+  // chaque exécution et on refuse d'écrire.
+  const second = buildSitemapXml(first.xml, products, lastmod);
+  if (first.xml !== second.xml) {
+    throw new Error(
+      'sitemap.xml : la transformation n\'est pas idempotente — une deuxième application produit un fichier différent.\n' +
+      'Aucune écriture effectuée. Vérifier les expressions régulières de buildSitemapXml() (marqueurs, fins de ligne).'
+    );
   }
-  sitemap = sitemap.replace('</urlset>', `${block}</urlset>`);
 
-  validateSitemapXml(sitemap);
+  validateSitemapXml(first.xml);
 
-  await writeFile(SITEMAP_PATH, sitemap, 'utf8');
-  return legacyMatches.length;
+  await writeFile(SITEMAP_PATH, first.xml, 'utf8');
+  return first.legacyCount;
 }
 
 async function loadManifest() {
