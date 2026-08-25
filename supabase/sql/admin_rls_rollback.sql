@@ -1,0 +1,75 @@
+-- ============================================================================
+-- ROLLBACK de supabase/sql/admin_rls.sql
+--
+-- ⚠ CE ROLLBACK RÉOUVRE L'ÉCRITURE À TOUT COMPTE CONNECTÉ. Il restaure très
+--   exactement la faille corrigée par admin_rls.sql : n'importe quelle
+--   personne capable de créer un compte sur ce projet retrouve les pleins
+--   droits sur le catalogue et sur le bucket de photos.
+--
+--   À n'exécuter que dans un seul cas : vous êtes verrouillé dehors (plus
+--   aucune écriture possible depuis admin.html) et vous devez rétablir le
+--   service immédiatement.
+--
+-- AVANT DE FAIRE ÇA, essayez d'abord la vraie correction — dans 99 % des cas,
+-- le blocage vient simplement d'une table `admins` qui ne contient pas le bon
+-- compte. Vérifiez, puis corrigez, sans jamais rouvrir l'écriture :
+--
+--   -- Qui est déclaré administrateur ?
+--   select * from public.admins;
+--
+--   -- Quel est l'identifiant réel de votre compte ?
+--   select id, email, email_confirmed_at from auth.users order by created_at;
+--
+--   -- Ajouter le bon compte (remplacez l'adresse) :
+--   insert into public.admins (user_id, email, note)
+--   select id, email, 'ajout manuel' from auth.users
+--   where lower(email) = lower('votre@adresse.fr')
+--   on conflict (user_id) do nothing;
+--
+-- Si malgré cela vous devez vraiment rouvrir, décommentez le bloc ci-dessous,
+-- exécutez-le, RÉTABLISSEZ L'ACCÈS, puis relancez admin_rls.sql au plus vite.
+-- ============================================================================
+
+-- begin;
+--
+-- drop policy if exists "admin_only_products" on public.products;
+-- create policy "admin_all_products"
+--   on public.products for all to authenticated using (true) with check (true);
+--
+-- drop policy if exists "admin_only_variants" on public.product_variants;
+-- create policy "admin_all_variants"
+--   on public.product_variants for all to authenticated using (true) with check (true);
+--
+-- drop policy if exists "admin_only_categories" on public.categories;
+-- create policy "admin_all_categories"
+--   on public.categories for all to authenticated using (true) with check (true);
+--
+-- drop policy if exists "admin_only_brands" on public.brands;
+-- create policy "admin_all_brands"
+--   on public.brands for all to authenticated using (true) with check (true);
+--
+-- drop policy if exists "admin_only_offers" on public.offers;
+-- create policy "admin_all_offers"
+--   on public.offers for all to authenticated using (true) with check (true);
+--
+-- drop policy if exists "admin_only_offer_products" on public.offer_products;
+-- create policy "admin_all_offer_products"
+--   on public.offer_products for all to authenticated using (true) with check (true);
+--
+-- drop policy if exists "admin_only_product_images" on storage.objects;
+-- create policy "admin_write_product_images"
+--   on storage.objects for all to authenticated
+--   using (bucket_id = 'product-images') with check (bucket_id = 'product-images');
+--
+-- commit;
+
+-- ----------------------------------------------------------------------------
+-- La table public.admins et la fonction public.is_admin() ne sont PAS
+-- supprimées par ce rollback : elles ne gênent rien tant qu'aucune politique
+-- ne les utilise, et les conserver rend la re-sécurisation immédiate.
+-- Pour les retirer malgré tout (uniquement après avoir rouvert les politiques,
+-- sinon vous vous verrouillez dehors) :
+--
+--   drop function if exists public.is_admin();
+--   drop table if exists public.admins;
+-- ----------------------------------------------------------------------------

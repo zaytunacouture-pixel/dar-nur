@@ -128,6 +128,15 @@ async function toggleProductActive(id, active) {
 
 // ── Variantes ─────────────────────────────────────────────────────────────────
 
+// CONTRAT — à respecter par tout appelant :
+// n'envoyer QUE les champs réellement saisis. Une mise à jour PostgREST écrase
+// chaque colonne présente dans le corps de la requête ; une colonne absente
+// n'est pas touchée. Passer `images: []`, `active: true` ou `sort_order: 0`
+// « pour compléter l'objet » revient donc à détruire ces données à chaque
+// enregistrement — c'est exactement le défaut corrigé dans admin.html
+// (Lot 1) : les photos des variantes de miels étaient effacées dès qu'on
+// corrigeait un prix. Les colonnes non fournies gardent leur valeur en base
+// (mise à jour), ou prennent la valeur par défaut du schéma (création).
 async function saveVariant(variant) {
   const { id, ...fields } = variant;
   if (id) {
