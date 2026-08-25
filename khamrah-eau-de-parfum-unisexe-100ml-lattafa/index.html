@@ -319,7 +319,30 @@ section{padding:15px 28px}
 .step-simple .step-num{font-family:'Cinzel';font-size:.75rem;letter-spacing:.2em;color:var(--gold)}
 .step-simple h3{font-size:.86rem;color:var(--green);margin:8px 0 6px}
 .step-simple p{font-size:.94rem;color:var(--muted);margin:0}
-.pay-note{text-align:center;font-family:'Cormorant Garamond';font-style:italic;font-size:1.05rem;color:var(--muted);margin-top:14px}
+/* --- Livraison a domicile / remise sur rendez-vous + paiement a la reception --- */
+.delivery-block{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:18px;align-items:stretch}
+.delivery-card{background:#fff;border:1px solid var(--line);border-radius:4px;padding:26px 22px;display:flex;flex-direction:column;align-items:center;text-align:center}
+.dc-free{border-color:var(--gold);box-shadow:0 0 0 1px rgba(200,168,75,.22)}
+.dc-price{font-family:'Cormorant Garamond',serif;font-size:2.6rem;font-weight:600;line-height:1.05;color:var(--gold-dark)}
+.dc-head{display:flex;align-items:center;justify-content:center;gap:9px;margin:12px 0 10px}
+.dc-head h3{font-size:.82rem;color:var(--green);margin:0;line-height:1.35}
+.dc-icon{width:17px;height:17px;flex:none;color:var(--gold);stroke:var(--gold);fill:none;stroke-width:1.6}
+.dc-body{font-size:.98rem;line-height:1.55;color:var(--muted);margin:0}
+.dc-body b{color:var(--green);font-weight:600}
+.dc-body+.dc-body{margin-top:7px}
+.dc-hint{font-family:'Jost',sans-serif;font-size:.74rem;line-height:1.55;color:var(--muted);margin:8px 0 0}
+.dc-min{font-family:'Jost',sans-serif;font-size:.66rem;letter-spacing:.13em;text-transform:uppercase;color:var(--gold-dark);margin-top:auto;padding-top:16px}
+.dc-note{grid-column:1/-1;font-family:'Jost',sans-serif;font-size:.8rem;line-height:1.6;color:var(--muted);text-align:center;max-width:860px;margin:0 auto}
+.dc-pay{grid-column:1/-1;background:var(--green);border-color:rgba(200,168,75,.35);display:flex;flex-direction:column;align-items:center;text-align:center;padding:28px 24px}
+.dc-pay .dc-head{margin-bottom:10px}
+.dc-pay .dc-head h3{color:var(--cream)}
+.dc-pay .dc-icon{color:var(--gold-light);stroke:var(--gold-light)}
+.dc-lead{font-family:'Cormorant Garamond';font-style:italic;font-size:1.5rem;line-height:1.3;color:var(--gold-light);margin:0 0 8px}
+.dc-sub{font-size:.94rem;color:rgba(250,247,240,.78);margin:0;max-width:620px}
+.dc-modes{font-family:'Jost',sans-serif;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(200,168,75,.9);margin-top:18px;padding-top:14px;border-top:1px solid rgba(200,168,75,.25);width:100%;max-width:620px}
+.order-delivery-link{display:inline-block;margin-top:10px;font-family:'Jost',sans-serif;font-size:.72rem;letter-spacing:.04em;color:var(--gold-dark);border-bottom:1px solid rgba(200,168,75,.5);cursor:pointer}
+.order-delivery-link:hover{color:var(--green);border-bottom-color:var(--green)}
+.pp-delivery{background:var(--cream);border-top:1px solid var(--line);padding:56px 28px}
 .faq-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
 .faq-item,.review-empty{
   background:#fff;border:1px solid var(--line);border-radius:4px;padding:26px 22px;
@@ -700,7 +723,9 @@ section{padding:15px 28px}
   padding:12px 18px;align-items:center;justify-content:space-between;gap:14px;
   border-top:1px solid rgba(200,168,75,.3);
 }
-.mbar .p{font-family:'Cormorant Garamond';font-size:1.5rem;color:var(--cream);font-weight:600}
+.mbar-info{display:flex;flex-direction:column;gap:1px;min-width:0}
+.mbar .p{font-family:'Cormorant Garamond';font-size:1.5rem;color:var(--cream);font-weight:600;line-height:1.15}
+.mbar-note{font-family:'Jost',sans-serif;font-size:.6rem;letter-spacing:.06em;text-transform:uppercase;color:rgba(200,168,75,.92);white-space:nowrap}
 .mbar .btn-wa{padding:13px 22px;font-size:.74rem}
 
 /* ============ FOOTER ============ */
@@ -817,7 +842,13 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
 }
 @media(max-width:768px){
   section{padding:12px 22px}
-  .about-points,.steps-simple,.faq-grid{grid-template-columns:1fr}
+  .about-points,.steps-simple,.faq-grid,.delivery-block{grid-template-columns:1fr}
+  .delivery-card{padding:22px 18px}
+  .dc-price{font-size:2.2rem}
+  .dc-body{font-size:.92rem}
+  .dc-lead{font-size:1.35rem}
+  .dc-sub{font-size:.88rem}
+  .pp-delivery{padding:40px 22px}
   .trust-grid{grid-template-columns:repeat(2,1fr);max-width:340px}
   .collections-grid{grid-template-columns:repeat(2,1fr)}
   footer{padding:16px 20px 12px}
@@ -988,8 +1019,8 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
 
   <div class="trust-bar" aria-label="Engagements Dar Nūr">
     <div class="trust-grid">
-      <div class="trust-item"><span class="trust-num">01</span><span>Livraison<br>en main propre</span></div>
-      <div class="trust-item"><span class="trust-num">02</span><span>Paiement<br>sécurisé</span></div>
+      <div class="trust-item"><span class="trust-num">01</span><span>Livraison<br>en Île-de-France</span></div>
+      <div class="trust-item"><span class="trust-num">02</span><span>Paiement<br>à la réception</span></div>
       <div class="trust-item"><span class="trust-num">03</span><span>Réponse WhatsApp<br>en moins d'1h</span></div>
       <div class="trust-item"><span class="trust-num">04</span><span>Produits sélectionnés<br>avec soin</span></div>
     </div>
@@ -1151,9 +1182,49 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
       <div class="steps-simple">
         <div class="step-simple"><span class="step-num">01</span><h3>Choisissez votre produit</h3><p>Parcourez nos collections et trouvez l'article qui vous intéresse.</p></div>
         <div class="step-simple"><span class="step-num">02</span><h3>Envoyez votre demande</h3><p>Le bouton WhatsApp prérempli le message — il ne reste qu'à l'envoyer.</p></div>
-        <div class="step-simple"><span class="step-num">03</span><h3>Confirmation & livraison</h3><p>Dar Nūr confirme votre commande et organise la livraison en Île-de-France.</p></div>
+        <div class="step-simple"><span class="step-num">03</span><h3>Livraison & paiement</h3><p>Vous choisissez la livraison à domicile ou une remise sur rendez-vous, puis vous réglez à la réception.</p></div>
       </div>
-      <p class="pay-note">Paiement par <strong>Revolut</strong> ou <strong>espèces</strong>, à la livraison.</p>
+
+      <div class="delivery-block" id="deliveryBlock">
+        <div class="delivery-card dc-tier dc-free">
+          <div class="dc-price">Gratuit</div>
+          <div class="dc-head">
+            <svg class="dc-icon" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <h3>À Chelles ou à Lognes</h3>
+          </div>
+          <p class="dc-body"><b>À Chelles</b> — à domicile, ou sur rendez-vous près de la mosquée.</p>
+          <p class="dc-body"><b>À Lognes</b> — sur rendez-vous au 8 allée des Palombes.</p>
+          <p class="dc-hint">Pour repérer le point de Lognes : en face d'Office Depot / Gifi, à côté du magasin Boulanger.</p>
+        </div>
+        <div class="delivery-card dc-tier">
+          <div class="dc-price">10 €</div>
+          <div class="dc-head">
+            <svg class="dc-icon" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V11a8 8 0 0116 0v10"/><path d="M2 21h20"/><path d="M12 3.2V1"/></svg>
+            <h3>Près d'une autre mosquée</h3>
+          </div>
+          <p class="dc-body">Une autre mosquée de votre choix en Île-de-France — celle de Chelles reste gratuite.</p>
+          <div class="dc-min">Minimum de commande : 20 €</div>
+        </div>
+        <div class="delivery-card dc-tier">
+          <div class="dc-price">20 €</div>
+          <div class="dc-head">
+            <svg class="dc-icon" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5L12 3l9 7.5"/><path d="M5.5 9.5V21h13V9.5"/><path d="M10 21v-6h4v6"/></svg>
+            <h3>À domicile</h3>
+          </div>
+          <p class="dc-body">Ailleurs qu'à Chelles, partout en Île-de-France.</p>
+          <div class="dc-min">Minimum de commande : 20 €</div>
+        </div>
+        <p class="dc-note">Le lieu exact et l'horaire sont convenus ensemble sur WhatsApp, et la remise se fait de la main à la main. Les mosquées et les commerces cités servent uniquement de repère pour vous orienter : ils ne réceptionnent aucune commande et ne sont pas partenaires de Dar Nūr.</p>
+        <div class="delivery-card dc-pay">
+          <div class="dc-head">
+            <svg class="dc-icon" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0-7-9-13-9-13S3 3 3 10a9 9 0 0018 0z"/><path d="M9 10l2 2 4-4"/></svg>
+            <h3>Paiement à la réception</h3>
+          </div>
+          <p class="dc-lead">Aucun paiement à l'avance.</p>
+          <p class="dc-sub">Recevez votre commande, vérifiez-la, puis payez sur place — par Revolut ou en espèces, selon votre préférence.</p>
+          <div class="dc-modes">Livraison actuellement disponible uniquement en Île-de-France</div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -1165,9 +1236,9 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
         <p>Les réponses essentielles avant de commander.</p>
       </div>
       <div class="faq-grid">
-        <div class="faq-item"><h3>Comment commander ?</h3><p>Cliquez sur le bouton WhatsApp de la fiche produit — le message est prérempli. Dar Nūr confirme la disponibilité et organise la livraison avec vous.</p></div>
-        <div class="faq-item"><h3>Livraison</h3><p>Dar Nūr livre en Île-de-France. Le créneau est convenu ensemble sur WhatsApp lors de la confirmation.</p></div>
-        <div class="faq-item"><h3>Paiement</h3><p>Revolut ou espèces, selon votre préférence. Le mode est confirmé ensemble sur WhatsApp avant la livraison.</p></div>
+        <div class="faq-item"><h3>Comment commander ?</h3><p>Cliquez sur le bouton WhatsApp de la fiche produit — le message est prérempli. Dar Nūr confirme la disponibilité, puis convient avec vous du mode de livraison, du lieu et de l'horaire.</p></div>
+        <div class="faq-item"><h3>Où et comment suis-je livré ?</h3><p>En Île-de-France uniquement. <b>Gratuit</b> : à Chelles, à domicile ou sur rendez-vous près de la mosquée ; à Lognes, sur rendez-vous au 8 allée des Palombes. <b>10 €</b> : rendez-vous près d'une autre mosquée de votre choix en Île-de-France. <b>20 €</b> : livraison à domicile ailleurs qu'à Chelles. Les deux options payantes sont proposées à partir de 20 € de commande. Le lieu exact et l'horaire sont convenus ensemble sur WhatsApp.</p></div>
+        <div class="faq-item"><h3>Quand dois-je payer ?</h3><p>Aucun paiement à l'avance : vous réglez uniquement après avoir reçu vos produits, par Revolut ou en espèces, selon votre préférence.</p></div>
       </div>
     </div>
   </section>
@@ -1277,7 +1348,10 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
 
 <!-- ============ MOBILE BAR ============ -->
 <div class="mbar" id="mbar">
-  <div class="p" id="mbarPrice"></div>
+  <div class="mbar-info">
+    <div class="p" id="mbarPrice"></div>
+    <div class="mbar-note">Paiement à la réception</div>
+  </div>
   <a class="btn-wa" id="mbarBtn" target="_blank" rel="noopener">
     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.945C.16 5.335 5.495 0 12.05 0a11.82 11.82 0 018.413 3.488 11.82 11.82 0 013.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.86 9.86 0 001.512 5.26l-.999 3.648 3.985-1.607zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
     Commander
@@ -2717,8 +2791,11 @@ Mes informations :
 
 • Nom :
 • Ville :
-• Adresse / lieu de remise :
-• Paiement souhaité : Revolut / Espèces
+• Mode de livraison souhaité : point de rendez-vous / près d'une mosquée / à domicile
+• Adresse ou lieu souhaité :
+• Paiement à la réception : Revolut / Espèces
+
+Les options de livraison payantes (10 € ou 20 €) sont disponibles à partir de 20 € de commande.
 
 Lien fiche : ${url}
 Date de demande : ${date}
@@ -2958,6 +3035,27 @@ function toggleAccordion(btn){
   panel.style.maxHeight = open ? panel.scrollHeight + 'px' : null;
 }
 
+/* Section "Livraison & paiement" de la fiche produit.
+   Ne re-declare AUCUN lieu ni tarif (domicile comme rendez-vous) : elle
+   clone #deliveryBlock, le bloc
+   statique de la section #commande-livraison de l'accueil (present dans le
+   DOM de chaque page, homeView etant seulement masque sur une fiche) — une
+   seule source de verite pour les mosquees, les tarifs et le paiement. */
+function deliverySectionHTML(){
+  const block = document.getElementById("deliveryBlock");
+  if(!block) return "";
+  return `<section class="customer-info pp-delivery" id="livraison-paiement">
+      <div class="wrap">
+        <div class="section-head">
+          <div class="eyebrow">Livraison &amp; paiement</div>
+          <h2>Recevez, puis payez</h2>
+          <p>Livraison à domicile ou remise sur rendez-vous, en Île-de-France, sans aucun paiement à l'avance.</p>
+        </div>
+        ${block.outerHTML.replace(' id="deliveryBlock"','')}
+      </div>
+    </section>`;
+}
+
 function showProduct(id){
   const p = PRODUCTS.find(x=>x.id===id);
   if(!p) return;
@@ -3039,8 +3137,8 @@ function showProduct(id){
 
     <div class="pp-value-strip">
       <div class="pp-value-grid">
-        <div><span></span>Livraison en main propre</div>
-        <div><span></span>Paiement sécurisé</div>
+        <div><span></span>Livraison en Île-de-France</div>
+        <div><span></span>Paiement à la réception</div>
         <div><span></span>Réponse WhatsApp en moins d'1h</div>
         <div><span></span>Produits sélectionnés avec soin</div>
       </div>
@@ -3073,9 +3171,11 @@ function showProduct(id){
           </a>`}
         </div>
         <div class="order-reassurance">
-          <span><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M21 10c0-7-9-13-9-13S3 3 3 10a9 9 0 0018 0z"/><path d="M9 10l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>Livraison en Île-de-France</span>
+          <span><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M21 10c0-7-9-13-9-13S3 3 3 10a9 9 0 0018 0z"/><path d="M9 10l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>Paiement à la réception</span>
+          <span><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="10" r="3"/></svg>Domicile ou rendez-vous — Île-de-France</span>
           <span><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke-linecap="round" stroke-linejoin="round"/></svg>Service client WhatsApp</span>
         </div>
+        <a class="order-delivery-link" href="#livraison-paiement" onclick="event.preventDefault();document.getElementById('livraison-paiement').scrollIntoView({behavior:'smooth'})">Modes &amp; tarifs de livraison ↓</a>
       </div>
       </div>
       </div>
@@ -3108,6 +3208,8 @@ function showProduct(id){
         </div>
       </div>
     </div>
+
+    ${deliverySectionHTML()}
 
     <section class="engage">
       <div class="wrap engage-inner">
@@ -3212,7 +3314,11 @@ function updateMobileBar(){
   const price=hasOpt?p.price.options[activeOption][1]:p.price.value;
   const opt=hasOpt?p.price.options[activeOption][0]:"";
   const btn=document.getElementById("mbarBtn");
+  const note=document.querySelector(".mbar-note");
   document.getElementById("mbarPrice").textContent=price+"€";
+  // La note "Paiement à la réception" n'a de sens qu'à côté d'un bouton
+  // réellement commandable — masquée sur un produit à venir.
+  if(note) note.hidden = (p.coming_soon===true);
   if(p.coming_soon===true){
     btn.removeAttribute("href");
     btn.classList.add("btn-soon");
@@ -3692,23 +3798,58 @@ let _selectedColor = null;
 let _selectedSize  = 'L';
 let _colorOfferActive = null;
 
+/* Préfixe partagé par TOUS les noms de produits d'une offre — par exemple
+   "Ensemble Nissah Mastoura " quand l'offre décline un même ensemble en
+   plusieurs couleurs. Calculé à partir des données de l'offre, jamais codé en
+   dur : les pastilles n'affichent ainsi que ce qui distingue les variantes,
+   pour n'importe quelle offre.
+
+   Le préfixe n'est retiré que s'il se comporte vraiment comme un nom de gamme
+   suivi d'un libellé de variante autonome, d'où les trois garde-fous :
+     - au moins deux mots, sinon un simple mot de catégorie partagé serait
+       amputé (un pack de miels donnerait « de Lavande » au lieu de « Miel de
+       Lavande ») ;
+     - chaque reste commence par une majuscule ou un chiffre, signe d'un
+       libellé qui se tient seul (« Bleu ») et non d'une suite de phrase ;
+     - aucun reste ne devient vide.
+   Sinon renvoie "" : les noms complets sont conservés tels quels. */
+function offerNamePrefix(names) {
+  if (names.length < 2) return '';
+  let prefix = names[0];
+  for (const n of names.slice(1)) {
+    let i = 0;
+    while (i < prefix.length && i < n.length && prefix[i] === n[i]) i++;
+    prefix = prefix.slice(0, i);
+    if (!prefix) return '';
+  }
+  prefix = prefix.slice(0, prefix.lastIndexOf(' ') + 1);   // ne jamais couper un mot
+  if (prefix.trim().split(/\s+/).filter(Boolean).length < 2) return '';
+
+  const restes = names.map(n => n.slice(prefix.length).trim());
+  const commenceAutonome = t => {
+    if (!t) return false;
+    const c = t[0];
+    return /[0-9]/.test(c) || (c.toLocaleUpperCase('fr') === c && c.toLocaleLowerCase('fr') !== c);
+  };
+  return restes.every(commenceAutonome) ? prefix : '';
+}
+
 function openColorModal(offerId) {
   const offer = _offersCache.find(o => o.id === offerId);
   if (!offer) return;
 
   // Résoudre les couleurs depuis offer_products → PRODUCTS (déjà chargé)
-  const colors = (offer.offer_products || [])
+  const offerProducts = (offer.offer_products || [])
     .sort((a, b) => a.sort_order - b.sort_order)
-    .map(op => {
-      const p = PRODUCTS.find(pr => pr.id === op.product_slug);
-      if (!p) return null;
-      return {
-        slug:  p.id,
-        label: p.name.replace('Ensemble Nissah Mastoura', '').trim(),
-        img:   '/' + (PRODUCT_IMAGES[p.id]?.[0] || 'logo-dar-nur.png'),
-      };
-    })
+    .map(op => PRODUCTS.find(pr => pr.id === op.product_slug))
     .filter(Boolean);
+  const namePrefix = offerNamePrefix(offerProducts.map(p => p.name));
+  const colors = offerProducts.map(p => ({
+    slug:  p.id,
+    name:  p.name,                                    // nom réel, utilisé dans le message WhatsApp
+    label: p.name.slice(namePrefix.length).trim() || p.name,
+    img:   '/' + (PRODUCT_IMAGES[p.id]?.[0] || 'logo-dar-nur.png'),
+  }));
 
   if (!colors.length) return;
 
@@ -3775,16 +3916,22 @@ function selectSize(el, size) {
 
 function updateColorWA() {
   if (!_colorOfferActive || !_selectedColor) return;
-  const { offer } = _colorOfferActive;
+  const { offer, colors } = _colorOfferActive;
+  // Nom réel du produit choisi (selectColor ne transmet que le libellé court).
+  const produitNom =
+    (colors.find(c => c.slug === _selectedColor.slug) || {}).name || _selectedColor.label;
   const msg = encodeURIComponent(
     `Salam alaykoum, je souhaite commander :\n\n`
     + `👗 ${offer.title} — ${offer.promo_price}€\n`
-    + `Ensemble Nissah Mastoura\n\n`
+    + `${produitNom}\n\n`
     + `• Couleur : ${_selectedColor.label}\n`
     + `• Taille : ${_selectedSize}\n\n`
     + `Mes informations :\n`
     + `• Nom :\n• Ville :\n`
-    + `• Paiement : Revolut / Espèces\n\n`
+    + `• Mode de livraison souhaité : point de rendez-vous / près d'une mosquée / à domicile\n`
+    + `• Adresse ou lieu souhaité :\n`
+    + `• Paiement à la réception : Revolut / Espèces\n\n`
+    + `Les options de livraison payantes (10 € ou 20 €) sont disponibles à partir de 20 € de commande.\n\n`
     + `Merci.`
   );
   window._colorWAHref = `https://wa.me/33769253375?text=${msg}`;
