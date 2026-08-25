@@ -2870,9 +2870,13 @@ function goCat(f){showHome();document.getElementById("boutique").style.display="
 function setProductGalleryImage(btn, src){
   const img = document.getElementById("ppGalleryMain");
   if(!img) return;
-  img.src = src;
-  btn.parentElement.querySelectorAll(".pp-thumb").forEach(x=>x.classList.remove("active"));
+  img.src = src || btn.dataset.src;
+  btn.parentElement.querySelectorAll(".pp-thumb").forEach(x=>{
+    x.classList.remove("active");
+    x.setAttribute("aria-pressed","false");
+  });
   btn.classList.add("active");
+  btn.setAttribute("aria-pressed","true");
 }
 
 /* ============ RENDER PRODUCT PAGE ============ */
@@ -3117,8 +3121,17 @@ function showProduct(id){
   const initialFormatImg = (formatImages && hasOptions) ? formatImages[p.price.options[0][0]] : null;
   const detailImg = initialFormatImg || productImages[0] || null;
   const activeImgIdx = Math.max(0, productImages.indexOf(detailImg));
-  const galleryThumbs = ((isWear || isBrume) && productImages.length > 1)
-    ? `<div class="pp-thumbs">${productImages.map((img,i)=>`<button class="pp-thumb ${i===activeImgIdx?'active':''}" type="button" onclick="setProductGalleryImage(this,'${img}')"><img src="${img}" alt="${p.name}" loading="lazy"/></button>`).join("")}</div>`
+  /* Galerie : pilotée UNIQUEMENT par le nombre d'images, sans réglage ni
+     exception de catégorie. 1 image -> aucune vignette, aucune navigation,
+     aucun conteneur vide. 2 images ou plus -> les vignettes apparaissent
+     d'elles-mêmes, et disparaissent d'elles-mêmes si on repasse à une image.
+     (Avant le Lot 2, ces vignettes étaient réservées aux catégories vêtements
+     et brumes : les autres produits multi-images n'affichaient jamais leurs
+     images secondaires.)
+     Le chemin passe par data-src plutôt que par une chaîne interpolée dans un
+     onclick : une apostrophe dans un nom de fichier cassait le gestionnaire. */
+  const galleryThumbs = (productImages.length > 1)
+    ? `<div class="pp-thumbs" role="group" aria-label="Autres images du produit">${productImages.map((img,i)=>`<button class="pp-thumb ${i===activeImgIdx?'active':''}" type="button" data-src="${img}" aria-label="Voir l'image ${i+1} sur ${productImages.length}" aria-pressed="${i===activeImgIdx}" onclick="setProductGalleryImage(this)"><img src="${img}" alt="${p.name} — image ${i+1}" width="72" height="72" loading="lazy"/></button>`).join("")}</div>`
     : "";
 
   // Qualité panel (left) — varies slightly by type

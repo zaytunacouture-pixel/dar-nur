@@ -285,7 +285,75 @@ tr:hover td { background: #fafaf8; }
   color: var(--muted); font-size: .78rem; text-align: center; line-height: 1.4;
 }
 .img-actions { display: flex; flex-direction: column; gap: 8px; justify-content: center; }
+.thumb-wrap { position: relative; display: inline-block; line-height: 0; }
+.thumb-count {
+  position: absolute; right: -5px; bottom: -5px;
+  min-width: 17px; height: 17px; padding: 0 4px;
+  border-radius: 9px; background: var(--green); color: var(--gold);
+  font-size: .66rem; font-weight: 700; line-height: 17px; text-align: center;
+  border: 1px solid #fff;
+}
 .img-status { font-size: .8rem; color: var(--muted); margin-top: 2px; font-style: italic; }
+.img-status.err { color: var(--red); font-style: normal; font-weight: 600; }
+
+/* ── Galerie produit (Lot 2) ──
+   Les classes .img-preview* ci-dessus restent utilisées par les modals
+   Marque et Offre, qui n'ont qu'une seule image chacun — ne pas les retirer. */
+.gal-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
+.gal-head > label { font-size: .82rem; font-weight: 600; color: #444; margin: 0; }
+.gal-count { font-size: .78rem; color: var(--muted); }
+.gal-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+  gap: 10px; padding: 12px; background: #fafaf8;
+  border: 1px solid var(--border); border-radius: 8px;
+}
+.gal-empty {
+  grid-column: 1 / -1; padding: 22px 12px; text-align: center;
+  color: var(--muted); font-size: .85rem; line-height: 1.5;
+  border: 2px dashed var(--border); border-radius: 8px; background: #f5f5f3;
+}
+.gal-item {
+  background: #fff; border: 1px solid var(--border); border-radius: 8px;
+  overflow: hidden; display: flex; flex-direction: column;
+}
+.gal-item.is-main { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold); }
+.gal-item.dragging { opacity: .45; }
+.gal-item.drop-target { border-color: var(--gold); border-style: dashed; }
+.gal-thumb-wrap { position: relative; background: #f2f0ea; }
+.gal-thumb {
+  display: block; width: 100%; aspect-ratio: 1; object-fit: cover;
+  background: #f2f0ea;
+}
+.gal-tag {
+  position: absolute; top: 6px; left: 6px;
+  font-size: .66rem; font-weight: 700; letter-spacing: .04em;
+  padding: 2px 7px; border-radius: 20px;
+  background: rgba(13,31,22,.82); color: #fff;
+}
+.gal-item.is-main .gal-tag { background: var(--gold); color: var(--green); }
+.gal-tag.pending { background: var(--red); }
+.gal-actions { display: flex; flex-wrap: wrap; gap: 4px; padding: 6px; }
+.gal-actions button {
+  flex: 1 1 auto; min-width: 36px; min-height: 36px;
+  border: 1px solid var(--border); border-radius: 6px; background: #fff;
+  cursor: pointer; font-size: .84rem; line-height: 1; padding: 6px 4px;
+}
+.gal-actions button:hover:not(:disabled) { border-color: var(--gold); background: #fffdf7; }
+.gal-actions button:disabled { opacity: .32; cursor: not-allowed; }
+.gal-actions button.main-btn { color: var(--gold-dark, #8a6a26); }
+.gal-actions button.del-btn  { color: var(--red); }
+.gal-drag {
+  display: none; /* poignée révélée sur desktop uniquement */
+  cursor: grab; color: var(--muted); font-size: .8rem;
+  padding: 3px 0 0; text-align: center; user-select: none;
+}
+@media (hover: hover) and (pointer: fine) { .gal-drag { display: block; } }
+.gal-toolbar {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  margin-top: 10px;
+}
+.gal-hint { font-size: .78rem; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+
 .btn-menu { display: none; }   /* masqué sur desktop, révélé via media query */
 
 /* ══════════════════════════════════════════════
@@ -347,6 +415,17 @@ tr:hover td { background: #fafaf8; }
   /* ── Modals 1 colonne ── */
   .form-grid { grid-template-columns: 1fr; }
   .modal { padding: 18px; }
+  /* ── Galerie produit sur téléphone ──
+     Deux colonnes plutôt qu'une : une vignette pleine largeur ferait défiler
+     interminablement une fiche à 10 images. Les boutons passent à 44 px de
+     haut (cible tactile confortable) et la poignée de glisser-déposer reste
+     masquée — Monter/Descendre sont les seules actions d'ordre au doigt. */
+  .gal-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 8px; }
+  .gal-actions { gap: 5px; padding: 5px; }
+  .gal-actions button { min-height: 44px; font-size: .95rem; flex: 1 1 40%; }
+  .gal-toolbar { flex-direction: column; align-items: stretch; }
+  .gal-toolbar .btn { width: 100%; min-height: 46px; font-size: .92rem; }
+
   /* Variante sur petit écran : nom sur toute la largeur, puis options / prix /
      bouton sur une seconde ligne. Sans ces règles, le 4ᵉ élément de la grille
      retombait seul sur une ligne et le bouton ✕ s'étirait sur toute la largeur. */
@@ -519,19 +598,21 @@ tr:hover td { background: #fafaf8; }
 
     <input type="hidden" id="p-id"/>
 
-    <!-- Image principale -->
+    <!-- Images du produit -->
     <div class="img-section">
-      <label>Image principale</label>
-      <div class="img-preview-wrap">
-        <div id="img-placeholder" class="img-placeholder">Aucune<br>image</div>
-        <img id="img-preview" class="img-preview" style="display:none" alt="Aperçu produit"/>
-        <div class="img-actions">
-          <button class="btn btn-outline btn-small" type="button" onclick="document.getElementById('img-file-input').click()">📁 Changer l'image</button>
-          <button class="btn btn-danger btn-small" type="button" id="img-remove-btn" style="display:none" onclick="removeProductImage()">✕ Supprimer l'image</button>
-          <div class="img-status" id="img-status"></div>
-        </div>
+      <div class="gal-head">
+        <label>Images du produit</label>
+        <span class="gal-count" id="gal-count"></span>
       </div>
-      <input type="file" id="img-file-input" accept="image/jpeg,image/png,image/webp,image/gif" style="display:none" onchange="handleImageSelect(this.files[0])"/>
+      <div class="gal-grid" id="gal-grid"></div>
+      <div class="gal-toolbar">
+        <button class="btn btn-outline" type="button" onclick="document.getElementById('img-file-input').click()">
+          📷 Ajouter des images
+        </button>
+        <div class="img-status" id="img-status"></div>
+      </div>
+      <input type="file" id="img-file-input" accept="image/jpeg,image/png,image/webp,image/gif"
+             multiple style="display:none" onchange="handleImageSelect(this.files)"/>
     </div>
 
     <div class="form-grid">
@@ -851,10 +932,9 @@ let filteredProducts = [];
 let currentPage      = 1;
 const PAGE_SIZE      = 25;
 
-// ── État image modal produit ───────────────────────────────────────────────────
-let currentImages    = [];
-let pendingImageFile = null;
-let imageRemoved     = false;
+// ── État galerie du modal produit ──────────────────────────────────────────────
+// (galleryItems / galleryDirty sont déclarés avec le composant de galerie,
+//  plus bas — voir « GALERIE PRODUIT (Lot 2) ».)
 
 // ── État variantes du modal produit ────────────────────────────────────────────
 // Identifiants des variantes retirées du formulaire, supprimées en base au
@@ -874,47 +954,266 @@ let brandPendingFile     = null;
 let brandImageRemoved    = false;
 let _brandModalFromProduct = false; // true si ouvert depuis le modal produit
 
-function showImgPreview(url) {
-  document.getElementById('img-preview').src          = url;
-  document.getElementById('img-preview').style.display    = 'block';
-  document.getElementById('img-placeholder').style.display = 'none';
-  document.getElementById('img-remove-btn').style.display  = 'inline-block';
-}
+// ══════════════════════════════════════════════════════════════════════════════
+// GALERIE PRODUIT (Lot 2)
+//
+// Modèle de données : AUCUN changement de schéma. On écrit dans la colonne qui
+// existe déjà, `products.images text[]`, un tableau ORDONNÉ dont le premier
+// élément est l'image principale — la convention que lisent déjà, sans rien
+// modifier, index.html (getProductCardImage/getProductImages), les trois
+// générateurs et le JSON-LD. « Définir comme principale » déplace donc
+// simplement l'image en position 0.
+//
+// Il n'y a volontairement aucun réglage « activer la galerie ». Le nombre
+// d'images suffit : 1 image -> affichage simple, 2 ou plus -> vignettes.
+//
+// Philosophie héritée du Lot 1 : la colonne `images` n'est envoyée à Supabase
+// QUE si la galerie a réellement été touchée (galleryDirty). Enregistrer un
+// prix, un texte ou une variante ne réécrit jamais les images.
+// ══════════════════════════════════════════════════════════════════════════════
 
-function hideImgPreview() {
-  document.getElementById('img-preview').src          = '';
-  document.getElementById('img-preview').style.display    = 'none';
-  document.getElementById('img-placeholder').style.display = 'flex';
-  document.getElementById('img-remove-btn').style.display  = 'none';
+// Une entrée = { kind:'url', url } pour une image déjà en base,
+//              { kind:'file', file, previewUrl, name, size } pour un ajout en attente.
+let galleryItems  = [];
+let galleryDirty  = false;
+let galleryDragIx = null;
+
+function markGalleryDirty() {
+  galleryDirty = true;
 }
 
 function resetImageState() {
-  currentImages    = [];
-  pendingImageFile = null;
-  imageRemoved     = false;
+  galleryItems.forEach(it => { if (it.kind === 'file' && it.previewUrl) URL.revokeObjectURL(it.previewUrl); });
+  galleryItems = [];
+  galleryDirty = false;
+  galleryDragIx = null;
   const fi = document.getElementById('img-file-input');
   if (fi) fi.value = '';
-  const st = document.getElementById('img-status');
-  if (st) st.textContent = '';
-  hideImgPreview();
+  setGalleryStatus('');
+  renderGallery();
 }
 
-function handleImageSelect(file) {
-  if (!file) return;
-  pendingImageFile = file;
-  imageRemoved     = false;
-  showImgPreview(URL.createObjectURL(file));
-  const kb = (file.size / 1024).toFixed(0);
-  document.getElementById('img-status').textContent =
-    `${file.name} (${kb} Ko) — sera uploadé à l'enregistrement`;
+function setGalleryStatus(msg, type) {
+  const el = document.getElementById('img-status');
+  if (!el) return;
+  el.textContent = msg || '';
+  el.className = 'img-status' + (type === 'err' ? ' err' : '');
 }
 
-function removeProductImage() {
-  pendingImageFile = null;
-  imageRemoved     = true;
-  hideImgPreview();
-  document.getElementById('img-status').textContent = 'Image supprimée à l\'enregistrement';
+// Charge la galerie depuis la donnée produit. Copie défensive : on ne travaille
+// jamais sur le tableau de `allProducts`, pour qu'une modification abandonnée
+// (fermeture sans enregistrer) ne laisse aucune trace en mémoire.
+function loadGallery(images) {
+  galleryItems = (Array.isArray(images) ? images : [])
+    .filter(Boolean)
+    .map(url => ({ kind: 'url', url: String(url) }));
+  galleryDirty = false;
+  renderGallery();
 }
+
+function galleryPreviewSrc(item) {
+  return item.kind === 'file' ? item.previewUrl : safeImageSrc(item.url);
+}
+
+function renderGallery() {
+  const grid  = document.getElementById('gal-grid');
+  const count = document.getElementById('gal-count');
+  if (!grid) return;
+
+  const n = galleryItems.length;
+  if (count) {
+    count.textContent = n === 0 ? 'aucune image'
+      : n === 1 ? '1 image — pas de galerie sur la fiche'
+      : `${n} images — galerie affichée sur la fiche`;
+  }
+
+  if (!n) {
+    grid.innerHTML = `<div class="gal-empty">Aucune image.<br>La fiche affichera le logo Dar Nūr à la place.</div>`;
+    return;
+  }
+
+  grid.innerHTML = galleryItems.map((it, i) => {
+    const src     = galleryPreviewSrc(it);
+    const isMain  = i === 0;
+    const pending = it.kind === 'file';
+    const tag = pending
+      ? `<span class="gal-tag pending">À envoyer</span>`
+      : (isMain ? `<span class="gal-tag">Principale</span>` : `<span class="gal-tag">n°${i + 1}</span>`);
+    // width/height : réserve la place avant chargement, évite le sautillement
+    // de la grille quand 10 vignettes arrivent en même temps.
+    const img = src
+      ? `<img class="gal-thumb" src="${src}" alt="Image ${i + 1}" width="148" height="148" loading="lazy" onerror="this.style.visibility='hidden'"/>`
+      : `<div class="gal-thumb"></div>`;
+    return `
+      <div class="gal-item${isMain ? ' is-main' : ''}" data-ix="${i}" draggable="true">
+        <div class="gal-thumb-wrap">${img}${tag}</div>
+        <div class="gal-actions">
+          <button type="button" class="main-btn" onclick="galleryMakeMain(${i})" ${isMain ? 'disabled' : ''}
+                  title="Définir comme image principale" aria-label="Définir comme image principale">★</button>
+          <button type="button" onclick="galleryMove(${i}, -1)" ${i === 0 ? 'disabled' : ''}
+                  title="Monter" aria-label="Monter">▲</button>
+          <button type="button" onclick="galleryMove(${i}, 1)" ${i === n - 1 ? 'disabled' : ''}
+                  title="Descendre" aria-label="Descendre">▼</button>
+          <button type="button" class="del-btn" onclick="galleryRemove(${i})"
+                  title="Retirer cette image du produit" aria-label="Retirer cette image du produit">✕</button>
+        </div>
+        <div class="gal-drag" title="Glisser pour réordonner">⠿</div>
+      </div>`;
+  }).join('');
+
+  let hint = grid.parentElement.querySelector('.gal-hint');
+  if (!hint) {
+    hint = document.createElement('div');
+    hint.className = 'gal-hint';
+    grid.parentElement.insertBefore(hint, document.getElementById('img-file-input'));
+  }
+  hint.textContent = n > 1
+    ? "La première image est l'image principale (cartes, aperçus de lien, réseaux sociaux). ★ pour la changer, ▲▼ pour réordonner."
+    : "Ajoutez une deuxième image pour que la fiche affiche une galerie.";
+}
+
+function galleryMakeMain(i) {
+  if (i <= 0 || i >= galleryItems.length) return;
+  const [it] = galleryItems.splice(i, 1);
+  galleryItems.unshift(it);
+  markGalleryDirty();
+  renderGallery();
+}
+
+function galleryMove(i, delta) {
+  const j = i + delta;
+  if (i < 0 || j < 0 || i >= galleryItems.length || j >= galleryItems.length) return;
+  [galleryItems[i], galleryItems[j]] = [galleryItems[j], galleryItems[i]];
+  markGalleryDirty();
+  renderGallery();
+}
+
+// Retire la référence du produit — jamais le fichier du Storage. Vérifié le
+// 2026-08-25 sur la base de production : 31 URLs sont référencées à plus d'un
+// endroit, dont 28 partagées entre un produit et ses propres variantes
+// (ex. miel-costus-nigelle-2.webp sert au produit ET à sa variante 50 g).
+// Supprimer physiquement un fichier ici casserait donc silencieusement
+// l'affichage ailleurs. Voir la note « Suppression » du rapport de Lot 2.
+function galleryRemove(i) {
+  const it = galleryItems[i];
+  if (!it) return;
+  const principale = i === 0 && galleryItems.length > 1;
+  const msg = principale
+    ? "Retirer l'image principale de ce produit ?\n\nLa suivante deviendra automatiquement la principale.\nLe fichier n'est pas supprimé du stockage."
+    : "Retirer cette image du produit ?\n\nLe fichier n'est pas supprimé du stockage : il peut servir à une variante ou à une autre fiche.";
+  if (!confirm(msg)) return;
+  if (it.kind === 'file' && it.previewUrl) URL.revokeObjectURL(it.previewUrl);
+  galleryItems.splice(i, 1);
+  markGalleryDirty();
+  renderGallery();
+}
+
+// Sélection de fichiers — accepte plusieurs images d'un coup, et sur téléphone
+// ouvre directement la photothèque (accept="image/*" + multiple).
+async function handleImageSelect(fileList) {
+  const files = [...(fileList || [])];
+  if (!files.length) return;
+
+  const MAX_MO = 12;
+  const rejets = [];
+  for (const file of files) {
+    if (!/^image\//.test(file.type)) { rejets.push(`${file.name} (pas une image)`); continue; }
+    if (file.size > MAX_MO * 1024 * 1024) { rejets.push(`${file.name} (> ${MAX_MO} Mo)`); continue; }
+    const prepared = await prepareImageForUpload(file);
+    galleryItems.push({
+      kind: 'file',
+      file: prepared.file,
+      previewUrl: URL.createObjectURL(prepared.file),
+      name: file.name,
+      size: prepared.file.size,
+      resized: prepared.resized,
+    });
+  }
+  document.getElementById('img-file-input').value = '';
+
+  const ajoutees = files.length - rejets.length;
+  if (ajoutees > 0) markGalleryDirty();
+  renderGallery();
+
+  const attente = galleryItems.filter(it => it.kind === 'file');
+  const poids = attente.reduce((s, it) => s + it.size, 0);
+  const allegees = attente.filter(it => it.resized).length;
+  let msg = attente.length
+    ? `${attente.length} image(s) en attente (${Math.round(poids / 1024)} Ko) — envoyées à l'enregistrement`
+    : '';
+  if (allegees) msg += ` · ${allegees} redimensionnée(s)`;
+  if (rejets.length) msg += (msg ? ' · ' : '') + `Ignoré : ${rejets.join(', ')}`;
+  setGalleryStatus(msg, rejets.length ? 'err' : null);
+}
+
+// Redimensionnement/conversion côté navigateur avant envoi. Volontairement
+// minimal : pas de dépendance, pas de service externe, pas de traitement
+// serveur. Objectif unique — qu'une photo prise au téléphone (souvent 3 à 5 Mo,
+// 4000 px de large) n'arrive pas telle quelle sur une carte produit et n'annule
+// pas le travail d'optimisation d'images déjà fait sur le site.
+// En cas d'échec ou de résultat plus lourd, on garde le fichier d'origine :
+// cette étape ne doit jamais empêcher un envoi.
+const UPLOAD_MAX_PX = 1600;
+async function prepareImageForUpload(file) {
+  try {
+    if (file.type === 'image/gif') return { file, resized: false };
+    const bitmap = await createImageBitmap(file);
+    const scale  = Math.min(1, UPLOAD_MAX_PX / Math.max(bitmap.width, bitmap.height));
+    const needed = scale < 1 || file.size > 400 * 1024;
+    if (!needed) { bitmap.close?.(); return { file, resized: false }; }
+
+    const w = Math.round(bitmap.width * scale);
+    const h = Math.round(bitmap.height * scale);
+    const canvas = document.createElement('canvas');
+    canvas.width = w; canvas.height = h;
+    canvas.getContext('2d').drawImage(bitmap, 0, 0, w, h);
+    bitmap.close?.();
+
+    const blob = await new Promise(res => canvas.toBlob(res, 'image/webp', 0.82));
+    if (!blob || blob.size >= file.size) return { file, resized: false };
+
+    const base = file.name.replace(/\.[^.]+$/, '');
+    return { file: new File([blob], `${base}.webp`, { type: 'image/webp' }), resized: true };
+  } catch {
+    return { file, resized: false };   // navigateur récalcitrant : on envoie l'original
+  }
+}
+
+// Glisser-déposer, desktop uniquement (la poignée est masquée au tactile).
+// Complément du couple ▲▼, jamais l'unique moyen de réordonner.
+document.addEventListener('dragstart', (e) => {
+  const item = e.target.closest?.('#gal-grid .gal-item');
+  if (!item) return;
+  galleryDragIx = Number(item.dataset.ix);
+  item.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+});
+document.addEventListener('dragover', (e) => {
+  const item = e.target.closest?.('#gal-grid .gal-item');
+  if (!item || galleryDragIx === null) return;
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  document.querySelectorAll('#gal-grid .drop-target').forEach(x => x.classList.remove('drop-target'));
+  item.classList.add('drop-target');
+});
+document.addEventListener('drop', (e) => {
+  const item = e.target.closest?.('#gal-grid .gal-item');
+  if (!item || galleryDragIx === null) return;
+  e.preventDefault();
+  const to = Number(item.dataset.ix);
+  if (to !== galleryDragIx) {
+    const [moved] = galleryItems.splice(galleryDragIx, 1);
+    galleryItems.splice(to, 0, moved);
+    markGalleryDirty();
+  }
+  galleryDragIx = null;
+  renderGallery();
+});
+document.addEventListener('dragend', () => {
+  galleryDragIx = null;
+  document.querySelectorAll('#gal-grid .dragging, #gal-grid .drop-target')
+    .forEach(x => x.classList.remove('dragging', 'drop-target'));
+});
 
 // ── Image marque ────────────────────────────────────────────────────────────────
 function showBrandImgPreview(url) {
@@ -1119,8 +1418,12 @@ function renderProductsPage() {
       : '<span class="badge badge-off">Inactif</span>')
       + (p.gift_idea ? ' <span class="badge badge-cat">Cadeau</span>' : '');
     const safeImg = safeImageSrc(img);
+    // Compteur d'images : repérer d'un coup d'œil, depuis la liste, les fiches
+    // qui n'ont qu'un seul visuel (donc pas de galerie publique).
+    const nbImgs = Array.isArray(p.images) ? p.images.filter(Boolean).length : 0;
+    const imgBadge = nbImgs > 1 ? `<span class="thumb-count" title="${nbImgs} images">${nbImgs}</span>` : '';
     const thumb = safeImg
-      ? `<img src="${safeImg}" class="thumb" loading="lazy" onerror="this.style.display='none'">`
+      ? `<span class="thumb-wrap"><img src="${safeImg}" class="thumb" loading="lazy" onerror="this.style.display='none'">${imgBadge}</span>`
       : `<span class="no-thumb"></span>`;
     return `<tr>
       <td>${thumb}</td>
@@ -1607,15 +1910,10 @@ function openProductModal(id) {
   document.getElementById('p-featured').checked  = !!p.featured;
   renderVariantRows(p.product_variants||[]);
 
-  // Image
-  currentImages    = Array.isArray(p.images) ? [...p.images] : [];
-  pendingImageFile = null;
-  imageRemoved     = false;
+  // Galerie
   document.getElementById('img-file-input').value = '';
-  document.getElementById('img-status').textContent = '';
-  const safePreview = currentImages.length > 0 ? safeImageSrc(currentImages[0]) : '';
-  if (safePreview) showImgPreview(safePreview);
-  else hideImgPreview();
+  setGalleryStatus('');
+  loadGallery(p.images);
 }
 
 /* Grise la section « Idées cadeaux » tant que la migration n'a pas été passée,
@@ -1657,6 +1955,9 @@ function closeProductModal() {
   // Fermer sans enregistrer annule les suppressions de variantes en attente —
   // elles ne doivent surtout pas se reporter sur le produit ouvert ensuite.
   pendingVariantDeletions = [];
+  // Idem pour la galerie : tout est en mémoire tant qu'on n'a pas enregistré,
+  // donc fermer suffit à tout annuler. On libère au passage les aperçus locaux.
+  resetImageState();
 }
 
 // Variantes dans le modal
@@ -1781,7 +2082,11 @@ async function saveProductModal() {
       gift_for_him: document.getElementById('p-gift-him').checked,
       gift_for_her: document.getElementById('p-gift-her').checked,
     } : {}),
-    images:         [],
+    // `images` n'est PAS déclaré ici : la colonne n'est ajoutée à l'objet que
+    // si la galerie a réellement été modifiée (voir plus bas). Une clé
+    // `images: []` posée « pour compléter l'objet » suffirait à effacer toutes
+    // les photos du produit au premier enregistrement — c'est exactement le
+    // défaut corrigé sur les variantes au Lot 1.
   };
 
   if (!product.name || !product.category_id) {
@@ -1851,26 +2156,34 @@ async function saveProductModal() {
   }, -1) + 1;
 
   try {
-    // ── Gestion image principale ───────────────────────────────────────────────
-    let finalImages = [...currentImages];
+    // ── Galerie ──────────────────────────────────────────────────────────────
+    // Même règle que pour les variantes (Lot 1) : la colonne `images` n'est
+    // transmise QUE si la galerie a réellement été modifiée. Enregistrer un
+    // prix, un texte ou une variante ne réécrit donc jamais les images, et une
+    // erreur éventuelle de ce composant ne peut pas les abîmer.
+    // Un produit neuf, lui, a toujours besoin de sa valeur initiale.
+    if (galleryDirty || isNewProduct) {
+      const aEnvoyer = galleryItems.filter(it => it.kind === 'file').length;
+      let envoyees = 0;
+      const urls = [];
 
-    if (pendingImageFile) {
-      const statusEl = document.getElementById('img-status');
-      if (statusEl) statusEl.textContent = 'Upload en cours…';
-      const ext  = pendingImageFile.name.split('.').pop().toLowerCase();
-      // `slug` et non `product.slug` : la colonne n'est plus transmise pour un
-      // produit existant, mais le chemin de stockage en a toujours besoin.
-      const path = `products/${slug}/${slug}-${Date.now()}.${ext}`;
-      const url  = await uploadImage(pendingImageFile, path);
-      // Remplace la première image, conserve les autres
-      finalImages = [url, ...finalImages.slice(1)];
-      if (statusEl) statusEl.textContent = 'Upload réussi ✓';
-    } else if (imageRemoved) {
-      // Retire la première image, conserve les autres
-      finalImages = finalImages.slice(1);
+      for (const it of galleryItems) {
+        if (it.kind === 'url') { urls.push(it.url); continue; }
+        envoyees++;
+        setGalleryStatus(`Envoi de l'image ${envoyees}/${aEnvoyer}…`);
+        const ext  = (it.file.name.split('.').pop() || 'webp').toLowerCase();
+        // Convention de chemin inchangée depuis la première version de l'admin
+        // — même bucket, même arborescence products/<slug>/ : aucun second
+        // système de stockage n'est introduit.
+        // `slug` et non `product.slug` : la colonne n'est plus transmise pour
+        // un produit existant, mais le chemin de stockage en a toujours besoin.
+        const path = `products/${slug}/${slug}-${Date.now()}-${envoyees}.${ext}`;
+        urls.push(await uploadImage(it.file, path));
+      }
+
+      if (aEnvoyer) setGalleryStatus(`${aEnvoyer} image(s) envoyée(s) ✓`);
+      product.images = urls;
     }
-
-    product.images = finalImages;
 
     const saved = await saveProduct(product);
 
@@ -1909,7 +2222,17 @@ async function saveProductModal() {
     closeProductModal();
     await loadAll();
   } catch(e) {
+    // Rien n'a été écrit sur le produit si l'échec vient d'un envoi d'image :
+    // saveProduct() n'est appelé qu'une fois TOUTES les images envoyées. Les
+    // images déjà en base restent donc intactes, et les fichiers en attente
+    // restent dans le formulaire — il suffit de réessayer.
     showToast('Erreur : ' + e.message, 'err');
+    const enAttente = galleryItems.filter(it => it.kind === 'file').length;
+    if (enAttente) {
+      setGalleryStatus(
+        `Échec de l'envoi — aucune modification enregistrée, vos images actuelles sont intactes. ` +
+        `${enAttente} image(s) toujours en attente : réessayez.`, 'err');
+    }
   }
 }
 
@@ -2290,6 +2613,6 @@ function closeSidebar() {
   font-size:.72rem; font-family:monospace; padding:4px 12px;
   border-radius:20px; pointer-events:none; z-index:9999;
   white-space:nowrap;
-">Admin version : variantes non destructives + URL protégée</div>
+">Admin version : galerie multi-images (Lot 2)</div>
 </body>
 </html>
