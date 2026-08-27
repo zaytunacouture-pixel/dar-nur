@@ -12,6 +12,7 @@
 - **Pages catégories** : 14 pages `<categorie>/index.html`, **générées depuis Supabase** par `scripts/generate-category-pages.mjs`. Le fichier committé est à la fois la source (nav, hero, texte éditorial, CSS, footer) et la sortie : seuls les blocs délimités par des marqueurs `<!-- AUTO:CATEGORY_*:START/END -->` sont réécrits.
 - **Fiches produit** : **237 pages statiques `/{slug}/`**, une par produit actif, générées par `scripts/generate-product-pages.mjs`. Chaque carte de page catégorie pointe vers `https://dar-nur.fr/<slug>/` — une vraie URL crawlable, pas une ancre.
 - **Parfums** : hub + une page par marque, générés par `scripts/generate-parfums.mjs` (pipeline séparé, voir sa section).
+- **Idées cadeaux** : `idees-cadeaux/index.html`, univers **transverse** au catalogue (pas une catégorie Supabase), généré par `scripts/generate-gift-page.mjs` sur le même modèle de blocs marqués que les pages catégories. Voir « Univers Idées cadeaux ».
 - **Hébergement** : **GitHub Pages** pour la production (`dar-nur.fr`, fichier `CNAME` à la racine). **Netlify** sert les deploy previews des pull requests.
 - **Design** : les variables CSS `:root` de `index.html` sont la seule source de vérité du design « Émeraude & Or ».
 
@@ -51,6 +52,7 @@
 | Bakhour & Encens | `bakhour/index.html` | idem | 1 produit, grille `.grid--single` centrée |
 | Miels de terroir | `miels-terroir/index.html` | idem | 1 produit |
 | Parfums (hub multi-marques) | `parfums/index.html` + `parfums/<brand_slug>/index.html` | `generate-parfums.mjs` | 30 produits, 4 marques (`khair`, `khamraha`, `lattafa`, `lecode`) |
+| Idées cadeaux | `idees-cadeaux/index.html` | `generate-gift-page.mjs` | Sélection transverse, filtres destinataire × budget, CTA WhatsApp dédié |
 | **Fiches produit** | `<slug>/index.html` × **237** | `generate-product-pages.mjs` | Une page par produit actif, URL propre et indexable |
 | Admin | `admin.html` | Manuel | Gestion produits/catégories/marques/offres (écrit dans Supabase) |
 | CGV / Confidentialité / Mentions légales | `cgv.html`, `confidentialite.html`, `mentions-legales.html` | Manuel | Statiques, mini-header « Retour » sans nav |
@@ -73,6 +75,7 @@ Quatre générateurs coexistent. Chacun est **propriétaire exclusif** de ses fi
 | `scripts/generate-product-pages.mjs` | Supabase `products` | les 237 `<slug>/index.html` | workflow `regenerate-product-pages.yml` |
 | `scripts/generate-category-pages.mjs` | Supabase `products` + `categories` | les blocs `AUTO:CATEGORY_*` des 14 pages catégories | même workflow, juste après |
 | `scripts/generate-parfums.mjs` | Supabase `products` (`category_id='parfums'`), groupés par `brand_slug` | `parfums/index.html`, `parfums/<brand_slug>/index.html`, bloc `AUTO:PARFUMS` de `sitemap.xml` | workflow `regenerate-parfums.yml` |
+| `scripts/generate-gift-page.mjs` | Supabase `products` (`gift_idea=true`) + `categories` | les blocs `AUTO:GIFT_*` de `idees-cadeaux/index.html` | même workflow, après les deux précédents |
 | `scripts/build-nav.mjs` | `data/nav.config.json` + `partials/nav.html` | `partials/nav-common.generated.html` **uniquement**, et seulement en mode `--write-artifact` (aucune page servie écrite) | manuel, rare (uniquement si la config nav change) |
 
 **Particularité de `generate-category-pages.mjs`** : contrairement aux deux autres générateurs de pages, il n'a **pas de gabarit séparé**. Le fichier `<dir>/index.html` committé est à la fois la source et la sortie ; seuls les blocs marqués sont réécrits en place, tout le reste (nav, hero, texte éditorial, CSS, tri, footer) n'est jamais touché. Ajouter une catégorie au pipeline = ajouter une entrée à `CATEGORY_PAGES` + poser les 4 marqueurs une fois dans le fichier existant. Jamais de refonte du fichier.
@@ -138,7 +141,7 @@ Ces workflows tournent réellement en production : l'historique de `main` contie
 
 ## Sitemap et robots
 
-- **`sitemap.xml`** : 257 URLs, aucun doublon. Le bloc délimité `<!-- AUTO:PARFUMS:START/END -->` appartient exclusivement à `generate-parfums.mjs` ; **tout le reste du fichier est maintenu à la main**. Conséquence pratique : ajouter une catégorie ou un produit impose de mettre le sitemap à jour manuellement — aucun générateur ne le fait à votre place hors du bloc parfums.
+- **`sitemap.xml`** : 258 URLs, aucun doublon (`/idees-cadeaux/` ajoutée à la main le 2026-08-27). Le bloc délimité `<!-- AUTO:PARFUMS:START/END -->` appartient exclusivement à `generate-parfums.mjs` ; **tout le reste du fichier est maintenu à la main**. Conséquence pratique : ajouter une catégorie ou un produit impose de mettre le sitemap à jour manuellement — aucun générateur ne le fait à votre place hors du bloc parfums.
 - **`robots.txt`** : autorise l'ensemble du site, déclare le sitemap, aucun `Disallow` actif. Aucun `noindex` nulle part sur les pages publiques.
 
 ## Catégories réelles (15, source Supabase `categories`)
@@ -197,6 +200,35 @@ Même principe pour les affirmations vérifiables : ne pas écrire qu'un catalog
 - **Nav interne** : chaque page a un dropdown « Parfums » généré automatiquement (hub + toutes les marques détectées, entrée courante active), via `buildParfumsNavBlock()`. La navigation *commune* provient, elle, de `partials/nav-common.generated.html`.
 - **Sitemap** : bloc `<!-- AUTO:PARFUMS:START/END -->` entièrement régénéré à chaque exécution. Nettoyage automatique : un dossier `parfums/<ancien-slug>/` dont la marque n'a plus de produit actif est supprimé, pour ne jamais laisser une page orpheline en ligne.
 - **Données** : colonnes `brand`/`brand_slug` sur `products` (voir section Supabase). Une table `brands` et son interface d'administration ont été ajoutées le 2026-07-19.
+
+## Univers Idées cadeaux (2026-08-27)
+
+Univers **transverse** : `/idees-cadeaux/` n'est pas une catégorie Supabase et ne duplique aucun produit. Elle republie des produits déjà au catalogue, sélectionnés par trois attributs administrables portés par `products`.
+
+**Modèle de données** — trois colonnes booléennes ajoutées par `supabase/sql/gift_ideas_migration.sql` (rollback : `gift_ideas_migration_rollback.sql`) :
+
+| Colonne | Rôle |
+|---|---|
+| `gift_idea` | Le produit apparaît sur `/idees-cadeaux/` et porte le badge « 🎁 Idée cadeau » |
+| `gift_for_him` | Destinataire « Pour lui » |
+| `gift_for_her` | Destinataire « Pour elle » |
+
+**Les tranches de budget ne sont jamais stockées.** Elles sont dérivées de `products.price_value` — la valeur même qu'affiche la carte, et déjà le prix mini d'un produit à variantes : `< 20 €`, `20 € à 50 €`, `50 € et +` (borne basse incluse, borne haute exclue). Un produit sans prix reste visible sous « Tous les budgets » mais n'est classé nulle part, plutôt que rangé dans une tranche inventée.
+
+**Patron suivi : celui de `coming_soon`**, à l'identique — colonne booléenne sur `products`, case à cocher dans `admin.html`, comparaison **stricte à `true`** partout (`p.gift_idea === true`), donc une colonne absente vaut `false` et aucune carte n'est marquée. Aucune liste de slugs n'existe dans le code : ajouter ou retirer une idée cadeau ne demande jamais de toucher un fichier.
+
+**Points de rendu** :
+
+- `idees-cadeaux/index.html` — blocs marqués `AUTO:GIFT_JSONLD`, `AUTO:GIFT_FILTERS`, `AUTO:GIFT_COUNT`, `AUTO:GIFT_PRODUCTS`. Le fichier committé est à la fois source et sortie, exactement comme une page catégorie. Grille statique complète (indexable sans JS) ; le script de filtre ne lit que `data-him` / `data-her` / `data-budget`, il n'a pas à évoluer quand la sélection change. Les effectifs des pilules sont dérivés des produits réels, ils ne peuvent pas diverger de la grille.
+- `scripts/generate-category-pages.mjs` — badge `.card-gift` sur les cartes, au même endroit que `.card-soon`.
+- `index.html` — badge `.card-gift` dans `renderGrid()`, et section « Pour qui est-ce idéal ? » sur la fiche (réutilise `.pp-ideal`, aucun CSS nouveau). La section n'apparaît que si le produit déclare réellement un destinataire — jamais de texte générique ajouté à toutes les fiches.
+- `admin.html` — trois cases à cocher. **Garde-fou** : `giftColumnsReady` détecte la présence des colonnes sur les lignes réellement retournées et n'envoie ces champs que si elles existent. Sans ce garde-fou, un PATCH mentionnant une colonne absente est rejeté par PostgREST (PGRST204) et **tout** enregistrement produit échouerait — même piège que la colonne `brand` en juillet 2026.
+
+**Comportement du générateur si la migration n'est pas passée** : `generate-gift-page.mjs` reconnaît l'erreur PostgREST 42703, journalise une notice et sort en 0 **sans toucher au fichier** — il ne doit pas faire échouer la régénération des 237 fiches. Si les colonnes existent mais qu'aucun produit n'est coché, il échoue au contraire bruyamment : mieux vaut une génération qui échoue qu'un univers cadeau publié vide.
+
+**Contrainte de navigation résolue au passage.** La rangée desktop ne tient que **9 entrées de premier niveau** : mesuré au navigateur, un 10ᵉ item déborde de 56 px à 1240 px (borne basse de la plage desktop). L'entrée « Idées cadeaux » a donc été gagnée en déplaçant `/accessoires/` du premier niveau vers le groupe « Mode & Accessoires » — dont il porte déjà le nom. Le nombre d'entrées de premier niveau est inchangé, `nav.css` n'a pas bougé, et aucun lien n'est perdu. Sur `/accessoires/`, le déclencheur du groupe porte désormais `aria-current="true"`, comme le fait « Bien-être » pour ses pages.
+
+**Aide WhatsApp** : le CTA « Besoin d'aide pour choisir un cadeau ? » réutilise le numéro unique `wa.me/33769253375` et la mécanique de message prérempli déjà en place. Aucun second système WhatsApp n'a été créé, et `waLink()` n'a pas été modifié — les messages de commande existants sont intacts.
 
 ## Hébergement et déploiement
 
@@ -295,6 +327,7 @@ Sujets identifiés, mesurés, et **volontairement laissés en l'état**. Aucun n
 
 > **Historique.** Les entrées ci-dessous sont datées et décrivent l'état du projet au moment où elles ont été écrites. Elles peuvent donc contenir des informations aujourd'hui dépassées. L'état courant et les règles à suivre sont décrits dans les sections précédentes.
 
+- **2026-08-27 — Phase 1 « Idées cadeaux » : univers transverse `/idees-cadeaux/` (branche `claude/dar-nur-gift-ideas-phase1-qajnt4`).** Nouveau parcours d'achat orienté cadeau, bâti **sans créer un seul produit** : la page republie 26 références déjà au catalogue, filtrables par destinataire (« Pour lui » / « Pour elle », un produit pouvant relever des deux) et par budget (`< 20 €`, `20–50 €`, `50 € et +`). **Les budgets ne sont pas saisis** : ils sont dérivés de `products.price_value`, la valeur même qu'affiche la carte. Trois colonnes administrables ajoutées à `products` (`gift_idea`, `gift_for_him`, `gift_for_her`) sur le patron exact de `coming_soon`, pilotées depuis `admin.html` — aucune liste de slugs n'existe dans le code. Nouveau générateur `scripts/generate-gift-page.mjs` (blocs `AUTO:GIFT_*`), branché sur le workflow existant, tolérant si la migration n'est pas encore passée et bloquant si la sélection est vide. Point de navigation : la rangée desktop étant saturée à 9 entrées (10ᵉ item = +56 px de débordement à 1240 px, mesuré), `/accessoires/` a été déplacée du premier niveau vers le groupe « Mode & Accessoires » pour libérer la place — `nav.css` inchangé. **La migration `supabase/sql/gift_ideas_migration.sql` n'a pas été exécutée** (Supabase injoignable depuis l'environnement de travail) : tant qu'elle ne l'est pas, la page vit sur sa sélection publiée, aucun badge n'apparaît ailleurs, et la section « Idées cadeaux » d'`admin.html` reste grisée.
 - **2026-08-21 — Lot 4 : `abayas/` générée, 15/15 catégories automatisées (PR #20, merge `87f1022`).** Dernière page catégorie mise sous pipeline, et la plus lourde : 62 produits actifs, 12 groupes, 13 pilules. L'audit préalable a confirmé la parité (62 cartes = 62 produits actifs, même ordre que `sort_order`, mêmes prix, images et taglines) — contrairement aux lots précédents, ni orphelin ni donnée fausse à corriger. Deux écarts seulement, tous deux arbitrés : `vt-layali-beige` était la seule des 62 cartes à porter « À partir de » alors que les 12 produits à variantes ont le même prix sur leurs 4 tailles (préfixe retiré, pas de `pricePrefix` sur cette page) ; et `abayas/` est la seule grille du site en `aspect-ratio:3/4`, d'où une **nouvelle option générique du générateur : `cfg.imageWidth`/`cfg.imageHeight`** (défaut `400`/`400`, validation entier strictement positif, opt-in). Non-régression prouvée avant ajout de la configuration Abayas : les 13 pages déjà automatisées, qui ne déclarent rien, sortent au bit près identiques à leur baseline (13/13 par comparaison de hash d'objet Git). Nettoyage SEO au passage : suppression du compteur « 62 » figé à cinq endroits (meta description, `og:description`, `twitter:description`, description JSON-LD, `<h2>`) et du prix minimum « 39,90 € » dans trois descriptions, ainsi que de deux affirmations fausses sur les tailles (50 des 62 produits n'ont aucune variante en base). Fichiers modifiés : `abayas/index.html`, `scripts/generate-category-pages.mjs`.
 - **2026-08-21 — Lot 3 : `brumes/` et `poudres/` générées, **0 orphelin atteint** (PR #19, merge `e5f4406`).** Les deux dernières pages porteuses d'orphelins. Contrairement aux lots 1 et 2, la génération change ici du contenu visible : l'audit préalable a relevé sept divergences entre le HTML écrit à la main et Supabase, toutes arbitrées en faveur de la base — `brumes/` avait 5 prix faux sur 5 (dont −10 € sur `br-nila` et `br-apaisante`) et affichait « À partir de » alors qu'aucune brume n'a de variante ; `poudres/` affichait 7,00 € pour 5,00 € en base sur `pdr-nila`, et `grn-baraka` portait une faute d'accord plus une affiche marketing au lieu de sa photo produit. Aucune donnée Supabase modifiée : ce sont les pages qui se sont alignées. À l'issue de ce lot, **les 3 derniers orphelins du site** (`spray-brumisateur-hibiscus-nigelle`, `dn-poudre-de-sidr-50g`, `dn-ismid-medine`) ont un lien entrant.
 - **2026-08-20 — Lot 2 : `gelules/`, `chaussures/`, `huiles/` générées (PR #18, merge `2d71542`).** Trois pages sans filtres ni tri, déjà à jour : aucun orphelin avant, aucun après. L'audit contenu préalable (39 produits, champ par champ) n'a relevé aucune divergence — contrairement au Lot 1, aucune donnée n'a eu besoin d'être ressaisie. Un seul écart de gabarit inédit : `huiles/` porte le prix dans un `<span>` là où les autres pages utilisent un `<div>`, d'où la nouvelle option `cfg.priceTag` (liste fermée `div`/`span`, pour qu'une faute de configuration ne puisse pas injecter de markup arbitraire).

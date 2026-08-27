@@ -68,6 +68,19 @@ jobs:
       - name: Générer les pages catégories (blocs marqués) depuis Supabase
         run: node scripts/generate-category-pages.mjs
 
+      # Blocs marqués AUTO:GIFT_* de idees-cadeaux/index.html. Même source
+      # d'événements que les deux générateurs ci-dessus (tout changement
+      # produit). Si les colonnes gift_* n'existent pas encore en base
+      # (migration supabase/sql/gift_ideas_migration.sql non passée), le script
+      # journalise une notice et sort en 0 sans toucher au fichier — il ne doit
+      # pas faire échouer la régénération des 237 fiches.
+      #
+      # idees-cadeaux/index.html n'est PAS ajouté au filtre `paths` du
+      # déclencheur `push` : ce fichier est une SORTIE de ce workflow, l'y
+      # inscrire rendrait son propre commit capable de se redéclencher.
+      - name: Générer la page Idées cadeaux (blocs marqués) depuis Supabase
+        run: node scripts/generate-gift-page.mjs
+
       - name: Vérifier si le contenu généré a réellement changé
         id: diff
         run: |

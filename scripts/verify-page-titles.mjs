@@ -18,10 +18,15 @@ const SITE = 'https://dar-nur.fr';
 function fail(scope, msg) { console.error(`  ✘ [${scope}] ${msg}`); }
 function warn(scope, msg) { console.warn(`  ⚠ [${scope}] ${msg}`); }
 
+// Pages de collection servies depuis un répertoire (<dir>/index.html) :
+// les 14 catégories, plus l'univers transverse « Idées cadeaux », qui n'est
+// pas une catégorie Supabase mais obéit aux mêmes règles de <title>,
+// canonical et <h1> unique.
 const CATEGORY_DIRS = [
   'miels', 'huiles', 'poudres', 'gelules', 'brumes', 'qamis', 'abayas',
   'bakhour', 'tahara', 'chaussures', 'chechias', 'accessoires',
   'miels-gourmands', 'miels-terroir',
+  'idees-cadeaux',
 ];
 
 // Doublons de <title> déjà identifiés lors de l'audit (2026-07-17) : produits

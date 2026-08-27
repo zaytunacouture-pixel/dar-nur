@@ -180,6 +180,10 @@ button,select{font-family:inherit;cursor:pointer}
 .meta-chip{display:inline-flex;align-items:center;gap:6px;font-family:'Jost';font-size:.66rem;color:var(--gold-dark);letter-spacing:.02em;margin-bottom:7px}
 .card-tagline{font-family:'Cormorant Garamond';font-style:italic;font-size:.92rem;color:var(--muted);line-height:1.5;flex:1;margin-bottom:12px}
 .card-soon{align-self:flex-start;font-family:'Cinzel';font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:#fff;background:var(--muted);padding:5px 10px;border-radius:3px;margin-bottom:10px}
+/* Badge "Idée cadeau" — piloté uniquement par products.gift_idea, comme
+   .card-soon l'est par products.coming_soon. Filet or sur fond crème :
+   uniquement des tokens déjà définis dans :root, aucune couleur nouvelle. */
+.card-gift{align-self:flex-start;display:inline-flex;align-items:center;gap:5px;font-family:'Cinzel';font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-dark);background:var(--cream);border:1px solid var(--line);padding:4px 9px;border-radius:3px;margin-bottom:10px}
 .card-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:auto}
 .card-price{font-family:'Cormorant Garamond';font-size:1.2rem;font-weight:600;color:var(--ink);white-space:nowrap}
 .card-price small{font-family:'Jost',sans-serif;font-size:.68rem;font-style:normal;color:var(--muted);display:block;line-height:1}
@@ -245,6 +249,9 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
         <li class="nav-item" role="none">
   <a href="https://dar-nur.fr/#boutique" id="nav-boutique" >Boutique</a>
 </li>
+<li class="nav-item" role="none">
+  <a href="/idees-cadeaux/" id="nav-idees-cadeaux" >Idées cadeaux</a>
+</li>
 <li class="nav-item nav-dropdown" role="none">
   <button
     type="button"
@@ -308,13 +315,13 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
 <li class="nav-item" role="none">
   <a href="/chechias/" id="nav-chechias" >Chéchias</a>
 </li>
+<li class="nav-item" role="none">
+  <a href="/accessoires/" id="nav-accessoires" >Accessoires</a>
+</li>
   </ul>
 </li>
 <li class="nav-item" role="none">
   <a href="/tahara/" id="nav-tahara" >Tahara & Hygiène</a>
-</li>
-<li class="nav-item" role="none">
-  <a href="/accessoires/" id="nav-accessoires" >Accessoires</a>
 </li>
 <li class="nav-item" role="none">
   <a href="https://dar-nur.fr/#histoire" id="nav-notre-histoire" >Notre histoire</a>
@@ -684,6 +691,7 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
     <div class="foot-cols">
       <div class="foot-col">
         <h3>Boutique</h3>
+        <a href="/idees-cadeaux/">Idées cadeaux</a>
         <a href="/miels/">Miels</a>
         <a href="/huiles/">Huiles</a>
         <a href="/parfums/">Parfums &amp; Muscs</a>

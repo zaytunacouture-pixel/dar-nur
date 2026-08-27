@@ -585,6 +585,26 @@ tr:hover td { background: #fafaf8; }
           <input type="checkbox" id="p-coming-soon"/> Disponible prochainement
         </label>
       </div>
+      <!-- Idées cadeaux — alimente /idees-cadeaux/ et le badge « Idée cadeau ».
+           La tranche de budget n'est pas saisie ici : elle est déduite
+           automatiquement du prix de base. -->
+      <div class="form-field full" id="gift-fields" style="border-top:1px solid var(--line);padding-top:12px">
+        <label>Idées cadeaux <small style="color:var(--muted);font-weight:400">(le budget est déduit automatiquement du prix)</small></label>
+        <p id="gift-fields-note" hidden style="margin:0 0 8px;font-size:.82rem;color:var(--muted)">
+          Non disponible : exécuter <code>supabase/sql/gift_ideas_migration.sql</code> dans le SQL Editor Supabase pour activer ces options.
+        </p>
+        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+          <label class="toggle-row">
+            <input type="checkbox" id="p-gift-idea"/> Idée cadeau
+          </label>
+          <label class="toggle-row">
+            <input type="checkbox" id="p-gift-him"/> Pour lui
+          </label>
+          <label class="toggle-row">
+            <input type="checkbox" id="p-gift-her"/> Pour elle
+          </label>
+        </div>
+      </div>
     </div>
 
     <!-- Variantes -->
@@ -777,6 +797,13 @@ tr:hover td { background: #fafaf8; }
 <script>
 // ── État global ────────────────────────────────────────────────────────────────
 let allProducts      = [];
+/* Les colonnes gift_* n'existent qu'une fois supabase/sql/gift_ideas_migration.sql
+   exécutée. Tant qu'elles sont absentes, PostgREST rejette tout PATCH/INSERT qui
+   les mentionne (PGRST204) — ce qui casserait TOUS les enregistrements produit,
+   pas seulement la partie cadeau. On détecte donc leur présence sur les lignes
+   réellement retournées par select=* et on n'envoie ces champs que si elles
+   existent. Même piège que la colonne `brand` en juillet 2026. */
+let giftColumnsReady = false;
 let allCategories    = [];
 let allBrands        = [];
 let allOffers        = [];
@@ -942,6 +969,8 @@ async function loadAll() {
     fetchOffers()
   ]);
   allProducts   = prods  || [];
+  giftColumnsReady = allProducts.length > 0 && 'gift_idea' in allProducts[0];
+  applyGiftColumnsState();
   allCategories = cats   || [];
   allBrands     = brands || [];
   allOffers     = offs   || [];
@@ -1036,11 +1065,12 @@ function renderProductsPage() {
     const img      = p.images?.[0] || '';
     const price    = p.price_value != null ? p.price_value.toFixed(2)+' €' : '—';
     const varCount = p.product_variants?.length || 0;
-    const status   = p.active
+    const status   = (p.active
       ? (p.coming_soon
           ? '<span class="badge badge-ok">Actif</span> <span class="badge badge-cat">Bientôt</span>'
           : '<span class="badge badge-ok">Actif</span>')
-      : '<span class="badge badge-off">Inactif</span>';
+      : '<span class="badge badge-off">Inactif</span>')
+      + (p.gift_idea ? ' <span class="badge badge-cat">Cadeau</span>' : '');
     const safeImg = safeImageSrc(img);
     const thumb = safeImg
       ? `<img src="${safeImg}" class="thumb" loading="lazy" onerror="this.style.display='none'">`
@@ -1403,6 +1433,9 @@ function openProductModal(id) {
   document.getElementById('p-sort').value         = p.sort_order ?? 0;
   document.getElementById('p-active').checked       = !!p.active;
   document.getElementById('p-coming-soon').checked  = !!p.coming_soon;
+  document.getElementById('p-gift-idea').checked     = !!p.gift_idea;
+  document.getElementById('p-gift-him').checked      = !!p.gift_for_him;
+  document.getElementById('p-gift-her').checked      = !!p.gift_for_her;
   document.getElementById('p-featured').checked  = !!p.featured;
   renderVariantRows(p.product_variants||[]);
 
@@ -1417,6 +1450,20 @@ function openProductModal(id) {
   else hideImgPreview();
 }
 
+/* Grise la section « Idées cadeaux » tant que la migration n'a pas été passée,
+   plutôt que de laisser cocher des cases qui ne seraient jamais enregistrées. */
+function applyGiftColumnsState() {
+  const box  = document.getElementById('gift-fields');
+  const note = document.getElementById('gift-fields-note');
+  if (!box) return;
+  ['p-gift-idea','p-gift-him','p-gift-her'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.disabled = !giftColumnsReady;
+  });
+  box.style.opacity = giftColumnsReady ? '1' : '.55';
+  if (note) note.hidden = giftColumnsReady;
+}
+
 function clearProductModal() {
   ['p-id','p-name','p-slug','p-tagline','p-description','p-benefits','p-benefits-label',
    'p-composition','p-provenance','p-usage','p-precautions','p-weight','p-volume',
@@ -1427,6 +1474,9 @@ function clearProductModal() {
   document.getElementById('p-active').checked      = true;
   document.getElementById('p-featured').checked    = false;
   document.getElementById('p-coming-soon').checked = false;
+  document.getElementById('p-gift-idea').checked  = false;
+  document.getElementById('p-gift-him').checked   = false;
+  document.getElementById('p-gift-her').checked   = false;
   document.getElementById('variants-list').innerHTML = '';
   resetImageState();
 }
@@ -1483,6 +1533,11 @@ async function saveProductModal() {
     active:         document.getElementById('p-active').checked,
     featured:       document.getElementById('p-featured').checked,
     coming_soon:    document.getElementById('p-coming-soon').checked,
+    ...(giftColumnsReady ? {
+      gift_idea:    document.getElementById('p-gift-idea').checked,
+      gift_for_him: document.getElementById('p-gift-him').checked,
+      gift_for_her: document.getElementById('p-gift-her').checked,
+    } : {}),
     images:         [],
   };
 

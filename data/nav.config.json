@@ -7,7 +7,8 @@
       "Le champ 'scope' vaut 'all' pour toutes les entrées actuelles : les 19 pages servies (homepage + 15 catégories + 3 pages parfums) affichent la même navigation. La valeur 'homepage' existe dans le vocabulaire du champ pour couvrir un futur cas d'entrée réellement propre à la homepage, mais n'est utilisée par aucune entrée aujourd'hui.",
       "'Qui sommes-nous ?' n'apparaît plus ici : décision déjà validée dans SPEC_FONCTIONNELLE_NAVIGATION_DAR_NUR.md §3 (fusionnée avec 'Notre histoire').",
       "L'ordre d'affichage est porté exclusivement par la position dans les tableaux 'entries'/'children' — aucun champ 'order' numérique redondant, pour éviter qu'il diverge de l'ordre réel.",
-      "Une seule structure sert à la fois le rendu desktop (survol/focus, dropdown en superposition) et mobile (liste continue, groupes non repliables) — seule la présentation (CSS) diffère entre les deux, jamais la donnée."
+      "Une seule structure sert à la fois le rendu desktop (survol/focus, dropdown en superposition) et mobile (liste continue, groupes non repliables) — seule la présentation (CSS) diffère entre les deux, jamais la donnée.",
+      "L'entrée 'accessoires' (/accessoires/) a été déplacée du premier niveau vers le groupe 'Mode & Accessoires' lors de l'ajout de 'Idées cadeaux' (Phase 1 cadeaux) : la rangée desktop ne tient que 9 entrées de premier niveau — mesuré au navigateur, un 10e item déborde de 56 px à 1240 px, la borne basse de la plage desktop. Le nombre d'entrées de premier niveau est donc inchangé, et /accessoires/ reste atteignable dans le groupe dont il porte déjà le nom."
     ]
   },
   "entries": [
@@ -19,19 +20,74 @@
       "scope": "all"
     },
     {
+      "id": "idees-cadeaux",
+      "label": "Idées cadeaux",
+      "type": "link",
+      "href": "/idees-cadeaux/",
+      "scope": "all"
+    },
+    {
       "id": "bien-etre",
       "label": "Bien-être",
       "type": "group",
       "scope": "all",
       "children": [
-        { "id": "miels", "label": "Miels", "type": "link", "href": "/miels/", "scope": "all" },
-        { "id": "miels-gourmands", "label": "Miels Gourmands", "type": "link", "href": "/miels-gourmands/", "scope": "all" },
-        { "id": "miels-terroir", "label": "Miels du Terroir", "type": "link", "href": "/miels-terroir/", "scope": "all" },
-        { "id": "gelules", "label": "Gélules", "type": "link", "href": "/gelules/", "scope": "all" },
-        { "id": "poudres", "label": "Poudres & Graines", "type": "link", "href": "/poudres/", "scope": "all" },
-        { "id": "huiles", "label": "Huiles", "type": "link", "href": "/huiles/", "scope": "all" },
-        { "id": "brumes", "label": "Brumes", "type": "link", "href": "/brumes/", "scope": "all" },
-        { "id": "bakhour", "label": "Bakhour & Encens", "type": "link", "href": "/bakhour/", "scope": "all" }
+        {
+          "id": "miels",
+          "label": "Miels",
+          "type": "link",
+          "href": "/miels/",
+          "scope": "all"
+        },
+        {
+          "id": "miels-gourmands",
+          "label": "Miels Gourmands",
+          "type": "link",
+          "href": "/miels-gourmands/",
+          "scope": "all"
+        },
+        {
+          "id": "miels-terroir",
+          "label": "Miels du Terroir",
+          "type": "link",
+          "href": "/miels-terroir/",
+          "scope": "all"
+        },
+        {
+          "id": "gelules",
+          "label": "Gélules",
+          "type": "link",
+          "href": "/gelules/",
+          "scope": "all"
+        },
+        {
+          "id": "poudres",
+          "label": "Poudres & Graines",
+          "type": "link",
+          "href": "/poudres/",
+          "scope": "all"
+        },
+        {
+          "id": "huiles",
+          "label": "Huiles",
+          "type": "link",
+          "href": "/huiles/",
+          "scope": "all"
+        },
+        {
+          "id": "brumes",
+          "label": "Brumes",
+          "type": "link",
+          "href": "/brumes/",
+          "scope": "all"
+        },
+        {
+          "id": "bakhour",
+          "label": "Bakhour & Encens",
+          "type": "link",
+          "href": "/bakhour/",
+          "scope": "all"
+        }
       ]
     },
     {
@@ -47,10 +103,41 @@
       "type": "group",
       "scope": "all",
       "children": [
-        { "id": "qamis", "label": "Qamis", "type": "link", "href": "/qamis/", "scope": "all" },
-        { "id": "abayas", "label": "Abayas & Ensembles", "type": "link", "href": "/abayas/", "scope": "all" },
-        { "id": "chaussures", "label": "Sandales", "type": "link", "href": "/chaussures/", "scope": "all" },
-        { "id": "chechias", "label": "Chéchias", "type": "link", "href": "/chechias/", "scope": "all" }
+        {
+          "id": "qamis",
+          "label": "Qamis",
+          "type": "link",
+          "href": "/qamis/",
+          "scope": "all"
+        },
+        {
+          "id": "abayas",
+          "label": "Abayas & Ensembles",
+          "type": "link",
+          "href": "/abayas/",
+          "scope": "all"
+        },
+        {
+          "id": "chaussures",
+          "label": "Sandales",
+          "type": "link",
+          "href": "/chaussures/",
+          "scope": "all"
+        },
+        {
+          "id": "chechias",
+          "label": "Chéchias",
+          "type": "link",
+          "href": "/chechias/",
+          "scope": "all"
+        },
+        {
+          "id": "accessoires",
+          "label": "Accessoires",
+          "type": "link",
+          "href": "/accessoires/",
+          "scope": "all"
+        }
       ]
     },
     {
@@ -58,13 +145,6 @@
       "label": "Tahara & Hygiène",
       "type": "link",
       "href": "/tahara/",
-      "scope": "all"
-    },
-    {
-      "id": "accessoires",
-      "label": "Accessoires",
-      "type": "link",
-      "href": "/accessoires/",
       "scope": "all"
     },
     {
