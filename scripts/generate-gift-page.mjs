@@ -272,10 +272,18 @@ async function main() {
     throw e;
   }
 
-  // Garde-fou : refuser de publier un univers cadeau vide. Mieux vaut une
-  // génération qui échoue qu'une page publiée sans aucune idée cadeau.
+  // Garde-fou : ne jamais publier un univers cadeau vide — la page garde sa
+  // sélection précédente plutôt que de se vider d'un coup.
+  //
+  // Sortie en code 0, et non une erreur : ce générateur partage son workflow
+  // avec generate-product-pages.mjs et generate-category-pages.mjs, et l'étape
+  // de commit vient APRÈS lui. Échouer ici empêcherait de committer les 237
+  // fiches et les 14 pages catégories déjà régénérées — un rayon d'action sans
+  // rapport avec la page cadeaux. L'avertissement reste visible dans le journal
+  // du workflow, et aucun octet n'est écrit.
   if (!products.length) {
-    throw new Error('Aucun produit actif avec gift_idea = true — refus de publier une sélection vide. Cocher au moins une « Idée cadeau » dans admin.html.');
+    log('::warning::Aucun produit actif avec gift_idea = true — page cadeaux laissée telle quelle (sélection précédente conservée). Cocher au moins une « Idée cadeau » dans admin.html pour la resynchroniser.');
+    return;
   }
 
   const seen = new Set();
