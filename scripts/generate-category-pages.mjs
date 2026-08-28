@@ -235,11 +235,20 @@ function buildCardHtml(p, pageTagLabel, isFirst, cfg) {
     ? '\n        <div class="card-soon">Disponible prochainement</div>'
     : '';
 
+  // Badge "Idée cadeau", pilote uniquement par products.gift_idea. Meme
+  // arbitrage que coming_soon ci-dessus : donnee metier generique, aucune
+  // categorie ni aucun slug traite a part, comparaison stricte a true (une
+  // colonne absente en base — migration gift_ideas_migration.sql non encore
+  // executee — vaut donc false, et aucune carte n'est marquee).
+  const giftBlock = p.gift_idea === true
+    ? '\n        <div class="card-gift">&#127873; Idée cadeau</div>'
+    : '';
+
   return `    <a href="https://dar-nur.fr/${esc(p.slug)}/" class="card"${attrs}>
       <div class="card-image"><img src="${esc(imgSrc)}" alt="${esc(p.name)} — Dar Nūr" loading="${loading}" width="${imageWidth}" height="${imageHeight}"/></div>
       <div class="card-body">
         <div class="cat-tag">${esc(cardTagLabel)}</div>
-        <h3>${esc(p.name)}</h3>${chipHtml}${taglineBlock}${comingSoonBlock}
+        <h3>${esc(p.name)}</h3>${chipHtml}${taglineBlock}${giftBlock}${comingSoonBlock}
         <div class="card-footer">
           <${priceTag} class="card-price">${priceHtml}</${priceTag}>
           <span class="card-cta">Voir la fiche</span>
