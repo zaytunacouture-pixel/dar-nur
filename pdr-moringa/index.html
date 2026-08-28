@@ -539,6 +539,11 @@ section{padding:15px 28px}
 .card:hover::after{transform:scaleX(1)}
 .card .emblem{width:44px;height:44px;margin-bottom:4px;color:var(--green);opacity:.92}
 .card .cat-tag{font-family:'Cinzel';font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:2px}
+/* Badge "Idée cadeau" — piloté uniquement par products.gift_idea.
+   Filet or sur fond crème : mêmes tokens que le reste de la carte, aucune
+   couleur nouvelle. Discret par construction, il ne doit rester lisible que
+   parce qu'il est rare. */
+.card .card-gift{display:inline-flex;align-items:center;gap:5px;font-family:'Cinzel';font-size:.55rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-dark);background:var(--cream);border:1px solid var(--line);padding:3px 9px;border-radius:2px;margin:0 0 5px}
 .card h3{font-size:0.85rem;color:var(--green);line-height:1.2;margin-bottom:3px;font-weight:500}
 .card .price{font-family:'Cormorant Garamond';font-size:1.3rem;color:var(--ink);font-weight:600;margin-top:auto}
 .card .price small{font-size:.8rem;color:var(--muted);font-style:italic}
@@ -909,6 +914,9 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
         <li class="nav-item" role="none">
   <a href="https://dar-nur.fr/#boutique" id="nav-boutique" >Boutique</a>
 </li>
+<li class="nav-item" role="none">
+  <a href="/idees-cadeaux/" id="nav-idees-cadeaux" >Idées cadeaux</a>
+</li>
 <li class="nav-item nav-dropdown" role="none">
   <button
     type="button"
@@ -972,13 +980,13 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
 <li class="nav-item" role="none">
   <a href="/chechias/" id="nav-chechias" >Chéchias</a>
 </li>
+<li class="nav-item" role="none">
+  <a href="/accessoires/" id="nav-accessoires" >Accessoires</a>
+</li>
   </ul>
 </li>
 <li class="nav-item" role="none">
   <a href="/tahara/" id="nav-tahara" >Tahara & Hygiène</a>
-</li>
-<li class="nav-item" role="none">
-  <a href="/accessoires/" id="nav-accessoires" >Accessoires</a>
 </li>
 <li class="nav-item" role="none">
   <a href="https://dar-nur.fr/#histoire" id="nav-notre-histoire" >Notre histoire</a>
@@ -1361,6 +1369,7 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
     <div class="foot-cols">
       <div class="foot-col">
         <h3>Boutique</h3>
+        <a href="/idees-cadeaux/">Idées cadeaux</a>
         <a href="/miels/">Miels</a>
         <a href="/huiles/">Huiles</a>
         <a href="/parfums/">Parfums & Muscs</a>
@@ -2755,6 +2764,17 @@ function startPrice(p){
   if(p.price.type==="fixed") return p.price.value;
   return p.price.options[0][1];
 }
+/* Destinataires réellement portés par le produit (colonnes Supabase
+   gift_for_him / gift_for_her). Retourne un tableau vide si le produit n'en
+   déclare aucun : la fiche n'affiche alors rien plutôt qu'un texte générique.
+   Comparaison stricte à true — une colonne absente en base vaut donc false,
+   même défensive que coming_soon. */
+function giftAudiences(p){
+  var out=[];
+  if(p.gift_for_him===true) out.push("Pour lui");
+  if(p.gift_for_her===true) out.push("Pour elle");
+  return out;
+}
 function priceLabel(p){
   if(p.price.type==="fixed") return `${p.price.value}€`;
   if(p.price.type==="format") return `dès ${p.price.options[0][1]}€`;
@@ -2815,6 +2835,7 @@ function renderGrid(){
       ${img ? `<div class="card-image has-photo"><img src="${img}" alt="${p.name}" loading="lazy"/></div>` : `<div class="card-logo-placeholder" aria-hidden="true"><img src="logo-dar-nur.png" alt="Dar Nūr"/></div>`}
       <div class="cat-tag">${CAT_LABELS[p.cat] || p.cat}</div>
       <h3>${p.name}</h3>
+      ${p.gift_idea===true?`<div class="card-gift">&#127873; Idée cadeau</div>`:``}
       <div class="price">${p.price.type==='format'?`<small>dès</small> ${p.price.options[0][1]}€`:`${startPrice(p)}€`}</div>
       <div class="card-actions">
         <a class="btn-product-wa" href="#" onclick="event.preventDefault();event.stopPropagation();showProduct('${p.id}')">Voir le produit</a>
@@ -3181,6 +3202,7 @@ function showProduct(id){
         ${mielPrintempsOriginBannerHTML(p)}
         ${p.description.map(d=>`<p>${d}</p>`).join("")}
         ${(()=>{const ip=(p.accordions||[]).find(a=>a.title==='Idéal pour');return ip?`<div class="pp-ideal"><span class="ideal-lbl">Idéal pour</span>${ip.html}</div>`:''})()}
+        ${(()=>{const auds=giftAudiences(p);return auds.length?`<div class="pp-ideal"><span class="ideal-lbl">Pour qui est-ce idéal&nbsp;?</span><ul>${auds.map(a=>`<li>${a}</li>`).join("")}</ul></div>`:''})()}
         ${(p.benefits&&p.benefits.length)?`<h2>${p.benefitsLabel || (isWear ? 'Points forts' : 'Bienfaits')}</h2>
         <ul class="pp-benefits">${p.benefits.map(b=>`<li>${b}</li>`).join("")}</ul>`:""}
         <h2>Le produit</h2>
@@ -3527,6 +3549,9 @@ syncBar();
         accordions:   p.accordions   || [],
         active:       true,
         coming_soon:  p.coming_soon  || false,
+        gift_idea:    p.gift_idea    || false,
+        gift_for_him: p.gift_for_him || false,
+        gift_for_her: p.gift_for_her || false,
       });
     });
 
