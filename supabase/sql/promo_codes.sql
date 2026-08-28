@@ -43,6 +43,26 @@
 --  volontaire, et cohérent avec public.admins (supabase/sql/admin_rls.sql).
 -- =====================================================================
 
+-- =====================================================================
+--  ÉTAPE 1 / 3 — INSTALLATION (transactionnelle)
+--
+--  Sélectionnez tout ce bloc, de « begin; » jusqu'à « commit; » inclus,
+--  et cliquez Run. Une SEULE valeur est à remplacer avant : le jeton
+--  jeton de la ligne « v_code text := ... » de la section 4.
+--
+--  ATOMICITÉ : les onze instructions ci-dessous (création de table, index,
+--  RLS, révocations, fonction, grants, insertion du code) sont encadrées
+--  par begin/commit. PostgreSQL sait annuler le DDL : si l'une d'elles
+--  échoue — jeton non remplacé, rôle absent, erreur de syntaxe — la
+--  transaction est annulée en bloc et la base revient exactement à son état
+--  d'avant. Aucune installation partielle n'est possible.
+--
+--  Si l'éditeur SQL affiche « WARNING: there is already a transaction in
+--  progress », c'est sans conséquence : cela signifie qu'il encadrait déjà
+--  le script dans sa propre transaction, et l'atomicité est acquise deux fois.
+-- =====================================================================
+begin;
+
 -- ---------------------------------------------------------------------
 -- 1) TABLE
 -- ---------------------------------------------------------------------
@@ -264,7 +284,7 @@ grant execute on function public.check_promo_code(text, jsonb) to authenticated;
 --    Un code écrit ici serait donc aussi public qu'un code écrit dans le
 --    JavaScript, ce qui annulerait tout l'intérêt du dispositif.
 --
---  MODE D'EMPLOI : remplacez REMPLACER_PAR_LE_CODE ci-dessous par le code
+--  MODE D'EMPLOI : remplacez le jeton de la ligne « v_code » ci-dessous par le code
 --  réel, dans le SQL Editor, juste avant d'exécuter. Ne recommittez jamais
 --  le fichier avec le code en clair. Le garde-fou refuse l'exécution si la
 --  substitution a été oubliée.
@@ -281,15 +301,22 @@ grant execute on function public.check_promo_code(text, jsonb) to authenticated;
 --  par Postgres, sans décalage codé en dur.
 do $$
 declare
-  -- Les DEUX valeurs sont à renseigner dans le SQL Editor, jamais ici.
+  -- ↓↓↓ LA SEULE VALEUR À REMPLACER DANS TOUT LE FICHIER ↓↓↓
+  --     Remplacez le jeton par le code réel, ici, dans l'éditeur SQL.
+  --     Ne jamais enregistrer le fichier avec le code en clair.
   v_code  text := 'REMPLACER_PAR_LE_CODE';
-  -- Le libellé est purement interne. Ne pas y remettre le code, ni un mot
-  -- qui le laisse deviner une fois associé au taux ci-dessous.
+  -- ↑↑↑ ------------------------------------------------- ↑↑↑
+
+  -- Libellé interne, facultatif : la valeur par défaut convient telle quelle.
+  -- Si vous la changez, n'y mettez ni le code, ni un mot qui le laisse deviner
+  -- une fois associé aux taux ci-dessous.
   v_label text := 'Remise catégorielle — parfums et miels';
 begin
-  if v_code = 'REMPLACER_PAR_LE_CODE' or btrim(v_code) = '' then
+  -- Le test porte sur le préfixe, jamais sur le jeton entier : un
+  -- « Remplacer tout » dans l'éditeur ne peut pas neutraliser ce garde-fou.
+  if btrim(v_code) = '' or upper(btrim(v_code)) like 'REMPLACER%' then
     raise exception
-      'Remplacez REMPLACER_PAR_LE_CODE par le code réel avant d''exécuter ce script.';
+      'Le jeton de la ligne « v_code text := ... » n''a pas été remplacé par le code réel. Rien n''a été installé.';
   end if;
 
   insert into public.promo_codes
@@ -310,124 +337,156 @@ begin
 end
 $$;
 
--- ---------------------------------------------------------------------
--- 5) VÉRIFICATIONS (à lire après exécution)
--- ---------------------------------------------------------------------
--- a) Le code est bien enregistré, et expire à la bonne date locale.
---    (La colonne `code` n'est volontairement pas sélectionnée : le résultat
---     d'une requête peut se retrouver copié dans un ticket ou une capture.)
-select active,
-       min_total_after_discount,
-       ends_at,
-       ends_at at time zone 'Europe/Paris' as fin_heure_de_paris,
-       rules,
-       created_at
-  from public.promo_codes
- order by created_at desc
- limit 5;
+commit;
+-- ↑ FIN DE L'ÉTAPE 1. Tout ce qui suit se lance séparément, après coup.
 
--- b) La table est bien verrouillée : ces deux lignes doivent renvoyer 0 ligne
---    de privilège pour anon et authenticated.
-select grantee, privilege_type
-  from information_schema.role_table_grants
- where table_schema = 'public' and table_name = 'promo_codes'
-   and grantee in ('anon', 'authenticated');
 
--- c) RLS actif, aucune politique.
-select relrowsecurity as rls_active,
-       (select count(*) from pg_policies
-         where schemaname = 'public' and tablename = 'promo_codes') as nb_policies
-  from pg_class where oid = 'public.promo_codes'::regclass;
+-- =====================================================================
+--  ÉTAPE 2 / 3 — VÉRIFICATION DE L'INSTALLATION
+--
+--  Une seule requête, un seul Run, une seule ligne de résultat.
+--  Aucune substitution : rien à modifier ici.
+-- =====================================================================
+select
+  (select relrowsecurity from pg_class where oid = 'public.promo_codes'::regclass)
+    as rls_actif__attendu_true,
+  (select count(*) from pg_policies
+    where schemaname = 'public' and tablename = 'promo_codes')
+    as nb_politiques__attendu_0,
+  (select count(*) from information_schema.role_table_grants
+    where table_schema = 'public' and table_name = 'promo_codes'
+      and grantee in ('anon', 'authenticated'))
+    as privileges_anon__attendu_0,
+  (select count(*) from pg_proc p
+     join pg_namespace n on n.oid = p.pronamespace
+    where n.nspname = 'public' and p.proname = 'check_promo_code')
+    as rpc_installee__attendu_1,
+  (select count(*) from public.promo_codes)
+    as nb_codes__attendu_1,
+  (select min_total_after_discount from public.promo_codes order by created_at desc limit 1)
+    as minimum__attendu_40_00,
+  (select rules from public.promo_codes order by created_at desc limit 1)
+    as regles,
+  -- Les deux colonnes suivantes lèvent toute ambiguïté UTC / heure locale.
+  (select ends_at at time zone 'Europe/Paris' from public.promo_codes order by created_at desc limit 1)
+    as expiration_paris__attendu_2026_08_30_23_59_59_999,
+  (select ends_at at time zone 'UTC' from public.promo_codes order by created_at desc limit 1)
+    as expiration_utc__attendu_2026_08_30_21_59_59_999,
+  (select ends_at > now() from public.promo_codes order by created_at desc limit 1)
+    as encore_valide_maintenant;
 
--- ---------------------------------------------------------------------
--- 6) BANC DE TEST — à exécuter APRÈS la section 4
--- ---------------------------------------------------------------------
--- Remplacez LE_CODE par le code réel dans les requêtes ci-dessous.
--- Les valeurs attendues sont calculées sur les prix réels en base au
--- 2026-08-28 : Galaxie (parfums) 45,00 € ; Miel de Nigelle 200 g (miels)
--- 24,99 € ; Gélules de Chardon Marie (gelules, non remisé) 14,99 €.
--- Si un prix change en base, l'attendu change : c'est normal, la fonction
--- lit toujours le catalogue réel.
 
--- A) Un seul parfum — sous le minimum de 40 €
---    Attendu : valid=false, reason=min_not_reached,
---              subtotal 45.00, discount 13.50, total 31.50, min_total 40.00
-select public.check_promo_code('LE_CODE',
-  '[{"slug":"dn-lecode-galaxie","qty":1}]'::jsonb) as test_a_parfum_seul_sous_minimum;
+-- =====================================================================
+--  ÉTAPE 3 / 3 — BANC DE TEST
+--
+--  AUCUNE SUBSTITUTION. Les cas de test lisent le code directement en base
+--  (l'éditeur SQL s'exécute en tant que propriétaire, il contourne donc RLS).
+--  C'est volontaire : un banc de test contenant le code en clair finirait
+--  committé un jour, et le dépôt est servi publiquement.
+--
+--  Trois Run successifs, dans cet ordre.
+-- =====================================================================
 
--- B) Deux parfums — au-dessus du minimum
---    Attendu : valid=true, subtotal 90.00, discount 27.00, total 63.00
-select public.check_promo_code('LE_CODE',
-  '[{"slug":"dn-lecode-galaxie","qty":2}]'::jsonb) as test_b_parfums_au_dessus;
+-- ÉTAPE 3a — crée un code jetable, expiré hier, pour tester le refus d'un
+--            code périmé. Il est supprimé à l'étape 3c.
+insert into public.promo_codes
+  (code, label, active, ends_at, min_total_after_discount, rules)
+values
+  ('ZZ-TEST-EXPIRE', 'jetable - banc de test', true,
+   now() - interval '1 day', 0,
+   '[{"categories":["parfums"],"percent":30}]'::jsonb)
+on conflict do nothing;
 
--- C) Miel seul, 2 pots de 200 g — 2 centimes sous le minimum
---    Attendu : valid=false, reason=min_not_reached,
---              subtotal 49.98, discount 10.00, total 39.98
-select public.check_promo_code('LE_CODE',
-  '[{"slug":"miel-nigelle","variant":"200 g","qty":2}]'::jsonb) as test_c_miel_seul_39_98;
 
--- D) Miel seul, 3 pots de 200 g — au-dessus du minimum
---    Attendu : valid=true, subtotal 74.97, discount 14.99, total 59.98
-select public.check_promo_code('LE_CODE',
-  '[{"slug":"miel-nigelle","variant":"200 g","qty":3}]'::jsonb) as test_d_miel_seul_valide;
+-- ÉTAPE 3b — les 11 cas en une seule requête, un seul tableau de résultats.
+--
+--  Prix réels en base au 2026-08-28, base des attendus :
+--    Galaxie (parfums)                           45,00 EUR
+--    Miel de Nigelle 200 g (miels)               24,99 EUR
+--    Gélules Chardon Marie (gelules, NON remisé) 14,99 EUR
+--  Si un prix change en base, l'attendu change : la fonction lit toujours le
+--  catalogue réel, elle ne recopie aucun prix.
+with le_code as (
+  -- Le vrai code : le dernier créé, hors code jetable.
+  select code
+    from public.promo_codes
+   where code <> 'ZZ-TEST-EXPIRE'
+   order by created_at desc
+   limit 1
+),
+cas (ordre, intitule, code_force, panier, attendu) as (
+  values
+    (1, 'A - 1 parfum, sous le minimum',
+        null::text,
+        '[{"slug":"dn-lecode-galaxie","qty":1}]'::jsonb,
+        'valid=false, min_not_reached - sous-total 45.00, remise 13.50, total 31.50'),
+    (2, 'B - 2 parfums, au-dessus du minimum',
+        null::text,
+        '[{"slug":"dn-lecode-galaxie","qty":2}]'::jsonb,
+        'valid=true - sous-total 90.00, remise 27.00, total 63.00'),
+    (3, 'C - 2 miels 200 g, 2 centimes sous le minimum',
+        null::text,
+        '[{"slug":"miel-nigelle","variant":"200 g","qty":2}]'::jsonb,
+        'valid=false, min_not_reached - sous-total 49.98, remise 10.00, total 39.98'),
+    (4, 'D - 3 miels 200 g, au-dessus du minimum',
+        null::text,
+        '[{"slug":"miel-nigelle","variant":"200 g","qty":3}]'::jsonb,
+        'valid=true - sous-total 74.97, remise 14.99, total 59.98'),
+    (5, 'E - parfum + miel, chaque taux sur sa categorie',
+        null::text,
+        '[{"slug":"dn-lecode-galaxie","qty":1},{"slug":"miel-nigelle","variant":"200 g","qty":2}]'::jsonb,
+        'valid=true - sous-total 94.98, remise 23.50, total 71.48'),
+    (6, 'F - parfum remise + produit NON remise comptant pour les 40 EUR',
+        null::text,
+        '[{"slug":"dn-lecode-galaxie","qty":1},{"slug":"gel-chardon","qty":1}]'::jsonb,
+        'valid=true - sous-total 59.99, remise 13.50, total 46.49'),
+    (7, 'G - code inconnu',
+        'CODE-QUI-N-EXISTE-PAS',
+        '[{"slug":"dn-lecode-galaxie","qty":2}]'::jsonb,
+        'valid=false, invalid_code'),
+    (8, 'H - produit coming_soon seul : ligne ignoree',
+        null::text,
+        '[{"slug":"hl-nigelle","qty":1}]'::jsonb,
+        'valid=false, empty_cart'),
+    (9, 'I - variante inexistante : ligne ecartee',
+        null::text,
+        '[{"slug":"miel-nigelle","variant":"999 g","qty":1}]'::jsonb,
+        'valid=false, empty_cart'),
+    (10, 'J - panier vide',
+        null::text,
+        '[]'::jsonb,
+        'valid=false, empty_cart'),
+    (11, 'K - code expire (jetable, cree a l etape 3a)',
+        'ZZ-TEST-EXPIRE',
+        '[{"slug":"dn-lecode-galaxie","qty":2}]'::jsonb,
+        'valid=false, expired')
+)
+select
+  c.ordre,
+  c.intitule,
+  c.attendu,
+  public.check_promo_code(
+    coalesce(c.code_force, (select code from le_code)),
+    c.panier
+  ) as obtenu
+from cas c
+order by c.ordre;
 
--- E) Parfum + miel — les deux taux s'appliquent, chacun à sa catégorie
---    Attendu : valid=true, subtotal 94.98, discount 23.50, total 71.48
-select public.check_promo_code('LE_CODE',
-  '[{"slug":"dn-lecode-galaxie","qty":1},
-    {"slug":"miel-nigelle","variant":"200 g","qty":2}]'::jsonb) as test_e_parfum_plus_miel;
 
--- F) Parfum remisé + produit NON remisé : le produit non remisé ne reçoit
---    aucune réduction mais compte pour atteindre les 40 €.
---    Attendu : valid=true, subtotal 59.99, discount 13.50, total 46.49
-select public.check_promo_code('LE_CODE',
-  '[{"slug":"dn-lecode-galaxie","qty":1},
-    {"slug":"gel-chardon","qty":1}]'::jsonb) as test_f_avec_produit_non_remise;
+-- ÉTAPE 3c — retire le code jetable. À ne pas oublier.
+delete from public.promo_codes where code = 'ZZ-TEST-EXPIRE';
 
--- G) Code inconnu — attendu : valid=false, reason=invalid_code
-select public.check_promo_code('CODE-QUI-N-EXISTE-PAS',
-  '[{"slug":"dn-lecode-galaxie","qty":2}]'::jsonb) as test_g_code_inconnu;
 
--- H) Produit non commandable seul (coming_soon) : ligne ignorée, panier vide
---    Attendu : valid=false, reason=empty_cart
-select public.check_promo_code('LE_CODE',
-  '[{"slug":"hl-nigelle","qty":1}]'::jsonb) as test_h_produit_coming_soon;
-
--- I) Variante inexistante : la ligne est écartée, panier vide
---    Attendu : valid=false, reason=empty_cart
-select public.check_promo_code('LE_CODE',
-  '[{"slug":"miel-nigelle","variant":"999 g","qty":1}]'::jsonb) as test_i_variante_inexistante;
-
--- J) Panier vide / mal formé — attendu : valid=false, reason=empty_cart
-select public.check_promo_code('LE_CODE', '[]'::jsonb)   as test_j1_panier_vide;
-select public.check_promo_code('LE_CODE', 'null'::jsonb) as test_j2_payload_invalide;
-
--- K) CODE EXPIRÉ — crée un code jetable expiré hier, le teste, puis le
---    supprime. Bloc autonome : rien ne subsiste après exécution.
---    Attendu : valid=false, reason=expired
-do $$
-declare v_res jsonb;
-begin
-  insert into public.promo_codes (code, label, active, ends_at, min_total_after_discount, rules)
-  values ('ZZ-TEST-EXPIRE', 'jetable — test d''expiration', true,
-          now() - interval '1 day', 0,
-          '[{"categories":["parfums"],"percent":30}]'::jsonb);
-
-  select public.check_promo_code('ZZ-TEST-EXPIRE',
-           '[{"slug":"dn-lecode-galaxie","qty":2}]'::jsonb) into v_res;
-
-  raise notice 'test_k_code_expire = %', v_res;
-
-  delete from public.promo_codes where code = 'ZZ-TEST-EXPIRE';
-end
-$$;
-
--- L) CONFIDENTIALITÉ — la table ne doit être lisible par aucun rôle exposé.
---    À vérifier plutôt depuis un terminal, hors SQL Editor (qui s'exécute en
---    tant que propriétaire et contourne donc RLS) :
+-- =====================================================================
+--  CONFIDENTIALITÉ — contrôle à faire HORS du SQL Editor
+--
+--  L'éditeur SQL s'exécute en tant que propriétaire et contourne RLS : il ne
+--  prouve donc rien sur ce que voit un visiteur. Le vrai contrôle se fait
+--  depuis un terminal, avec la clé anon publique de js/config.js :
 --
 --    curl -s -o /dev/null -w "%{http_code}\n" \
 --      "https://sxlpgcnjerlayitaxxyv.supabase.co/rest/v1/promo_codes?select=*" \
---      -H "apikey: <clé anon publique de js/config.js>"
+--      -H "apikey: <cle anon publique>"
 --
---    Attendu : 401, 403 ou 404 — jamais 200 avec des lignes.
+--  Attendu : 401, 403 ou 404 — jamais 200 accompagne de lignes.
+-- =====================================================================

@@ -48,16 +48,16 @@ drop function if exists public.check_promo_code(text, jsonb);
 drop table if exists public.promo_codes;
 
 -- ---------------------------------------------------------------------
--- 3) VÉRIFICATION — les deux requêtes doivent renvoyer 0
+-- 3) VÉRIFICATION — une seule requête, exécutable APRÈS les DROP
 -- ---------------------------------------------------------------------
-select count(*) as table_restante
-  from information_schema.tables
- where table_schema = 'public' and table_name = 'promo_codes';
-
-select count(*) as fonction_restante
-  from pg_proc p
-  join pg_namespace n on n.oid = p.pronamespace
- where n.nspname = 'public' and p.proname = 'check_promo_code';
+-- Ces deux fonctions interrogent le catalogue, jamais les objets eux-mêmes :
+-- to_regclass() et to_regprocedure() renvoient NULL quand l'objet n'existe
+-- pas, sans lever d'erreur. Le script peut donc être exécuté intégralement,
+-- du début à la fin, sans jamais échouer — y compris sur une base où rien
+-- n'avait été installé.
+select
+  to_regclass('public.promo_codes')                       as table_restante__attendu_null,
+  to_regprocedure('public.check_promo_code(text,jsonb)')  as fonction_restante__attendu_null;
 
 -- ---------------------------------------------------------------------
 -- 4) CÔTÉ SITE
