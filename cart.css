@@ -1,0 +1,332 @@
+/* cart.css — panier Dar Nūr (bouton flottant + panneau latéral + toast).
+   Chargé sur les pages commerciales uniquement : index.html (et par héritage
+   les 237 fiches produit générées), les 14 pages catégories, les 5 pages
+   parfums. Pas sur les pages légales.
+
+   Contraintes respectées :
+   - Aucune couleur, police ou espacement inventé : uniquement les tokens
+     :root deja definis par chaque page (--green, --gold, --cream, --ink...).
+   - Aucun selecteur existant redefini. Tout est prefixe .dn-cart-*, a la
+     seule exception de `button.btn-wa` (reset de bordure, necessaire parce
+     que le CTA de la fiche produit devient un <button> et non plus un <a> —
+     specificite element+classe, l'ordre de chargement n'entre pas en jeu).
+   - Rien n'est insere dans l'en-tete : mesure faite en production, la barre
+     de navigation n'a 0 px de marge a 1240px sur la homepage et les fiches.
+     Le panier est donc un bouton flottant, identique sur les 4 types de page.
+*/
+
+/* ── Reset du CTA fiche produit devenu <button> ───────────────────────── */
+button.btn-wa{
+  border:none;
+  font-family:'Cinzel',serif;
+  -webkit-appearance:none;appearance:none;
+  text-align:center;
+}
+
+/* ── Bouton flottant ──────────────────────────────────────────────────── */
+/* --dn-fab-bottom est pilote par js/cart.js : il est augmente de la hauteur
+   de la barre mobile .mbar quand celle-ci est affichee (fiche produit
+   <=768px), pour ne jamais masquer le bouton "Ajouter au panier" qu'elle
+   contient. env(safe-area-inset-bottom) couvre la barre d'accueil iPhone. */
+:root{ --dn-fab-bottom:20px; }
+
+.dn-cart-fab{
+  position:fixed;
+  right:20px;
+  bottom:calc(var(--dn-fab-bottom) + env(safe-area-inset-bottom, 0px));
+  z-index:180;
+  width:58px;height:58px;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:50%;
+  background:var(--green);
+  border:1px solid rgba(200,168,75,.55);
+  box-shadow:0 14px 34px -12px rgba(13,31,22,.75);
+  cursor:pointer;
+  transition:transform .25s ease,background .25s ease,bottom .25s ease;
+  -webkit-appearance:none;appearance:none;
+  padding:0;
+}
+.dn-cart-fab:hover{background:var(--green-soft);transform:translateY(-2px)}
+.dn-cart-fab:focus-visible{outline:2px solid var(--gold-light);outline-offset:3px}
+.dn-cart-fab svg{width:25px;height:25px;stroke:var(--gold);fill:none;stroke-width:1.6}
+
+.dn-cart-fab-badge{
+  position:absolute;top:-4px;right:-4px;
+  min-width:22px;height:22px;padding:0 6px;
+  display:none;align-items:center;justify-content:center;
+  border-radius:11px;
+  background:var(--gold);color:var(--green);
+  font-family:'Jost',sans-serif;font-size:.72rem;font-weight:600;line-height:1;
+  box-shadow:0 4px 10px -3px rgba(0,0,0,.5);
+}
+.dn-cart-fab[data-count]:not([data-count="0"]) .dn-cart-fab-badge{display:flex}
+
+/* ── Voile ────────────────────────────────────────────────────────────── */
+.dn-cart-overlay{
+  position:fixed;inset:0;z-index:190;
+  background:rgba(13,31,22,.55);
+  opacity:0;visibility:hidden;
+  transition:opacity .3s ease,visibility 0s linear .3s;
+}
+.dn-cart-overlay.open{opacity:1;visibility:visible;transition:opacity .3s ease}
+
+/* ── Panneau lateral ──────────────────────────────────────────────────── */
+.dn-cart-panel{
+  position:fixed;top:0;right:0;bottom:0;z-index:200;
+  width:min(430px,100%);
+  display:flex;flex-direction:column;
+  background:var(--offwhite);
+  border-left:1px solid var(--line);
+  box-shadow:-24px 0 60px -30px rgba(13,31,22,.6);
+  transform:translateX(100%);
+  visibility:hidden;
+  transition:transform .32s ease,visibility 0s linear .32s;
+}
+.dn-cart-panel.open{transform:translateX(0);visibility:visible;transition:transform .32s ease}
+
+.dn-cart-head{
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+  padding:20px 22px;
+  background:var(--green);
+  border-bottom:1px solid rgba(200,168,75,.28);
+  flex:0 0 auto;
+}
+.dn-cart-head h2{
+  font-family:'Cinzel',serif;font-size:.92rem;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--cream);margin:0;font-weight:600;
+}
+.dn-cart-close{
+  background:none;border:none;padding:6px;cursor:pointer;line-height:0;
+  -webkit-appearance:none;appearance:none;
+}
+.dn-cart-close svg{width:20px;height:20px;stroke:var(--gold);fill:none;stroke-width:1.8}
+.dn-cart-close:focus-visible{outline:1px solid var(--gold-light);outline-offset:2px}
+
+.dn-cart-body{
+  flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:18px 22px;
+}
+
+/* ── Panier vide ──────────────────────────────────────────────────────── */
+.dn-cart-empty{
+  text-align:center;padding:48px 12px;
+  font-family:'Lora',serif;font-size:.95rem;color:var(--muted);line-height:1.7;
+}
+.dn-cart-empty strong{
+  display:block;margin-bottom:10px;
+  font-family:'Cinzel',serif;font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--green);font-weight:600;
+}
+
+/* ── Lignes ───────────────────────────────────────────────────────────── */
+.dn-cart-line{
+  display:grid;grid-template-columns:64px 1fr;gap:14px;
+  padding:16px 0;
+  border-bottom:1px solid var(--line);
+}
+.dn-cart-line:first-child{padding-top:0}
+.dn-cart-thumb{
+  width:64px;height:64px;border-radius:4px;overflow:hidden;
+  background:var(--cream);border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;
+}
+.dn-cart-thumb img{width:100%;height:100%;object-fit:cover}
+.dn-cart-info{min-width:0}
+.dn-cart-name{
+  font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:600;
+  color:var(--ink);line-height:1.25;margin:0 0 3px;
+}
+.dn-cart-variant{
+  font-family:'Jost',sans-serif;font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--gold-dark);margin-bottom:2px;
+}
+.dn-cart-unit{
+  font-family:'Lora',serif;font-size:.8rem;color:var(--muted);margin-bottom:9px;
+}
+.dn-cart-linefoot{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+
+.dn-cart-qty{display:flex;align-items:center;border:1px solid var(--line);border-radius:3px;overflow:hidden}
+.dn-cart-qty button{
+  width:34px;height:34px;
+  background:var(--cream);border:none;cursor:pointer;
+  font-family:'Jost',sans-serif;font-size:1rem;color:var(--green);line-height:1;
+  -webkit-appearance:none;appearance:none;
+  transition:background .2s;
+}
+.dn-cart-qty button:hover:not(:disabled){background:var(--gold);color:var(--green)}
+.dn-cart-qty button:disabled{opacity:.35;cursor:not-allowed}
+.dn-cart-qty button:focus-visible{outline:1px solid var(--gold-light);outline-offset:-2px}
+.dn-cart-qty .dn-cart-qty-val{
+  min-width:38px;text-align:center;
+  font-family:'Jost',sans-serif;font-size:.88rem;color:var(--ink);
+}
+.dn-cart-linetotal{
+  font-family:'Cormorant Garamond',serif;font-size:1.22rem;font-weight:600;color:var(--green);
+  white-space:nowrap;
+}
+.dn-cart-remove{
+  background:none;border:none;cursor:pointer;padding:4px 0;
+  font-family:'Jost',sans-serif;font-size:.66rem;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--muted);text-decoration:underline;text-underline-offset:3px;
+  -webkit-appearance:none;appearance:none;
+}
+.dn-cart-remove:hover{color:#a6332e}
+.dn-cart-remove:focus-visible{outline:1px solid var(--gold-light);outline-offset:2px}
+
+/* Ligne devenue indisponible (produit desactive, rupture, prix retire) */
+.dn-cart-line.is-unavailable .dn-cart-thumb,
+.dn-cart-line.is-unavailable .dn-cart-name{opacity:.5}
+.dn-cart-flag{
+  display:block;margin:6px 0 8px;padding:7px 10px;
+  background:rgba(166,51,46,.08);border-left:2px solid #a6332e;border-radius:2px;
+  font-family:'Jost',sans-serif;font-size:.68rem;letter-spacing:.03em;color:#a6332e;line-height:1.45;
+}
+
+/* ── Pied du panneau ──────────────────────────────────────────────────── */
+.dn-cart-foot{
+  flex:0 0 auto;
+  padding:16px 22px calc(18px + env(safe-area-inset-bottom, 0px));
+  background:var(--cream);
+  border-top:1px solid var(--line);
+}
+.dn-cart-row{
+  display:flex;align-items:baseline;justify-content:space-between;gap:12px;
+  font-family:'Lora',serif;font-size:.9rem;color:var(--muted);
+  padding:4px 0;
+}
+.dn-cart-row.is-discount{color:#1d6b45}
+.dn-cart-row.is-total{
+  margin-top:8px;padding-top:12px;border-top:1px solid var(--line);
+  font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--green);font-weight:600;
+}
+.dn-cart-row.is-total .dn-cart-amount{
+  font-family:'Cormorant Garamond',serif;font-size:1.6rem;letter-spacing:0;text-transform:none;
+}
+.dn-cart-amount{font-variant-numeric:tabular-nums;white-space:nowrap}
+
+/* ── Code promo ───────────────────────────────────────────────────────── */
+.dn-cart-promo{margin:12px 0 14px}
+.dn-cart-promo-toggle{
+  background:none;border:none;padding:0;cursor:pointer;
+  font-family:'Jost',sans-serif;font-size:.7rem;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--gold-dark);text-decoration:underline;text-underline-offset:3px;
+  -webkit-appearance:none;appearance:none;
+}
+.dn-cart-promo-toggle:focus-visible{outline:1px solid var(--gold-light);outline-offset:2px}
+.dn-cart-promo-form{display:none;gap:8px;margin-top:10px}
+.dn-cart-promo-form.open{display:flex}
+.dn-cart-promo-form input{
+  flex:1 1 auto;min-width:0;
+  padding:11px 12px;
+  background:var(--offwhite);border:1px solid var(--line);border-radius:3px;
+  font-family:'Jost',sans-serif;font-size:.86rem;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ink);
+}
+.dn-cart-promo-form input:focus{outline:none;border-color:var(--gold)}
+.dn-cart-promo-form button{
+  flex:0 0 auto;
+  padding:11px 16px;border:none;border-radius:3px;cursor:pointer;
+  background:var(--green);color:var(--gold);
+  font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;
+  -webkit-appearance:none;appearance:none;
+  transition:background .2s;
+}
+.dn-cart-promo-form button:hover:not(:disabled){background:var(--green-soft)}
+.dn-cart-promo-form button:disabled{opacity:.5;cursor:progress}
+.dn-cart-promo-msg{
+  margin-top:9px;
+  font-family:'Jost',sans-serif;font-size:.72rem;line-height:1.5;color:var(--muted);
+}
+.dn-cart-promo-msg.is-error{color:#a6332e}
+.dn-cart-promo-msg.is-ok{color:#1d6b45}
+
+/* ── CTA WhatsApp ─────────────────────────────────────────────────────── */
+.dn-cart-cta{
+  display:flex;align-items:center;justify-content:center;gap:11px;width:100%;
+  margin-top:6px;padding:16px 18px;
+  background:var(--gold);color:var(--green);border:none;border-radius:2px;cursor:pointer;
+  font-family:'Cinzel',serif;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;font-weight:600;
+  box-shadow:0 10px 30px -10px rgba(200,168,75,.6);
+  -webkit-appearance:none;appearance:none;
+  transition:background .25s,transform .25s;
+}
+.dn-cart-cta:hover:not(:disabled){background:var(--gold-light);transform:translateY(-2px)}
+.dn-cart-cta:disabled{opacity:.45;cursor:not-allowed;box-shadow:none;transform:none}
+.dn-cart-cta svg{width:18px;height:18px;fill:currentColor;flex:0 0 auto}
+.dn-cart-note{
+  margin-top:10px;text-align:center;
+  font-family:'Jost',sans-serif;font-size:.65rem;letter-spacing:.05em;color:var(--muted);line-height:1.5;
+}
+
+/* ── Toast de confirmation ────────────────────────────────────────────── */
+.dn-cart-toast{
+  position:fixed;z-index:210;
+  left:50%;transform:translateX(-50%) translateY(14px);
+  bottom:calc(var(--dn-fab-bottom) + 26px + env(safe-area-inset-bottom, 0px));
+  max-width:calc(100vw - 32px);
+  padding:12px 20px;border-radius:3px;
+  background:var(--green);border:1px solid rgba(200,168,75,.4);
+  font-family:'Jost',sans-serif;font-size:.78rem;letter-spacing:.04em;color:var(--cream);
+  box-shadow:0 16px 40px -16px rgba(13,31,22,.8);
+  opacity:0;visibility:hidden;pointer-events:none;
+  transition:opacity .25s ease,transform .25s ease,visibility 0s linear .25s;
+}
+.dn-cart-toast.show{
+  opacity:1;visibility:visible;transform:translateX(-50%) translateY(0);
+  transition:opacity .25s ease,transform .25s ease;
+}
+.dn-cart-toast.is-error{border-color:rgba(166,51,46,.7)}
+
+/* ── Verrou de defilement pendant l'ouverture ─────────────────────────── */
+html.dn-cart-open,html.dn-cart-open body{overflow:hidden}
+
+/* ── Responsive ───────────────────────────────────────────────────────── */
+@media(max-width:520px){
+  .dn-cart-panel{width:100%;border-left:none}
+  .dn-cart-body{padding:16px 18px}
+  .dn-cart-foot{padding:14px 18px calc(16px + env(safe-area-inset-bottom, 0px))}
+  .dn-cart-fab{width:54px;height:54px;right:16px}
+  .dn-cart-line{grid-template-columns:56px 1fr;gap:12px}
+  .dn-cart-thumb{width:56px;height:56px}
+}
+
+/* Ecrans bas (iPhone SE en paysage, etc.) : le panneau reste utilisable */
+@media(max-height:560px){
+  .dn-cart-head{padding:14px 20px}
+  .dn-cart-body{padding:14px 20px}
+  .dn-cart-cta{padding:13px 16px}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .dn-cart-fab,.dn-cart-panel,.dn-cart-overlay,.dn-cart-toast,.dn-cart-cta{transition:none}
+}
+
+/* ── Appel visuel : variante non choisie ──────────────────────────────
+   Declenche par addActiveProductToCart() (index.html) quand le client
+   clique "Ajouter au panier" sans avoir selectionne son format ou sa
+   taille. Aucune couleur nouvelle : uniquement l'or du design. */
+.opt-row.needs-choice{animation:dn-cart-nudge .5s ease}
+.opt-row.needs-choice .opt{
+  border-color:var(--gold);
+  box-shadow:0 0 0 2px rgba(200,168,75,.3);
+}
+@keyframes dn-cart-nudge{
+  0%,100%{transform:translateX(0)}
+  20%{transform:translateX(-5px)}
+  40%{transform:translateX(5px)}
+  60%{transform:translateX(-3px)}
+  80%{transform:translateX(3px)}
+}
+@media(prefers-reduced-motion:reduce){
+  .opt-row.needs-choice{animation:none}
+}
+
+/* Avertissement affiche quand le catalogue Supabase est injoignable : les
+   montants viennent alors de l'instantane local, pas d'une lecture fraiche. */
+.dn-cart-note-offline{
+  color:#a6332e;
+  background:rgba(166,51,46,.08);
+  border-left:2px solid #a6332e;border-radius:2px;
+  padding:8px 10px;text-align:left;
+}

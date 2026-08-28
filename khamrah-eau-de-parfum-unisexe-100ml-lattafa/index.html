@@ -895,6 +895,9 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
 
 }
 </style>
+
+<!-- Panier (bouton flottant + panneau + toast) — voir js/cart.js -->
+<link rel="stylesheet" href="/cart.css" />
 </head>
 <body>
 
@@ -1360,10 +1363,10 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
     <div class="p" id="mbarPrice"></div>
     <div class="mbar-note">Paiement à la réception</div>
   </div>
-  <a class="btn-wa" id="mbarBtn" target="_blank" rel="noopener">
-    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.945C.16 5.335 5.495 0 12.05 0a11.82 11.82 0 018.413 3.488 11.82 11.82 0 013.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.86 9.86 0 001.512 5.26l-.999 3.648 3.985-1.607zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
-    Commander
-  </a>
+  <button type="button" class="btn-wa" id="mbarBtn" onclick="addActiveProductToCart()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 4h2.2l2.3 11.2a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.5L21 8H6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="20" r="1.3" fill="currentColor" stroke="none"/><circle cx="17.5" cy="20" r="1.3" fill="currentColor" stroke="none"/></svg>
+    <span id="mbarBtnLabel">Ajouter au panier</span>
+  </button>
 </div>
 
 <footer>
@@ -1477,8 +1480,6 @@ function mielPrintempsOriginBannerHTML(p){
 }
 
 const STORY = "<p>Chez Dar Nūr, nous croyons qu’un produit de qualité commence par une sélection exigeante. Chaque référence est choisie avec soin, dans le respect des matières premières, de leur origine et d’un savoir herboriste ancestral qui inspire notre démarche. Notre engagement est de proposer des produits authentiques, sélectionnés pour leur qualité et présentés avec une transparence fidèle aux valeurs qui animent notre Maison.</p>";
-
-const WA = "https://wa.me/33769253375?text=";
 
 /* ---- SVG emblems by category ---- */
 const EMBLEMS = {
@@ -2760,7 +2761,7 @@ PRODUCTS.forEach(p=>{
 /* ============ STATE ============ */
 let currentFilter = "all";
 let activeProduct = null;
-let activeOption = 0;
+let activeOption = null;   /* null = aucune variante choisie par le client */
 
 /* ============ HELPERS ============ */
 function startPrice(p){
@@ -2783,45 +2784,95 @@ function priceLabel(p){
   if(p.price.type==="format") return `dès ${p.price.options[0][1]}€`;
   return `${p.price.options[0][1]}€`;
 }
-function waLink(p, opt, price){
-  const isWear = p.cat==='qamis'||p.cat==='vetements';
-  const date = new Date().toLocaleDateString('fr-FR');
-  const url = 'https://dar-nur.fr/'+p.id+'/';
-  let variantLine = '';
-  if(isWear){
-    variantLine = '\n• Taille : '+(opt||'');
-  } else if(p.cat==='miels'&&opt){
-    variantLine = '\n• Format / Poids : '+opt;
-  } else if(p.cat==='gelules'){
-    variantLine = '\n• Contenu : 60 gélules';
-  } else if(opt){
-    variantLine = '\n• Format : '+opt;
-  }
+/* ---- Prix de la fiche produit & passage au panier -------------------
+   Le parcours de commande passe désormais par le panier (js/cart.js) :
+   la fiche n'émet plus de lien WhatsApp mono-produit avec « Quantité : 1 ».
+   Les modales pack et couleur/taille des offres gardent, elles, leur
+   propre flux WhatsApp — elles ne sont pas concernées. */
+
+// Format français imposé, identique à celui du panier et des pages
+// catégories (formatPriceLabel de generate-category-pages.mjs) :
+// 31,50 € — jamais 31.5 EUR, et jamais « null€ ».
+function fmtPrice(v){
+  const n = Number(v);
+  if(v==null || !isFinite(n)) return "Prix sur demande";
+  return n.toFixed(2).replace('.', ',') + " €";
+}
+
+// Un produit n'est commandable que si son prix existe réellement en base.
+// 6 fiches (gommages et chantillys de karité) n'ont pas de price_value :
+// elles ne doivent jamais entrer dans le panier ni afficher « null€ ».
+// La donnée elle-même reste hors périmètre de ce chantier.
+function hasUsablePrice(p){
+  if(p.price.type==="fixed") return p.price.value!=null && isFinite(Number(p.price.value));
+  const first = p.price.options && p.price.options[0];
+  return !!first && first[1]!=null && isFinite(Number(first[1]));
+}
+
+function priceHeadline(p){
+  if(!hasUsablePrice(p)) return "Prix sur demande";
+  if(p.price.type==="fixed") return fmtPrice(p.price.value);
+  return "dès " + fmtPrice(startPrice(p));
+}
+
+// Seul lien WhatsApp conservé sur la fiche produit : la demande de prix
+// pour un produit sans tarif en base, qui ne peut pas entrer au panier.
+// Ce n'est pas un parcours de commande concurrent — il ne porte ni
+// quantité, ni prix, ni récapitulatif.
+function priceRequestLink(p){
   const t = `As-salâm 'alaykoum,
 
-Je souhaite commander le produit suivant :
+Je souhaite connaître le prix de ce produit :
 
 • Produit : ${p.name}
-• Catégorie : ${CAT_LABELS[p.cat] || p.cat}
-• Référence : ${p.id}${variantLine}
-• Prix : ${price} €
-• Quantité : 1
+• Référence : ${p.id}
 
-Mes informations :
-
-• Nom :
-• Ville :
-• Mode de livraison souhaité : point de rendez-vous / près d'une mosquée / à domicile
-• Adresse ou lieu souhaité :
-• Paiement à la réception : Revolut / Espèces
-
-Les options de livraison payantes (10 € ou 20 €) sont disponibles à partir de 20 € de commande.
-
-Lien fiche : ${url}
-Date de demande : ${date}
+Lien fiche : https://dar-nur.fr/${p.id}/
 
 BarakAllahu fik.`;
-  return WA + encodeURIComponent(t);
+  return "https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent(t);
+}
+
+// Ajoute au panier le produit affiché, avec la variante réellement choisie.
+// Aucune variante n'est présélectionnée : tant que le client n'a pas cliqué
+// une option, activeOption vaut null et l'ajout est refusé avec un message.
+function addActiveProductToCart(){
+  const p = activeProduct;
+  if(!p || !window.DarNurCart) return;
+  if(p.coming_soon===true) return;
+  // Produit sans prix en base : jamais dans le panier, mais on garde le
+  // moyen de nous joindre pour le tarif (même cible que le bouton desktop).
+  if(!hasUsablePrice(p)){ window.open(priceRequestLink(p), "_blank", "noopener"); return; }
+
+  const hasOptions = p.price.type!=="fixed";
+  if(hasOptions && activeOption===null){
+    window.DarNurCart.toast(
+      p.price.type==="size" ? "Choisissez d’abord votre taille"
+                            : "Choisissez d’abord votre format", true);
+    const row = document.getElementById("optRow");
+    if(row){
+      row.classList.remove("needs-choice");
+      void row.offsetWidth;              /* relance l'animation d'appel */
+      row.classList.add("needs-choice");
+      row.scrollIntoView({behavior:"smooth", block:"center"});
+    }
+    return;
+  }
+
+  const variant = hasOptions ? p.price.options[activeOption][0] : null;
+  const unit    = hasOptions ? p.price.options[activeOption][1] : p.price.value;
+
+  window.DarNurCart.add({
+    slug: p.id,
+    variant: variant,
+    qty: 1,
+    snapshot: {
+      name:  p.name,
+      price: Number(unit),
+      image: getProductImages(p.id)[0] || null,
+      cat:   p.cat
+    }
+  });
 }
 
 /* ============ RENDER HOME ============ */
@@ -3080,7 +3131,7 @@ function deliverySectionHTML(){
 function showProduct(id){
   const p = PRODUCTS.find(x=>x.id===id);
   if(!p) return;
-  activeProduct = p; activeOption = 0;
+  activeProduct = p; activeOption = null;
   if(location.pathname !== '/'+id+'/') history.pushState({productId:id}, '', '/'+id+'/');
   updatePageMetadata(p);
   const hasOptions = p.price.type!=="fixed";
@@ -3177,19 +3228,21 @@ function showProduct(id){
       ${hasOptions?`<div class="pp-format-select">
         <div class="label">${optLabel}</div>
         <div class="opt-row" id="optRow">
-          ${p.price.options.map((o,i)=>`<button class="opt ${i===0?'sel':''}" onclick="selectOption(${i})">${o[0]}</button>`).join("")}
+          ${p.price.options.map((o,i)=>`<button class="opt" onclick="selectOption(${i})">${o[0]}</button>`).join("")}
         </div>
       </div>`:""}
       <div class="order-box">
         <div class="order-eyebrow">Votre sélection</div>
         <div class="order-foot">
-          <div class="order-price"><span id="ppPrice">${startPrice(p)}€</span>${p.price.type==='format'?`<small id="ppFmt">${p.price.options[0][0]}</small>`:(p.price.type==='size'?`<small id="ppFmt">Taille ${p.price.options[0][0]}</small>`:``)}</div>
+          <div class="order-price"><span id="ppPrice">${priceHeadline(p)}</span>${hasOptions?`<small id="ppFmt"></small>`:``}</div>
           ${p.coming_soon===true
             ? `<span class="btn-wa dark btn-soon" id="ppBtn">Disponible prochainement</span>`
-            : `<a class="btn-wa dark" id="ppBtn" href="${waLink(p, hasOptions?p.price.options[0][0]:'', startPrice(p))}" target="_blank" rel="noopener">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.945C.16 5.335 5.495 0 12.05 0a11.82 11.82 0 018.413 3.488 11.82 11.82 0 013.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.86 9.86 0 001.512 5.26l-.999 3.648 3.985-1.607zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
-            Commander
-          </a>`}
+            : !hasUsablePrice(p)
+              ? `<a class="btn-wa dark" id="ppBtn" href="${priceRequestLink(p)}" target="_blank" rel="noopener">Demander le prix</a>`
+              : `<button type="button" class="btn-wa dark" id="ppBtn" onclick="addActiveProductToCart()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 4h2.2l2.3 11.2a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.5L21 8H6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="20" r="1.3" fill="currentColor" stroke="none"/><circle cx="17.5" cy="20" r="1.3" fill="currentColor" stroke="none"/></svg>
+            Ajouter au panier
+          </button>`}
         </div>
         <div class="order-reassurance">
           <span><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M21 10c0-7-9-13-9-13S3 3 3 10a9 9 0 0018 0z"/><path d="M9 10l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>Paiement à la réception</span>
@@ -3305,12 +3358,13 @@ function selectOption(i){
   activeOption=i;
   const p=activeProduct;
   document.querySelectorAll("#optRow .opt").forEach((b,idx)=>b.classList.toggle("sel",idx===i));
+  const row=document.getElementById("optRow");
+  if(row) row.classList.remove("needs-choice");
   const price=p.price.options[i][1];
   const opt=p.price.options[i][0];
-  document.getElementById("ppPrice").textContent=price+"€";
+  document.getElementById("ppPrice").textContent=fmtPrice(price);
   const fmt=document.getElementById("ppFmt");
   if(fmt) fmt.textContent = p.price.type==='size'?`Taille ${opt}`:opt;
-  document.getElementById("ppBtn").href = waLink(p, opt, price);
   updateFormatImage(p, opt);
   updateMobileBar();
 }
@@ -3333,21 +3387,24 @@ function updateFormatImage(p, formatLabel){
 function updateMobileBar(){
   const p=activeProduct; if(!p) return;
   const hasOpt=p.price.type!=="fixed";
-  const price=hasOpt?p.price.options[activeOption][1]:p.price.value;
-  const opt=hasOpt?p.price.options[activeOption][0]:"";
+  const chosen=hasOpt && activeOption!==null;
   const btn=document.getElementById("mbarBtn");
   const note=document.querySelector(".mbar-note");
-  document.getElementById("mbarPrice").textContent=price+"€";
+  // Tant qu'aucune variante n'est choisie, la barre affiche le prix d'appel
+  // — jamais le prix d'une variante que le client n'a pas sélectionnée.
+  document.getElementById("mbarPrice").textContent =
+    !hasUsablePrice(p) ? "Prix sur demande"
+    : hasOpt ? (chosen ? fmtPrice(p.price.options[activeOption][1])
+                       : "dès "+fmtPrice(startPrice(p)))
+    : fmtPrice(p.price.value);
   // La note "Paiement à la réception" n'a de sens qu'à côté d'un bouton
-  // réellement commandable — masquée sur un produit à venir.
-  if(note) note.hidden = (p.coming_soon===true);
-  if(p.coming_soon===true){
-    btn.removeAttribute("href");
-    btn.classList.add("btn-soon");
-  } else {
-    btn.href=waLink(p, opt, price);
-    btn.classList.remove("btn-soon");
-  }
+  // réellement commandable — masquée sur un produit à venir ou sans prix.
+  if(note) note.hidden = (p.coming_soon===true || !hasUsablePrice(p));
+  if(!btn) return;
+  btn.classList.toggle("btn-soon", p.coming_soon===true);
+  btn.disabled = (p.coming_soon===true);
+  const label=document.getElementById("mbarBtnLabel");
+  if(label) label.textContent = hasUsablePrice(p) ? "Ajouter au panier" : "Demander le prix";
 }
 
 /* ============ NAV ============ */
@@ -3976,5 +4033,8 @@ function closeColorModal() {
 }
 
 </script>
+<!-- Panier : chargé en defer, après js/config.js (SUPABASE_URL / WHATSAPP_NUMBER). -->
+<script src="/js/cart.js" defer></script>
+
 </body>
 </html>
