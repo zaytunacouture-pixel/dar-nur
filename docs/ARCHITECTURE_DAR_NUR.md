@@ -311,6 +311,32 @@ Cinq règles issues des chantiers de migration successifs. Elles ne sont pas des
 
 5. **Supabase reste la source de vérité — pas d'exception codée en dur.** Aucun nom de produit, prix, marque ou identifiant métier ne doit apparaître dans un générateur ou un gabarit. Les seules valeurs littérales admises en configuration sont les libellés d'affichage (pilules, pastilles, titres SEO) et les règles de classement. Quand une page affiche autre chose que `categories.label`, cela passe par une option générique (`tagLabel`), jamais par un `if` sur un identifiant de catégorie.
 
+## Panier et commande WhatsApp (2026-08-28)
+
+**Le panier est désormais le seul parcours de commande.** La fiche produit n'émet plus de lien WhatsApp mono-produit : `waLink()` et la constante globale `WA` ont été supprimées d'`index.html`, et avec elles le `Quantité : 1` codé en dur. Le client ajoute au panier, puis envoie un récapitulatif complet depuis le panneau.
+
+- **Fichiers** : `cart.css` et `js/cart.js` (12,8 Ko gzip cumulés, `defer`, aucune dépendance, aucun SDK). Ils ne sont chargés que sur les **pages commerciales** : `index.html` (donc les 237 fiches par héritage du gabarit), les 14 pages catégories, les 5 pages parfums. **Jamais** sur `cgv.html`, `confidentialite.html`, `mentions-legales.html` ni `admin.html`.
+- **Inclusion sur les pages catégories et parfums** : `<link href="/cart.css">` après `/nav.css`, puis `js/config.js` + `js/cart.js` après `/js/nav.js` — toujours **hors** des marqueurs `AUTO:*`. Les pages parfums reçoivent ces lignes par leurs deux gabarits, jamais par édition directe.
+- **`js/config.js` porte maintenant `WHATSAPP_NUMBER`** (`33769253375`). C'est la source à utiliser : ne pas réintroduire le numéro en dur dans un nouveau fichier. Les pages catégories et parfums chargent `config.js` uniquement pour ça et pour `SUPABASE_URL`/`SUPABASE_ANON` — elles n'ont toujours pas le SDK Supabase, le panier interroge PostgREST par `fetch` natif.
+- **localStorage ne mémorise que `{slug, variante, quantité}`** sous la clé `darnur.cart.v1`. Aucun prix ne fait autorité côté client : à chaque ouverture, nom / catégorie / disponibilité / prix sont relus depuis Supabase. L'instantané joint à chaque ligne ne sert qu'à l'affichage immédiat et au mode dégradé, et un bandeau explicite prévient le client quand les montants en viennent.
+- **Aucune variante n'est présélectionnée** : `activeOption` vaut `null` tant que le client n'a pas cliqué une option. Le prix affiché reste « dès X,XX € », et l'ajout au panier est refusé avec « Choisissez d'abord votre format / votre taille ». Ne pas rétablir le `.sel` sur l'option 0 : c'était le comportement qui aurait fait entrer une variante non choisie dans une commande.
+- **23 produits ne sont jamais ajoutables** : les 17 `coming_soon` et les 6 sans `price_value`. Ces derniers affichent « Prix sur demande » et un bouton « Demander le prix » (WhatsApp sans prix ni quantité — ce n'est pas un parcours de commande concurrent). `fmtPrice()` ne renvoie jamais `null€`. La donnée elle-même reste une dette non traitée.
+- **Format monétaire** : `fmtPrice()` dans `index.html` et `fmt()` dans `js/cart.js` reproduisent `formatPriceLabel()` de `generate-category-pages.mjs` — `Number(v).toFixed(2).replace('.', ',') + ' €'`. Une seule règle sur tout le site.
+
+### Pourquoi le bouton panier est flottant et non dans l'en-tête
+
+Mesuré en production le 2026-08-28, viewport 1240 px : sur la homepage et les 237 fiches, `.brand` (175,6 px) + `.nav-links` (993,4 px) = 1169 px pour 1169 px disponibles — **0 px de marge**. Sur les pages catégories, `.nav-links` fait 1194 px pour 1225 px. Sur les pages parfums, `.nav-links` fait 1226,5 px et **déborde déjà de ~1,5 px** (anomalie préexistante, reproduite à l'identique sur `https://dar-nur.fr/parfums/` sans aucun code panier).
+
+Insérer quoi que ce soit dans cette rangée ferait donc réapparaître le débordement horizontal corrigé au commit `f5562a0`. Le panier est un bouton `position:fixed` en bas à droite, injecté par JS, identique sur les quatre types de page. Sur la fiche produit en mobile, `js/cart.js` observe `#mbar` et remonte le bouton au-dessus d'elle (14 px d'écart mesurés à 375×812). **Ne pas déplacer ce bouton dans le `<header>`** sans refaire ces mesures.
+
+### Codes promotionnels — le code ne vit qu'en base
+
+`supabase/sql/promo_codes.sql` crée la table `public.promo_codes` (RLS activé, **aucune politique**, privilèges révoqués pour `anon` et `authenticated` : non énumérable depuis le navigateur) et la fonction `public.check_promo_code(p_code text, p_items jsonb)` en `SECURITY DEFINER`, seule exposée à PostgREST. Elle valide le code, la fenêtre de validité en heure de Paris, **recalcule les montants depuis `products`/`product_variants`** et applique le minimum de commande — le navigateur n'envoie que des slugs, des variantes et des quantités. Rollback : `promo_codes_rollback.sql`.
+
+**`js/cart.js` ne contient aucun code, aucun taux, aucune catégorie remisée, aucun seuil, aucune date.** C'est la condition de la confidentialité, et elle doit être préservée : y ajouter une règle « pour aller plus vite » annulerait tout le dispositif.
+
+**Corollaire vérifié le 2026-08-28, à connaître : GitHub Pages sert les fichiers du dépôt tels quels, `supabase/` et `scripts/` compris.** `https://dar-nur.fr/supabase/sql/brands_migration.sql`, `https://dar-nur.fr/supabase/schema.sql` et `https://dar-nur.fr/scripts/generate-product-pages.mjs` répondent tous **HTTP 200**. Un code promotionnel écrit dans un fichier `.sql` versionné serait donc aussi public qu'un code écrit dans le JavaScript. `promo_codes.sql` porte pour cette raison un jeton `REMPLACER_PAR_LE_CODE`, remplacé dans le SQL Editor au moment de l'exécution, avec un garde-fou qui refuse une exécution non substituée. **Ne jamais committer un code promotionnel en clair.**
+
 ## Dette connue — non traitée
 
 Sujets identifiés, mesurés, et **volontairement laissés en l'état**. Aucun n'est traité dans le chantier en cours.
