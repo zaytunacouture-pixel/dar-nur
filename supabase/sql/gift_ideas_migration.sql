@@ -11,7 +11,8 @@
 --  comme le prix affiché sur les cartes. Rien à saisir à la main.
 --
 --  À exécuter une fois dans : Supabase → SQL Editor → New query → Run
---  (compte propriétaire zahi.youcef@hotmail.fr, e-mail + mot de passe).
+--  (compte propriétaire du projet, connexion par e-mail et mot de passe —
+--  jamais par GitHub : voir docs/ARCHITECTURE_DAR_NUR.md).
 --
 --  Rollback : supabase/sql/gift_ideas_migration_rollback.sql
 --
