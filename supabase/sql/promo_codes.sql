@@ -2,7 +2,8 @@
 --  DAR NŪR — Codes promotionnels (table confidentielle + RPC de validation)
 --
 --  À exécuter UNE FOIS dans : Supabase → SQL Editor → New query → Run
---  (compte propriétaire zahi.youcef@hotmail.fr, organisation « Dar Nur »).
+--  (compte propriétaire du projet, organisation « Dar Nur » — connexion par
+--  e-mail et mot de passe, jamais par GitHub : voir docs/ARCHITECTURE_DAR_NUR.md).
 --
 --  Rollback : supabase/sql/promo_codes_rollback.sql
 --
