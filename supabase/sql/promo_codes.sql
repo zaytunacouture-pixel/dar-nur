@@ -295,7 +295,11 @@ grant execute on function public.check_promo_code(text, jsonb) to authenticated;
 --    −20 % sur « miels », « miels-gourmands » et « miels-terroir »
 --    aucune remise sur les autres catégories
 --    minimum 40 € APRÈS réduction, tous produits confondus
---    valable jusqu'au 30 août 2026 à 23 h 59, heure de Paris
+--    valable jusqu'au 31 août 2026 à 00 h 30, heure de Paris
+--      (prolongé depuis le 30 août 23 h 59 — voir
+--       supabase/sql/promo_codes_prolongation.sql, qui est le script à
+--       exécuter sur une base DÉJÀ installée : l'insertion ci-dessous est
+--       idempotente et ne modifie jamais un code existant)
 --
 --  L'écriture « at time zone 'Europe/Paris' » convertit un horodatage local
 --  de Paris en timestamptz : le passage heure d'été / heure d'hiver est géré
@@ -327,7 +331,7 @@ begin
     v_label,
     true,
     null,
-    (timestamp '2026-08-30 23:59:59.999') at time zone 'Europe/Paris',
+    (timestamp '2026-08-31 00:30:59.999') at time zone 'Europe/Paris',
     40.00,
     '[{"categories":["parfums"],"percent":30},
       {"categories":["miels","miels-gourmands","miels-terroir"],"percent":20}]'::jsonb
@@ -370,9 +374,9 @@ select
     as regles,
   -- Les deux colonnes suivantes lèvent toute ambiguïté UTC / heure locale.
   (select ends_at at time zone 'Europe/Paris' from public.promo_codes order by created_at desc limit 1)
-    as expiration_paris__attendu_2026_08_30_23_59_59_999,
+    as expiration_paris__attendu_2026_08_31_00_30_59_999,
   (select ends_at at time zone 'UTC' from public.promo_codes order by created_at desc limit 1)
-    as expiration_utc__attendu_2026_08_30_21_59_59_999,
+    as expiration_utc__attendu_2026_08_30_22_30_59_999,
   (select ends_at > now() from public.promo_codes order by created_at desc limit 1)
     as encore_valide_maintenant;
 
