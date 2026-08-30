@@ -240,6 +240,9 @@ button.btn-wa{
 }
 .dn-cart-promo-msg.is-error{color:#a6332e}
 .dn-cart-promo-msg.is-ok{color:#1d6b45}
+/* Code retenu mais remise pas encore acquise (minimum non atteint, panier vide,
+   catalogue injoignable) : ton informatif, ni refus rouge ni succes vert. */
+.dn-cart-promo-msg.is-pending{color:#8a6a1f}
 
 /* ── CTA WhatsApp ─────────────────────────────────────────────────────── */
 .dn-cart-cta{
