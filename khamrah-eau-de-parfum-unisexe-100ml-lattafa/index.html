@@ -1932,33 +1932,49 @@ const COLLECTION_THUMBS = {
 };
 const getCollectionThumb = id=>COLLECTION_THUMBS[id] || getProductCardImage(id);
 
-// Pour les miels : image principale liée au format choisi (50 g / 200 g / 300 g).
-// Si un format n'a pas d'image dédiée, l'image principale ne change pas (fallback).
+// Pour les miels thérapeutiques : image principale liée au format choisi
+// (50 g / 200 g / 300 g). Une entrée par visuel réellement existant — le repli
+// d'un format sans visuel dédié est porté une seule fois par
+// FORMAT_IMAGE_FALLBACKS ci-dessous, jamais recopié produit par produit.
 const PRODUCT_FORMAT_IMAGES = {
   "miel-nigelle": {"50 g":"assets/produits-ia/miel-nigelle/miel-nigelle-2.webp","200 g":"assets/produits-ia/miel-nigelle/miel-nigelle-1.webp"},
   "miel-aphrodisiaque": {"50 g":"assets/produits-ia/miel-aphrodisiaque/miel-aphrodisiaque-2.webp","200 g":"assets/produits-ia/miel-aphrodisiaque/miel-aphrodisiaque-1.webp"},
-  // Format 300 g : réutilise provisoirement le visuel 200 g, jusqu'à la création d'un visuel dédié 300 g.
-  "miel-rose-siberie": {"50 g":"assets/produits-ia/miel-rose-siberie/miel-rose-siberie-2.webp","200 g":"assets/produits-ia/miel-rose-siberie/miel-rose-siberie-1.webp","300 g":"assets/produits-ia/miel-rose-siberie/miel-rose-siberie-1.webp"},
-  // Format 300 g : réutilise provisoirement le visuel 200 g, jusqu'à la création d'un visuel dédié 300 g.
-  "miel-spiruline": {"50 g":"assets/produits-ia/miel-spiruline/miel-spiruline-1.webp","200 g":"assets/produits-ia/miel-spiruline/miel-spiruline-2.webp","300 g":"assets/produits-ia/miel-spiruline/miel-spiruline-2.webp"},
+  "miel-rose-siberie": {"50 g":"assets/produits-ia/miel-rose-siberie/miel-rose-siberie-2.webp","200 g":"assets/produits-ia/miel-rose-siberie/miel-rose-siberie-1.webp"},
+  "miel-spiruline": {"50 g":"assets/produits-ia/miel-spiruline/miel-spiruline-1.webp","200 g":"assets/produits-ia/miel-spiruline/miel-spiruline-2.webp"},
   "miel-gingembre-curcuma": {"50 g":"assets/produits-ia/miel-gingembre-curcuma/miel-gingembre-curcuma-1.webp","200 g":"assets/produits-ia/miel-gingembre-curcuma/miel-gingembre-curcuma-2.webp"},
   "miel-hibiscus-zamzam": {"50 g":"assets/produits-ia/miel-hibiscus-zamzam/miel-hibiscus-zamzam-2.webp","200 g":"assets/produits-ia/miel-hibiscus-zamzam/miel-hibiscus-zamzam-1.webp"},
   "miel-moringa-nigelle": {"50 g":"assets/produits-ia/miel-moringa-nigelle/miel-moringa-nigelle-2.webp","200 g":"assets/produits-ia/miel-moringa-nigelle/miel-moringa-nigelle-1.webp"},
-  // Format 300 g : réutilise provisoirement le visuel 200 g, jusqu'à la création d'un visuel dédié 300 g.
-  "miel-gingembre-fenugrec": {"50 g":"assets/produits-ia/miel-gingembre-fenugrec/miel-gingembre-fenugrec-2.webp","200 g":"assets/produits-ia/miel-gingembre-fenugrec/miel-gingembre-fenugrec-1.webp","300 g":"assets/produits-ia/miel-gingembre-fenugrec/miel-gingembre-fenugrec-1.webp"},
+  "miel-gingembre-fenugrec": {"50 g":"assets/produits-ia/miel-gingembre-fenugrec/miel-gingembre-fenugrec-2.webp","200 g":"assets/produits-ia/miel-gingembre-fenugrec/miel-gingembre-fenugrec-1.webp"},
   "miel-aubepine": {"50 g":"assets/produits-ia/miel-aubepine/miel-aubepine-2.webp","200 g":"assets/produits-ia/miel-aubepine/miel-aubepine-1.webp"},
-  // Format 300 g : réutilise provisoirement le visuel 200 g, jusqu'à la création d'un visuel dédié 300 g.
-  "miel-costus-nigelle": {"50 g":"assets/produits-ia/miel-costus-nigelle/miel-costus-nigelle-2.webp","200 g":"assets/produits-ia/miel-costus-nigelle/miel-costus-nigelle-1.webp","300 g":"assets/produits-ia/miel-costus-nigelle/miel-costus-nigelle-1.webp"},
+  "miel-costus-nigelle": {"50 g":"assets/produits-ia/miel-costus-nigelle/miel-costus-nigelle-2.webp","200 g":"assets/produits-ia/miel-costus-nigelle/miel-costus-nigelle-1.webp"},
   "miel-sidr-jujubier": {"50 g":"assets/produits-ia/miel-sidr-jujubier/miel-sidr-jujubier-2.webp","200 g":"assets/produits-ia/miel-sidr-jujubier/miel-sidr-jujubier-1.webp"},
-  // Format 300 g : réutilise provisoirement le visuel 200 g, jusqu'à la création d'un visuel dédié 300 g.
-  "miel-fraise-russie": {"50 g":"assets/produits-ia/miel-fraise-russie/miel-fraise-russie-2.webp","200 g":"assets/produits-ia/miel-fraise-russie/miel-fraise-russie-1.webp","300 g":"assets/produits-ia/miel-fraise-russie/miel-fraise-russie-1.webp"},
-  // Format 300 g : réutilise provisoirement le visuel 200 g, jusqu'à la création d'un visuel dédié 300 g.
-  "miel-shilajit": {"50 g":"assets/produits-ia/miel-shilajit/miel-shilajit-1.webp","200 g":"assets/produits-ia/miel-shilajit/miel-shilajit-2.webp","300 g":"assets/produits-ia/miel-shilajit/miel-shilajit-2.webp"},
+  "miel-fraise-russie": {"50 g":"assets/produits-ia/miel-fraise-russie/miel-fraise-russie-2.webp","200 g":"assets/produits-ia/miel-fraise-russie/miel-fraise-russie-1.webp"},
+  "miel-shilajit": {"50 g":"assets/produits-ia/miel-shilajit/miel-shilajit-1.webp","200 g":"assets/produits-ia/miel-shilajit/miel-shilajit-2.webp"},
   "miel-blanc-kirghizistan": {"50 g":"assets/produits-ia/miel-blanc-kirghizistan/miel-blanc-kirghizistan-2.webp","200 g":"assets/produits-ia/miel-blanc-kirghizistan/miel-blanc-kirghizistan-1.webp"},
+  // Seul miel sans visuel 200 g : le 200 g et le 300 g retombent sur le pot 50 g
+  // via le repli générique ci-dessous, tant qu'aucun autre visuel n'existe.
   "miel-cactus": {"50 g":"assets/produits-ia/miel-cactus/miel-cactus-1.webp"},
-  // Format 300 g : réutilise provisoirement le visuel 200 g, jusqu'à la création d'un visuel dédié 300 g.
-  "miel-gingembre-citron": {"50 g":"assets/produits-ia/miel-gingembre-citron/miel-gingembre-citron-1.webp","200 g":"assets/produits-ia/miel-gingembre-citron/miel-gingembre-citron-2.webp","300 g":"assets/produits-ia/miel-gingembre-citron/miel-gingembre-citron-2.webp"}
+  "miel-gingembre-citron": {"50 g":"assets/produits-ia/miel-gingembre-citron/miel-gingembre-citron-1.webp","200 g":"assets/produits-ia/miel-gingembre-citron/miel-gingembre-citron-2.webp"}
 };
+
+/* Formats qui n'ont pas de visuel propre : ordre de repli, du plus proche au
+   plus lointain. Le 300 g partage le pot du 200 g tant qu'aucun visuel dédié
+   300 g n'a été produit — règle écrite ici une seule fois plutôt que dupliquée
+   dans chaque entrée de PRODUCT_FORMAT_IMAGES. */
+const FORMAT_IMAGE_FALLBACKS = { "300 g": ["200 g", "50 g"], "200 g": ["50 g"] };
+
+/* Image principale à afficher pour un produit et un format donné.
+   Renvoie null si le produit n'a aucun visuel par format (tous les produits
+   hors miels thérapeutiques) — l'appelant garde alors son image habituelle. */
+function formatImageSrc(productId, formatLabel){
+  const map = PRODUCT_FORMAT_IMAGES[productId];
+  if(!map) return null;
+  if(map[formatLabel]) return map[formatLabel];
+  for(const alt of (FORMAT_IMAGE_FALLBACKS[formatLabel] || [])){
+    if(map[alt]) return map[alt];
+  }
+  return null;
+}
 
 /* ============ PRODUCTS ============ */
 const PRODUCTS = [
@@ -2869,7 +2885,11 @@ function addActiveProductToCart(){
     snapshot: {
       name:  p.name,
       price: Number(unit),
-      image: getProductImages(p.id)[0] || null,
+      // Miels thérapeutiques : la vignette du panier montre le pot du format
+      // commandé, pas un visuel générique — même règle que l'image de la fiche.
+      // formatImageSrc() renvoie null pour toute autre catégorie : visuel
+      // principal habituel, comportement inchangé.
+      image: (variant && formatImageSrc(p.id, variant)) || getProductImages(p.id)[0] || null,
       cat:   p.cat
     }
   });
@@ -3149,20 +3169,26 @@ function showProduct(id){
   const isFragrance = ["parfums","tahara","bakhour"].includes(p.cat);
   const isAccessory = ["chaussures","accessoires","chechias"].includes(p.cat);
   const productImages = getProductImages(p.id);
-  const formatImages = PRODUCT_FORMAT_IMAGES[p.id];
-  const initialFormatImg = (formatImages && hasOptions) ? formatImages[p.price.options[0][0]] : null;
+  const initialFormatImg = hasOptions ? formatImageSrc(p.id, p.price.options[0][0]) : null;
   const detailImg = initialFormatImg || productImages[0] || null;
   const activeImgIdx = Math.max(0, productImages.indexOf(detailImg));
-  /* Galerie : pilotée UNIQUEMENT par le nombre d'images, sans réglage ni
-     exception de catégorie. 1 image -> aucune vignette, aucune navigation,
-     aucun conteneur vide. 2 images ou plus -> les vignettes apparaissent
-     d'elles-mêmes, et disparaissent d'elles-mêmes si on repasse à une image.
+  /* Miels thérapeutiques : l'image principale est pilotée EXCLUSIVEMENT par le
+     sélecteur de format (50 g / 200 g / 300 g), donc aucune vignette n'est
+     rendue — desktop comme mobile. Deux commandes concurrentes sur la même
+     image (vignettes + sélecteur) laissaient afficher le pot 50 g avec le prix
+     du 300 g. */
+  const isFormatDrivenImage = !!PRODUCT_FORMAT_IMAGES[p.id];
+  /* Galerie des autres catégories : pilotée UNIQUEMENT par le nombre d'images,
+     sans réglage ni exception de catégorie. 1 image -> aucune vignette, aucune
+     navigation, aucun conteneur vide. 2 images ou plus -> les vignettes
+     apparaissent d'elles-mêmes, et disparaissent d'elles-mêmes si on repasse à
+     une image.
      (Avant le Lot 2, ces vignettes étaient réservées aux catégories vêtements
      et brumes : les autres produits multi-images n'affichaient jamais leurs
      images secondaires.)
      Le chemin passe par data-src plutôt que par une chaîne interpolée dans un
      onclick : une apostrophe dans un nom de fichier cassait le gestionnaire. */
-  const galleryThumbs = (productImages.length > 1)
+  const galleryThumbs = (!isFormatDrivenImage && productImages.length > 1)
     ? `<div class="pp-thumbs" role="group" aria-label="Autres images du produit">${productImages.map((img,i)=>`<button class="pp-thumb ${i===activeImgIdx?'active':''}" type="button" data-src="${img}" aria-label="Voir l'image ${i+1} sur ${productImages.length}" aria-pressed="${i===activeImgIdx}" onclick="setProductGalleryImage(this)"><img src="${img}" alt="${p.name} — image ${i+1}" width="72" height="72" loading="lazy"/></button>`).join("")}</div>`
     : "";
 
@@ -3383,18 +3409,14 @@ function selectOption(i){
 }
 
 // Change l'image principale pour qu'elle corresponde au format sélectionné.
-// Si aucune image n'existe pour ce format, l'image actuelle est conservée.
+// Produits concernés = ceux de PRODUCT_FORMAT_IMAGES, qui n'affichent aucune
+// vignette : rien d'autre que #ppGalleryMain n'est à resynchroniser. Pour tout
+// autre produit, formatImageSrc() renvoie null et l'image reste inchangée.
 function updateFormatImage(p, formatLabel){
-  const map = PRODUCT_FORMAT_IMAGES[p.id];
-  if(!map) return;
-  const src = map[formatLabel];
+  const src = formatImageSrc(p.id, formatLabel);
   if(!src) return;
   const main = document.getElementById("ppGalleryMain");
   if(main) main.src = src;
-  document.querySelectorAll(".pp-thumb").forEach(t=>{
-    const img = t.querySelector("img");
-    t.classList.toggle("active", !!img && img.getAttribute("src")===src);
-  });
 }
 
 function updateMobileBar(){
