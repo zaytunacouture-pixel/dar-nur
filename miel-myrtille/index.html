@@ -4043,15 +4043,7 @@ function updateColorWA() {
     + `• Taille : ${_selectedSize}\n\n`
     + `Mes informations :\n`
     + `• Nom :\n• Ville :\n`
-    + `• Mode de livraison souhaité : point de rendez-vous / près d'une mosquée / à domicile\n`
-    + `• Adresse ou lieu souhaité :\n`
     + `• Paiement à la réception : Revolut / Espèces\n\n`
-    // Mention affichée seulement quand elle est utile : le montant de la
-    // commande (prix promo de l'offre, montant réellement dû) n'atteint pas
-    // le minimum de 20 € des deux options de livraison payantes.
-    + (Number(offer.promo_price) < 20
-        ? `Les options de livraison payantes (10 € ou 20 €) sont disponibles à partir de 20 € de commande.\n\n`
-        : ``)
     + `Merci.`
   );
   window._colorWAHref = `https://wa.me/33769253375?text=${msg}`;
