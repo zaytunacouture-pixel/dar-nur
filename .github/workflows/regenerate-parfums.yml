@@ -1,6 +1,6 @@
 name: Régénère la page Parfums (Supabase → HTML statique)
 
-# Déclenchement à la demande UNIQUEMENT — aucune exécution planifiée (cron) :
+# Déclenchement à la demande (plus un cron de rattrapage, voir plus bas) :
 #   - repository_dispatch "regenerate-parfums" : envoyé automatiquement par le
 #     trigger Postgres Supabase, filtré sur category_id = 'parfums' (voir
 #     supabase/sql/parfums_webhook_trigger.sql).
@@ -25,10 +25,19 @@ name: Régénère la page Parfums (Supabase → HTML statique)
 # qui publie une carte publie aussi la fiche vers laquelle elle pointe.
 # Ce choix couvre aussi le trigger `brands` (trigger 6), qui déclenche
 # "regenerate-parfums" seul, sans aucun "regenerate-product-pages" en face.
+#
+# Filet de sécurité planifié (ajouté le 2026-09-18) : même constat et même
+# logique que dans regenerate-product-pages.yml — le webhook Supabase → GitHub
+# (PAT dans Vault + net.http_post silencieux) a cessé de déclencher quoi que
+# ce soit après le 2026-08-12, sans aucune erreur visible. Ce cron rejoue la
+# génération 4×/jour, décalé de 30 min par rapport à l'autre workflow ; sans
+# dérive il ne commit rien, avec dérive il commit ET le signale.
 on:
   repository_dispatch:
     types: [regenerate-parfums]
   workflow_dispatch: {}
+  schedule:
+    - cron: '37 3,9,15,21 * * *'
 
 concurrency:
   group: regenerate-parfums
@@ -79,6 +88,10 @@ jobs:
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
             echo "::notice::Contenu modifié — commit à venir."
+            if [ "${{ github.event_name }}" = "schedule" ]; then
+              echo "::warning::Dérive rattrapée par le run planifié : le webhook Supabase → GitHub a manqué au moins un événement. Vérifier le PAT (supabase/sql/webhook_rotate_pat.sql)."
+              echo "⚠️ **Dérive rattrapée par le run planifié** — le webhook Supabase → GitHub n'a pas déclenché la régénération. Vérifier le PAT GitHub stocké dans Vault (\`supabase/sql/webhook_rotate_pat.sql\`)." >> "$GITHUB_STEP_SUMMARY"
+            fi
           fi
 
       - name: Committer et publier uniquement si changement réel
@@ -86,7 +99,11 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git commit -m "chore: régénère la collection Parfums (fiches + hub + pages marque) depuis Supabase [skip ci]"
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            git commit -m "chore: régénère la collection Parfums depuis Supabase (rattrapage planifié, webhook manqué) [skip ci]"
+          else
+            git commit -m "chore: régénère la collection Parfums (fiches + hub + pages marque) depuis Supabase [skip ci]"
+          fi
 
           # Ce commit porte désormais les fiches produit ET les pages marque :
           # le perdre sur un push refusé republierait des cartes sans leurs

@@ -287,7 +287,7 @@ function buildCardHtml(p, brandName, imgPrefix) {
         <h3>${esc(p.name)}</h3>
         <p class="card-tagline">${esc(teaser)}</p>
         <div class="card-footer">
-          <div class="card-price">${esc(priceLabel)}</div>
+          <div class="card-price">${esc(priceLabel)}${p.volume ? `<small>${esc(p.volume)}</small>` : ''}</div>
           <span class="card-cta">Voir la fiche</span>
         </div>
       </div>
@@ -329,11 +329,17 @@ async function renderBrandPage(group, allGroups, commonNav) {
 
   const countLabel = pluralize(products.length, 'parfum');
   const metaDescription = `Découvrez les ${products.length} parfums ${brandName}${formatsText ? ` : disponibles en ${formatsText}` : ''}${minPrice != null ? `, à partir de ${minPrice.toFixed(0)} €` : ''}. Commandez sur WhatsApp.`;
-  const heroSubtitle = `${countLabel}, disponible${products.length > 1 ? 's' : ''} en ${formatsText}.`;
-  // Description : celle saisie dans admin > Marques en priorité, sinon un
-  // texte générique dérivé des formats réels (comportement précédent, gardé
-  // comme valeur par défaut tant qu'aucune description n'a été renseignée).
-  const introText = brandDescription || `La collection Parfum ${brandName} — disponible en ${formatsText}.`;
+  const availabilityText = `${countLabel}, disponible${products.length > 1 ? 's' : ''} en ${formatsText}.`;
+  // Identité de marque d'abord : quand une description a été saisie dans
+  // admin > Marques, c'est elle qui accroche sous le H1 (le visiteur comprend
+  // l'univers olfactif avant les chiffres), et la ligne de disponibilité
+  // (complétée du prix d'appel) passe dans l'intro. Sans description,
+  // comportement précédent inchangé : disponibilité sous le H1, texte
+  // générique dans l'intro.
+  const heroSubtitle = brandDescription || availabilityText;
+  const introText = brandDescription
+    ? `${availabilityText.slice(0, -1)}${minPrice != null ? `, à partir de ${formatPriceLabel(minPrice)}` : ''}.`
+    : `La collection Parfum ${brandName} — disponible en ${formatsText}.`;
 
   const template = await readFile(BRAND_TEMPLATE_PATH, 'utf8');
   const cardsHtml = products.map(p => buildCardHtml(p, brandName, imgPrefix)).join('\n\n');

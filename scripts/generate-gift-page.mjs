@@ -19,6 +19,7 @@
 // Aucune dépendance npm : fetch natif de Node (>=18).
 
 import { readFile, writeFile } from 'node:fs/promises';
+import { pathToFileURL } from 'node:url';
 
 const ROOT = new URL('../', import.meta.url);
 const PAGE_PATH = new URL('idees-cadeaux/index.html', ROOT);
@@ -319,8 +320,11 @@ async function main() {
 }
 
 // Exécuté seulement en ligne de commande : les fonctions ci-dessus restent
-// importables pour vérification hors ligne.
-if (import.meta.url === `file://${process.argv[1]}`) {
+// importables pour vérification hors ligne. pathToFileURL() et non
+// `file://${argv[1]}` : sous Windows, argv[1] est un chemin C:\… qui ne
+// correspondait jamais à import.meta.url, et le script se terminait sans rien
+// faire (aucune erreur) — constaté le 2026-09-19.
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   main().catch(err => {
     console.error(`::error::${err.message}`);
     process.exit(1);
