@@ -2,3 +2,4 @@ _archive_pre_nav_refactor/
 # Sauvegardes locales (exports JSON, dossiers de travail des imports) — jamais versionnées :
 # GitHub Pages sert tout fichier committé tel quel.
 backups/
+supabase/.temp/
