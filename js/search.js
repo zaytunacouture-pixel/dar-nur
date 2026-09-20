@@ -35,7 +35,7 @@
   var INDEX_URL = '/data/search-index.json';
   var MIN_CHARS = 2;
   var SUGGEST_LIMIT = 8;      // suggestions affichées avant « Voir tous les résultats »
-  var PAGE_STEP = 40;         // résultats ajoutés à chaque « Afficher plus »
+  var PAGE_STEP = 100;        // « Voir tous » affiche tout jusqu'à ce seuil, puis par tranches
   var DEBOUNCE_MS = 120;
   var MOBILE_QUERY = '(max-width: 1239px)';   // même seuil que nav.css / index.html
 
@@ -72,6 +72,7 @@
   // Même contrat que normalize() de scripts/generate-search-index.mjs.
   function normalize(str) {
     return String(str == null ? '' : str)
+      .replace(/[œŒ]/g, 'oe').replace(/[æÆ]/g, 'ae')   // ligatures : NFD ne les décompose pas (« cœur » donnait « c ur »)
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
       .toLowerCase()
@@ -323,12 +324,13 @@
     input.setAttribute('aria-expanded', 'true');
 
     var label = total + (total > 1 ? ' résultats' : ' résultat') + ' pour « ' + qTrim + ' »';
-    setStatus(label + (limit < total ? ' — ' + limit + ' affichés' : ''));
+    if (limit < total) label += expanded ? ' — les ' + limit + ' premiers affichés' : ' — ' + limit + ' suggestions';
+    setStatus(label);
 
     if (limit < total) {
       var remaining = total - limit;
       foot.innerHTML = expanded
-        ? '<button type="button" class="dn-search-more" data-more>Afficher ' + Math.min(PAGE_STEP, remaining) + ' de plus</button>'
+        ? '<button type="button" class="dn-search-more" data-more>Afficher les ' + Math.min(PAGE_STEP, remaining) + ' suivants</button>'
         : '<button type="button" class="dn-search-more" data-all>Voir tous les ' + total + ' résultats</button>';
     } else {
       foot.innerHTML = '';

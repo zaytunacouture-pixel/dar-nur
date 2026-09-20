@@ -88,6 +88,7 @@ async function fetchCategories(creds) {
 // un espace.
 function normalize(str) {
   return String(str ?? '')
+    .replace(/[œŒ]/g, 'oe').replace(/[æÆ]/g, 'ae')   // ligatures : NFD ne les décompose pas (« cœur » donnait « c ur »)
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
