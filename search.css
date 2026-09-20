@@ -1,0 +1,181 @@
+/* search.css — recherche publique Dar Nūr (bouton d'en-tête + panneau de
+   résultats). Chargé avec /js/search.js sur les pages commerciales, jamais
+   sur cgv/confidentialite/mentions-legales/admin. Repose uniquement sur les
+   tokens :root déjà présents sur chaque page (--green, --gold, --cream…),
+   comme cart.css. Préfixe .dn-search- pour ne jamais entrer en collision
+   avec les styles des pages. */
+
+/* ── Bouton dans l'en-tête ───────────────────────────────────────────── */
+.dn-search-trigger{
+  flex:none;
+  display:inline-flex;align-items:center;justify-content:center;
+  width:38px;height:38px;padding:0;
+  border:1px solid rgba(200,168,75,.38);border-radius:3px;
+  background:transparent;color:var(--gold);
+  cursor:pointer;
+  -webkit-appearance:none;appearance:none;
+  transition:border-color .2s ease,background .2s ease;
+}
+.dn-search-trigger svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round}
+.dn-search-trigger:hover{border-color:var(--gold);background:rgba(200,168,75,.09)}
+.dn-search-trigger:focus-visible{outline:1px solid var(--gold-light);outline-offset:3px}
+/* Homepage / fiches : ferme la rangée de navigation, à droite des liens. */
+header > nav > .dn-search-trigger{margin-left:14px}
+/* Pages à deux rangées : à droite de la rangée identité (flex, centrée). */
+.row-identity > .dn-search-trigger{margin-left:auto}
+@media(max-width:1239px){
+  /* Un seul emplacement sur mobile, tous types de page : à gauche du burger.
+     margin-left:auto n'agit que sur la homepage (nav en space-between avec
+     trois enfants) ; sur les pages à deux rangées, nav n'a pas d'espace
+     libre et la marge est sans effet. */
+  header nav > .dn-search-trigger{margin-left:auto;margin-right:10px;width:40px;height:40px}
+}
+
+/* ── Panneau ──────────────────────────────────────────────────────────── */
+html.dn-search-open{overflow:hidden}
+
+.dn-search[hidden]{display:none}
+.dn-search-backdrop{
+  /* Au-dessus du bouton panier flottant (z 180, cart.css), sous le panneau
+     panier (190/200) — les deux ne sont jamais ouverts en même temps. */
+  position:fixed;inset:0;z-index:182;
+  background:rgba(13,31,22,.55);
+  animation:dn-search-fade .2s ease;
+}
+.dn-search-panel{
+  position:fixed;z-index:184;
+  top:56px;left:50%;transform:translateX(-50%);
+  width:min(680px,calc(100vw - 32px));
+  max-height:calc(100vh - 88px);
+  display:flex;flex-direction:column;
+  background:var(--offwhite);
+  border:1px solid var(--line);border-radius:6px;
+  box-shadow:0 30px 70px -30px rgba(13,31,22,.65);
+  overflow:hidden;
+  animation:dn-search-rise .22s ease;
+}
+@keyframes dn-search-fade{from{opacity:0}to{opacity:1}}
+@keyframes dn-search-rise{from{opacity:0;transform:translate(-50%,-8px)}to{opacity:1;transform:translate(-50%,0)}}
+@media(prefers-reduced-motion:reduce){
+  .dn-search-backdrop,.dn-search-panel{animation:none}
+}
+
+/* Champ */
+.dn-search-form{
+  display:flex;align-items:center;gap:10px;
+  padding:14px 16px;
+  background:var(--green);
+  border-bottom:1px solid rgba(200,168,75,.28);
+  flex:0 0 auto;
+}
+.dn-search-icon{flex:none;display:inline-flex;line-height:0}
+.dn-search-icon svg{width:20px;height:20px;stroke:var(--gold);fill:none;stroke-width:1.7;stroke-linecap:round}
+.dn-search-input{
+  flex:1 1 auto;min-width:0;
+  height:46px;padding:0 4px;
+  border:none;border-bottom:1px solid rgba(200,168,75,.35);border-radius:0;
+  background:transparent;
+  font-family:'Lora',serif;font-size:1.05rem;color:var(--cream);
+  -webkit-appearance:none;appearance:none;
+}
+.dn-search-input::placeholder{color:rgba(250,247,240,.5)}
+.dn-search-input:focus{outline:none;border-bottom-color:var(--gold)}
+.dn-search-input::-webkit-search-decoration,
+.dn-search-input::-webkit-search-cancel-button{-webkit-appearance:none;appearance:none}
+.dn-search-clear,.dn-search-close{
+  flex:none;
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:44px;height:44px;padding:0 6px;
+  border:none;border-radius:3px;background:transparent;
+  color:var(--gold);cursor:pointer;
+  -webkit-appearance:none;appearance:none;
+}
+.dn-search-clear svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round}
+.dn-search-close{
+  font-family:'Cinzel',serif;font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--cream);opacity:.85;padding:0 10px;
+  border:1px solid rgba(200,168,75,.35);
+}
+.dn-search-clear:hover,.dn-search-close:hover{background:rgba(200,168,75,.12);opacity:1}
+.dn-search-clear:focus-visible,.dn-search-close:focus-visible{outline:1px solid var(--gold-light);outline-offset:2px}
+
+/* État / compteur */
+.dn-search-status{
+  margin:0;padding:12px 18px 8px;
+  font-family:'Jost',sans-serif;font-size:.8rem;letter-spacing:.02em;
+  color:var(--muted);line-height:1.5;
+  flex:0 0 auto;
+}
+.dn-search-status:empty{display:none}
+.dn-search-status.is-empty{padding-bottom:14px;color:var(--ink)}
+.dn-search-status.is-error{color:#8a2626}
+
+/* Liste des résultats */
+.dn-search-list{
+  list-style:none;margin:0;padding:0 8px 8px;
+  flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+}
+.dn-search-list:empty{padding:0}
+.dn-search-item a{
+  display:grid;grid-template-columns:56px 1fr auto;align-items:center;gap:14px;
+  padding:9px 10px;border-radius:4px;
+  text-decoration:none;color:var(--ink);
+  transition:background .15s ease;
+}
+.dn-search-item a:hover,.dn-search-item.is-active a{background:rgba(200,168,75,.13)}
+.dn-search-thumb{
+  width:56px;height:56px;border-radius:4px;overflow:hidden;
+  background:var(--cream);border:1px solid var(--line);
+  display:block;
+}
+.dn-search-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.dn-search-body{min-width:0;display:flex;flex-direction:column;gap:3px}
+.dn-search-name{
+  font-family:'Cinzel',serif;font-size:.82rem;letter-spacing:.04em;color:var(--green);
+  line-height:1.3;
+  overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+}
+.dn-search-meta{
+  font-family:'Jost',sans-serif;font-size:.74rem;letter-spacing:.03em;color:var(--muted);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.dn-search-price{
+  font-family:'Cormorant Garamond',serif;font-size:1.12rem;font-weight:600;color:var(--gold-dark);
+  white-space:nowrap;
+}
+.dn-search-price.is-muted{font-family:'Jost',sans-serif;font-size:.72rem;font-weight:400;color:var(--muted);letter-spacing:.03em}
+
+/* Pied : voir tous / afficher plus / boutique */
+.dn-search-foot{flex:0 0 auto;padding:0 18px 16px}
+.dn-search-foot:empty{display:none}
+.dn-search-more,.dn-search-all{
+  display:flex;align-items:center;justify-content:center;
+  width:100%;min-height:46px;padding:0 16px;
+  border:1px solid var(--gold);border-radius:3px;
+  background:transparent;color:var(--green);
+  font-family:'Cinzel',serif;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;
+  text-decoration:none;cursor:pointer;
+  transition:background .2s ease,color .2s ease;
+  -webkit-appearance:none;appearance:none;
+}
+.dn-search-more:hover,.dn-search-all:hover{background:var(--green);color:var(--cream)}
+.dn-search-more:focus-visible,.dn-search-all:focus-visible{outline:2px solid var(--gold-light);outline-offset:3px}
+
+/* ── Mobile : plein écran, jamais sous l'en-tête ──────────────────────── */
+@media(max-width:768px){
+  .dn-search-panel{
+    top:0;left:0;transform:none;
+    width:100%;max-height:none;height:100%;
+    border:none;border-radius:0;
+    animation:dn-search-fade .2s ease;
+  }
+  .dn-search-form{padding:12px 12px 12px 16px;padding-top:calc(12px + env(safe-area-inset-top,0px))}
+  /* 16px minimum : en dessous, iOS zoome la page au focus du champ. */
+  .dn-search-input{font-size:1.05rem;height:48px}
+  .dn-search-item a{grid-template-columns:52px 1fr auto;gap:12px;padding:10px 8px}
+  .dn-search-thumb{width:52px;height:52px}
+  .dn-search-name{font-size:.8rem}
+  .dn-search-price{font-size:1.05rem}
+  .dn-search-foot{padding-bottom:calc(16px + env(safe-area-inset-bottom,0px))}
+}

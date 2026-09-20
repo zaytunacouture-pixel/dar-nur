@@ -133,7 +133,12 @@ nav{
 .brand .name{font-family:'Cinzel';font-size:1.35rem;color:var(--cream);letter-spacing:.18em}
 .brand .ar{font-family:'Cormorant Garamond';font-size:1rem;color:var(--gold);letter-spacing:.05em;margin-top:3px}
 .nav-portal{display:contents}
-.nav-links{display:flex;gap:34px;align-items:center;list-style:none}
+/* gap 34px -> 28px et margin-left:auto (recherche, 2026-09-20) : a 1240px la
+   rangee brand + liens occupait 100 % de la largeur (0 px de marge mesuree).
+   Les 8 intervalles resserres de 6 px liberent 48 px, juste ce qu'il faut au
+   bouton de recherche (38 px + 14 px) que js/search.js insere avant #burger ;
+   margin-left:auto garde les liens colles a droite malgre ce 3e enfant flex. */
+.nav-links{display:flex;gap:28px;align-items:center;list-style:none;margin-left:auto}
 .nav-links a{
   font-family:'Cinzel';font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;
   color:var(--cream);opacity:.82;transition:opacity .25s,color .25s;position:relative;padding:4px 0;
@@ -901,6 +906,8 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
 
 <!-- Panier (bouton flottant + panneau + toast) — voir js/cart.js -->
 <link rel="stylesheet" href="/cart.css" />
+<!-- Recherche publique (bouton d'en-tête + panneau) — voir js/search.js -->
+<link rel="stylesheet" href="/search.css" />
 </head>
 <body>
 
@@ -4100,6 +4107,8 @@ function closeColorModal() {
 </script>
 <!-- Panier : chargé en defer, après js/config.js (SUPABASE_URL / WHATSAPP_NUMBER). -->
 <script src="/js/cart.js" defer></script>
+<!-- Recherche : index statique data/search-index.json, chargé au premier usage seulement. -->
+<script src="/js/search.js" defer></script>
 
 </body>
 </html>

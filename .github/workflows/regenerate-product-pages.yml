@@ -28,10 +28,10 @@ name: Régénère les fiches produit (Supabase → HTML statique)
 #      matche QUE ce fichier, jamais "<slug>/index.html" ni
 #      "<catégorie>/index.html" (il faudrait "**/index.html" pour cela).
 #      Or le commit de ce workflow ne peut contenir que : <slug>/index.html,
-#      <catégorie>/index.html, sitemap.xml et
-#      scripts/.generated-product-slugs.json — ce sont les seules cibles
-#      d'écriture des deux générateurs, index.html racine n'y étant ouvert
-#      qu'en LECTURE. Son propre commit ne peut donc pas le redéclencher.
+#      <catégorie>/index.html, idees-cadeaux/index.html, sitemap.xml,
+#      scripts/.generated-product-slugs.json et data/search-index.json — ce
+#      sont les seules cibles d'écriture des générateurs, index.html racine
+#      n'y étant ouvert qu'en LECTURE. Son propre commit ne peut donc pas le redéclencher.
 #   2. Le commit reste marqué [skip ci] : même si la barrière 1 cédait un
 #      jour, GitHub n'ouvrirait aucun run pour ce push.
 #
@@ -94,6 +94,14 @@ jobs:
       # inscrire rendrait son propre commit capable de se redéclencher.
       - name: Générer la page Idées cadeaux (blocs marqués) depuis Supabase
         run: node scripts/generate-gift-page.mjs
+
+      # Index de la recherche publique (data/search-index.json), lu par
+      # js/search.js. Généré ici, avec les fiches, pour qu'un résultat de
+      # recherche pointe toujours vers une page /{slug}/ qui existe. Sortie
+      # déterministe (aucune date) : sans changement de catalogue, le fichier
+      # est identique et le commit conditionnel ci-dessous ne se déclenche pas.
+      - name: Générer l'index de recherche depuis Supabase
+        run: node scripts/generate-search-index.mjs
 
       - name: Vérifier si le contenu généré a réellement changé
         id: diff
