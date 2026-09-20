@@ -11,6 +11,7 @@
 // Usage :
 //   node scripts/import-flora.mjs --ids 65197,65693,64945 [--work <dossier>] [--exclude-images <url,url>]
 //   node scripts/import-flora.mjs --ids ... --apply     # après validation du dry-run
+//   node scripts/import-flora.mjs --verify <dossier-d-application>   # contrôle post-import
 //   node scripts/import-flora.mjs --rollback <dossier-de-sauvegarde>
 //
 // Écriture (`--apply` / `--rollback`) : session administrateur Supabase par
@@ -106,12 +107,13 @@ function fail(msg) { console.error(`\n✖ ${msg}`); process.exit(1); }
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 function parseArgs(argv) {
-  const args = { ids: [], apply: false, rollback: null, work: null, excludeImages: [] };
+  const args = { ids: [], apply: false, rollback: null, verify: null, work: null, excludeImages: [] };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--ids') args.ids = String(argv[++i] || '').split(',').map(s => s.trim()).filter(Boolean);
     else if (a === '--apply') args.apply = true;
     else if (a === '--rollback') args.rollback = argv[++i];
+    else if (a === '--verify') args.verify = argv[++i];
     else if (a === '--work') args.work = argv[++i];
     else if (a === '--exclude-images') args.excludeImages.push(...String(argv[++i] || '').split(',').map(s => s.trim()).filter(Boolean));
     else fail(`Argument inconnu : ${a}`);
@@ -821,6 +823,10 @@ async function applyPlan(plan, creds, workDir) {
     backup.sources = await sbGet(creds, `product_sources?select=*&product_id=in.(${existingIds.join(',')})`);
   }
   await writeFile(path.join(workDir, 'backup-before-apply.json'), JSON.stringify(backup, null, 2));
+  // Instantané (id, slug, updated_at) de TOUS les produits : permet de prouver
+  // après coup qu'aucune ligne hors périmètre n'a été touchée (--verify).
+  const snapshot = await sbGet(creds, 'products?select=id,slug,updated_at&order=slug.asc');
+  await writeFile(path.join(workDir, 'snapshot-all-products-before.json'), JSON.stringify(snapshot, null, 2));
   log(`Sauvegarde écrite : ${existingIds.length} produit(s) existant(s), ${backup.sources.length} source(s).`);
 
   try {
@@ -918,6 +924,112 @@ async function rollback(workDir, creds) {
 }
 
 // ---------------------------------------------------------------------------
+// Vérification post-import (--verify <dossier d'application>)
+// ---------------------------------------------------------------------------
+// Relit Supabase avec la session admin et compare l'état réel au plan du
+// dry-run et au manifeste : prix, brouillons inactifs, variantes, marques,
+// product_sources (purchase_price NULL), coming_soon intact, aucune autre ligne
+// modifiée (instantané pris juste avant l'écriture), aucune mention « Flora »
+// dans les champs publics, table product_sources illisible en anonyme.
+// Écrit <dossier>/verify-report.md ; n'affiche jamais de secret.
+
+async function verifyApply(workDir, creds, anonCreds) {
+  const plan = JSON.parse(await readFile(path.join(workDir, 'plan.json'), 'utf8'));
+  const manifest = JSON.parse(await readFile(path.join(workDir, 'apply-manifest.json'), 'utf8'));
+  const snapshot = JSON.parse(await readFile(path.join(workDir, 'snapshot-all-products-before.json'), 'utf8'));
+  const L = [];
+  let ok = 0, ko = 0;
+  const check = (cond, label, detail = '') => { (cond ? ok++ : ko++); L.push(`- ${cond ? '✔' : '✖'} ${label}${detail ? ` — ${detail}` : ''}`); };
+
+  const all = await sbGet(creds, 'products?select=id,slug,name,price_value,active,coming_soon,brand,brand_slug,updated_at,volume,images,tagline,description,composition,benefits,accordions,variant_axes,product_variants(*)&order=slug.asc');
+  const bySlug = new Map(all.map(p => [p.slug, p]));
+  const brands = await sbGet(creds, 'brands?select=*');
+  const sources = await sbGet(creds, `product_sources?select=*&supplier=eq.${SUPPLIER}`);
+
+  L.push(`# Vérification post-import — ${new Date().toISOString()}`, '', `Dossier : ${workDir}`, '');
+  L.push('## Produits existants');
+  for (const it of plan.items.filter(i => i.decision === 'PRODUIT EXISTANT')) {
+    const p = bySlug.get(it.existing.slug);
+    const expected = it.patch?.price_value ?? it.existing.price_value;
+    check(p && Number(p.price_value) === Number(expected), `${it.existing.slug} : prix ${fmt(p?.price_value)}`, `attendu ${fmt(expected)}`);
+    check(p && p.coming_soon === it.existing.coming_soon, `${it.existing.slug} : coming_soon inchangé (${p?.coming_soon})`);
+    check(p && p.active === it.existing.active, `${it.existing.slug} : active inchangé (${p?.active})`);
+    const before = snapshot.find(s => s.id === it.existing.id);
+    const fields = Object.keys(it.patch || {});
+    check(fields.length === 0 || (p && p.updated_at !== before?.updated_at), `${it.existing.slug} : champs écrits = ${fields.length ? fields.join(', ') : 'aucun'}`);
+    if (fields.length === 0) check(p && p.updated_at === before?.updated_at, `${it.existing.slug} : updated_at identique à l'instantané (aucune écriture)`);
+  }
+  L.push('', '## Nouveaux produits (brouillons)');
+  for (const it of plan.items.filter(i => i.decision === 'NOUVEAU PRODUIT')) {
+    const p = bySlug.get(it.slug);
+    check(!!p, `${it.slug} existe`);
+    if (!p) continue;
+    check(p.active === false, `${it.slug} : active = ${p.active}`);
+    check(Number(p.price_value) === Number(it.row.price_value), `${it.slug} : prix ${fmt(p.price_value)}`, `attendu ${fmt(it.row.price_value)}`);
+    check(p.brand_slug === it.row.brand_slug && p.brand === it.row.brand, `${it.slug} : marque ${p.brand} (${p.brand_slug})`);
+    check(p.coming_soon === false, `${it.slug} : coming_soon = ${p.coming_soon} (non piloté par le stock fournisseur)`);
+    const imgs = it.images?.images?.map(i => i.repoPath) || [];
+    check(JSON.stringify(p.images) === JSON.stringify(imgs), `${it.slug} : ${p.images.length} image(s)`, `attendu ${imgs.length}`);
+    for (const rp of p.images) check(existsSync(path.join(ROOT, rp)), `${it.slug} : fichier ${rp} présent`);
+    const vars = (p.product_variants || []).sort((a, b) => a.sort_order - b.sort_order);
+    check(vars.length === (it.variants || []).length, `${it.slug} : ${vars.length} variante(s)`, `attendu ${(it.variants || []).length}`);
+    (it.variants || []).forEach((v, i) => {
+      const r = vars[i];
+      check(r && r.name === v.name && Number(r.price) === Number(v.price) && r.sku === v.sku && JSON.stringify(r.options) === JSON.stringify(v.options) && r.active === true,
+        `${it.slug} · variante ${v.name}`, r ? `${fmt(r.price)} · SKU ${r.sku} · options ${JSON.stringify(r.options)}` : 'absente');
+    });
+    check(!SUPPLIER_NAME_RE.test(JSON.stringify({ n: p.name, t: p.tagline, d: p.description, c: p.composition, a: p.accordions, b: p.benefits, i: p.images })), `${it.slug} : aucune mention « Flora » dans les champs publics`);
+  }
+  L.push('', '## Marques');
+  for (const b of plan.brandsToCreate) {
+    const rows = brands.filter(x => x.id === b.id || normalize(x.name) === normalize(b.name));
+    check(rows.length === 1, `${b.name} : ${rows.length} ligne(s)`, rows.map(r => `${r.id} active=${r.active} sort_order=${r.sort_order}`).join(' ; '));
+  }
+  const lb = all.filter(p => normalize(p.name) === 'liquid brun');
+  check(lb.length === 2 && new Set(lb.map(p => p.brand_slug)).size === 2 && new Set(lb.map(p => p.slug)).size === 2, `Liquid Brun : ${lb.length} produits distincts`, lb.map(p => `${p.slug} (${p.brand_slug}, ${p.id})`).join(' ; '));
+
+  L.push('', '## product_sources');
+  for (const it of plan.items.filter(i => i.decision !== 'ABANDON')) {
+    const slug = it.slug || it.existing.slug;
+    const p = bySlug.get(slug);
+    const rows = sources.filter(s => s.product_id === p?.id);
+    const prod = rows.find(s => !s.variant_id);
+    check(!!prod && prod.supplier_product_id === it.flora.supplier_product_id, `${slug} : ligne produit (id fournisseur ${prod?.supplier_product_id})`);
+    if (prod) {
+      check(prod.purchase_price === null, `${slug} : purchase_price = ${prod.purchase_price} (à renseigner)`);
+      check(Number(prod.supplier_price) === Number(it.flora.price) && Number(prod.supplier_regular_price) === Number(it.flora.regular_price), `${slug} : prix fournisseur ${fmt(prod.supplier_price)} (régulier ${fmt(prod.supplier_regular_price)})`);
+      check(prod.supplier_in_stock === it.flora.in_stock && (prod.supplier_stock_qty ?? null) === (it.flora.stock_qty ?? null), `${slug} : dispo ${prod.supplier_in_stock}, qté ${prod.supplier_stock_qty ?? '—'}`);
+      check((prod.gtin ?? null) === (it.flora.gtin ?? null), `${slug} : gtin ${prod.gtin ?? '—'}`);
+    }
+    const vrows = rows.filter(s => s.variant_id);
+    check(vrows.length === (it.variantSources || []).length, `${slug} : ${vrows.length} ligne(s) variante`, `attendu ${(it.variantSources || []).length}`);
+    for (const vr of vrows) check(vr.purchase_price === null && (p.product_variants || []).some(v => v.id === vr.variant_id), `${slug} · source variante ${vr.supplier_variant_id} → variante ${vr.variant_id} · purchase_price NULL`);
+  }
+  check(sources.length === manifest.createdSources.length + manifest.updatedSources.length, `product_sources : ${sources.length} ligne(s) au total`, `manifeste : ${manifest.createdSources.length} créées + ${manifest.updatedSources.length} mises à jour`);
+
+  L.push('', '## Aucune autre ligne modifiée');
+  const touched = new Set([...manifest.createdProducts.map(p => p.id), ...manifest.patchedProducts.map(p => p.id)]);
+  const changed = all.filter(p => !touched.has(p.id)).filter(p => { const s = snapshot.find(x => x.id === p.id); return !s || s.updated_at !== p.updated_at; });
+  check(changed.length === 0, `produits hors périmètre avec updated_at modifié : ${changed.length}`, changed.map(p => p.slug).join(', '));
+  check(all.length === snapshot.length + manifest.createdProducts.length, `nombre de produits : ${all.length}`, `instantané ${snapshot.length} + ${manifest.createdProducts.length} créés`);
+
+  L.push('', '## Confidentialité (lecture anonyme)');
+  const anonRes = await fetch(`${anonCreds.url}/rest/v1/product_sources?select=*&limit=1`, { headers: { apikey: anonCreds.key, Authorization: `Bearer ${anonCreds.key}` } });
+  const anonBody = await anonRes.text();
+  check(anonRes.status === 401 || anonRes.status === 403 || (anonRes.status === 200 && anonBody.trim() === '[]'), `anon → product_sources : HTTP ${anonRes.status}`, anonBody.slice(0, 120));
+  check(anonRes.status !== 404 && !/PGRST205/.test(anonBody), 'la table existe (pas de PGRST205)');
+  const anonInactive = await fetch(`${anonCreds.url}/rest/v1/products?select=slug&active=eq.false`, { headers: { apikey: anonCreds.key, Authorization: `Bearer ${anonCreds.key}` } });
+  const inactiveBody = await anonInactive.text();
+  check(anonInactive.status === 200 && inactiveBody.trim() === '[]', `anon → produits inactifs : ${inactiveBody.slice(0, 80)} (attendu [])`);
+
+  L.push('', `**${ok} vérification(s) réussie(s), ${ko} en échec.**`);
+  const report = L.join('\n');
+  await writeFile(path.join(workDir, 'verify-report.md'), report);
+  log(report);
+  if (ko) fail(`${ko} vérification(s) en échec — voir ${path.join(workDir, 'verify-report.md')}`);
+}
+
+// ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
 
@@ -928,6 +1040,11 @@ async function main() {
   if (args.rollback) {
     const creds = await adminLogin(creds0);
     await rollback(path.resolve(args.rollback), creds);
+    return;
+  }
+  if (args.verify) {
+    const creds = await adminLogin(creds0);
+    await verifyApply(path.resolve(args.verify), creds, creds0);
     return;
   }
   if (!args.ids.length) fail('Aucun identifiant : --ids 65197,65693,…  (jamais le catalogue entier)');
