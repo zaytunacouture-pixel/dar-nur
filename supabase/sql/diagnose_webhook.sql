@@ -27,6 +27,10 @@ where name = 'github_pat_parfums';
 --    200/204 = succès réel). S'il n'y a AUCUNE ligne ici alors que des
 --    marques ont été créées/modifiées récemment, le trigger ne s'est même
 --    pas déclenché.
+--    /!\ pg_net ne conserve ces réponses que quelques heures : un diagnostic
+--    lancé longtemps après la dernière écriture ne montre rien, même si le
+--    jeton est expiré. Dans ce cas, passer directement par
+--    webhook_rotate_pat.sql, qui renouvelle le jeton ET fait un appel de test.
 select id, created, status_code, content::text as response_body
 from net._http_response
 order by created desc

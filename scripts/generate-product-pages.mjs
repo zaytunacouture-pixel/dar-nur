@@ -103,6 +103,9 @@ function buildProductTitle(product, siblingTaglines) {
     const myTagline = (product.tagline || '').trim();
     if (myTagline && distinct.size > 1) title += ` – ${myTagline}`;
   }
+  // Parfums de marque : la marque fait partie de la requête de recherche
+  // naturelle ("Ambre Nomade Gulf Collection"). Même règle que côté runtime.
+  if (product.brand) title += ` – ${product.brand}`;
   return `${title} | Dar Nūr`;
 }
 
@@ -120,7 +123,9 @@ function computeMeta(product, catLabel, siblingTaglines) {
     priceStr = `${price.value} €`;
   }
 
-  let description = `${product.name} — Dar Nūr. ${product.tagline || ''}`;
+  let description = product.brand
+    ? `${product.name} — Parfum ${product.brand}. ${product.tagline || ''}`
+    : `${product.name} — Dar Nūr. ${product.tagline || ''}`;
   if (priceStr) description += `. ${priceStr}`;
   description += `. Commandez sur WhatsApp.`;
   if (description.length > 160) description = description.substring(0, 157) + '...';
@@ -167,6 +172,12 @@ function buildProductSSR(product, catLabel, meta, price) {
   const tagline = esc(product.tagline || '');
   const label = esc(catLabel || product.category_id);
   const catSlug = CAT_SLUG_OVERRIDES[product.category_id] || product.category_id;
+  // Marque (parfums uniquement) : brand/brand_slug sont NULL hors category_id='parfums'
+  // (voir docs/ARCHITECTURE_DAR_NUR.md, section Supabase). Même rendu que showProduct()
+  // dans index.html : niveau dans le fil d'Ariane + lien .pp-brand sous le h1, tous deux
+  // vers la page de marque générée par scripts/generate-parfums.mjs.
+  const brandHref = (product.brand && product.brand_slug) ? `/parfums/${esc(product.brand_slug)}/` : null;
+  const brandName = brandHref ? esc(product.brand) : '';
   const description = Array.isArray(product.description) ? product.description : [];
   const descHtml = description.map(d => `<p>${esc(d)}</p>`).join('\n        ');
 
@@ -189,14 +200,16 @@ function buildProductSSR(product, catLabel, meta, price) {
     <div class="pp-breadcrumb-bar">
       <div class="pp-breadcrumb-bar-inner breadcrumb">
         <a href="/">Dar Nūr</a><span>›</span>
-        <a href="/${esc(catSlug)}/">${label}</a><span>›</span>
+        <a href="/${esc(catSlug)}/">${label}</a><span>›</span>${brandHref ? `
+        <a href="${brandHref}">${brandName}</a><span>›</span>` : ''}
         <span style="color:var(--ink);font-weight:500">${name}</span>
       </div>
     </div>
     <section class="pp-hero">
       <div class="pp-hero-inner">
         <div class="pp-badge">${label}</div>
-        <h1>${name}</h1>
+        <h1>${name}</h1>${brandHref ? `
+        <a class="pp-brand" href="${brandHref}">${brandName}</a>` : ''}
         <div class="tagline">${tagline}</div>
       </div>
     </section>
@@ -232,7 +245,7 @@ function injectProductHead(html, product, meta, catLabel, price) {
 
   out = replaceLine(out,
     '<meta property="og:title" content="Dar Nūr — Produits Naturels Premium" />',
-    `<meta property="og:title" content="${escName} — Dar Nūr" />`,
+    `<meta property="og:title" content="${product.brand ? `${escName} — ${esc(product.brand)} | Dar Nūr` : `${escName} — Dar Nūr`}" />`,
     'og:title');
 
   out = replaceLine(out,

@@ -7,7 +7,7 @@ name: Régénère les fiches produit (Supabase → HTML statique)
 # tout changement de catégorie), inutile de dupliquer les triggers Postgres
 # pour ça.
 #
-# Déclenchement à la demande UNIQUEMENT — aucune exécution planifiée (cron) :
+# Déclenchement à la demande (plus un cron de rattrapage, voir plus bas) :
 #   - repository_dispatch "regenerate-product-pages" : envoyé automatiquement
 #     par les triggers Postgres Supabase sur `products` (tout produit,
 #     n'importe quelle catégorie) et `categories` (le label d'une catégorie
@@ -34,6 +34,18 @@ name: Régénère les fiches produit (Supabase → HTML statique)
 #      qu'en LECTURE. Son propre commit ne peut donc pas le redéclencher.
 #   2. Le commit reste marqué [skip ci] : même si la barrière 1 cédait un
 #      jour, GitHub n'ouvrirait aucun run pour ce push.
+#
+# Filet de sécurité planifié (ajouté le 2026-09-18) : le webhook Supabase →
+# GitHub repose sur un PAT stocké dans Vault et sur net.http_post(), qui ne
+# remonte JAMAIS une erreur (un 401 « jeton expiré » est avalé en silence).
+# Constat : plus aucun repository_dispatch reçu après le 2026-08-12, et les
+# 10 parfums Gulf Collection créés les 17–18/09 ne sont jamais arrivés sur le
+# site. Ce cron rejoue la génération 4×/jour : les générateurs étant
+# idempotents et le commit conditionnel, un run planifié sans dérive ne
+# produit rien ; s'il produit un commit, c'est la preuve que le webhook a
+# manqué un événement (le message de commit le dit, voir plus bas).
+# Décalé de 30 min par rapport au cron de regenerate-parfums.yml pour que
+# les deux workflows ne poussent jamais sur main en même temps.
 on:
   push:
     branches: [main]
@@ -42,6 +54,8 @@ on:
   repository_dispatch:
     types: [regenerate-product-pages]
   workflow_dispatch: {}
+  schedule:
+    - cron: '7 0,6,12,18 * * *'
 
 concurrency:
   group: regenerate-product-pages
@@ -94,6 +108,10 @@ jobs:
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
             echo "::notice::Contenu modifié — commit à venir."
+            if [ "${{ github.event_name }}" = "schedule" ]; then
+              echo "::warning::Dérive rattrapée par le run planifié : le webhook Supabase → GitHub a manqué au moins un événement. Vérifier le PAT (supabase/sql/webhook_rotate_pat.sql)."
+              echo "⚠️ **Dérive rattrapée par le run planifié** — le webhook Supabase → GitHub n'a pas déclenché la régénération. Vérifier le PAT GitHub stocké dans Vault (\`supabase/sql/webhook_rotate_pat.sql\`)." >> "$GITHUB_STEP_SUMMARY"
+            fi
           fi
 
       - name: Committer et publier uniquement si changement réel
@@ -101,7 +119,13 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git commit -m "chore: régénère les fiches produit depuis Supabase [skip ci]"
+          # Le message distingue un rattrapage planifié d'un déclenchement
+          # normal : un « rattrapage » dans l'historique = webhook défaillant.
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            git commit -m "chore: régénère les fiches produit depuis Supabase (rattrapage planifié, webhook manqué) [skip ci]"
+          else
+            git commit -m "chore: régénère les fiches produit depuis Supabase [skip ci]"
+          fi
 
           # main peut avancer entre le checkout et ce push (autre commit
           # poussé pendant l'exécution du job) : on rebase sur le dernier

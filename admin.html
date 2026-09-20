@@ -1241,14 +1241,18 @@ function resetBrandImageState() {
   hideBrandImgPreview();
 }
 
-function handleBrandImageSelect(file) {
+async function handleBrandImageSelect(file) {
   if (!file) return;
-  brandPendingFile = file;
+  // Même redimensionnement/compression que les images produit : sans cela un
+  // logo de marque partait tel quel (constat : Gulf Collection, PNG de 1,8 Mo
+  // affiché dans un rond de 128 px sur chaque page de la marque).
+  const prepared = await prepareImageForUpload(file);
+  brandPendingFile = prepared.file;
   brandImageRemoved = false;
-  showBrandImgPreview(URL.createObjectURL(file));
-  const kb = (file.size / 1024).toFixed(0);
+  showBrandImgPreview(URL.createObjectURL(prepared.file));
+  const kb = (prepared.file.size / 1024).toFixed(0);
   document.getElementById('brand-img-status').textContent =
-    `${file.name} (${kb} Ko) — sera uploadé à l'enregistrement`;
+    `${file.name} (${kb} Ko${prepared.resized ? ', optimisée' : ''}) — sera uploadé à l'enregistrement`;
 }
 
 function removeBrandImage() {

@@ -97,7 +97,7 @@ button,select{font-family:inherit;cursor:pointer}
 .divider .dot{width:6px;height:6px;border-radius:50%;background:var(--gold);flex:none}
 
 /* ===== HERO RING (sceau) ===== */
-.hero-ring{position:relative;width:110px;height:110px;margin:0 auto 18px;border-radius:50%;border:1px solid rgba(200,168,75,.55);display:flex;align-items:center;justify-content:center;overflow:hidden;background:radial-gradient(circle,rgba(200,168,75,.08),transparent 70%)}
+.hero-ring{position:relative;width:128px;height:128px;margin:0 auto 20px;border-radius:50%;border:1px solid rgba(200,168,75,.55);display:flex;align-items:center;justify-content:center;overflow:hidden;background:radial-gradient(circle,rgba(200,168,75,.08),transparent 70%)}
 .hero-ring::before{content:"";position:absolute;inset:7px;border:1px solid rgba(200,168,75,.28);border-radius:50%;z-index:2;pointer-events:none}
 .hero-ring img{width:100%;height:100%;object-fit:cover}
 .hero-ring .ring-mark{font-family:'Cormorant Garamond';font-size:1.4rem;color:var(--gold-light);opacity:.85}
@@ -128,7 +128,7 @@ button,select{font-family:inherit;cursor:pointer}
 .cat-hero::after{content:"";position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(200,168,75,.35),transparent)}
 .cat-badge{position:relative;display:inline-block;white-space:nowrap;border:1px solid rgba(200,168,75,.5);color:var(--gold);font-family:'Cinzel';font-size:.62rem;letter-spacing:.28em;text-transform:uppercase;padding:7px 22px;border-radius:20px;margin-bottom:22px}
 .cat-hero h1{position:relative;font-family:'Cinzel';font-size:clamp(2rem,5vw,3.2rem);font-weight:600;color:var(--cream);letter-spacing:.06em;text-transform:uppercase;margin-bottom:14px}
-.cat-hero-sub{position:relative;font-family:'Cormorant Garamond';font-style:italic;font-size:clamp(1.05rem,2.4vw,1.35rem);color:rgba(250,247,240,.68);max-width:520px;margin:0 auto}
+.cat-hero-sub{position:relative;font-family:'Cormorant Garamond';font-style:italic;font-size:clamp(1.05rem,2.4vw,1.35rem);color:rgba(250,247,240,.78);max-width:600px;margin:0 auto;line-height:1.55}
 
 /* ===== INTRO ===== */
 .intro-section{max-width:760px;margin:0 auto;padding:44px 28px 8px;text-align:center}
@@ -252,8 +252,8 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
 
 <!-- ===== HERO CATÉGORIE ===== -->
 <section class="cat-hero">
-  <div class="cat-badge">Parfum {{BRAND_NAME}}</div>
-  <div class="hero-ring"><img src="{{HERO_IMAGE_URL}}" alt="{{HERO_IMAGE_ALT}}"/></div>
+  <div class="cat-badge">Collection de parfums</div>
+  <div class="hero-ring"><img src="{{HERO_IMAGE_URL}}" alt="{{HERO_IMAGE_ALT}}" width="128" height="128" decoding="async"/></div>
   <h1>Parfum {{BRAND_NAME}}</h1>
   <p class="cat-hero-sub">{{HERO_SUBTITLE}}</p>
   <div class="divider" aria-hidden="true"><span class="line"></span><span class="dot"></span><span class="line r"></span></div>
