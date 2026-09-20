@@ -1,1 +1,10 @@
 _archive_pre_nav_refactor/
+# Sauvegardes locales (exports JSON, dossiers de travail des imports) — jamais versionnées :
+# GitHub Pages sert tout fichier committé tel quel.
+backups/
+supabase/.temp/
+# Configuration locale du fournisseur (code, URL, catégories) — jamais versionnée :
+# le fournisseur ne doit être identifiable que dans les données privées Supabase.
+supplier.config.local.json
+# Gabarits locaux du filigrane fournisseur (cartes de contours dérivées de son logo) — jamais versionnés.
+supplier.local/

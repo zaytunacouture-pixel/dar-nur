@@ -162,7 +162,9 @@ async function fetchParfumsProducts() {
   if (!SUPABASE_URL || !SUPABASE_KEY) {
     throw new Error('Variables PARFUMS_SUPABASE_URL / PARFUMS_SUPABASE_KEY manquantes (secrets GitHub Action non configurés).');
   }
-  const url = `${SUPABASE_URL}/rest/v1/products?select=*&category_id=eq.parfums&active=eq.true&order=sort_order.asc`;
+  // product_variants : nécessaire pour les parfums vendus en plusieurs contenances
+  // (variant_axes contient 'contenance'), voir productFormats().
+  const url = `${SUPABASE_URL}/rest/v1/products?select=*,product_variants(*)&category_id=eq.parfums&active=eq.true&order=sort_order.asc`;
   const res = await fetch(url, {
     headers: {
       apikey: SUPABASE_KEY,
@@ -233,12 +235,32 @@ function groupByBrand(products, activeBrands) {
   return [...groups.values()].sort((a, b) => a.sortOrder - b.sortOrder);
 }
 
+// Formats d'un parfum : ses variantes de contenance actives (nom de variante,
+// triées par sort_order) quand variant_axes contient 'contenance', sinon son
+// `volume` unique. Un produit à plusieurs contenances compte donc dans chaque
+// groupe de format et porte plusieurs valeurs dans data-line (séparées par
+// un espace, le filtre du gabarit les lit une à une). Même convention de
+// variante que index.html / generate-product-pages.mjs (adaptPrice).
+function productFormats(p) {
+  const axes = Array.isArray(p.variant_axes) ? p.variant_axes : [];
+  const variants = (p.product_variants || [])
+    .filter(v => v.active !== false)
+    .sort((a, b) => a.sort_order - b.sort_order);
+  if (axes.includes('contenance') && variants.length) {
+    const names = variants.map(v => (v.options && v.options.contenance) || v.name).filter(Boolean);
+    if (names.length) return [...new Set(names)];
+  }
+  return p.volume ? [p.volume] : [];
+}
+
 function computeVolumeGroups(products) {
   const map = new Map();
   for (const p of products) {
-    const vol = p.volume || 'Format non précisé';
-    if (!map.has(vol)) map.set(vol, []);
-    map.get(vol).push(p);
+    const formats = productFormats(p);
+    for (const vol of (formats.length ? formats : ['Format non précisé'])) {
+      if (!map.has(vol)) map.set(vol, []);
+      map.get(vol).push(p);
+    }
   }
   return map;
 }
@@ -274,10 +296,12 @@ function buildInfoNoteBlock(volumeGroups) {
 function buildCardHtml(p, brandName, imgPrefix) {
   const images = Array.isArray(p.images) ? p.images.filter(Boolean) : [];
   const img1 = images[0] ? resolveImagePath(imgPrefix, images[0]) : `${imgPrefix}logo-dar-nur.png`;
-  const line = slugifyVolume(p.volume);
-  const priceLabel = formatPriceLabel(p.price_value);
+  const formats = productFormats(p);
+  const line = (formats.length ? formats : ['']).map(slugifyVolume).join(' ');
+  // Plusieurs contenances : price_value est le prix mini (convention products.price_value).
+  const priceLabel = formats.length > 1 && p.price_value != null ? `À partir de ${formatPriceLabel(p.price_value)}` : formatPriceLabel(p.price_value);
   const priceAttr = p.price_value != null ? String(p.price_value) : '';
-  const format = p.volume || 'Format non précisé';
+  const format = formats.length ? formats.join(' · ') : 'Format non précisé';
   const teaser = firstSentence((p.description && p.description[0]) || '');
 
   return `    <a class="card" href="https://dar-nur.fr/${esc(p.slug)}/" id="${esc(p.slug)}" data-line="${esc(line)}" data-price="${priceAttr}">
@@ -287,7 +311,7 @@ function buildCardHtml(p, brandName, imgPrefix) {
         <h3>${esc(p.name)}</h3>
         <p class="card-tagline">${esc(teaser)}</p>
         <div class="card-footer">
-          <div class="card-price">${esc(priceLabel)}${p.volume ? `<small>${esc(p.volume)}</small>` : ''}</div>
+          <div class="card-price">${esc(priceLabel)}${formats.length ? `<small>${esc(format)}</small>` : ''}</div>
           <span class="card-cta">Voir la fiche</span>
         </div>
       </div>

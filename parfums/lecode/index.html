@@ -741,7 +741,7 @@ document.getElementById('filters').addEventListener('click', (e) => {
   const line = btn.dataset.line;
   let visible = 0;
   cards.forEach(c => {
-    const show = line === 'all' || c.dataset.line === line;
+    const show = line === 'all' || c.dataset.line.split(' ').includes(line);
     c.hidden = !show;
     if (show) visible++;
   });
