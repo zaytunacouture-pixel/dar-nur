@@ -10,7 +10,7 @@
 //
 // Usage :
 //   node scripts/import-flora.mjs --ids 65197,65693,64945 [--work <dossier>] [--exclude-images <url,url>]
-//   node scripts/import-flora.mjs --ids ... --apply     # après validation du dry-run
+//   node scripts/import-flora.mjs --ids ... --apply [--auth cli]   # après validation du dry-run
 //   node scripts/import-flora.mjs --verify <dossier-d-application>   # contrôle post-import
 //   node scripts/import-flora.mjs --rollback <dossier-de-sauvegarde>
 //
@@ -107,13 +107,14 @@ function fail(msg) { console.error(`\n✖ ${msg}`); process.exit(1); }
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 function parseArgs(argv) {
-  const args = { ids: [], apply: false, rollback: null, verify: null, work: null, excludeImages: [] };
+  const args = { ids: [], apply: false, rollback: null, verify: null, work: null, excludeImages: [], auth: 'admin' };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--ids') args.ids = String(argv[++i] || '').split(',').map(s => s.trim()).filter(Boolean);
     else if (a === '--apply') args.apply = true;
     else if (a === '--rollback') args.rollback = argv[++i];
     else if (a === '--verify') args.verify = argv[++i];
+    else if (a === '--auth') { args.auth = argv[++i]; if (!['admin', 'cli'].includes(args.auth)) fail('--auth admin | cli'); }
     else if (a === '--work') args.work = argv[++i];
     else if (a === '--exclude-images') args.excludeImages.push(...String(argv[++i] || '').split(',').map(s => s.trim()).filter(Boolean));
     else fail(`Argument inconnu : ${a}`);
@@ -342,10 +343,18 @@ async function sbWrite(creds, method, pathAndQuery, body) {
   return text ? JSON.parse(text) : null;
 }
 
-async function adminLogin(creds) {
+// Deux façons d'obtenir le droit d'écrire, au choix (`--auth`) :
+//   - `admin` (défaut) : session Supabase Auth d'un compte listé dans public.admins,
+//     e-mail + mot de passe lus dans DN_ADMIN_EMAIL / DN_ADMIN_PASSWORD ;
+//   - `cli`   : clé secrète du projet récupérée EN MÉMOIRE auprès de la CLI Supabase
+//     (`supabase projects api-keys --reveal`), elle-même authentifiée par
+//     `supabase login` (navigateur, jeton dans le coffre d'identifiants de l'OS).
+//     Rien n'est affiché ni écrit : la clé ne vit que dans ce processus.
+async function adminLogin(creds, mode = 'admin') {
+  if (mode === 'cli') return cliServiceLogin(creds);
   const email = process.env.DN_ADMIN_EMAIL;
   const password = process.env.DN_ADMIN_PASSWORD;
-  if (!email || !password) fail('DN_ADMIN_EMAIL et DN_ADMIN_PASSWORD sont requis pour --apply / --rollback (session admin, jamais dans le dépôt).');
+  if (!email || !password) fail('DN_ADMIN_EMAIL et DN_ADMIN_PASSWORD sont requis pour --apply / --rollback (session admin, jamais dans le dépôt) — ou utiliser --auth cli.');
   const res = await fetch(`${creds.url}/auth/v1/token?grant_type=password`, {
     method: 'POST',
     headers: { apikey: creds.key, 'Content-Type': 'application/json' },
@@ -354,6 +363,31 @@ async function adminLogin(creds) {
   if (!res.ok) fail(`Connexion admin refusée (${res.status}) : ${await res.text()}`);
   const data = await res.json();
   return { ...creds, token: data.access_token };
+}
+
+function projectRef(url) {
+  const m = String(url).match(/^https:\/\/([a-z0-9]+)\.supabase\.co/i);
+  if (!m) fail(`URL Supabase inattendue : ${url}`);
+  return m[1];
+}
+
+async function cliServiceLogin(creds) {
+  const ref = projectRef(creds.url);
+  const out = await new Promise((resolve, reject) => {
+    const child = spawn('npx', ['--yes', 'supabase@latest', 'projects', 'api-keys', '--project-ref', ref, '--reveal', '-o', 'json'], { shell: true, stdio: ['ignore', 'pipe', 'pipe'] });
+    let o = '', e = '';
+    child.stdout.on('data', d => { o += d; });
+    child.stderr.on('data', d => { e += d; });
+    child.on('error', reject);
+    child.on('close', code => (code === 0 ? resolve(o) : reject(new Error(`supabase projects api-keys a échoué (${code}) : ${e.replace(/sb_[a-z]+_[A-Za-z0-9_-]+/g, 'sb_***')}`))));
+  });
+  let keys;
+  try { keys = JSON.parse(out); } catch { fail('Réponse de la CLI Supabase illisible (êtes-vous connecté ? `npx supabase login`).'); }
+  const secret = (keys || []).find(k => k.type === 'secret' || k.name === 'service_role' || /^sb_secret_/.test(k.api_key || ''));
+  if (!secret || !secret.api_key) fail('Aucune clé secrète retournée par la CLI Supabase.');
+  // La clé secrète est utilisée comme apikey ET comme Bearer : PostgREST la
+  // reconnaît comme rôle service_role (contourne la RLS — réservé à ce script).
+  return { ...creds, key: secret.api_key, token: secret.api_key, viaCli: true };
 }
 
 async function loadDarNur(creds) {
@@ -1038,12 +1072,12 @@ async function main() {
   const creds0 = await loadSupabaseCreds();
 
   if (args.rollback) {
-    const creds = await adminLogin(creds0);
+    const creds = await adminLogin(creds0, args.auth);
     await rollback(path.resolve(args.rollback), creds);
     return;
   }
   if (args.verify) {
-    const creds = await adminLogin(creds0);
+    const creds = await adminLogin(creds0, args.auth);
     await verifyApply(path.resolve(args.verify), creds, creds0);
     return;
   }
@@ -1057,7 +1091,7 @@ async function main() {
 
   let creds = creds0;
   if (args.apply) {
-    creds = await adminLogin(creds0);
+    creds = await adminLogin(creds0, args.auth);
     try { await sbGet(creds, 'product_sources?select=id&limit=1'); }
     catch (e) { fail(`product_sources inaccessible avec la session admin — exécuter supabase/sql/product_sources.sql d'abord. (${e.message})`); }
   }
