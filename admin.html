@@ -8,6 +8,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js"></script>
 <script src="js/config.js"></script>
 <script src="js/supabase-client.js"></script>
+<script src="js/admin-supply.js" defer></script>
 <style>
 :root {
   --green: #0d1f16;
@@ -123,6 +124,32 @@ tr:hover td { background: #fafaf8; }
 .badge-ok  { background: #e8f8ee; color: var(--ok); }
 .badge-off { background: #fbe9e7; color: var(--red); }
 .badge-cat { background: var(--cream); color: var(--green); }
+/* Onglet Fournisseurs : niveaux des propositions du synchroniseur */
+.badge-lvl-bloquant  { background: #fbe9e7; color: var(--red); }
+.badge-lvl-attention { background: #fff3e0; color: #b86e00; }
+.badge-lvl-info      { background: #e8f0fb; color: #2b5fa8; }
+tr.supply-row-bloquant td:first-child  { box-shadow: inset 4px 0 0 var(--red); }
+tr.supply-row-attention td:first-child { box-shadow: inset 4px 0 0 #e0a030; }
+#section-supply td, #section-supply th { padding: 8px 8px; font-size: .82rem; }
+#section-supply td { vertical-align: top; }
+#section-supply th { white-space: normal; }
+.supply-link { color: var(--green); font-size: .78rem; }
+#section-supply select.supply-inl { max-width: 108px; }
+#section-supply .btn-small { white-space: normal; line-height: 1.2; }
+.supply-inl { padding: 4px 6px; border: 1px solid var(--border); border-radius: 6px; font-size: .82rem; font-family: inherit; background: #fff; }
+.supply-num { width: 64px; }
+.supply-note { width: 150px; }
+.supply-base { margin-top: 4px; white-space: nowrap; }
+.supply-muted { color: var(--muted); }
+.supply-actions { padding-left: 8px; }
+tr.supply-actions-row td { background: #fcfbf7; border-bottom: 2px solid var(--border); }
+.supply-prop { padding: 6px 0; border-bottom: 1px dashed #eee; }
+.supply-prop:last-child { border-bottom: none; }
+.supply-prop-text { margin-bottom: 4px; }
+.supply-prop-form { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; margin-top: 4px; }
+.supply-prop-form .btn-primary { width: auto; }
+#supply-history-body h3 { font-size: .95rem; margin: 16px 0 8px; color: var(--green); }
+#supply-history-body table { font-size: .82rem; }
 .thumb { width: 44px; height: 44px; object-fit: cover; border-radius: 6px; background: #eee; }
 .no-thumb { width: 44px; height: 44px; border-radius: 6px; background: #eee; display:inline-block; }
 .actions { display: flex; gap: 6px; align-items: center; }
@@ -478,6 +505,8 @@ tr:hover td { background: #fafaf8; }
       <a href="#" onclick="showSection('brands',this)">💎 Marques</a>
       <div class="section-label">Marketing</div>
       <a href="#" onclick="showSection('offers',this)">🎁 Offres & Packs</a>
+      <div class="section-label">Approvisionnement</div>
+      <a href="#" onclick="showSection('supply',this)">🔗 Fournisseurs</a>
     </nav>
 
     <main class="main-content">
@@ -587,7 +616,72 @@ tr:hover td { background: #fafaf8; }
         </div>
       </div>
 
+      <!-- Section : Fournisseurs (synchroniseur V1 — js/admin-supply.js) -->
+      <div id="section-supply" style="display:none">
+        <div class="toolbar">
+          <input type="search" id="supply-search" placeholder="Rechercher un produit…" oninput="filterSupply()"/>
+          <select id="supply-filter" onchange="filterSupply()">
+            <option value="all">Toutes les sources</option>
+            <option value="alerts">Avec proposition en attente</option>
+            <option value="bloquant">Bloquant</option>
+            <option value="attention">Attention</option>
+            <option value="info">Info</option>
+          </select>
+          <span id="supply-counts"></span>
+          <div class="spacer"></div>
+          <button class="btn btn-outline btn-small" onclick="loadSupplySection()">↻ Recharger</button>
+        </div>
+        <div class="table-wrap" style="overflow-x:auto">
+          <table>
+            <thead>
+              <tr>
+                <th>Produit</th><th>Prix Dar Nūr</th><th>Fourn. avant</th><th>Fourn. actuel</th><th>Promo</th>
+                <th>Stock fourn.</th><th>Stock Dar Nūr</th><th>Prix d’achat</th><th>Alerte</th>
+              </tr>
+            </thead>
+            <tbody id="supply-tbody">
+              <tr><td colspan="9" class="loading">Chargement…</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p id="supply-foot" style="font-size:.8rem;color:var(--muted);margin-top:10px"></p>
+      </div>
+
     </main>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ MODALS FOURNISSEURS ═══ -->
+<div class="overlay" id="supply-history-modal">
+  <div class="modal" style="width:900px">
+    <h2 id="supply-history-title">Historique</h2>
+    <div id="supply-history-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeSupplyHistory()">Fermer</button>
+    </div>
+  </div>
+</div>
+<div class="overlay" id="supply-purchase-modal">
+  <div class="modal" style="max-width:440px">
+    <h2 id="supply-purchase-title">Prix d’achat réel</h2>
+    <p style="font-size:.85rem;color:var(--muted);margin-bottom:14px">Le prix d’achat réel de Dar Nūr, tel que facturé ou négocié — jamais le prix public du fournisseur. Sans date ni origine, il n’est pas enregistré.</p>
+    <input type="hidden" id="supply-purchase-source"/>
+    <div class="form-grid" style="grid-template-columns:1fr; gap:14px">
+      <div class="form-field"><label>Prix d’achat (€) *</label><input type="number" id="supply-purchase-price" step="0.01" min="0.01" placeholder="ex : 4.90"/></div>
+      <div class="form-field"><label>Date *</label><input type="date" id="supply-purchase-at"/></div>
+      <div class="form-field"><label>Origine *</label>
+        <select id="supply-purchase-origin">
+          <option value="facture">Facture</option>
+          <option value="tarif_pro">Tarif professionnel</option>
+          <option value="autre">Autre</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger btn-small" onclick="saveSupplyPurchase(true)">Effacer (non renseigné)</button>
+      <button class="btn btn-outline" onclick="closeSupplyPurchase()">Annuler</button>
+      <button class="btn btn-primary" style="width:auto" onclick="saveSupplyPurchase(false)">Enregistrer</button>
+    </div>
   </div>
 </div>
 
@@ -1376,6 +1470,8 @@ function showSection(name, el) {
   document.getElementById('section-categories').style.display = name==='categories' ? 'block' : 'none';
   document.getElementById('section-brands').style.display     = name==='brands'     ? 'block' : 'none';
   document.getElementById('section-offers').style.display     = name==='offers'     ? 'block' : 'none';
+  document.getElementById('section-supply').style.display     = name==='supply'     ? 'block' : 'none';
+  if (name === 'supply' && typeof loadSupplySection === 'function') loadSupplySection(); // chargé à la demande (tables privées)
   if(window.innerWidth < 768) closeSidebar(); // ferme uniquement sur mobile
   return false;
 }
