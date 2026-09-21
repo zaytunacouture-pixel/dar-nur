@@ -103,8 +103,10 @@ function renderSupply() {
   });
   const counts = { bloquant: 0, attention: 0, info: 0 };
   for (const p of supplyState.proposals) if (p.status === 'pending' && counts[p.level] != null) counts[p.level]++;
+  const noRun = !supplyState.observations.length && !supplyState.proposals.length;
   document.getElementById('supply-counts').innerHTML =
-    `${supplyBadge('bloquant')} ${counts.bloquant} · ${supplyBadge('attention')} ${counts.attention} · ${supplyBadge('info')} ${counts.info}`;
+    `${supplyBadge('bloquant')} ${counts.bloquant} · ${supplyBadge('attention')} ${counts.attention} · ${supplyBadge('info')} ${counts.info}` +
+    (noRun ? ' <small class="supply-muted">— aucune synchronisation enregistrée : les prix fournisseur affichés sont ceux de l’import, aucune proposition tant que le synchroniseur n’a pas tourné (--record).</small>' : '');
   const lastSync = supplyState.sources.map(s => s.last_synced_at).filter(Boolean).sort().pop();
   const stale = supplyState.sources.filter(s => s.last_error).length;
   document.getElementById('supply-foot').textContent =
