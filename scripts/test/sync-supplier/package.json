@@ -1,0 +1,8 @@
+{
+  "name": "dar-nur-sync-supplier-tests",
+  "private": true,
+  "type": "module",
+  "description": "Banc d'essai hors ligne du synchroniseur fournisseur : PGlite (Postgres WASM) + faux PostgREST + faux fournisseur. `npm install` ici, puis `node run.mjs`.",
+  "scripts": { "test": "node run.mjs" },
+  "dependencies": { "@electric-sql/pglite": "^0.5.8" }
+}

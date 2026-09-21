@@ -1,0 +1,9 @@
+{
+  "_comment": "Seuils de détection du synchroniseur fournisseur (scripts/sync-supplier.mjs). Politique Dar Nūr, rien qui identifie un fournisseur. Aucun de ces seuils ne déclenche une écriture de prix : ils ne font que qualifier des propositions soumises à validation humaine.",
+  "strongPromoPct": 40,
+  "strongPromoEuro": 10,
+  "staleDays": 7,
+  "unreachableAttempts": 2,
+  "maxAppliedPerRun": 20,
+  "requireWholeEuros": true
+}

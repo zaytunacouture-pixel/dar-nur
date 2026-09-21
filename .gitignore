@@ -8,3 +8,5 @@ supabase/.temp/
 supplier.config.local.json
 # Gabarits locaux du filigrane fournisseur (cartes de contours dérivées de son logo) — jamais versionnés.
 supplier.local/
+# Dépendances du banc d'essai hors ligne (scripts/test/sync-supplier : PGlite) — jamais versionnées.
+node_modules/
