@@ -2833,6 +2833,8 @@ BarakAllahu fik.`;
 function addActiveProductToCart(){
   const p = activeProduct;
   if(!p || !window.DarNurCart) return;
+  /* Aperçu d'un brouillon : jamais de commande (le produit n'est pas publié). */
+  if(p._preview===true){ window.DarNurCart.toast("Aperçu : commande désactivée", true); return; }
   if(p.coming_soon===true) return;
   // Produit sans prix en base : jamais dans le panier, mais on garde le
   // moyen de nous joindre pour le tarif (même cible que le bouton desktop).
@@ -2917,7 +2919,9 @@ function setProductGalleryImage(btn, src){
 // Même règle répliquée côté génération statique dans
 // scripts/generate-product-pages.mjs (buildProductTitle()) — garder synchro.
 function buildProductTitle(product){
-  const siblings = PRODUCTS.filter(p => p.cat === product.cat && p.name.trim().toLowerCase() === product.name.trim().toLowerCase());
+  /* Un brouillon en aperçu n'est pas dans PRODUCTS : il est compté ici comme il le serait une fois publié. */
+  const pool = PRODUCTS.includes(product) ? PRODUCTS : PRODUCTS.concat(product);
+  const siblings = pool.filter(p => p.cat === product.cat && p.name.trim().toLowerCase() === product.name.trim().toLowerCase());
   let title = product.name;
   if(siblings.length > 1){
     const distinct = new Set(siblings.map(p => (p.tagline || '').trim()).filter(Boolean));
@@ -3137,11 +3141,17 @@ function deliverySectionHTML(){
     </section>`;
 }
 
+/* Produit brouillon affiché par js/preview.js (aperçu administrateur).
+   Volontairement tenu HORS de PRODUCTS : il n'entre jamais dans la grille,
+   les collections, les meilleures ventes, les packs ni « Dans la même famille ». */
+let _previewProduct = null;
+
 function showProduct(id){
-  const p = PRODUCTS.find(x=>x.id===id);
+  const p = PRODUCTS.find(x=>x.id===id) || (_previewProduct && _previewProduct.id===id ? _previewProduct : null);
   if(!p) return;
   activeProduct = p; activeOption = null;
-  if(location.pathname !== '/'+id+'/') history.pushState({productId:id}, '', '/'+id+'/');
+  /* Un brouillon n'a pas de page /{slug}/ : l'URL d'aperçu reste telle quelle. */
+  if(p._preview!==true && location.pathname !== '/'+id+'/') history.pushState({productId:id}, '', '/'+id+'/');
   updatePageMetadata(p);
   const hasOptions = p.price.type!=="fixed";
   const optLabel = p.price.type==="format" ? "Choisissez votre format" : (p.price.type==="size" ? "Choisissez votre taille" : "");
@@ -3443,9 +3453,16 @@ function updateMobileBar(){
   // réellement commandable — masquée sur un produit à venir ou sans prix.
   if(note) note.hidden = (p.coming_soon===true || !hasUsablePrice(p));
   if(!btn) return;
+  const label=document.getElementById("mbarBtnLabel");
+  /* Aperçu d'un brouillon : bouton neutralisé, même après le choix d'une variante. */
+  if(p._preview===true){
+    btn.disabled = true;
+    if(note) note.hidden = true;
+    if(label) label.textContent = "Aperçu — commande désactivée";
+    return;
+  }
   btn.classList.toggle("btn-soon", p.coming_soon===true);
   btn.disabled = (p.coming_soon===true);
-  const label=document.getElementById("mbarBtnLabel");
   if(label) label.textContent = hasUsablePrice(p) ? "Ajouter au panier" : "Demander le prix";
 }
 
@@ -3593,13 +3610,60 @@ obs.observe(document.getElementById("productView"),{attributes:true,attributeFil
 syncBar();
 
 /* ── Supabase : source principale — fallback hardcodé uniquement en cas d'erreur ── */
+function adaptPrice(p){
+  const axes = p.variant_axes || [];
+  const variants = (p.product_variants || [])
+    .filter(v => v.active !== false)
+    .sort((a,b) => a.sort_order - b.sort_order);
+  if(!variants.length) return {type:'fixed', value: p.price_value};
+  if(axes.includes('format') || axes.includes('contenance'))
+    return {type:'format', options: variants.map(v=>[v.name, v.price])};
+  if(axes.includes('taille'))
+    return {type:'size',   options: variants.map(v=>[v.name, v.price])};
+  return {type:'fixed', value: p.price_value};
+}
+
+/* Transforme une ligne Supabase `products` (avec product_variants) en objet
+   produit du moteur SPA, et enregistre sa galerie dans PRODUCT_IMAGES.
+   Unique point de conversion : utilisé par loadFromSupabase() pour le
+   catalogue public, et par js/preview.js pour l'aperçu administrateur d'un
+   brouillon — les deux rendus passent donc par exactement le même mapping. */
+function productFromRow(p){
+  if(p.images && p.images.length) PRODUCT_IMAGES[p.slug] = p.images;
+  return {
+    id:           p.slug,
+    cat:          p.category_id,
+    name:         p.name,
+    brand:        p.brand || null,
+    brandSlug:    p.brand_slug || null,
+    tagline:      p.tagline || '',
+    description:  p.description  || [],
+    benefits:     p.benefits     || [],
+    benefitsLabel:p.benefits_label,
+    compo:        p.composition,
+    prov:         p.provenance,
+    poids:        p.weight,
+    contenance:   p.volume,
+    uso:          p.usage_advice,
+    precautions:  p.precautions  || [],
+    price:        adaptPrice(p),
+    accordions:   p.accordions   || [],
+    active:       true,
+    coming_soon:  p.coming_soon  || false,
+    gift_idea:    p.gift_idea    || false,
+    gift_for_him: p.gift_for_him || false,
+    gift_for_her: p.gift_for_her || false,
+  };
+}
+
 (async function loadFromSupabase(){
   /* Affiche le skeleton immédiatement — les produits hardcodés ne s'affichent jamais */
   renderSkeleton();
 
+  let _sb = null;
   try {
     if(typeof supabase==='undefined' || typeof SUPABASE_URL==='undefined') throw new Error('SDK absent');
-    const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+    _sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
     /* Chargement parallèle : catégories actives + produits actifs — zéro latence ajoutée */
     const [catRes, prodRes] = await Promise.all([
@@ -3617,47 +3681,8 @@ syncBar();
     if(error) throw error;
     if(!data || !data.length) throw new Error('Aucun produit retourné');
 
-    function adaptPrice(p){
-      const axes = p.variant_axes || [];
-      const variants = (p.product_variants || [])
-        .filter(v => v.active !== false)
-        .sort((a,b) => a.sort_order - b.sort_order);
-      if(!variants.length) return {type:'fixed', value: p.price_value};
-      if(axes.includes('format') || axes.includes('contenance'))
-        return {type:'format', options: variants.map(v=>[v.name, v.price])};
-      if(axes.includes('taille'))
-        return {type:'size',   options: variants.map(v=>[v.name, v.price])};
-      return {type:'fixed', value: p.price_value};
-    }
-
     PRODUCTS.length = 0;
-    data.forEach(p => {
-      if(p.images && p.images.length) PRODUCT_IMAGES[p.slug] = p.images;
-      PRODUCTS.push({
-        id:           p.slug,
-        cat:          p.category_id,
-        name:         p.name,
-        brand:        p.brand || null,
-        brandSlug:    p.brand_slug || null,
-        tagline:      p.tagline || '',
-        description:  p.description  || [],
-        benefits:     p.benefits     || [],
-        benefitsLabel:p.benefits_label,
-        compo:        p.composition,
-        prov:         p.provenance,
-        poids:        p.weight,
-        contenance:   p.volume,
-        uso:          p.usage_advice,
-        precautions:  p.precautions  || [],
-        price:        adaptPrice(p),
-        accordions:   p.accordions   || [],
-        active:       true,
-        coming_soon:  p.coming_soon  || false,
-        gift_idea:    p.gift_idea    || false,
-        gift_for_him: p.gift_for_him || false,
-        gift_for_her: p.gift_for_her || false,
-      });
-    });
+    data.forEach(p => { PRODUCTS.push(productFromRow(p)); });
 
     renderGrid();
     renderCollections();
@@ -3685,6 +3710,19 @@ syncBar();
         history.replaceState(null, '', '/'+_hashProductId+'/');
         showProduct(_hashProductId);
       }
+    }
+
+    /* Aperçu administrateur d'un brouillon : /?preview=<slug> (voir js/preview.js).
+       Le paramètre n'est PAS un mécanisme de sécurité : la ligne n'est renvoyée
+       par Supabase que si la session courante est celle d'un administrateur
+       (politique RLS is_admin()) ; un visiteur ne reçoit rien. Le script n'est
+       chargé que sur la homepage avec ce paramètre — jamais pour un visiteur. */
+    const _previewSlug = location.pathname==='/' ? new URLSearchParams(location.search).get('preview') : null;
+    if(_previewSlug){
+      const s = document.createElement('script');
+      s.src = '/js/preview.js';
+      s.onload = () => { if(window.DarNurPreview) window.DarNurPreview.run(_sb, _previewSlug); };
+      document.head.appendChild(s);
     }
   }
 })();
