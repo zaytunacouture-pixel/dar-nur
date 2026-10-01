@@ -1,0 +1,7 @@
+# Fins de ligne LF imposées dans site/ (Prettier les exige, CI Linux comme postes Windows).
+* text=auto eol=lf
+*.woff2 binary
+*.png binary
+*.webp binary
+*.jpg binary
+*.ico binary
