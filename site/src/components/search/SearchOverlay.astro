@@ -1,0 +1,384 @@
+---
+/**
+ * Recherche — composant visuel et architecture seulement (§H.6).
+ * Le MOTEUR n'est pas construit ici : l'aperçu filtre un petit index embarqué
+ * (échantillon Supabase + collections + marques), clairement signalé à l'écran.
+ * L'étape Recherche remplacera `index` sans toucher à l'interface.
+ * Mobile : plein écran. Desktop : panneau sous le header (≤ 70 vh).
+ */
+import { getImage } from 'astro:assets';
+import Drawer from '@/components/ui/Drawer.astro';
+import Icon from '@/components/ui/Icon.astro';
+import { contact, frequentSearches } from '@/config/commerce';
+import { navigation, universes } from '@/config/navigation';
+import { priceLabel } from '@/lib/format';
+import { getCatalogSample } from '@/lib/sample';
+
+const sample = await getCatalogSample();
+
+const products = await Promise.all(
+  sample.products.map(async (product) => {
+    const thumb =
+      product.image && typeof product.image.src === 'string'
+        ? await getImage({ src: product.image.src, width: 96, height: 120, fit: 'cover', format: 'webp' })
+        : undefined;
+    return { label: product.name, href: product.href, meta: priceLabel(product.price), thumb: thumb?.src };
+  }),
+);
+
+const collections = navigation.flatMap((item) =>
+  item.kind === 'universe'
+    ? [
+        { label: item.label, href: item.href, meta: 'Univers' },
+        ...item.groups.flatMap((g) =>
+          g.links.map((l) => ({ label: l.label, href: l.href, meta: item.label })),
+        ),
+      ]
+    : [{ label: item.label, href: item.href, meta: '' }],
+);
+
+// Pages marque existantes du site actuel (/parfums/<marque>/), URL inchangées.
+const brands = sample.brands.map((b) => ({ label: b.name, href: `/parfums/${b.slug}/`, meta: 'Marque' }));
+
+const index = { products, collections, brands };
+---
+
+<Drawer id="dn-search" title="Rechercher" side="top" showTitle={false} class="dn-search">
+  <div slot="header" class="dn-search__bar">
+    <form class="dn-search__form dn-container" role="search" action="#" data-dn-search-form>
+      <label class="dn-visually-hidden" for="dn-search-input">
+        Rechercher un produit, une collection, une marque
+      </label>
+      <span class="dn-search__field">
+        <Icon name="search" size={20} />
+        <input
+          id="dn-search-input"
+          class="dn-search__input"
+          type="search"
+          autocomplete="off"
+          enterkeyhint="search"
+          placeholder="Miel, musc, qamis…"
+          data-dn-search-input
+        />
+      </span>
+      <button type="button" class="dn-search__cancel" data-dn-close>
+        Fermer
+      </button>
+    </form>
+  </div>
+
+  <div class="dn-search__body dn-container">
+    <p class="dn-search__status dn-visually-hidden" aria-live="polite" data-dn-search-status></p>
+
+    <section class="dn-search__empty" data-dn-search-empty>
+      <h3 class="dn-label dn-muted">Recherches fréquentes</h3>
+      <ul class="dn-search__chips" role="list">
+        {frequentSearches.map((term) => (
+          <li>
+            <button type="button" class="dn-search__chip" data-dn-search-term={term}>
+              {term}
+            </button>
+          </li>
+        ))}
+      </ul>
+      <h3 class="dn-label dn-muted">Univers</h3>
+      <ul class="dn-search__links" role="list">
+        {universes.map((u) => (
+          <li>
+            <a href={u.href}>{u.label}</a>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <div class="dn-search__results" data-dn-search-results hidden>
+      <section data-group="products">
+        <h3 class="dn-label dn-muted">Produits</h3>
+        <ul role="list" class="dn-search__list dn-search__list--products"></ul>
+      </section>
+      <div class="dn-search__side">
+        <section data-group="collections">
+          <h3 class="dn-label dn-muted">Collections</h3>
+          <ul role="list" class="dn-search__list"></ul>
+        </section>
+        <section data-group="brands">
+          <h3 class="dn-label dn-muted">Marques</h3>
+          <ul role="list" class="dn-search__list"></ul>
+        </section>
+      </div>
+    </div>
+
+    <section class="dn-search__none" data-dn-search-none hidden>
+      <p>
+        <strong data-dn-search-none-text></strong>
+      </p>
+      <p class="dn-muted dn-body-sm">Vérifiez l’orthographe, ou parcourez un univers.</p>
+      <p>
+        <a href={contact.whatsappUrl}>Demander conseil sur WhatsApp</a>
+      </p>
+    </section>
+
+    <p class="dn-search__notice dn-small dn-muted">
+      {`Aperçu : la recherche porte sur un échantillon (${products.length} produits${sample.configured ? '' : ', Supabase non configuré'}). Le moteur complet arrivera avec l’étape Recherche.`}
+    </p>
+  </div>
+  <script type="application/json" data-dn-search-index set:html={JSON.stringify(index)} />
+</Drawer>
+
+<style>
+  .dn-search__bar {
+    border-bottom: var(--dn-border-decor);
+  }
+  .dn-search__form {
+    display: flex;
+    align-items: center;
+    gap: var(--dn-space-3);
+    min-block-size: var(--dn-header-h);
+  }
+  .dn-search__field {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: var(--dn-space-2);
+    min-block-size: var(--dn-input-h);
+    padding-inline: var(--dn-space-4);
+    border-radius: var(--dn-radius-sm);
+    background: var(--dn-bg-alt);
+    color: var(--dn-ink-2);
+  }
+  .dn-search__field:focus-within {
+    outline: var(--dn-focus-ring);
+    outline-offset: var(--dn-focus-offset);
+  }
+  .dn-search__input {
+    flex: 1;
+    min-inline-size: 0;
+    border: 0;
+    background: transparent;
+    font-size: var(--dn-fs-input);
+    color: var(--dn-ink);
+  }
+  .dn-search__input:focus {
+    outline: none;
+  }
+  /* Croix native masquée : « Fermer » suffit, et elle sort de la palette. */
+  .dn-search__input::-webkit-search-cancel-button {
+    appearance: none;
+  }
+  .dn-search__cancel {
+    min-block-size: var(--dn-tap-min);
+    padding: 0;
+    border: 0;
+    background: none;
+    font-weight: var(--dn-fw-medium);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+  .dn-search__body {
+    display: grid;
+    gap: var(--dn-space-6);
+    padding-block: var(--dn-space-6) var(--dn-space-8);
+  }
+  .dn-search__empty,
+  .dn-search__results section {
+    display: grid;
+    gap: var(--dn-space-3);
+    align-content: start;
+  }
+  .dn-search__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--dn-space-2);
+    margin-bottom: var(--dn-space-3);
+  }
+  .dn-search__chip {
+    min-block-size: var(--dn-chip-h);
+    padding-inline: var(--dn-space-4);
+    border: var(--dn-border-ui);
+    border-radius: var(--dn-radius-pill);
+    background: var(--dn-surface);
+    font-size: var(--dn-fs-body-sm);
+    font-weight: var(--dn-fw-medium);
+  }
+  .dn-search__chip:hover {
+    border-color: var(--dn-ink);
+  }
+  .dn-search__links a,
+  .dn-search__list :global(a) {
+    display: flex;
+    align-items: center;
+    gap: var(--dn-space-3);
+    min-block-size: var(--dn-tap-min);
+    text-decoration: none;
+  }
+  .dn-search__links a:hover,
+  .dn-search__list :global(a:hover) {
+    color: var(--dn-green);
+    text-decoration: underline;
+  }
+  .dn-search__results {
+    display: grid;
+    gap: var(--dn-space-6);
+  }
+  .dn-search__results[hidden],
+  .dn-search__none[hidden],
+  .dn-search__empty[hidden],
+  .dn-search__results section[hidden] {
+    display: none;
+  }
+  .dn-search__side {
+    display: grid;
+    gap: var(--dn-space-6);
+    align-content: start;
+  }
+  .dn-search__list--products :global(a) {
+    min-block-size: 72px;
+  }
+  .dn-search__list :global(img) {
+    inline-size: 48px;
+    block-size: 60px;
+    border-radius: var(--dn-radius-sm);
+    background: var(--dn-media);
+    object-fit: cover;
+  }
+  .dn-search__list :global(.dn-search__meta) {
+    display: block;
+    font-size: var(--dn-fs-small);
+    color: var(--dn-ink-2);
+    font-variant-numeric: tabular-nums;
+  }
+  .dn-search__list :global(mark) {
+    background: none;
+    color: inherit;
+    font-weight: var(--dn-fw-medium);
+  }
+  .dn-search__notice {
+    padding-top: var(--dn-space-4);
+    border-top: var(--dn-border-decor);
+  }
+
+  @media (min-width: 1024px) {
+    .dn-search__results {
+      grid-template-columns: 2fr 1fr;
+      gap: var(--dn-space-10);
+    }
+  }
+</style>
+
+<script>
+  type Entry = { label: string; href: string; meta: string; thumb?: string };
+  type Index = Record<'products' | 'collections' | 'brands', Entry[]>;
+
+  const dialog = document.getElementById('dn-search') as HTMLDialogElement | null;
+  const raw = dialog?.querySelector('[data-dn-search-index]')?.textContent;
+  if (dialog && raw) {
+    const index = JSON.parse(raw) as Index;
+    const input = dialog.querySelector<HTMLInputElement>('[data-dn-search-input]')!;
+    const empty = dialog.querySelector<HTMLElement>('[data-dn-search-empty]')!;
+    const results = dialog.querySelector<HTMLElement>('[data-dn-search-results]')!;
+    const none = dialog.querySelector<HTMLElement>('[data-dn-search-none]')!;
+    const noneText = dialog.querySelector<HTMLElement>('[data-dn-search-none-text]')!;
+    const status = dialog.querySelector<HTMLElement>('[data-dn-search-status]')!;
+    const LIMITS = { products: 6, collections: 6, brands: 4 } as const;
+
+    const normalize = (value: string) =>
+      value
+        .normalize('NFD')
+        .replace(/\p{Diacritic}/gu, '')
+        .toLowerCase()
+        .trim();
+
+    // Surligne le terme sans jamais injecter de HTML issu de la saisie.
+    const highlighted = (label: string, query: string) => {
+      const fragment = document.createDocumentFragment();
+      const start = normalize(label).indexOf(query);
+      if (start < 0) {
+        fragment.append(label);
+        return fragment;
+      }
+      const mark = document.createElement('mark');
+      mark.textContent = label.slice(start, start + query.length);
+      fragment.append(label.slice(0, start), mark, label.slice(start + query.length));
+      return fragment;
+    };
+
+    const render = () => {
+      const query = normalize(input.value);
+      if (query.length < 2) {
+        empty.hidden = false;
+        results.hidden = true;
+        none.hidden = true;
+        status.textContent = '';
+        return;
+      }
+      let total = 0;
+      for (const group of ['products', 'collections', 'brands'] as const) {
+        const section = results.querySelector<HTMLElement>(`[data-group="${group}"]`)!;
+        const list = section.querySelector('ul')!;
+        const matches = index[group]
+          .filter((e) => normalize(e.label).includes(query))
+          .slice(0, LIMITS[group]);
+        list.replaceChildren(
+          ...matches.map((entry) => {
+            const li = document.createElement('li');
+            const a = document.createElement('a');
+            a.href = entry.href;
+            if (entry.thumb) {
+              const img = document.createElement('img');
+              img.src = entry.thumb;
+              img.alt = '';
+              img.width = 48;
+              img.height = 60;
+              img.loading = 'lazy';
+              a.append(img);
+            }
+            const text = document.createElement('span');
+            text.append(highlighted(entry.label, query));
+            if (entry.meta) {
+              const meta = document.createElement('span');
+              meta.className = 'dn-search__meta';
+              meta.textContent = entry.meta;
+              text.append(meta);
+            }
+            a.append(text);
+            li.append(a);
+            return li;
+          }),
+        );
+        section.hidden = matches.length === 0;
+        total += matches.length;
+      }
+      empty.hidden = true;
+      results.hidden = total === 0;
+      none.hidden = total > 0;
+      noneText.textContent = `Aucun résultat pour « ${input.value.trim()} ».`;
+      status.textContent = total > 0 ? `${total} résultat${total > 1 ? 's' : ''}` : 'Aucun résultat';
+    };
+
+    let timer: number | undefined;
+    input.addEventListener('input', () => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(render, 150);
+    });
+    dialog.querySelector('[data-dn-search-form]')?.addEventListener('submit', (event) => {
+      event.preventDefault();
+      render();
+    });
+    for (const chip of dialog.querySelectorAll<HTMLButtonElement>('[data-dn-search-term]')) {
+      chip.addEventListener('click', () => {
+        input.value = chip.dataset.dnSearchTerm ?? '';
+        render();
+        input.focus();
+      });
+    }
+    dialog.addEventListener('dn:open', () => requestAnimationFrame(() => input.focus()));
+    // Raccourci « / » sur desktop (hors champ de saisie).
+    document.addEventListener('keydown', (event) => {
+      const target = event.target as HTMLElement;
+      if (event.key !== '/' || dialog.open || target.closest('input, textarea, select, [contenteditable]'))
+        return;
+      event.preventDefault();
+      document.querySelector<HTMLElement>('.dn-header__desktop-only[data-dn-open="dn-search"]')?.click();
+    });
+  }
+</script>

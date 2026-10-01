@@ -1,0 +1,189 @@
+---
+/**
+ * Footer (§O) : la seule section sombre de la page. Logo sur cartouche crème.
+ * Mobile : accordéons natifs (<details>). Desktop : colonnes ouvertes (petit script qui
+ * ouvre les <details> à ≥ 1024 px ; sans JS, ils restent simplement repliables).
+ */
+import Icon from '@/components/ui/Icon.astro';
+import { contact } from '@/config/commerce';
+import { footerSections, footerUpcoming } from '@/config/footer';
+import { isIndexable, siteEnv } from '@/config/site';
+import Logo from './Logo.astro';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="dn-footer dn-on-dark" id="pied-de-page">
+  <div class="dn-footer__inner dn-container">
+    <div class="dn-footer__brand">
+      <Logo onDark context="footer" />
+      <a class="dn-footer__wa" href={contact.whatsappUrl} rel="noopener">
+        <Icon name="whatsapp" size={20} />
+        Conseil sur WhatsApp · {contact.whatsappDisplay}
+      </a>
+    </div>
+
+    <nav class="dn-footer__nav" aria-label="Pied de page">
+      {footerSections.map((section) => (
+        <details class="dn-footer__section" data-dn-footer-section>
+          <summary class="dn-footer__title">
+            <span class="dn-label">{section.title}</span>
+            <Icon name="chevron-down" size={20} class="dn-footer__chevron" />
+          </summary>
+          <ul class="dn-footer__links" role="list">
+            {section.links.map((link) => (
+              <li>
+                <a href={link.href} rel={link.external ? 'noopener' : undefined}>
+                  {link.label}
+                </a>
+              </li>
+            ))}
+            {(footerUpcoming[section.title] ?? []).map((label) => (
+              <li class="dn-footer__upcoming">
+                {label} <span class="dn-small">(bientôt)</span>
+              </li>
+            ))}
+          </ul>
+        </details>
+      ))}
+    </nav>
+  </div>
+
+  <div class="dn-footer__bottom dn-container">
+    <p class="dn-small">© {year} Dar Nūr</p>
+    {!isIndexable && (
+      <p class="dn-small dn-footer__env">
+        Préproduction ({siteEnv}) — non indexée, ne remplace pas dar-nur.fr
+      </p>
+    )}
+    <p class="dn-footer__ar" lang="ar" dir="rtl">
+      دار النور
+    </p>
+  </div>
+</footer>
+
+<style>
+  .dn-footer {
+    background: var(--dn-green-deep);
+    color: var(--dn-on-dark);
+    padding-block: var(--dn-space-12) var(--dn-space-8);
+  }
+  .dn-footer a {
+    color: var(--dn-on-dark-2);
+    text-decoration: none;
+  }
+  .dn-footer a:hover {
+    color: var(--dn-on-dark);
+    text-decoration: underline;
+  }
+  .dn-footer__inner {
+    display: grid;
+    gap: var(--dn-space-8);
+  }
+  .dn-footer__brand {
+    display: grid;
+    justify-items: start;
+    gap: var(--dn-space-4);
+  }
+  .dn-footer__wa {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--dn-space-2);
+    min-block-size: var(--dn-tap-min);
+  }
+  .dn-footer__section {
+    border-bottom: var(--dn-border-width) solid color-mix(in srgb, var(--dn-gold-light) 50%, transparent);
+  }
+  .dn-footer__title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-block-size: var(--dn-menu-row-h);
+    color: var(--dn-on-dark-2);
+    list-style: none;
+    cursor: pointer;
+  }
+  .dn-footer__title::-webkit-details-marker {
+    display: none;
+  }
+  .dn-footer__section[open] :global(.dn-footer__chevron) {
+    transform: rotate(180deg);
+  }
+  .dn-footer__links {
+    display: grid;
+    padding-bottom: var(--dn-space-4);
+  }
+  .dn-footer__links a,
+  .dn-footer__upcoming {
+    display: flex;
+    align-items: center;
+    min-block-size: var(--dn-tap-min);
+    font-size: var(--dn-fs-button);
+  }
+  .dn-footer__upcoming {
+    gap: var(--dn-space-1);
+    color: var(--dn-on-dark-2);
+  }
+  .dn-footer__bottom {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--dn-space-2) var(--dn-space-6);
+    margin-top: var(--dn-space-8);
+    padding-top: var(--dn-space-6);
+    border-top: var(--dn-border-width) solid color-mix(in srgb, var(--dn-gold-light) 50%, transparent);
+    color: var(--dn-on-dark-2);
+  }
+  .dn-footer__env {
+    color: var(--dn-gold-light);
+  }
+  .dn-footer__ar {
+    font-size: var(--dn-fs-body);
+  }
+
+  @media (min-width: 1024px) {
+    .dn-footer {
+      padding-block: var(--dn-space-16) var(--dn-space-8);
+    }
+    .dn-footer__inner {
+      grid-template-columns: 3fr 9fr;
+      gap: var(--dn-grid-gap);
+    }
+    .dn-footer__nav {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--dn-grid-gap);
+    }
+    .dn-footer__section {
+      border-bottom: 0;
+    }
+    .dn-footer__title {
+      min-block-size: auto;
+      margin-bottom: var(--dn-space-3);
+      cursor: default;
+      pointer-events: none;
+    }
+    .dn-footer :global(.dn-footer__chevron) {
+      display: none;
+    }
+    .dn-footer__links a,
+    .dn-footer__upcoming {
+      min-block-size: 32px;
+    }
+  }
+</style>
+
+<script>
+  // Desktop : rubriques toujours ouvertes (colonnes). Mobile : accordéons.
+  const sections = [...document.querySelectorAll<HTMLDetailsElement>('[data-dn-footer-section]')];
+  const desktop = window.matchMedia('(min-width: 1024px)');
+  const sync = () => sections.forEach((s) => (s.open = desktop.matches));
+  sync();
+  desktop.addEventListener('change', sync);
+  for (const section of sections) {
+    section.querySelector('summary')?.addEventListener('click', (event) => {
+      if (desktop.matches) event.preventDefault();
+    });
+  }
+</script>

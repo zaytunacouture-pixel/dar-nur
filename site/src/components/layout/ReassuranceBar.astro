@@ -1,0 +1,55 @@
+---
+/**
+ * Réassurance (§N.4) : 4 faits vérifiés dans les CGV, juste au-dessus du footer,
+ * une seule fois par page. Aucune promesse non publiée (retours, livraison France…).
+ */
+import Icon from '@/components/ui/Icon.astro';
+import { reassurance } from '@/config/commerce';
+---
+
+<section class="dn-reassurance" aria-label="Nos engagements">
+  <div class="dn-container">
+    <ul class="dn-reassurance__list" role="list">
+      {reassurance.map((item) => (
+        <li class="dn-reassurance__item">
+          <Icon name={item.icon} />
+          <div>
+            <p class="dn-reassurance__title">{item.title}</p>
+            <p class="dn-small dn-muted">{item.text}</p>
+          </div>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .dn-reassurance {
+    background: var(--dn-bg-alt);
+    padding-block: var(--dn-space-8);
+  }
+  .dn-reassurance__list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--dn-space-6) var(--dn-grid-gap);
+  }
+  .dn-reassurance__item {
+    display: grid;
+    gap: var(--dn-space-2);
+    align-content: start;
+  }
+  .dn-reassurance__title {
+    font-size: var(--dn-fs-button);
+    font-weight: var(--dn-fw-medium);
+    line-height: var(--dn-lh-label);
+  }
+  @media (min-width: 1024px) {
+    .dn-reassurance__list {
+      grid-template-columns: repeat(4, 1fr);
+    }
+    .dn-reassurance__item {
+      grid-template-columns: auto 1fr;
+      gap: var(--dn-space-3);
+    }
+  }
+</style>

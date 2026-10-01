@@ -1,0 +1,98 @@
+---
+/**
+ * Layout global : <head> SEO, robots selon l'environnement, polices locales préchargées,
+ * lien d'évitement, repères (header / main / footer) et panneaux globaux.
+ */
+import { Font } from 'astro:assets';
+import MiniCart from '@/components/cart/MiniCart.astro';
+import AnnouncementBar from '@/components/layout/AnnouncementBar.astro';
+import Footer from '@/components/layout/Footer.astro';
+import Header from '@/components/layout/Header.astro';
+import MobileMenu from '@/components/layout/MobileMenu.astro';
+import ReassuranceBar from '@/components/layout/ReassuranceBar.astro';
+import SearchOverlay from '@/components/search/SearchOverlay.astro';
+import { announcementMessages, announcementRotation } from '@/config/commerce';
+import { defaultDescription, isIndexable, siteName, themeColor } from '@/config/site';
+import { demoCartCount } from '@/data/demo/cart';
+import type { SeoMeta } from '@/types/site';
+import '@/styles/tokens.css';
+import '@/styles/base.css';
+
+interface Props {
+  seo: SeoMeta;
+  /** Affiche le panier fictif étiqueté (pages de démonstration uniquement). */
+  cartDemo?: boolean;
+  showReassurance?: boolean;
+}
+
+const { seo, cartDemo = false, showReassurance = true } = Astro.props;
+const title = seo.title.includes(siteName) ? seo.title : `${seo.title} — ${siteName}`;
+const description = seo.description || defaultDescription;
+const canonical = new URL(seo.canonicalPath ?? Astro.url.pathname, Astro.site).toString();
+const robots = isIndexable && !seo.noindex ? 'index, follow' : 'noindex, nofollow';
+const ogImage = seo.ogImage ? new URL(seo.ogImage, Astro.site).toString() : undefined;
+---
+
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta name="robots" content={robots} />
+    <meta name="theme-color" content={themeColor} />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" href="/favicon.png" type="image/png" />
+
+    <meta property="og:type" content={seo.ogType ?? 'website'} />
+    <meta property="og:site_name" content={siteName} />
+    <meta property="og:locale" content="fr_FR" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    {ogImage && <meta property="og:image" content={ogImage} />}
+
+    <Font cssVariable="--dn-font-jost" preload />
+    <Font cssVariable="--dn-font-cormorant" preload />
+    <slot name="head" />
+  </head>
+  <body>
+    <a class="dn-skip" href="#contenu">
+      Aller au contenu
+    </a>
+    <AnnouncementBar messages={announcementMessages} rotation={announcementRotation} />
+    <Header currentPath={Astro.url.pathname} cartCount={cartDemo ? demoCartCount : 0} />
+    <main id="contenu" tabindex="-1">
+      <slot />
+    </main>
+    {showReassurance && <ReassuranceBar />}
+    <Footer />
+
+    <MobileMenu />
+    <SearchOverlay />
+    <MiniCart demo={cartDemo} />
+  </body>
+</html>
+
+<style>
+  .dn-skip {
+    position: fixed;
+    inset-block-start: var(--dn-space-2);
+    inset-inline-start: var(--dn-space-2);
+    z-index: var(--dn-z-skip);
+    padding: var(--dn-space-3) var(--dn-space-4);
+    border-radius: var(--dn-radius-sm);
+    background: var(--dn-green);
+    color: var(--dn-on-dark);
+    font-weight: var(--dn-fw-medium);
+    transform: translateY(-200%);
+  }
+  .dn-skip:focus {
+    transform: none;
+  }
+  main:focus {
+    outline: none;
+  }
+</style>

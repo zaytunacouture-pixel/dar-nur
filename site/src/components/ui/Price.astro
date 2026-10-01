@@ -1,0 +1,49 @@
+---
+/** Prix (Jost tabulaire). Prix barré UNIQUEMENT pour une offre réelle (`compareAt`). */
+import { formatPrice, priceLabel } from '@/lib/format';
+import type { PriceInfo } from '@/types/catalog';
+
+interface Props {
+  price: PriceInfo;
+  size?: 'md' | 'lg';
+}
+
+const { price, size = 'md' } = Astro.props;
+const compareAt = price.kind === 'fixed' ? price.compareAt : undefined;
+---
+
+<p class:list={['dn-price', `dn-price--${size}`, { 'dn-price--request': price.kind === 'on-request' }]}>
+  {compareAt && (
+    <s class="dn-price__compare">
+      <span class="dn-visually-hidden">Prix habituel : </span>
+      {formatPrice(compareAt)}
+    </s>
+  )}
+  <span class="dn-price__current">{priceLabel(price)}</span>
+</p>
+
+<style>
+  .dn-price {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--dn-space-2);
+    align-items: baseline;
+    font-family: var(--dn-font-sans);
+    font-weight: var(--dn-fw-medium);
+    font-variant-numeric: tabular-nums;
+    color: var(--dn-ink);
+  }
+  .dn-price--md {
+    font-size: var(--dn-fs-price);
+    line-height: var(--dn-lh-label);
+  }
+  .dn-price--lg {
+    font-size: var(--dn-fs-price-lg);
+    line-height: var(--dn-lh-product-title);
+  }
+  .dn-price--request,
+  .dn-price__compare {
+    color: var(--dn-ink-2);
+    font-weight: var(--dn-fw-regular);
+  }
+</style>

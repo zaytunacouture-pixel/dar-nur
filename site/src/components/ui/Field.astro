@@ -1,0 +1,175 @@
+---
+/**
+ * Champ de formulaire (§G.1) : libellé toujours visible, aide reliée par
+ * aria-describedby, erreur signalée par contour + icône + texte (jamais la couleur seule).
+ * Le <select> est réservé aux listes de plus de 8 options, jamais aux variantes.
+ */
+import Icon from './Icon.astro';
+
+interface Props {
+  id: string;
+  label: string;
+  control?: 'input' | 'textarea' | 'select';
+  type?: 'text' | 'email' | 'tel' | 'search' | 'number';
+  name?: string;
+  value?: string;
+  placeholder?: string;
+  help?: string;
+  error?: string;
+  optional?: boolean;
+  required?: boolean;
+  disabled?: boolean;
+  autocomplete?: string;
+  options?: { value: string; label: string }[];
+}
+
+const {
+  id,
+  label,
+  control = 'input',
+  type = 'text',
+  name = id,
+  value,
+  placeholder,
+  help,
+  error,
+  optional = false,
+  required = false,
+  disabled = false,
+  autocomplete,
+  options = [],
+} = Astro.props;
+
+const helpId = help ? `${id}-help` : undefined;
+const errorId = error ? `${id}-error` : undefined;
+const describedBy = [helpId, errorId].filter(Boolean).join(' ') || undefined;
+const common = {
+  id,
+  name,
+  required,
+  disabled,
+  'aria-describedby': describedBy,
+  'aria-invalid': error ? ('true' as const) : undefined,
+};
+---
+
+<div class:list={['dn-field', { 'dn-field--error': error }]}>
+  <label class="dn-field__label" for={id}>
+    {label}
+    {optional && <span class="dn-field__optional"> (facultatif)</span>}
+  </label>
+  {control === 'textarea' ? (
+    <textarea class="dn-field__control dn-field__control--textarea" placeholder={placeholder} {...common}>
+        {value}
+      </textarea>
+  ) : control === 'select' ? (
+    <span class="dn-field__select">
+      <select class="dn-field__control" {...common}>
+        {options.map((o) => (
+          <option value={o.value} selected={o.value === value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+      <Icon name="chevron-down" size={20} class="dn-field__chevron" />
+    </span>
+  ) : (
+    <input
+      class="dn-field__control"
+      type={type}
+      value={value}
+      placeholder={placeholder}
+      autocomplete={autocomplete}
+      {...common}
+    />
+  )}
+  {help && (
+    <p class="dn-field__help" id={helpId}>
+      {help}
+    </p>
+  )}
+  {error && (
+    <p class="dn-field__error" id={errorId}>
+      <Icon name="circle-alert" size={16} />
+      {error}
+    </p>
+  )}
+</div>
+
+<style>
+  .dn-field {
+    display: grid;
+    gap: var(--dn-space-2);
+  }
+  .dn-field__label {
+    font-size: var(--dn-fs-body-sm);
+    font-weight: var(--dn-fw-medium);
+    color: var(--dn-ink);
+  }
+  .dn-field__optional {
+    color: var(--dn-ink-2);
+    font-weight: var(--dn-fw-regular);
+  }
+  .dn-field__control {
+    inline-size: 100%;
+    min-block-size: var(--dn-input-h);
+    padding: 0 var(--dn-space-4);
+    border: var(--dn-border-ui);
+    border-radius: var(--dn-radius-sm);
+    background: var(--dn-surface);
+    font-size: var(--dn-fs-input);
+    color: var(--dn-ink);
+    transition: border-color var(--dn-dur-fast) var(--dn-ease-in-out);
+  }
+  .dn-field__control::placeholder {
+    color: var(--dn-ink-3);
+  }
+  .dn-field__control:hover {
+    border-color: var(--dn-ink);
+  }
+  .dn-field__control:focus-visible {
+    border-color: var(--dn-green);
+  }
+  .dn-field__control:disabled {
+    background: var(--dn-disabled-bg);
+    color: var(--dn-disabled-ink);
+    border-color: var(--dn-unavailable);
+    cursor: not-allowed;
+  }
+  .dn-field__control--textarea {
+    min-block-size: 120px;
+    padding-block: var(--dn-space-3);
+    resize: vertical;
+    line-height: var(--dn-lh-body);
+  }
+  .dn-field__select {
+    position: relative;
+    display: block;
+  }
+  .dn-field__select select {
+    appearance: none;
+    padding-inline-end: var(--dn-tap-min);
+  }
+  .dn-field__select :global(.dn-field__chevron) {
+    position: absolute;
+    inset-inline-end: var(--dn-space-3);
+    inset-block-start: 50%;
+    translate: 0 -50%;
+    pointer-events: none;
+  }
+  .dn-field__help {
+    font-size: var(--dn-fs-small);
+    line-height: var(--dn-lh-small);
+    color: var(--dn-ink-2);
+  }
+  .dn-field__error {
+    display: flex;
+    gap: var(--dn-space-1);
+    align-items: center;
+    font-size: var(--dn-fs-small);
+    color: var(--dn-error);
+  }
+  .dn-field--error .dn-field__control {
+    border: var(--dn-border-width-strong) solid var(--dn-error);
+  }
+</style>

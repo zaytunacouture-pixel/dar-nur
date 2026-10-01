@@ -12,6 +12,12 @@
       "runtimeExecutable": "node",
       "runtimeArgs": ["scripts/test/sync-supplier/serve-admin.mjs", "--port", "3100", "--scenario-promo-end"],
       "port": 3100
+    },
+    {
+      "name": "site-astro-preview",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "site", "run", "preview", "--", "--port", "4321"],
+      "port": 4321
     }
   ]
 }

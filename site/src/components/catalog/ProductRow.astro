@@ -1,0 +1,67 @@
+---
+/**
+ * Rangée de produits (§I.4) : défilement horizontal natif à aimantation sur mobile
+ * (2,2 cartes visibles, la suivante dépasse), grille de 4 sans flèches sur desktop.
+ * Aucun script de carrousel.
+ */
+import type { ProductSummary } from '@/types/catalog';
+import ProductCard from './ProductCard.astro';
+
+interface Props {
+  products: ProductSummary[];
+  label: string;
+}
+
+const { products, label } = Astro.props;
+---
+
+<div class="dn-row" role="region" aria-label={label} tabindex="0">
+  <ul class="dn-row__list" role="list">
+    {products.map((product) => (
+      <li class="dn-row__item">
+        <ProductCard product={product} />
+      </li>
+    ))}
+  </ul>
+</div>
+
+<style>
+  .dn-row {
+    margin-inline: calc(-1 * var(--dn-gutter-x));
+    padding-inline: var(--dn-gutter-x);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--dn-gutter-x);
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+  }
+  .dn-row::-webkit-scrollbar {
+    display: none;
+  }
+  .dn-row__list {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 44%;
+    gap: var(--dn-grid-gap);
+  }
+  .dn-row__item {
+    scroll-snap-align: start;
+  }
+  @media (min-width: 768px) {
+    .dn-row__list {
+      grid-auto-columns: 30%;
+    }
+  }
+  @media (min-width: 1024px) {
+    .dn-row {
+      margin-inline: 0;
+      padding-inline: 0;
+      overflow: visible;
+    }
+    .dn-row__list {
+      grid-auto-flow: row;
+      grid-template-columns: repeat(4, 1fr);
+      row-gap: var(--dn-grid-row-gap);
+    }
+  }
+</style>

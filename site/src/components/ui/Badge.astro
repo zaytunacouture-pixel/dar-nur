@@ -1,0 +1,37 @@
+---
+/** Badge (§G.2) : liste fermée, un seul par carte, toujours issu d'une donnée. */
+import type { BadgeKind } from '@/types/catalog';
+
+interface Props {
+  kind: BadgeKind;
+  /** `overlay` : posé sur l'image (cartes). `inline` : au-dessus du nom (fiche). */
+  placement?: 'overlay' | 'inline';
+}
+
+const labels: Record<BadgeKind, string> = {
+  'coming-soon': 'Bientôt disponible',
+  'sold-out': 'Épuisé',
+  offer: 'Offre',
+  new: 'Nouveau',
+};
+const { kind, placement = 'overlay' } = Astro.props;
+---
+
+<span class:list={['dn-badge', 'dn-label', `dn-badge--${placement}`]}>{labels[kind]}</span>
+
+<style>
+  .dn-badge {
+    display: inline-flex;
+    align-items: center;
+    color: var(--dn-ink);
+  }
+  .dn-badge--overlay {
+    block-size: var(--dn-badge-h);
+    padding-inline: var(--dn-space-2);
+    border-radius: var(--dn-radius-xs);
+    background: var(--dn-glass);
+  }
+  .dn-badge--inline {
+    color: var(--dn-ink-2);
+  }
+</style>

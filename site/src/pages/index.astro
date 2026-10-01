@@ -1,0 +1,80 @@
+---
+/**
+ * Accueil de la PRÉPRODUCTION — ce n'est pas la future page d'accueil.
+ * Il oriente vers les pages de validation du socle (étape 5).
+ */
+import Button from '@/components/ui/Button.astro';
+import Ornament from '@/components/ui/Ornament.astro';
+import { siteEnv } from '@/config/site';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+
+const pages = [
+  {
+    href: '/demo/',
+    title: 'Page de démonstration',
+    text: 'Header, hero (emplacement photo), univers, échantillon de produits réels, footer.',
+  },
+  {
+    href: '/design-system/',
+    title: 'Design system',
+    text: 'Palette, typographie, espacements, boutons, champs, cartes, badges, variantes.',
+  },
+  {
+    href: '/lab/supabase/',
+    title: 'Lecture Supabase',
+    text: 'Preuve de la chaîne build → Supabase → HTML statique.',
+  },
+];
+---
+
+<BaseLayout
+  seo={{
+    title: 'Socle technique — préproduction',
+    description: 'Préproduction du nouveau socle Dar Nūr (Astro). Pages de validation, non indexées.',
+  }}
+>
+  <section class="dn-section dn-container">
+    <Ornament />
+    <h1>Dar Nūr — socle technique</h1>
+    <p class="dn-body-lg dn-muted dn-measure dn-intro">
+      Préproduction du futur site ({siteEnv}). Le socle existe techniquement et visuellement ; les pages
+      catalogue ne sont pas encore migrées. La boutique en service reste{' '}
+      <a href="https://dar-nur.fr/">dar-nur.fr</a>.
+    </p>
+    <ul class="dn-entry-list" role="list">
+      {pages.map((page) => (
+        <li class="dn-entry">
+          <h2 class="dn-h3">{page.title}</h2>
+          <p class="dn-body-sm dn-muted">{page.text}</p>
+          <Button variant="secondary" href={page.href} iconEnd="arrow-right">
+            Ouvrir
+          </Button>
+        </li>
+      ))}
+    </ul>
+  </section>
+</BaseLayout>
+
+<style>
+  .dn-intro {
+    margin-top: var(--dn-space-3);
+  }
+  .dn-entry-list {
+    display: grid;
+    gap: var(--dn-grid-gap);
+    margin-top: var(--dn-space-8);
+  }
+  .dn-entry {
+    display: grid;
+    gap: var(--dn-space-3);
+    justify-items: start;
+    padding: var(--dn-space-6);
+    border-radius: var(--dn-radius-md);
+    background: var(--dn-bg-alt);
+  }
+  @media (min-width: 1024px) {
+    .dn-entry-list {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+</style>

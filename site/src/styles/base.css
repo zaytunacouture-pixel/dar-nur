@@ -1,0 +1,226 @@
+/*
+ * Base globale : reset léger, typographie, focus, utilitaires de mise en page.
+ * Les composants ont leur CSS scopé (balise <style> des fichiers .astro) ; ce fichier
+ * ne contient que ce qui est réellement transverse.
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  color-scheme: light;
+  scroll-padding-top: calc(var(--dn-header-h) + var(--dn-space-4));
+}
+
+html.dn-scroll-locked {
+  overflow: hidden;
+}
+
+body {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--dn-bg);
+  color: var(--dn-ink);
+  font-family: var(--dn-font-sans);
+  font-size: var(--dn-fs-body);
+  font-weight: var(--dn-fw-regular);
+  line-height: var(--dn-lh-body);
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+main {
+  flex: 1 0 auto;
+}
+
+img,
+picture,
+svg,
+video {
+  display: block;
+  max-width: 100%;
+}
+
+img {
+  height: auto;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
+}
+
+p,
+h1,
+h2,
+h3,
+h4 {
+  overflow-wrap: break-word;
+}
+
+ul[role='list'],
+ol[role='list'] {
+  list-style: none;
+  padding: 0;
+}
+
+/* ── Typographie ─────────────────────────────────────────────── */
+/* Cormorant : jamais sous 18 px, jamais en capitales (§D.3). */
+h1,
+h2,
+h3,
+.dn-display,
+.dn-h1,
+.dn-h2,
+.dn-h3,
+.dn-product-title {
+  font-family: var(--dn-font-serif);
+  font-weight: var(--dn-fw-semibold);
+  color: var(--dn-ink);
+  text-wrap: balance;
+}
+
+.dn-display {
+  font-size: var(--dn-fs-display);
+  line-height: var(--dn-lh-display);
+  letter-spacing: var(--dn-tracking-display);
+}
+
+h1,
+.dn-h1 {
+  font-size: var(--dn-fs-h1);
+  line-height: var(--dn-lh-h1);
+}
+
+.dn-product-title {
+  font-size: var(--dn-fs-product-title);
+  line-height: var(--dn-lh-product-title);
+}
+
+h2,
+.dn-h2 {
+  font-size: var(--dn-fs-h2);
+  line-height: var(--dn-lh-heading);
+}
+
+h3,
+.dn-h3 {
+  font-size: var(--dn-fs-h3);
+  line-height: var(--dn-lh-h3);
+}
+
+.dn-body-lg {
+  font-size: var(--dn-fs-body-lg);
+  line-height: var(--dn-lh-body-lg);
+}
+
+.dn-body-sm {
+  font-size: var(--dn-fs-body-sm);
+  line-height: var(--dn-lh-body-sm);
+}
+
+.dn-small {
+  font-size: var(--dn-fs-small);
+  line-height: var(--dn-lh-small);
+}
+
+.dn-label {
+  font-family: var(--dn-font-sans);
+  font-size: var(--dn-fs-label);
+  font-weight: var(--dn-fw-medium);
+  line-height: var(--dn-lh-label);
+  letter-spacing: var(--dn-tracking-label);
+  text-transform: uppercase;
+}
+
+.dn-muted {
+  color: var(--dn-ink-2);
+}
+
+.dn-measure {
+  max-width: var(--dn-measure);
+}
+
+/* ── Focus visible partout ───────────────────────────────────── */
+:focus-visible {
+  outline: var(--dn-focus-ring);
+  outline-offset: var(--dn-focus-offset);
+}
+
+.dn-on-dark :focus-visible {
+  outline: var(--dn-focus-ring-on-dark);
+}
+
+/* ── Mise en page ────────────────────────────────────────────── */
+.dn-container {
+  width: 100%;
+  max-width: calc(var(--dn-container) + 2 * var(--dn-gutter-x));
+  margin-inline: auto;
+  padding-inline: var(--dn-gutter-x);
+}
+
+.dn-section {
+  padding-block: var(--dn-section-y);
+}
+
+.dn-section--alt {
+  background: var(--dn-bg-alt);
+}
+
+.dn-section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: var(--dn-space-2) var(--dn-space-6);
+  margin-bottom: var(--dn-section-title-gap);
+}
+
+.dn-stack > * + * {
+  margin-top: var(--dn-space-4);
+}
+
+.dn-visually-hidden:not(:focus):not(:active) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ── Mouvement réduit : coupe toute transition et animation ──── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,0 +1,355 @@
+---
+/**
+ * Sélecteur de variantes unique (§M) : fieldset + légende + groupe de boutons radio natifs
+ * (flèches clavier, lecture correcte), quatre présentations :
+ *   format    → carte « 200 g » + prix (formats, contenances) ;
+ *   text      → bouton texte (taille, senteur, motif texte) ;
+ *   thumbnail → miniature de la VRAIE photo (couleur, motif) ;
+ *   swatch    → pastille, seulement si une couleur codée existe en base.
+ * Règles : aucune présélection ; une option épuisée reste visible, barrée, non
+ * sélectionnable et annoncée ; une seule option = information, pas sélecteur.
+ * Les options avec `href` (couleurs stockées en produits séparés) sont des liens.
+ */
+import CatalogPicture from '@/components/ui/CatalogPicture.astro';
+import { formatPrice, unitPrice } from '@/lib/format';
+import type { VariantAxis, VariantOption, VariantPresentation } from '@/types/catalog';
+
+interface Props {
+  name: string;
+  axis: VariantAxis;
+  legend: string;
+  presentation: VariantPresentation;
+  options: VariantOption[];
+  /** Option déjà connue (ex. couleur de la fiche courante). Jamais un choix par défaut arbitraire. */
+  currentId?: string;
+  /** Lien affiché à droite de la légende (ex. guide des tailles). */
+  aside?: { label: string; href: string };
+}
+
+const { name, axis, legend, presentation, options, currentId, aside } = Astro.props;
+const current = options.find((o) => o.id === currentId);
+const single = options.length === 1 ? options[0] : undefined;
+const groupId = `dn-variant-${name}`;
+const showUnitPrice = presentation === 'format';
+// « Épuisé » est annoncé par aria-label (l'option reste visible, barrée, désactivée).
+---
+
+{single ? (
+  <p class="dn-variant-single">
+    <span class="dn-variant__legend-label">{legend} :</span> {single.label}
+    {single.detail && <span class="dn-muted"> · {single.detail}</span>}
+  </p>
+) : (
+  <fieldset
+    class:list={['dn-variant', `dn-variant--${presentation}`]}
+    data-dn-variant
+    data-axis={axis}
+    aria-describedby={`${groupId}-error`}
+  >
+    <div class="dn-variant__head">
+      <legend class="dn-variant__legend">
+        <span class="dn-variant__legend-label">{legend}</span>
+        <span data-dn-variant-value>{current ? ` : ${current.label}` : ''}</span>
+      </legend>
+      {aside && (
+        <a class="dn-variant__aside" href={aside.href}>
+          {aside.label}
+        </a>
+      )}
+    </div>
+
+    <div class="dn-variant__options">
+      {options.map((option) => {
+        const inputId = `${groupId}-${option.id}`;
+        const unit = option.price !== undefined ? unitPrice(option.price, option.label) : null;
+        const content = (
+          <>
+            {presentation === 'thumbnail' &&
+              (option.image ? (
+                <CatalogPicture
+                  image={option.image}
+                  width={96}
+                  height={120}
+                  widths={[48, 96]}
+                  sizes="48px"
+                  decorative
+                  class="dn-variant__thumb"
+                />
+              ) : (
+                <span class="dn-variant__thumb dn-variant__thumb--empty" />
+              ))}
+            {presentation === 'swatch' && (
+              <span
+                class="dn-variant__swatch"
+                style={option.swatch ? `--dn-swatch: ${option.swatch}` : undefined}
+              />
+            )}
+            <span
+              class:list={[
+                'dn-variant__text',
+                { 'dn-visually-hidden': presentation === 'thumbnail' || presentation === 'swatch' },
+              ]}
+            >
+              <span class="dn-variant__label">{option.label}</span>
+              {presentation === 'format' && option.price !== undefined && (
+                <span class="dn-variant__price">{formatPrice(option.price)}</span>
+              )}
+              {presentation === 'text' && option.detail && (
+                <span class="dn-variant__detail">{option.detail}</span>
+              )}
+            </span>
+          </>
+        );
+        return option.href ? (
+          <a
+            class:list={['dn-variant__option', { 'is-unavailable': !option.available }]}
+            href={option.href}
+            aria-current={option.id === currentId ? 'true' : undefined}
+            aria-label={option.available ? undefined : `${option.label}, épuisé`}
+            title={option.label}
+          >
+            {content}
+          </a>
+        ) : (
+          <label
+            class:list={['dn-variant__option', { 'is-unavailable': !option.available }]}
+            for={inputId}
+            title={presentation === 'thumbnail' || presentation === 'swatch' ? option.label : undefined}
+          >
+            <input
+              class="dn-variant__input"
+              type="radio"
+              id={inputId}
+              name={name}
+              value={option.id}
+              disabled={!option.available}
+              aria-label={option.available ? undefined : `${option.label}, épuisé`}
+              checked={option.id === currentId}
+              data-label={option.label}
+              data-price={option.price}
+              data-unit={unit ?? undefined}
+            />
+            {content}
+          </label>
+        );
+      })}
+    </div>
+
+    {showUnitPrice && (
+      <p class="dn-variant__unit dn-small dn-muted" data-dn-variant-unit aria-live="polite" />
+    )}
+    <p class="dn-variant__error dn-small" id={`${groupId}-error`} data-dn-variant-error hidden role="alert" />
+  </fieldset>
+)}
+
+<style>
+  .dn-variant {
+    border: 0;
+    padding: 0;
+    margin: 0;
+    min-inline-size: 0;
+  }
+  .dn-variant__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--dn-space-4);
+    margin-bottom: var(--dn-space-2);
+  }
+  .dn-variant__legend {
+    float: inline-start;
+    padding: 0;
+    font-size: var(--dn-fs-body-sm);
+  }
+  .dn-variant__legend-label {
+    font-weight: var(--dn-fw-medium);
+  }
+  .dn-variant__aside {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: var(--dn-tap-min);
+    font-size: var(--dn-fs-body-sm);
+    font-weight: var(--dn-fw-medium);
+    text-underline-offset: 4px;
+  }
+  .dn-variant__options {
+    clear: both;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--dn-space-2);
+  }
+  .dn-variant--format .dn-variant__options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+  }
+
+  /* ── Option : base commune ─────────────────────────────────── */
+  .dn-variant__option {
+    position: relative;
+    display: inline-grid;
+    place-items: center;
+    min-inline-size: var(--dn-btn-h-md);
+    min-block-size: var(--dn-btn-h-md);
+    border: var(--dn-border-ui);
+    border-radius: var(--dn-radius-sm);
+    background: var(--dn-surface);
+    color: var(--dn-ink);
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+      border-color var(--dn-dur-fast) var(--dn-ease-in-out),
+      background-color var(--dn-dur-fast) var(--dn-ease-in-out);
+  }
+  .dn-variant__option:hover {
+    border-color: var(--dn-ink);
+  }
+  .dn-variant__input {
+    position: absolute;
+    opacity: 0;
+    inset: 0;
+    margin: 0;
+    cursor: inherit;
+  }
+  .dn-variant__text {
+    display: grid;
+    justify-items: center;
+    padding-inline: var(--dn-space-4);
+    line-height: var(--dn-lh-label);
+  }
+  .dn-variant__label {
+    font-size: var(--dn-fs-button);
+    font-weight: var(--dn-fw-medium);
+  }
+  .dn-variant__price,
+  .dn-variant__detail {
+    font-size: var(--dn-fs-body-sm);
+    color: var(--dn-ink-2);
+    font-variant-numeric: tabular-nums;
+  }
+  .dn-variant--format .dn-variant__option {
+    min-block-size: var(--dn-sticky-bar-h);
+  }
+  .dn-variant--format .dn-variant__label {
+    font-size: var(--dn-fs-body);
+  }
+
+  /* ── Sélectionnée : 3 signaux (contour 2 px, fond, coche/anneau) ─ */
+  .dn-variant__option:has(.dn-variant__input:checked),
+  .dn-variant__option[aria-current='true'] {
+    border: var(--dn-border-selected);
+    background: var(--dn-green-50);
+  }
+  .dn-variant--format .dn-variant__option:has(.dn-variant__input:checked)::after {
+    content: '';
+    position: absolute;
+    inset-block-start: var(--dn-space-2);
+    inset-inline-end: var(--dn-space-2);
+    inline-size: 5px;
+    block-size: 9px;
+    border: solid var(--dn-green);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+  .dn-variant__option:has(.dn-variant__input:focus-visible) {
+    outline: var(--dn-focus-ring);
+    outline-offset: var(--dn-focus-offset);
+  }
+
+  /* ── Indisponible : lisible, barrée, non sélectionnable ────── */
+  .dn-variant__option.is-unavailable {
+    color: var(--dn-unavailable);
+    border-color: var(--dn-unavailable);
+    background: transparent;
+    cursor: not-allowed;
+  }
+  .dn-variant__option.is-unavailable .dn-variant__label {
+    text-decoration: line-through;
+  }
+  .dn-variant__option.is-unavailable .dn-variant__price {
+    color: var(--dn-unavailable);
+  }
+
+  /* ── Miniature photo et pastille ───────────────────────────── */
+  .dn-variant--thumbnail .dn-variant__option,
+  .dn-variant--swatch .dn-variant__option {
+    padding: 0;
+    border-color: var(--dn-line);
+  }
+  .dn-variant--thumbnail .dn-variant__option {
+    overflow: hidden;
+  }
+  .dn-variant__option :global(.dn-variant__thumb) {
+    display: block;
+    inline-size: 48px;
+    block-size: 60px;
+    object-fit: cover;
+    background: var(--dn-media);
+  }
+  .dn-variant--swatch .dn-variant__option {
+    inline-size: var(--dn-tap-min);
+    block-size: var(--dn-tap-min);
+    min-inline-size: 0;
+    min-block-size: 0;
+    border-radius: var(--dn-radius-pill);
+  }
+  .dn-variant__swatch {
+    inline-size: 32px;
+    block-size: 32px;
+    border-radius: var(--dn-radius-pill);
+    background: var(--dn-swatch, var(--dn-media));
+    box-shadow: inset 0 0 0 1px var(--dn-line);
+  }
+  .dn-variant--swatch .dn-variant__option:has(.dn-variant__input:checked) {
+    background: var(--dn-surface);
+  }
+  .dn-variant--thumbnail .dn-variant__option.is-unavailable :global(.dn-variant__thumb),
+  .dn-variant--swatch .dn-variant__option.is-unavailable .dn-variant__swatch {
+    opacity: 0.4;
+  }
+  .dn-variant--thumbnail .dn-variant__option.is-unavailable::after,
+  .dn-variant--swatch .dn-variant__option.is-unavailable::after {
+    content: '';
+    position: absolute;
+    inset: 50% -10%;
+    border-top: 1.5px solid var(--dn-ink-2);
+    transform: rotate(-52deg);
+  }
+
+  .dn-variant__unit:empty {
+    display: none;
+  }
+  .dn-variant__unit,
+  .dn-variant__error {
+    margin-top: var(--dn-space-2);
+  }
+  .dn-variant__error {
+    color: var(--dn-error);
+  }
+  .dn-variant-single {
+    font-size: var(--dn-fs-body-sm);
+  }
+</style>
+
+<script>
+  for (const group of document.querySelectorAll<HTMLFieldSetElement>('[data-dn-variant]')) {
+    const value = group.querySelector<HTMLElement>('[data-dn-variant-value]');
+    const unit = group.querySelector<HTMLElement>('[data-dn-variant-unit]');
+    const error = group.querySelector<HTMLElement>('[data-dn-variant-error]');
+    group.addEventListener('change', (event) => {
+      const input = event.target as HTMLInputElement;
+      if (value) value.textContent = ` : ${input.dataset.label ?? ''}`;
+      if (unit) unit.textContent = input.dataset.unit ?? '';
+      if (error) error.hidden = true;
+      group.dispatchEvent(
+        new CustomEvent('dn:variant-change', {
+          bubbles: true,
+          detail: {
+            axis: group.dataset.axis,
+            label: input.dataset.label,
+            price: input.dataset.price ? Number(input.dataset.price) : undefined,
+          },
+        }),
+      );
+    });
+  }
+</script>

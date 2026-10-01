@@ -1,0 +1,136 @@
+---
+/**
+ * Carte d'univers (§I.3) : horizontale sur mobile (les 3 univers tiennent dans un écran),
+ * verticale 4:5 sur desktop. Texte toujours SOUS/À CÔTÉ de l'image, jamais dessus.
+ * Toute la carte est un seul lien.
+ */
+import CatalogPicture from '@/components/ui/CatalogPicture.astro';
+import Icon from '@/components/ui/Icon.astro';
+import MediaPlaceholder from '@/components/ui/MediaPlaceholder.astro';
+import type { MediaImage } from '@/types/catalog';
+
+interface Props {
+  title: string;
+  description: string;
+  href: string;
+  image?: MediaImage;
+  /** Photo attendue, affichée si `image` est absente. */
+  placeholder?: string;
+  headingLevel?: 'h2' | 'h3';
+}
+
+const {
+  title,
+  description,
+  href,
+  image,
+  placeholder = 'Photo d’univers à produire',
+  headingLevel: Heading = 'h3',
+} = Astro.props;
+---
+
+<article class="dn-universe">
+  <div class="dn-universe__media">
+    {image ? (
+      <CatalogPicture
+        image={image}
+        width={820}
+        height={1025}
+        widths={[240, 420, 820]}
+        sizes="(min-width: 768px) 30vw, 120px"
+        decorative
+        class="dn-universe__img"
+      />
+    ) : (
+      <MediaPlaceholder caption={placeholder} class="dn-universe__ph" />
+    )}
+  </div>
+  <div class="dn-universe__body">
+    <Heading class="dn-universe__title">
+      <a class="dn-universe__link" href={href}>
+        {title}
+      </a>
+    </Heading>
+    <p class="dn-body-sm dn-muted">{description}</p>
+    <span class="dn-universe__cta" aria-hidden="true">
+      Découvrir <Icon name="arrow-right" size={16} />
+    </span>
+  </div>
+</article>
+
+<style>
+  .dn-universe {
+    position: relative;
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: var(--dn-space-4);
+    align-items: center;
+    padding-block: var(--dn-space-3);
+    border-bottom: var(--dn-border-decor);
+  }
+  .dn-universe__media {
+    aspect-ratio: var(--dn-ratio-tile);
+    overflow: hidden;
+    border-radius: var(--dn-radius-sm);
+    background: var(--dn-media);
+  }
+  .dn-universe__media :global(.dn-universe__img) {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+    transition: transform var(--dn-dur-base) var(--dn-ease-out);
+  }
+  .dn-universe__media :global(.dn-universe__ph) {
+    block-size: 100%;
+    aspect-ratio: auto;
+    padding: var(--dn-space-2);
+  }
+  .dn-universe__body {
+    display: grid;
+    gap: var(--dn-space-1);
+  }
+  .dn-universe__title {
+    font-size: var(--dn-fs-h3);
+  }
+  .dn-universe__link {
+    text-decoration: none;
+  }
+  .dn-universe__link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+  .dn-universe__link:focus-visible {
+    outline: none;
+  }
+  .dn-universe:has(.dn-universe__link:focus-visible) {
+    outline: var(--dn-focus-ring);
+    outline-offset: var(--dn-focus-offset);
+  }
+  .dn-universe__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--dn-space-1);
+    margin-top: var(--dn-space-1);
+    font-size: var(--dn-fs-button);
+    font-weight: var(--dn-fw-medium);
+  }
+  .dn-universe:hover .dn-universe__link {
+    text-decoration: underline;
+  }
+
+  @media (min-width: 768px) {
+    .dn-universe {
+      grid-template-columns: 1fr;
+      align-items: start;
+      padding-block: 0;
+      border-bottom: 0;
+    }
+    .dn-universe__media {
+      aspect-ratio: var(--dn-ratio-universe-d);
+    }
+    .dn-universe:hover .dn-universe__media :global(.dn-universe__img) {
+      transform: scale(1.02);
+    }
+  }
+</style>

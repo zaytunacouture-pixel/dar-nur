@@ -1,0 +1,150 @@
+---
+/**
+ * Mini-panier VISUEL (§N.2). La logique panier (js/cart.js) n'est PAS migrée :
+ * sans `demo`, le tiroir montre l'état vide ; avec `demo`, un panier fictif étiqueté.
+ * Aucune logique de prix ni de commande ici.
+ */
+import Button from '@/components/ui/Button.astro';
+import Drawer from '@/components/ui/Drawer.astro';
+import IconButton from '@/components/ui/IconButton.astro';
+import { currentShipping } from '@/config/commerce';
+import { universes } from '@/config/navigation';
+import { demoCartCount, demoCartLines, demoCartSubtotal } from '@/data/demo/cart';
+import { formatPrice } from '@/lib/format';
+import FreeShippingProgress from './FreeShippingProgress.astro';
+
+interface Props {
+  demo?: boolean;
+}
+
+const { demo = false } = Astro.props;
+const lines = demo ? demoCartLines : [];
+const title = lines.length ? `Panier (${demoCartCount})` : 'Panier';
+---
+
+<Drawer id="dn-cart" title={title} side="right">
+  {lines.length === 0 ? (
+    <div class="dn-cart__empty">
+      <h3>Votre panier est vide.</h3>
+      <div class="dn-cart__empty-links">
+        {universes.map((u) => (
+          <Button variant="secondary" href={u.href} fullWidth>
+            {u.label}
+          </Button>
+        ))}
+      </div>
+    </div>
+  ) : (
+    <div class="dn-cart__content">
+      <p class="dn-cart__demo dn-label">Démonstration — panier fictif, aucune commande possible</p>
+      <FreeShippingProgress policy={currentShipping} subtotal={demoCartSubtotal} />
+      <ul class="dn-cart__lines" role="list">
+        {lines.map((line) => (
+          <li class="dn-cart__line">
+            <span class="dn-cart__thumb" aria-hidden="true" />
+            <div class="dn-cart__info">
+              <p class="dn-cart__name">{line.name}</p>
+              {line.variant && <p class="dn-small dn-muted">{line.variant}</p>}
+              <div class="dn-cart__row">
+                <div class="dn-qty" role="group" aria-label={`Quantité de ${line.name}`}>
+                  <IconButton icon="minus" label="Diminuer la quantité" disabled={line.quantity <= 1} />
+                  <span class="dn-qty__value" aria-live="polite">
+                    {line.quantity}
+                  </span>
+                  <IconButton icon="plus" label="Augmenter la quantité" />
+                </div>
+                <span class="dn-cart__price">{formatPrice(line.quantity * line.unitPrice)}</span>
+              </div>
+              <Button variant="tertiary" size="sm">
+                Retirer
+              </Button>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )}
+  {lines.length > 0 && (
+    <div slot="footer" class="dn-cart__footer">
+      <p class="dn-cart__subtotal">
+        <span>Sous-total</span>
+        <span>{formatPrice(demoCartSubtotal)}</span>
+      </p>
+      <p class="dn-small dn-muted">Frais de livraison convenus à la commande · {currentShipping.summary}.</p>
+      <Button size="lg" fullWidth disabled iconStart="whatsapp">
+        Commander sur WhatsApp
+      </Button>
+      <p class="dn-small dn-muted dn-cart__note">Bouton inactif : démonstration du composant.</p>
+    </div>
+  )}
+</Drawer>
+
+<style>
+  .dn-cart__empty {
+    display: grid;
+    gap: var(--dn-space-6);
+    padding: var(--dn-space-8) var(--dn-space-4);
+  }
+  .dn-cart__empty-links {
+    display: grid;
+    gap: var(--dn-space-3);
+  }
+  .dn-cart__content {
+    display: grid;
+    gap: var(--dn-space-4);
+    padding: var(--dn-space-4);
+  }
+  .dn-cart__demo,
+  .dn-cart__note {
+    color: var(--dn-warning);
+  }
+  .dn-cart__lines {
+    display: grid;
+  }
+  .dn-cart__line {
+    display: grid;
+    grid-template-columns: 64px 1fr;
+    gap: var(--dn-space-3);
+    padding-block: var(--dn-space-4);
+    border-bottom: var(--dn-border-decor);
+  }
+  .dn-cart__thumb {
+    aspect-ratio: var(--dn-ratio-product);
+    border-radius: var(--dn-radius-sm);
+    background: var(--dn-media);
+  }
+  .dn-cart__name {
+    font-size: var(--dn-fs-button);
+    font-weight: var(--dn-fw-medium);
+  }
+  .dn-cart__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: var(--dn-space-2);
+  }
+  .dn-cart__price,
+  .dn-cart__subtotal {
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--dn-fw-medium);
+  }
+  .dn-qty {
+    display: inline-flex;
+    align-items: center;
+    border: var(--dn-border-ui);
+    border-radius: var(--dn-radius-sm);
+  }
+  .dn-qty__value {
+    min-inline-size: var(--dn-space-6);
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+  .dn-cart__footer {
+    display: grid;
+    gap: var(--dn-space-3);
+  }
+  .dn-cart__subtotal {
+    display: flex;
+    justify-content: space-between;
+  }
+</style>

@@ -1,0 +1,44 @@
+---
+/**
+ * Icône SVG inline. Décorative par défaut (aria-hidden) ; passer `label` seulement si
+ * l'icône porte seule une information. Un bouton à icône porte son libellé lui-même.
+ */
+import { brandIcons, lucideIcons, type IconName } from './icons';
+
+interface Props {
+  name: IconName;
+  size?: 16 | 20 | 24;
+  label?: string;
+  class?: string;
+}
+
+const { name, size = 24, label, class: className } = Astro.props;
+
+const isBrand = name in brandIcons;
+const lucideInner = (svg: string) => svg.replace(/^[\s\S]*?<svg[^>]*>/, '').replace(/<\/svg>\s*$/, '');
+const inner = isBrand
+  ? `<path d="${brandIcons[name as keyof typeof brandIcons]}"/>`
+  : lucideInner(lucideIcons[name as keyof typeof lucideIcons]);
+---
+
+<svg
+  class:list={['dn-icon', className]}
+  xmlns="http://www.w3.org/2000/svg"
+  width={size}
+  height={size}
+  viewBox="0 0 24 24"
+  fill={isBrand ? 'currentColor' : 'none'}
+  stroke={isBrand ? 'none' : 'currentColor'}
+  stroke-width={isBrand ? undefined : 1.5}
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  focusable="false"
+  {...(label ? { role: 'img', 'aria-label': label } : { 'aria-hidden': 'true' })}
+  set:html={inner}
+/>
+
+<style>
+  .dn-icon {
+    flex: none;
+  }
+</style>

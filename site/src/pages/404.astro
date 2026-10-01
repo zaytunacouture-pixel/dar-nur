@@ -1,0 +1,36 @@
+---
+import Button from '@/components/ui/Button.astro';
+import { universes } from '@/config/navigation';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  seo={{
+    title: 'Page introuvable',
+    description: 'Cette page n’existe pas encore dans la nouvelle version.',
+    noindex: true,
+  }}
+>
+  <section class="dn-section dn-container dn-stack dn-measure">
+    <h1>Cette page n’est pas encore là</h1>
+    <p class="dn-body-lg dn-muted">
+      La nouvelle version de Dar Nūr est en construction : les pages catalogue ne sont pas encore migrées. La
+      boutique actuelle reste disponible sur <a href="https://dar-nur.fr/">dar-nur.fr</a>.
+    </p>
+    <div class="dn-404__links">
+      {universes.map((u) => (
+        <Button variant="secondary" href={u.href}>
+          {u.label}
+        </Button>
+      ))}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .dn-404__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--dn-space-3);
+  }
+</style>

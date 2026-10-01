@@ -1,0 +1,39 @@
+---
+/**
+ * Seul ornement du site (§B.7) : filet or + losange, ponctuation reprise des filets
+ * qui encadrent « Dar Nūr » dans le logo. Un par section au plus, trois par page au plus.
+ */
+interface Props {
+  align?: 'start' | 'center';
+}
+const { align = 'start' } = Astro.props;
+---
+
+<span class:list={['dn-ornament', `dn-ornament--${align}`]} aria-hidden="true">
+  <span class="dn-ornament__line"></span>
+  <span class="dn-ornament__diamond"></span>
+  <span class="dn-ornament__line"></span>
+</span>
+
+<style>
+  .dn-ornament {
+    display: flex;
+    align-items: center;
+    gap: var(--dn-space-1);
+    inline-size: var(--dn-ornament-w);
+    margin-bottom: var(--dn-space-3);
+  }
+  .dn-ornament--center {
+    margin-inline: auto;
+  }
+  .dn-ornament__line {
+    flex: 1;
+    border-top: var(--dn-border-gold);
+  }
+  .dn-ornament__diamond {
+    inline-size: 5px;
+    block-size: 5px;
+    background: var(--dn-gold);
+    transform: rotate(45deg);
+  }
+</style>

@@ -1,0 +1,725 @@
+---
+/**
+ * Design system — page INTERNE de préproduction (toujours noindex, même en production).
+ * Palette lue directement dans tokens.css au build : impossible qu'elle diverge du code.
+ * Les états marqués « simulé » sont des démonstrations du composant, pas des données.
+ */
+import FreeShippingProgress from '@/components/cart/FreeShippingProgress.astro';
+import CollectionCard from '@/components/catalog/CollectionCard.astro';
+import ProductCard from '@/components/catalog/ProductCard.astro';
+import SizeGuide from '@/components/catalog/SizeGuide.astro';
+import UniverseCard from '@/components/catalog/UniverseCard.astro';
+import VariantSelector from '@/components/catalog/VariantSelector.astro';
+import AnnouncementBar from '@/components/layout/AnnouncementBar.astro';
+import Accordion from '@/components/ui/Accordion.astro';
+import Badge from '@/components/ui/Badge.astro';
+import Button from '@/components/ui/Button.astro';
+import Choice from '@/components/ui/Choice.astro';
+import Field from '@/components/ui/Field.astro';
+import Icon from '@/components/ui/Icon.astro';
+import IconButton from '@/components/ui/IconButton.astro';
+import { brandIcons, lucideIcons, type IconName } from '@/components/ui/icons';
+import MediaPlaceholder from '@/components/ui/MediaPlaceholder.astro';
+import Ornament from '@/components/ui/Ornament.astro';
+import Price from '@/components/ui/Price.astro';
+import { currentShipping, plannedShipping } from '@/config/commerce';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { toVariantOptions } from '@/lib/catalog';
+import { formatPrice } from '@/lib/format';
+import { getCatalogSample } from '@/lib/sample';
+import tokensCss from '@/styles/tokens.css?raw';
+import type { BadgeKind, ProductSummary, VariantOption } from '@/types/catalog';
+import aichaBlanc from '@/assets/demo/ensemble-aicha-blanc.webp';
+import aichaBordeaux from '@/assets/demo/ensemble-aicha-bordeaux.webp';
+import aichaKaki from '@/assets/demo/ensemble-aicha-kaki.webp';
+import aichaNoir from '@/assets/demo/ensemble-aicha-noir.webp';
+import abaya from '@/assets/demo/abaya-nouha-gris-argente.webp';
+
+const sample = await getCatalogSample();
+
+// ── Palette : extraite de tokens.css (nom, valeur, commentaire d'usage) ──
+const colorTokens = [
+  ...tokensCss.matchAll(/--(dn-[a-z0-9-]+):\s*(#[0-9a-f]{3,8}|rgb\([^)]*\));(?:\s*\/\*\s*(.*?)\s*\*\/)?/gi),
+].map(([, name, value, usage]) => ({ name: name!, value: value!, usage: usage ?? '' }));
+const colorGroups = [
+  { title: 'Fonds', match: /^dn-(bg|surface|media)/ },
+  { title: 'Texte', match: /^dn-ink/ },
+  { title: 'Vert — action et sélection', match: /^dn-(green|on-dark)/ },
+  { title: 'Or — décoratif uniquement', match: /^dn-gold/ },
+  { title: 'Lignes', match: /^dn-line/ },
+  { title: 'États', match: /^dn-(success|error|warning|disabled|unavailable)/ },
+].map((g) => ({ ...g, tokens: colorTokens.filter((t) => g.match.test(t.name)) }));
+
+const typeScale = [
+  { cls: 'dn-display', name: 'display', spec: 'Cormorant 600 · 34 → 56 px · 1,08' },
+  { cls: 'dn-h1', name: 'h1', spec: 'Cormorant 600 · 30 → 44 px · 1,12' },
+  { cls: 'dn-product-title', name: 'product-title', spec: 'Cormorant 600 · 28 → 36 px · 1,15' },
+  { cls: 'dn-h2', name: 'h2', spec: 'Cormorant 600 · 26 → 36 px · 1,18' },
+  { cls: 'dn-h3', name: 'h3', spec: 'Cormorant 600 · 20 → 24 px · 1,25' },
+  { cls: 'dn-body-lg', name: 'body-lg', spec: 'Jost 400 · 16 → 18 px · 1,65' },
+  { cls: '', name: 'body', spec: 'Jost 400 · 16 px · 1,6' },
+  { cls: 'dn-body-sm', name: 'body-sm', spec: 'Jost 400 · 14 → 15 px · 1,5' },
+  { cls: 'dn-small', name: 'small', spec: 'Jost 400 · 13 px · 1,45 (plancher)' },
+  { cls: 'dn-label', name: 'label', spec: 'Jost 500 · 12 px · capitales +0,08 em' },
+];
+const spaces = [1, 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24];
+const radii = ['xs', 'sm', 'md', 'lg', 'pill'];
+const iconNames = [...Object.keys(lucideIcons), ...Object.keys(brandIcons)] as IconName[];
+const badges: BadgeKind[] = ['coming-soon', 'sold-out', 'offer', 'new'];
+
+// ── Cartes produit : échantillon réel + états simulés étiquetés ──
+const real = sample.products[0];
+const simulated: { label: string; product: ProductSummary }[] = real
+  ? [
+      { label: 'Réel (Supabase)', product: real },
+      {
+        label: 'État simulé : bientôt disponible',
+        product: { ...real, badge: 'coming-soon', availability: 'coming-soon' },
+      },
+      { label: 'État simulé : prix sur demande', product: { ...real, price: { kind: 'on-request' } } },
+      { label: 'Sans photo', product: (({ image: _image, ...rest }) => rest)(real) },
+    ]
+  : [];
+
+// ── Variantes : données réelles quand elles existent ──
+const formatRow = sample.variantExamples.format;
+const contenanceRow = sample.variantExamples.contenance;
+const tailleRow = sample.variantExamples.taille;
+const formatOptions = formatRow ? toVariantOptions(formatRow) : [];
+const contenanceOptions = contenanceRow ? toVariantOptions(contenanceRow) : [];
+const tailleOptions: VariantOption[] = tailleRow
+  ? toVariantOptions(tailleRow).map((o, i, all) =>
+      // État simulé : l'avant-dernière taille rendue épuisée pour montrer le style.
+      i === all.length - 2 ? { ...o, available: false } : o,
+    )
+  : [];
+const colorOptions: VariantOption[] = [
+  { id: 'noir', label: 'Noir', available: true, image: { src: aichaNoir, alt: '' } },
+  { id: 'kaki', label: 'Kaki', available: true, image: { src: aichaKaki, alt: '' } },
+  { id: 'bordeaux', label: 'Bordeaux', available: true, image: { src: aichaBordeaux, alt: '' } },
+  { id: 'blanc', label: 'Blanc', available: false, image: { src: aichaBlanc, alt: '' } },
+];
+const swatchOptions: VariantOption[] = [
+  { id: 's1', label: 'Vert profond', available: true, swatch: 'var(--dn-green-deep)' },
+  { id: 's2', label: 'Sable', available: true, swatch: 'var(--dn-bg-alt)' },
+  { id: 's3', label: 'Encre', available: false, swatch: 'var(--dn-ink)' },
+];
+const senteurOptions: VariantOption[] = [
+  { id: 'a', label: 'Senteur A', available: true },
+  { id: 'b', label: 'Senteur B', available: true },
+  { id: 'c', label: 'Senteur C', available: false },
+];
+---
+
+<BaseLayout
+  seo={{
+    title: 'Design system',
+    description: 'Page interne de préproduction : tokens et composants du nouveau Dar Nūr.',
+    noindex: true,
+  }}
+  cartDemo
+>
+  <div class="dn-container ds">
+    <header class="ds-intro">
+      <Ornament />
+      <h1>Design system</h1>
+      <p class="dn-body-lg dn-muted dn-measure">
+        Page interne, non indexée. Référence : <code>DESIGN_SYSTEM_ETAPE_4.md</code>. Les valeurs viennent de
+        <code>src/styles/tokens.css</code> ; les états marqués « simulé » illustrent un composant, pas une
+        donnée.
+      </p>
+      <nav class="ds-toc" aria-label="Sommaire">
+        {[
+          'Couleurs',
+          'Typographie',
+          'Espacements',
+          'Rayons et ombres',
+          'Boutons',
+          'Champs',
+          'Badges et prix',
+          'Icônes',
+          'Cartes',
+          'Variantes',
+          'Accordéons',
+          'Panier et annonce',
+        ].map((s) => (
+          <a
+            href={`#${s
+              .normalize('NFD')
+              .replace(/\p{Diacritic}/gu, '')
+              .toLowerCase()
+              .replace(/[^a-z]+/g, '-')}`}
+          >
+            {s}
+          </a>
+        ))}
+      </nav>
+    </header>
+
+    <section class="ds-section" id="couleurs">
+      <h2>Couleurs</h2>
+      {colorGroups.map((group) => (
+        <div class="ds-block">
+          <h3 class="dn-label dn-muted">{group.title}</h3>
+          <ul class="ds-swatches" role="list">
+            {group.tokens.map((t) => (
+              <li class="ds-swatch">
+                <span class="ds-swatch__chip" style={`background: var(--${t.name})`} />
+                <code>--{t.name}</code>
+                <span class="dn-small">{t.value}</span>
+                {t.usage && <span class="dn-small dn-muted">{t.usage}</span>}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </section>
+
+    <section class="ds-section" id="typographie">
+      <h2>Typographie</h2>
+      <p class="dn-muted">
+        Cormorant Garamond (500–600) et Jost (400–500), auto-hébergées, sous-ensemble FR + ū.
+      </p>
+      <ul class="ds-type" role="list">
+        {typeScale.map((t) => (
+          <li class="ds-type__row">
+            <span class="dn-label dn-muted">
+              {t.name} · {t.spec}
+            </span>
+            <span class={t.cls}>Dar Nūr — miel de nigelle, 14,90 €</span>
+          </li>
+        ))}
+        <li class="ds-type__row">
+          <span class="dn-label dn-muted">Caractères spéciaux</span>
+          <span class="dn-h3">DAR NŪR · Dar Nūr · « œuvre » — … · 9,99 €</span>
+          <span>DAR NŪR · Dar Nūr · « œuvre » — … · 9,99 €</span>
+        </li>
+      </ul>
+    </section>
+
+    <section class="ds-section" id="espacements">
+      <h2>Espacements</h2>
+      <p class="dn-muted">Base 4. Rythme de section : 48 → 64 → 80 px. Grille 4 / 8 / 12 colonnes.</p>
+      <ul class="ds-spaces" role="list">
+        {spaces.map((s) => (
+          <li>
+            <code>--dn-space-{s}</code>
+            <span class="ds-space-bar" style={`inline-size: var(--dn-space-${s})`} />
+            <span class="dn-small dn-muted">{s * 4} px</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <section class="ds-section" id="rayons-et-ombres">
+      <h2>Rayons et ombres</h2>
+      <div class="ds-grid">
+        {radii.map((r) => (
+          <div class="ds-radius" style={`border-radius: var(--dn-radius-${r})`}>
+            <code>--dn-radius-{r}</code>
+          </div>
+        ))}
+        <div class="ds-radius ds-shadow-raised">
+          <code>--dn-shadow-raised</code>
+        </div>
+        <div class="ds-radius ds-shadow-overlay">
+          <code>--dn-shadow-overlay</code>
+        </div>
+      </div>
+    </section>
+
+    <section class="ds-section" id="boutons">
+      <h2>Boutons</h2>
+      <p class="dn-muted">Survol, appui et focus clavier (Tab) sont actifs sur cette page.</p>
+      <div class="ds-row">
+        <Button>Primaire</Button>
+        <Button variant="secondary">Secondaire</Button>
+        <Button variant="tertiary">Tertiaire</Button>
+        <IconButton icon="search" label="Bouton icône (exemple)" />
+      </div>
+      <div class="ds-row">
+        <Button size="sm">Petit (desktop)</Button>
+        <Button size="md">Moyen 48 px</Button>
+        <Button size="lg" iconStart="shopping-bag">
+          Grand 52 px
+        </Button>
+      </div>
+      <div class="ds-row">
+        <Button disabled>Primaire désactivé</Button>
+        <Button variant="secondary" disabled>
+          Secondaire désactivé
+        </Button>
+        <Button variant="tertiary" disabled>
+          Tertiaire désactivé
+        </Button>
+        <IconButton icon="plus" label="Icône désactivée" disabled />
+      </div>
+      <div class="ds-row ds-on-dark dn-on-dark">
+        <Button onDark>Primaire sur vert</Button>
+        <Button variant="secondary" onDark>
+          Secondaire sur vert
+        </Button>
+        <IconButton icon="x" label="Icône sur vert" onDark />
+      </div>
+    </section>
+
+    <section class="ds-section" id="champs">
+      <h2>Champs</h2>
+      <form class="ds-form" action="#" onsubmit="return false">
+        <Field
+          id="ds-name"
+          label="Prénom"
+          autocomplete="given-name"
+          help="Aide : texte reliée par aria-describedby."
+        />
+        <Field
+          id="ds-email"
+          label="Adresse e-mail"
+          type="email"
+          value="adresse@"
+          error="Indiquez une adresse e-mail valide."
+        />
+        <Field id="ds-phone" label="Téléphone" type="tel" optional />
+        <Field id="ds-disabled" label="Champ désactivé" value="Non modifiable" disabled />
+        <Field
+          id="ds-select"
+          label="Liste (réservée aux listes de plus de 8 options)"
+          control="select"
+          options={[
+            { value: '', label: 'Choisir…' },
+            { value: 'a', label: 'Option A' },
+            { value: 'b', label: 'Option B' },
+          ]}
+        />
+        <Field id="ds-message" label="Message" control="textarea" placeholder="Votre message" />
+        <fieldset class="ds-fieldset">
+          <legend class="dn-label dn-muted">Cases à cocher</legend>
+          <Choice type="checkbox" id="ds-c1" name="c" label="Cochée" checked count={12} />
+          <Choice type="checkbox" id="ds-c2" name="c" label="Non cochée" count={4} />
+          <Choice type="checkbox" id="ds-c3" name="c" label="Désactivée" disabled />
+        </fieldset>
+        <fieldset class="ds-fieldset">
+          <legend class="dn-label dn-muted">Boutons radio</legend>
+          <Choice type="radio" id="ds-r1" name="r" label="Pertinence" checked />
+          <Choice type="radio" id="ds-r2" name="r" label="Prix croissant" />
+          <Choice type="radio" id="ds-r3" name="r" label="Désactivé" disabled />
+        </fieldset>
+      </form>
+    </section>
+
+    <section class="ds-section" id="badges-et-prix">
+      <h2>Badges et prix</h2>
+      <div class="ds-row">
+        {badges.map((b) => (
+          <Badge kind={b} />
+        ))}
+      </div>
+      <div class="ds-row">
+        <Price price={{ kind: 'fixed', amount: 14.9 }} />
+        <Price price={{ kind: 'from', amount: 9.99 }} />
+        <Price price={{ kind: 'fixed', amount: 40, compareAt: 59.99 }} />
+        <Price price={{ kind: 'on-request' }} />
+        <Price price={{ kind: 'fixed', amount: 89.99 }} size="lg" />
+      </div>
+      <Ornament />
+    </section>
+
+    <section class="ds-section" id="icones">
+      <h2>Icônes</h2>
+      <p class="dn-muted">Lucide (ISC), contour 1,5 px, 24 px. Logos de réseaux : Simple Icons (CC0).</p>
+      <ul class="ds-icons" role="list">
+        {iconNames.map((name) => (
+          <li>
+            <Icon name={name} />
+            <span class="dn-small">{name}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <section class="ds-section" id="cartes">
+      <h2>Cartes</h2>
+      <h3 class="dn-label dn-muted">Carte produit</h3>
+      <ul class="ds-cards" role="list">
+        {simulated.map(({ label, product }) => (
+          <li>
+            <p class="dn-small dn-muted ds-caption">{label}</p>
+            <ProductCard product={product} />
+          </li>
+        ))}
+      </ul>
+      {!real && <p class="dn-muted">Supabase non configuré : aucune carte réelle.</p>}
+
+      <h3 class="dn-label dn-muted">Carte d’univers</h3>
+      <div class="ds-universes">
+        <UniverseCard
+          title="Mode"
+          description="Abayas & ensembles, qamis, sandales, accessoires"
+          href="/mode/"
+          image={{ src: abaya, alt: '' }}
+        />
+        <UniverseCard
+          title="Miels & Herboristerie"
+          description="Miels, poudres & graines, gélules"
+          href="/miels-herboristerie/"
+        />
+      </div>
+
+      <h3 class="dn-label dn-muted">Carte de collection</h3>
+      <ul class="ds-cards" role="list">
+        <li>
+          <CollectionCard
+            collection={{
+              id: 'abayas',
+              label: 'Abayas & ensembles',
+              href: '/abayas/',
+              image: { src: aichaKaki, alt: '' },
+            }}
+          />
+        </li>
+        <li>
+          <CollectionCard collection={{ id: 'miels', label: 'Miels', href: '/miels/' }} />
+        </li>
+      </ul>
+
+      <h3 class="dn-label dn-muted">Emplacement d’image</h3>
+      <div class="ds-ph">
+        <MediaPlaceholder caption="Photo hero finale à fournir après shooting" ratio="4 / 3" />
+      </div>
+    </section>
+
+    <section class="ds-section" id="variantes">
+      <h2>Variantes</h2>
+      <p class="dn-muted">
+        Aucune option présélectionnée. Options épuisées visibles, barrées, non sélectionnables.
+      </p>
+      <div class="ds-variants">
+        {formatOptions.length > 1 && (
+          <div class="ds-block">
+            <p class="dn-small dn-muted ds-caption">Format + prix — données réelles : {formatRow?.name}</p>
+            <VariantSelector
+              name="ds-format"
+              axis="format"
+              legend="Format"
+              presentation="format"
+              options={formatOptions}
+            />
+          </div>
+        )}
+        {contenanceOptions.length > 0 && (
+          <div class="ds-block">
+            <p class="dn-small dn-muted ds-caption">Contenance — données réelles : {contenanceRow?.name}</p>
+            <VariantSelector
+              name="ds-contenance"
+              axis="contenance"
+              legend="Contenance"
+              presentation="format"
+              options={contenanceOptions}
+            />
+          </div>
+        )}
+        {tailleOptions.length > 1 && (
+          <div class="ds-block">
+            <p class="dn-small dn-muted ds-caption">
+              Taille — données réelles : {tailleRow?.name} (une taille rendue épuisée : état simulé)
+            </p>
+            <VariantSelector
+              name="ds-taille"
+              axis="taille"
+              legend="Taille"
+              presentation="text"
+              options={tailleOptions}
+            />
+            <SizeGuide id="ds-size-guide" guide={null} />
+          </div>
+        )}
+        <div class="ds-block">
+          <p class="dn-small dn-muted ds-caption">
+            Couleur — miniatures de vraies photos (ensemble Aïcha), « Blanc » épuisé simulé
+          </p>
+          <VariantSelector
+            name="ds-couleur"
+            axis="couleur"
+            legend="Couleur"
+            presentation="thumbnail"
+            options={colorOptions}
+          />
+        </div>
+        <div class="ds-block">
+          <p class="dn-small dn-muted ds-caption">
+            Pastille — couleurs illustratives (aucune couleur codée en base aujourd’hui)
+          </p>
+          <VariantSelector
+            name="ds-swatch"
+            axis="couleur"
+            legend="Teinte"
+            presentation="swatch"
+            options={swatchOptions}
+          />
+        </div>
+        <div class="ds-block">
+          <p class="dn-small dn-muted ds-caption">Senteur — libellés de démonstration</p>
+          <VariantSelector
+            name="ds-senteur"
+            axis="senteur"
+            legend="Senteur"
+            presentation="text"
+            options={senteurOptions}
+          />
+        </div>
+        <div class="ds-block">
+          <p class="dn-small dn-muted ds-caption">Une seule option = information, pas sélecteur</p>
+          <VariantSelector
+            name="ds-single"
+            axis="format"
+            legend="Format"
+            presentation="format"
+            options={[{ id: 'u', label: '250 g', available: true }]}
+          />
+        </div>
+        {formatOptions.length > 1 && (
+          <div class="ds-block ds-buy" data-ds-buy>
+            <p class="dn-small dn-muted ds-caption">
+              Bouton d’ajout relié au premier sélecteur (démonstration)
+            </p>
+            <Button size="lg" fullWidth data-ds-buy-button>
+              Choisir un format
+            </Button>
+            <p class="dn-small dn-muted">
+              Le panier n’est pas branché : le bouton illustre seulement le libellé.
+            </p>
+          </div>
+        )}
+      </div>
+    </section>
+
+    <section class="ds-section" id="accordeons">
+      <h2>Accordéons</h2>
+      <div class="dn-measure">
+        <Accordion title="Description" open>
+          <p>Contenu natif &lt;details&gt; : aucun JavaScript, état annoncé par le navigateur.</p>
+        </Accordion>
+        <Accordion title="Composition & origine">
+          <p>Un accordéon dont la donnée est vide n’est pas rendu.</p>
+        </Accordion>
+        <Accordion title="Livraison & paiement">
+          <p>{currentShipping.summary}.</p>
+        </Accordion>
+      </div>
+    </section>
+
+    <section class="ds-section" id="panier-et-annonce">
+      <h2>Panier et annonce</h2>
+      <div class="ds-block dn-measure">
+        <p class="dn-small dn-muted ds-caption">
+          Politique en vigueur (Île-de-France, aucun seuil) : rien ne s’affiche
+        </p>
+        <div class="ds-empty-box">
+          <FreeShippingProgress policy={currentShipping} subtotal={38} />
+        </div>
+        <p class="dn-small dn-muted ds-caption">
+          Politique prévue — seuil de {formatPrice(plannedShipping.freeShippingThreshold ?? 0)} :
+          démonstration étiquetée
+        </p>
+        <FreeShippingProgress policy={plannedShipping} subtotal={38} demo />
+      </div>
+      <div class="ds-block">
+        <p class="dn-small dn-muted ds-caption">
+          Bandeau avec rotation (désactivée sur le site) — deux messages vrais
+        </p>
+        <AnnouncementBar
+          messages={[
+            { text: 'Paiement à la réception · Livraison en Île-de-France' },
+            { text: 'Commande simple : votre panier envoyé sur WhatsApp' },
+          ]}
+          rotation={{ enabled: true, intervalMs: 7000 }}
+        />
+      </div>
+      <Button variant="secondary" data-dn-open="dn-cart" iconStart="shopping-bag">
+        Ouvrir le mini-panier (fictif)
+      </Button>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .ds {
+    padding-block: var(--dn-section-y);
+  }
+  .ds-intro {
+    display: grid;
+    gap: var(--dn-space-3);
+  }
+  .ds-toc {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--dn-space-2) var(--dn-space-4);
+    font-size: var(--dn-fs-body-sm);
+  }
+  .ds-toc a {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: var(--dn-tap-min);
+  }
+  .ds-section {
+    display: grid;
+    gap: var(--dn-space-6);
+    padding-block: var(--dn-section-y) 0;
+    border-bottom: var(--dn-border-decor);
+    padding-bottom: var(--dn-section-y);
+  }
+  .ds-block {
+    display: grid;
+    gap: var(--dn-space-3);
+    align-content: start;
+  }
+  .ds-caption {
+    margin-bottom: var(--dn-space-1);
+  }
+  code {
+    font-size: var(--dn-fs-small);
+  }
+  .ds-swatches {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--dn-space-4);
+  }
+  .ds-swatch {
+    display: grid;
+    gap: var(--dn-space-1);
+    align-content: start;
+  }
+  .ds-swatch__chip {
+    block-size: 56px;
+    border-radius: var(--dn-radius-sm);
+    border: var(--dn-border-decor);
+  }
+  .ds-type {
+    display: grid;
+    gap: var(--dn-space-5);
+  }
+  .ds-type__row {
+    display: grid;
+    gap: var(--dn-space-1);
+  }
+  .ds-spaces {
+    display: grid;
+    gap: var(--dn-space-2);
+  }
+  .ds-spaces li {
+    display: grid;
+    grid-template-columns: 140px auto 1fr;
+    gap: var(--dn-space-3);
+    align-items: center;
+  }
+  .ds-space-bar {
+    block-size: var(--dn-space-3);
+    background: var(--dn-green);
+  }
+  .ds-grid,
+  .ds-cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--dn-grid-gap);
+  }
+  .ds-radius {
+    display: grid;
+    place-items: center;
+    min-block-size: 96px;
+    padding: var(--dn-space-3);
+    background: var(--dn-bg-alt);
+    text-align: center;
+  }
+  .ds-shadow-raised {
+    background: var(--dn-surface);
+    box-shadow: var(--dn-shadow-raised);
+  }
+  .ds-shadow-overlay {
+    background: var(--dn-surface);
+    box-shadow: var(--dn-shadow-overlay);
+  }
+  .ds-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--dn-space-3);
+  }
+  .ds-on-dark {
+    padding: var(--dn-space-6);
+    border-radius: var(--dn-radius-md);
+    background: var(--dn-green-deep);
+  }
+  .ds-form {
+    display: grid;
+    gap: var(--dn-space-4);
+    max-inline-size: 480px;
+  }
+  .ds-fieldset {
+    border: 0;
+    padding: 0;
+  }
+  .ds-icons {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: var(--dn-space-4);
+  }
+  .ds-icons li {
+    display: grid;
+    justify-items: start;
+    gap: var(--dn-space-1);
+  }
+  .ds-universes {
+    display: grid;
+    gap: var(--dn-grid-gap);
+  }
+  .ds-ph {
+    max-inline-size: 480px;
+  }
+  .ds-variants {
+    display: grid;
+    gap: var(--dn-space-8);
+    max-inline-size: 480px;
+  }
+  .ds-empty-box {
+    min-block-size: var(--dn-space-6);
+    padding: var(--dn-space-2);
+    border: 1px dashed var(--dn-line-strong);
+    border-radius: var(--dn-radius-sm);
+  }
+  @media (min-width: 768px) {
+    .ds-universes {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  @media (min-width: 1024px) {
+    .ds-cards,
+    .ds-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+</style>
+
+<script>
+  // Démonstration : le bouton suit le premier sélecteur de format (libellé + prix).
+  const buy = document.querySelector<HTMLButtonElement>('[data-ds-buy-button]');
+  const first = document.querySelector<HTMLElement>('[data-dn-variant][data-axis="format"]');
+  if (buy && first) {
+    const label = buy.querySelector('.dn-btn__label') ?? buy;
+    first.addEventListener('dn:variant-change', (event) => {
+      const { price } = (event as CustomEvent<{ price?: number }>).detail;
+      label.textContent =
+        typeof price === 'number'
+          ? `Ajouter au panier · ${price.toFixed(2).replace('.', ',')} €`
+          : 'Ajouter au panier';
+    });
+    buy.addEventListener('click', () => {
+      if (first.querySelector('input:checked')) return;
+      const error = first.querySelector<HTMLElement>('[data-dn-variant-error]');
+      if (error) {
+        error.textContent = 'Choisissez un format pour continuer.';
+        error.hidden = false;
+      }
+      first.querySelector<HTMLInputElement>('input:not(:disabled)')?.focus();
+    });
+  }
+</script>

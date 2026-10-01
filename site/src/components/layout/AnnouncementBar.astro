@@ -1,0 +1,140 @@
+---
+/**
+ * Bandeau d'annonce (§H.1) : 32 px, une ligne, défile avec la page (non fixe).
+ * Messages lus en configuration (src/config/commerce.ts) — aucun seuil écrit ici.
+ * Rotation désactivée par défaut ; si activée : fondu, pause au survol/focus,
+ * bouton pause (WCAG 2.2.2), et premier message seul en mouvement réduit.
+ */
+import Icon from '@/components/ui/Icon.astro';
+import type { AnnouncementMessage } from '@/types/site';
+
+interface Props {
+  messages: AnnouncementMessage[];
+  rotation?: { enabled: boolean; intervalMs: number };
+}
+
+const { messages, rotation = { enabled: false, intervalMs: 7000 } } = Astro.props;
+const rotating = rotation.enabled && messages.length > 1;
+const shown = rotating ? messages.slice(0, 3) : messages.slice(0, 1);
+---
+
+{shown.length > 0 && (
+  <div
+    class="dn-announcement"
+    role="region"
+    aria-label="Annonce"
+    data-rotating={rotating ? 'true' : undefined}
+    data-interval={rotation.intervalMs}
+  >
+    <div class="dn-announcement__track" aria-live="off">
+      {shown.map((message, index) => (
+        <p class="dn-announcement__message" data-active={index === 0 ? 'true' : undefined}>
+          {message.href ? <a href={message.href}>{message.text}</a> : message.text}
+        </p>
+      ))}
+    </div>
+    {rotating && (
+      <button
+        type="button"
+        class="dn-announcement__pause"
+        aria-label="Mettre l’annonce en pause"
+        aria-pressed="false"
+      >
+        <Icon name="pause" size={16} />
+      </button>
+    )}
+  </div>
+)}
+
+<style>
+  .dn-announcement {
+    position: relative;
+    display: grid;
+    place-items: center;
+    block-size: var(--dn-announcement-h);
+    padding-inline: var(--dn-space-4);
+    background: var(--dn-green);
+    color: var(--dn-on-dark);
+    font-size: var(--dn-fs-small);
+    font-weight: var(--dn-fw-medium);
+    letter-spacing: var(--dn-tracking-announcement);
+  }
+  /* Place réservée au bouton pause seulement quand la rotation est active. */
+  .dn-announcement[data-rotating] {
+    padding-inline: var(--dn-space-10);
+  }
+  .dn-announcement :focus-visible {
+    outline: var(--dn-focus-ring-on-dark);
+  }
+  .dn-announcement__track {
+    display: grid;
+  }
+  .dn-announcement__message {
+    grid-area: 1 / 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-inline-size: 100%;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity 300ms var(--dn-ease-in-out),
+      visibility 300ms;
+  }
+  .dn-announcement__message[data-active] {
+    opacity: 1;
+    visibility: visible;
+  }
+  .dn-announcement a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .dn-announcement a:hover {
+    text-decoration: underline;
+  }
+  .dn-announcement__pause {
+    position: absolute;
+    inset-inline-end: var(--dn-space-2);
+    display: grid;
+    place-items: center;
+    inline-size: var(--dn-btn-h-sm);
+    block-size: var(--dn-announcement-h);
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+  }
+</style>
+
+<script>
+  for (const bar of document.querySelectorAll<HTMLElement>('.dn-announcement[data-rotating]')) {
+    const messages = [...bar.querySelectorAll<HTMLElement>('.dn-announcement__message')];
+    const pause = bar.querySelector<HTMLButtonElement>('.dn-announcement__pause');
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduced || messages.length < 2) {
+      pause?.remove();
+      continue;
+    }
+    let index = 0;
+    let paused = false;
+    let hovered = false;
+    window.setInterval(
+      () => {
+        if (paused || hovered) return;
+        messages[index]?.removeAttribute('data-active');
+        index = (index + 1) % messages.length;
+        messages[index]?.setAttribute('data-active', 'true');
+      },
+      Number(bar.dataset.interval) || 7000,
+    );
+    bar.addEventListener('pointerenter', () => (hovered = true));
+    bar.addEventListener('pointerleave', () => (hovered = false));
+    bar.addEventListener('focusin', () => (hovered = true));
+    bar.addEventListener('focusout', () => (hovered = false));
+    pause?.addEventListener('click', () => {
+      paused = !paused;
+      pause.setAttribute('aria-pressed', String(paused));
+      pause.setAttribute('aria-label', paused ? 'Reprendre l’annonce' : 'Mettre l’annonce en pause');
+    });
+  }
+</script>

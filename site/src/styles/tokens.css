@@ -1,0 +1,248 @@
+/*
+ * Design tokens Dar Nūr — source unique des valeurs visuelles.
+ * Référence : DESIGN_SYSTEM_ETAPE_4.md, §C (palette) et §F (tokens). Ne pas réinventer :
+ * toute valeur nouvelle doit d'abord être ajoutée ici, puis justifiée.
+ *
+ * Les composants n'utilisent QUE ces variables (contrôlé par scripts/verify-build.mjs :
+ * aucune couleur hexadécimale hors de ce fichier).
+ *
+ * Breakpoints (ne peuvent pas être des variables CSS dans une media query) :
+ *   tablette  @media (min-width: 768px)
+ *   desktop   @media (min-width: 1024px)
+ * Aucune autre valeur de media query de largeur n'est autorisée.
+ */
+
+:root {
+  /* ── Couleurs : fonds ───────────────────────────────────────────── */
+  --dn-bg: #fbf8f2; /* fond principal : page, header, tiroirs */
+  --dn-bg-alt: #f3ede2; /* sections alternées, cartes secondaires, faux champ de recherche */
+  --dn-surface: #ffffff; /* champs, options de variante, lignes du panier */
+  --dn-media: #efe8db; /* fond des vignettes et de la galerie */
+
+  /* ── Couleurs : texte ───────────────────────────────────────────── */
+  --dn-ink: #1f221d; /* texte principal — 15,2:1 sur crème */
+  --dn-ink-2: #55524a; /* texte secondaire — 7,4:1 */
+  --dn-ink-3: #6e6a60; /* tertiaire (placeholder, mentions) — interdit sur --dn-media */
+
+  /* ── Couleurs : vert (action, sélection) ───────────────────────── */
+  --dn-green: #2c4a23; /* CTA principal, sélection, focus — 9,4:1 */
+  --dn-green-hover: #213a1a;
+  --dn-green-active: #1a2f14;
+  --dn-green-50: #eef3ea; /* fond de l'option sélectionnée, puce active */
+  --dn-green-deep: #1d3017; /* footer : la seule section sombre */
+  --dn-on-dark: #fbf8f2; /* texte sur vert — 13,3:1 */
+  --dn-on-dark-2: #c9c6b8; /* texte secondaire sur vert — 8,2:1 */
+
+  /* ── Couleurs : or (décoratif UNIQUEMENT) ──────────────────────── */
+  --dn-gold: #b48a3c; /* filets, ornement — 2,98:1 : jamais du texte */
+  --dn-gold-light: #d6b46a; /* filets sur vert, focus sur vert — 7,1:1 */
+
+  /* ── Couleurs : lignes ─────────────────────────────────────────── */
+  --dn-line: #e2d9c9; /* séparateurs décoratifs */
+  --dn-line-strong: #8f8879; /* contour des composants interactifs — 3,3:1 */
+
+  /* ── Couleurs : états ──────────────────────────────────────────── */
+  --dn-success: #2f6a3f;
+  --dn-success-bg: #e9f1e7;
+  --dn-error: #a3392b;
+  --dn-error-bg: #f8eae6;
+  --dn-warning: #8a5a00;
+  --dn-warning-bg: #f7eeda;
+  --dn-disabled-bg: #e6e1d6;
+  --dn-disabled-ink: #5e5a50; /* reste lisible : 5,3:1 */
+  --dn-unavailable: #9c978c; /* option épuisée : toujours barrée en plus */
+  --dn-scrim: rgb(31 34 29 / 0.48);
+  --dn-hover-tint: rgb(31 34 29 / 0.06);
+  --dn-press-tint: rgb(31 34 29 / 0.1);
+  --dn-glass: rgb(251 248 242 / 0.92); /* --dn-bg à 92 % : badge, compteur, ajout rapide */
+
+  /* ── Typographie ───────────────────────────────────────────────── */
+  /* --dn-font-cormorant / --dn-font-jost sont injectées par l'API Fonts d'Astro
+     (avec des polices de repli aux métriques ajustées). */
+  --dn-font-serif: var(--dn-font-cormorant), 'Iowan Old Style', Georgia, serif;
+  --dn-font-sans: var(--dn-font-jost), 'Segoe UI', system-ui, -apple-system, Roboto, Arial, sans-serif;
+
+  --dn-fw-regular: 400;
+  --dn-fw-medium: 500;
+  --dn-fw-semibold: 600;
+
+  /* Échelle (mobile 390 px → desktop 1 280 px), §D.3 */
+  --dn-fs-display: clamp(2.125rem, 1.522rem + 2.472vw, 3.5rem); /* 34 → 56 */
+  --dn-fs-h1: clamp(1.875rem, 1.492rem + 1.573vw, 2.75rem); /* 30 → 44 */
+  --dn-fs-product-title: clamp(1.75rem, 1.531rem + 0.899vw, 2.25rem); /* 28 → 36 */
+  --dn-fs-h2: clamp(1.625rem, 1.351rem + 1.124vw, 2.25rem); /* 26 → 36 */
+  --dn-fs-h3: clamp(1.25rem, 1.14rem + 0.449vw, 1.5rem); /* 20 → 24 */
+  --dn-fs-card-title: 1.125rem; /* 18 (19 en desktop) */
+  --dn-fs-card-title-lg: 1.1875rem;
+  --dn-fs-body-lg: clamp(1rem, 0.945rem + 0.225vw, 1.125rem); /* 16 → 18 */
+  --dn-fs-body: 1rem; /* 16 */
+  --dn-fs-body-sm: 0.875rem; /* 14 (15 en desktop) */
+  --dn-fs-body-sm-lg: 0.9375rem;
+  --dn-fs-small: 0.8125rem; /* 13 : plancher du site */
+  --dn-fs-label: 0.75rem; /* 12, capitales */
+  --dn-fs-button: 0.9375rem; /* 15 */
+  --dn-fs-nav: 0.9375rem; /* 15 */
+  --dn-fs-price: 1rem; /* 16 */
+  --dn-fs-price-lg: clamp(1.375rem, 1.32rem + 0.225vw, 1.5rem); /* 22 → 24 */
+  --dn-fs-input: 1rem; /* 16 : évite le zoom iOS */
+  --dn-fs-menu-l1: 1.0625rem; /* 17 */
+  --dn-fs-badge-count: 0.6875rem; /* 11 : chiffre du compteur panier */
+
+  --dn-lh-display: 1.08;
+  --dn-lh-h1: 1.12;
+  --dn-lh-product-title: 1.15;
+  --dn-lh-heading: 1.18;
+  --dn-lh-h3: 1.25;
+  --dn-lh-body-lg: 1.65;
+  --dn-lh-body: 1.6;
+  --dn-lh-body-sm: 1.5;
+  --dn-lh-small: 1.45;
+  --dn-lh-label: 1.3;
+  --dn-lh-tight: 1;
+
+  --dn-tracking-display: -0.01em;
+  --dn-tracking-label: 0.08em;
+  --dn-tracking-button: 0.01em;
+  --dn-tracking-announcement: 0.02em;
+
+  /* ── Espacements (base 4), §F.3 ───────────────────────────────── */
+  --dn-space-1: 4px;
+  --dn-space-2: 8px;
+  --dn-space-3: 12px;
+  --dn-space-4: 16px;
+  --dn-space-5: 20px;
+  --dn-space-6: 24px;
+  --dn-space-8: 32px;
+  --dn-space-10: 40px;
+  --dn-space-12: 48px;
+  --dn-space-16: 64px;
+  --dn-space-20: 80px;
+  --dn-space-24: 96px;
+
+  /* Rythme vertical de section : 48 (mobile) → 64 (tablette) → 80 (desktop) */
+  --dn-section-y: var(--dn-space-12);
+  --dn-section-title-gap: var(--dn-space-5);
+
+  /* ── Grille et conteneurs, §E.2 ────────────────────────────────── */
+  --dn-container: 1280px;
+  --dn-container-wide: 1600px;
+  --dn-measure: 680px;
+  --dn-gutter-x: var(--dn-space-4); /* marge latérale : 16 → 32 → 40 */
+  --dn-grid-gap: var(--dn-space-3); /* gouttière : 12 → 16 → 24 */
+  --dn-grid-row-gap: 28px; /* interligne grille produits : 28 → 32 → 40 */
+  --dn-grid-columns: 4; /* 4 → 8 → 12 */
+
+  /* ── Rayons, §F.5 ─────────────────────────────────────────────── */
+  --dn-radius-xs: 2px;
+  --dn-radius-sm: 4px;
+  --dn-radius-md: 8px;
+  --dn-radius-lg: 12px;
+  --dn-radius-pill: 999px;
+
+  /* ── Bordures, §F.7 ───────────────────────────────────────────── */
+  --dn-border-width: 1px;
+  --dn-border-width-strong: 2px;
+  --dn-border-decor: var(--dn-border-width) solid var(--dn-line);
+  --dn-border-ui: var(--dn-border-width) solid var(--dn-line-strong);
+  --dn-border-selected: var(--dn-border-width-strong) solid var(--dn-green);
+  --dn-border-gold: var(--dn-border-width) solid var(--dn-gold);
+
+  /* ── Ombres : deux, pas une de plus, §F.6 ─────────────────────── */
+  --dn-shadow-raised: 0 1px 2px rgb(31 34 29 / 0.06), 0 2px 8px rgb(31 34 29 / 0.06);
+  --dn-shadow-overlay: 0 12px 40px rgb(31 34 29 / 0.16);
+
+  /* ── Focus ────────────────────────────────────────────────────── */
+  --dn-focus-ring: 2px solid var(--dn-green);
+  --dn-focus-ring-on-dark: 2px solid var(--dn-gold-light);
+  --dn-focus-offset: 2px;
+
+  /* ── Dimensions clés, §F.8 ────────────────────────────────────── */
+  --dn-announcement-h: 32px;
+  --dn-header-h: 60px; /* 76 en desktop */
+  --dn-logo-h: 48px; /* 60 en desktop */
+  --dn-logo-footer-h: 72px;
+  --dn-tap-min: 44px;
+  --dn-btn-h-sm: 40px;
+  --dn-btn-h-md: 48px;
+  --dn-btn-h-lg: 52px;
+  --dn-btn-pad-sm: var(--dn-space-5);
+  --dn-btn-pad-md: var(--dn-space-6);
+  --dn-btn-pad-lg: 28px;
+  --dn-input-h: 48px;
+  --dn-chip-h: 40px;
+  --dn-icon: 24px;
+  --dn-icon-sm: 20px;
+  --dn-icon-xs: 16px;
+  --dn-sticky-bar-h: 64px;
+  --dn-drawer-w: 420px;
+  --dn-sheet-w: 480px;
+  --dn-sheet-max-h: 90dvh;
+  --dn-menu-row-h: 56px;
+  --dn-menu-row-sub-h: 48px;
+  --dn-badge-h: 24px;
+  --dn-cart-count: 18px;
+  --dn-ornament-w: 40px;
+
+  --dn-ratio-product: 4 / 5;
+  --dn-ratio-hero-m: 1 / 1;
+  --dn-ratio-hero-d: 4 / 3;
+  --dn-ratio-tile: 1 / 1;
+  --dn-ratio-universe-d: 4 / 5;
+  --dn-ratio-editorial-m: 4 / 3;
+  --dn-ratio-editorial-d: 4 / 5;
+  --dn-ratio-pack: 4 / 3;
+
+  /* ── Z-index, §F.9 ────────────────────────────────────────────── */
+  --dn-z-base: 0;
+  --dn-z-raised: 10;
+  --dn-z-sticky-bar: 80;
+  --dn-z-header: 100;
+  --dn-z-megamenu: 110;
+  --dn-z-scrim: 200;
+  --dn-z-drawer: 210;
+  --dn-z-modal: 300;
+  --dn-z-toast: 400;
+  --dn-z-skip: 500;
+
+  /* ── Mouvement, §F.10 / §P ────────────────────────────────────── */
+  --dn-dur-fast: 120ms;
+  --dn-dur-base: 200ms;
+  --dn-dur-slow: 280ms;
+  --dn-ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --dn-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --dn-hover-delay: 150ms;
+  --dn-hover-close: 250ms;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --dn-section-y: var(--dn-space-16);
+    --dn-gutter-x: var(--dn-space-8);
+    --dn-grid-gap: var(--dn-space-4);
+    --dn-grid-row-gap: var(--dn-space-8);
+    --dn-grid-columns: 8;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --dn-section-y: var(--dn-space-20);
+    --dn-section-title-gap: var(--dn-space-8);
+    --dn-gutter-x: var(--dn-space-10);
+    --dn-grid-gap: var(--dn-space-6);
+    --dn-grid-row-gap: var(--dn-space-10);
+    --dn-grid-columns: 12;
+    --dn-header-h: 76px;
+    --dn-logo-h: 60px;
+    --dn-fs-card-title: var(--dn-fs-card-title-lg);
+    --dn-fs-body-sm: var(--dn-fs-body-sm-lg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dn-dur-fast: 0.01ms;
+    --dn-dur-base: 0.01ms;
+    --dn-dur-slow: 0.01ms;
+  }
+}

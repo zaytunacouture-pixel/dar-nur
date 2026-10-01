@@ -1,0 +1,102 @@
+---
+/**
+ * Guide des tailles (§M.4). N'affiche un tableau QUE si de vraies mesures existent.
+ * Aujourd'hui aucune mesure, matière ni stature n'est en base : le composant rend alors
+ * le repli « Besoin d'aide pour choisir votre taille ? », sans promettre de donnée.
+ */
+import Drawer from '@/components/ui/Drawer.astro';
+import Icon from '@/components/ui/Icon.astro';
+import { contact } from '@/config/commerce';
+import type { SizeGuide } from '@/types/catalog';
+
+interface Props {
+  id: string;
+  guide?: SizeGuide | null;
+}
+
+const { id, guide } = Astro.props;
+---
+
+{guide && guide.rows.length > 0 ? (
+  <>
+    <button
+      type="button"
+      class="dn-sizeguide__link"
+      data-dn-open={id}
+      aria-haspopup="dialog"
+      aria-expanded="false"
+      aria-controls={id}
+    >
+      <Icon name="ruler" size={16} />
+      Guide des tailles
+    </button>
+    <Drawer id={id} title={guide.title} side="right">
+      <div class="dn-sizeguide__body">
+        <table class="dn-sizeguide__table">
+          <thead>
+            <tr>
+              {guide.columns.map((c) => (
+                <th scope="col">{c}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {guide.rows.map((row) => (
+              <tr>{row.map((cell, i) => (i === 0 ? <th scope="row">{cell}</th> : <td>{cell}</td>))}</tr>
+            ))}
+          </tbody>
+        </table>
+        {guide.howToMeasure && (
+          <ol class="dn-sizeguide__steps">
+            {guide.howToMeasure.map((step) => (
+              <li>{step}</li>
+            ))}
+          </ol>
+        )}
+        <a href={contact.whatsappUrl}>Besoin d’un conseil ? Écrivez-nous sur WhatsApp</a>
+      </div>
+    </Drawer>
+  </>
+) : (
+  <a class="dn-sizeguide__help" href={contact.whatsappUrl} rel="noopener">
+    <Icon name="whatsapp" size={16} />
+    Besoin d’aide pour choisir votre taille ?
+  </a>
+)}
+
+<style>
+  .dn-sizeguide__link,
+  .dn-sizeguide__help {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--dn-space-2);
+    min-block-size: var(--dn-tap-min);
+    padding: 0;
+    border: 0;
+    background: none;
+    font-size: var(--dn-fs-body-sm);
+    font-weight: var(--dn-fw-medium);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+  .dn-sizeguide__body {
+    display: grid;
+    gap: var(--dn-space-6);
+    padding: var(--dn-space-4);
+  }
+  .dn-sizeguide__table {
+    inline-size: 100%;
+    border-collapse: collapse;
+    font-size: var(--dn-fs-body-sm);
+    font-variant-numeric: tabular-nums;
+  }
+  .dn-sizeguide__table th,
+  .dn-sizeguide__table td {
+    padding: var(--dn-space-3) var(--dn-space-2);
+    border-bottom: var(--dn-border-decor);
+    text-align: start;
+  }
+  .dn-sizeguide__steps {
+    padding-inline-start: var(--dn-space-6);
+  }
+</style>

@@ -1,0 +1,61 @@
+---
+/**
+ * Logo officiel Dar Nūr — fichier source inchangé (seules les marges transparentes ont été
+ * rognées, pixels identiques vérifiés). Jamais recoloré, redessiné ni posé sur photo.
+ * Sur fond vert : `onDark` le pose sur un cartouche crème (le mot vert resterait illisible, 1,3:1).
+ */
+import { Picture } from 'astro:assets';
+import logo from '@/assets/brand/logo-dar-nur.png';
+
+interface Props {
+  onDark?: boolean;
+  /** Hauteur d'affichage : header (48 → 60 px) ou footer (72 px). */
+  context?: 'header' | 'footer';
+}
+
+const { onDark = false, context = 'header' } = Astro.props;
+const ratio = logo.width / logo.height; // 416 / 343
+const heights = context === 'header' ? [48, 60] : [72];
+const widths = [...new Set(heights.flatMap((h) => [1, 2, 3].map((d) => Math.round(h * ratio * d))))]
+  .filter((w) => w <= logo.width)
+  .sort((a, b) => a - b);
+const sizes =
+  context === 'header'
+    ? `(min-width: 1024px) ${Math.round(60 * ratio)}px, ${Math.round(48 * ratio)}px`
+    : `${Math.round(72 * ratio)}px`;
+---
+
+<span class:list={['dn-logo', `dn-logo--${context}`, { 'dn-logo--cartouche': onDark }]}>
+  <Picture
+    src={logo}
+    alt="Dar Nūr"
+    widths={widths}
+    sizes={sizes}
+    formats={['avif']}
+    fallbackFormat="webp"
+    loading={context === 'header' ? 'eager' : 'lazy'}
+    class="dn-logo__img"
+  />
+</span>
+
+<style>
+  .dn-logo {
+    display: inline-block;
+    line-height: 0;
+  }
+  .dn-logo :global(.dn-logo__img) {
+    inline-size: auto;
+  }
+  .dn-logo--header :global(.dn-logo__img) {
+    block-size: var(--dn-logo-h);
+  }
+  .dn-logo--footer :global(.dn-logo__img) {
+    block-size: var(--dn-logo-footer-h);
+  }
+  /* Cartouche crème : marge = zone de protection (≈ hauteur du mot dans le logo). */
+  .dn-logo--cartouche {
+    padding: var(--dn-space-4);
+    border-radius: var(--dn-radius-lg);
+    background: var(--dn-bg);
+  }
+</style>

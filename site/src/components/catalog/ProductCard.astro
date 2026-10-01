@@ -1,0 +1,208 @@
+---
+/**
+ * Carte produit (§K.4) : 5 informations maximum — photo 4:5, [marque], nom (2 lignes),
+ * une ligne utile, prix — et 1 badge maximum. Pas d'étoiles, pas de favoris.
+ * Statique : seul l'ajout rapide et la 2ᵉ image (survol desktop) ont un petit script.
+ */
+import Badge from '@/components/ui/Badge.astro';
+import CatalogPicture from '@/components/ui/CatalogPicture.astro';
+import Icon from '@/components/ui/Icon.astro';
+import MediaPlaceholder from '@/components/ui/MediaPlaceholder.astro';
+import Price from '@/components/ui/Price.astro';
+import type { ProductSummary } from '@/types/catalog';
+
+interface Props {
+  product: ProductSummary;
+  headingLevel?: 'h2' | 'h3';
+  /** Première rangée d'une grille : image prioritaire (LCP probable). */
+  priority?: boolean;
+}
+
+const { product, headingLevel: Heading = 'h3', priority = false } = Astro.props;
+const quickAdd =
+  product.variantCount <= 1 && product.price.kind !== 'on-request' && product.availability === 'available';
+
+const sizes = '(min-width: 1024px) 302px, (min-width: 768px) 30vw, 46vw';
+const frame = { width: 600, height: 750, widths: [200, 400, 600], sizes };
+---
+
+<article class:list={['dn-card', { 'dn-card--unavailable': product.availability !== 'available' }]}>
+  <div class="dn-card__media" data-dn-card-media>
+    {product.image ? (
+      <CatalogPicture image={product.image} {...frame} priority={priority} class="dn-card__img" />
+    ) : (
+      <MediaPlaceholder caption="Photo à venir" />
+    )}
+    {product.hoverImage && (
+      <template data-dn-card-hover>
+        <CatalogPicture image={product.hoverImage} {...frame} class="dn-card__img dn-card__img--hover" />
+      </template>
+    )}
+    {product.badge && (
+      <span class="dn-card__badge">
+        <Badge kind={product.badge} />
+      </span>
+    )}
+    {quickAdd && (
+      <button
+        type="button"
+        class="dn-card__quick"
+        aria-label={`Ajouter ${product.name} au panier`}
+        data-dn-quick-add
+      >
+        <Icon name="plus" size={20} />
+      </button>
+    )}
+  </div>
+  <div class="dn-card__body">
+    {product.brand && <p class="dn-card__brand dn-label dn-muted">{product.brand.name}</p>}
+    <Heading class="dn-card__title">
+      <a class="dn-card__link" href={product.href}>
+        {product.name}
+      </a>
+    </Heading>
+    {product.metaLine && <p class="dn-card__meta dn-body-sm dn-muted">{product.metaLine}</p>}
+    <Price price={product.price} />
+  </div>
+</article>
+
+<style>
+  .dn-card {
+    position: relative;
+    display: grid;
+    align-content: start;
+    gap: var(--dn-space-3);
+  }
+  .dn-card__media {
+    position: relative;
+    aspect-ratio: var(--dn-ratio-product);
+    overflow: hidden;
+    border-radius: var(--dn-radius-sm);
+    background: var(--dn-media);
+  }
+  .dn-card__media :global(.dn-card__img) {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+  }
+  .dn-card__media :global(.dn-card__img--hover) {
+    opacity: 0;
+    transition: opacity var(--dn-dur-base) var(--dn-ease-in-out);
+  }
+  .dn-card:hover .dn-card__media :global(.dn-card__img--hover) {
+    opacity: 1;
+  }
+  .dn-card__badge {
+    position: absolute;
+    inset-block-start: var(--dn-space-2);
+    inset-inline-start: var(--dn-space-2);
+    z-index: var(--dn-z-raised);
+  }
+  .dn-card__quick {
+    position: absolute;
+    inset-block-end: var(--dn-space-2);
+    inset-inline-end: var(--dn-space-2);
+    z-index: var(--dn-z-raised);
+    display: grid;
+    place-items: center;
+    inline-size: var(--dn-btn-h-sm);
+    block-size: var(--dn-btn-h-sm);
+    /* Zone tactile portée à 44 px par la marge invisible. */
+    outline-offset: var(--dn-focus-offset);
+    border: 0;
+    border-radius: var(--dn-radius-pill);
+    background: var(--dn-glass);
+    box-shadow: var(--dn-shadow-raised);
+    color: var(--dn-ink);
+  }
+  .dn-card__quick::before {
+    content: '';
+    position: absolute;
+    inset: calc((var(--dn-btn-h-sm) - var(--dn-tap-min)) / 2);
+  }
+  .dn-card__quick:hover {
+    background: var(--dn-bg);
+  }
+  @media (hover: hover) and (min-width: 1024px) {
+    .dn-card__quick {
+      opacity: 0;
+      transition: opacity var(--dn-dur-fast) var(--dn-ease-in-out);
+    }
+    .dn-card:hover .dn-card__quick,
+    .dn-card:focus-within .dn-card__quick {
+      opacity: 1;
+    }
+  }
+  .dn-card__body {
+    display: grid;
+    gap: var(--dn-space-1);
+  }
+  .dn-card__title {
+    font-size: var(--dn-fs-card-title);
+    line-height: var(--dn-lh-h3);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .dn-card__link {
+    text-decoration: none;
+  }
+  /* Lien étiré : toute la carte est cliquable, un seul arrêt de tabulation. */
+  .dn-card__link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+  .dn-card__link:focus-visible {
+    outline: none;
+  }
+  .dn-card:has(.dn-card__link:focus-visible) .dn-card__media {
+    outline: var(--dn-focus-ring);
+    outline-offset: var(--dn-focus-offset);
+  }
+  .dn-card:hover .dn-card__link {
+    text-decoration: underline;
+  }
+  .dn-card__meta {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .dn-card--unavailable :global(.dn-price) {
+    color: var(--dn-ink-2);
+  }
+</style>
+
+<script>
+  // 2ᵉ image : insérée seulement sur desktop à pointeur fin, à la première intention de survol.
+  if (window.matchMedia('(hover: hover) and (pointer: fine) and (min-width: 1024px)').matches) {
+    for (const media of document.querySelectorAll<HTMLElement>('[data-dn-card-media]')) {
+      const template = media.querySelector<HTMLTemplateElement>('template[data-dn-card-hover]');
+      if (!template) continue;
+      media
+        .closest('.dn-card')
+        ?.addEventListener(
+          'pointerenter',
+          () => media.insertBefore(template.content.cloneNode(true), template),
+          { once: true },
+        );
+    }
+  }
+
+  // Ajout rapide : le panier (js/cart.js) n'est pas encore migré → confirmation visuelle seulement.
+  for (const button of document.querySelectorAll<HTMLButtonElement>('[data-dn-quick-add]')) {
+    button.addEventListener('click', () => {
+      const label = button.getAttribute('aria-label') ?? '';
+      button.setAttribute('aria-label', 'Démonstration : le panier sera branché lors de sa migration');
+      button.dataset.done = 'true';
+      window.setTimeout(() => {
+        button.setAttribute('aria-label', label);
+        delete button.dataset.done;
+      }, 2500);
+    });
+  }
+</script>

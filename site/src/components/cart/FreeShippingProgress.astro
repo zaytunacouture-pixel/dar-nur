@@ -1,0 +1,74 @@
+---
+/**
+ * Progression vers la livraison offerte (§N.3). Seuil et zone lus dans la politique
+ * passée en prop — jamais écrits ici. N'affiche RIEN si la politique n'est pas active
+ * ou n'a pas de seuil (cas actuel : Île-de-France, aucune livraison offerte).
+ * `demo` permet d'illustrer une politique prévue, avec une étiquette explicite.
+ */
+import { formatPrice } from '@/lib/format';
+import type { ShippingPolicy } from '@/types/site';
+
+interface Props {
+  policy: ShippingPolicy;
+  subtotal: number;
+  demo?: boolean;
+}
+
+const { policy, subtotal, demo = false } = Astro.props;
+const threshold = policy.freeShippingThreshold;
+const visible = threshold !== null && (policy.status === 'active' || demo);
+const remaining = threshold !== null ? Math.max(0, threshold - subtotal) : 0;
+const ratio = threshold ? Math.min(1, subtotal / threshold) : 0;
+---
+
+{visible && (
+  <div class="dn-progress">
+    {demo && policy.status !== 'active' && (
+      <p class="dn-progress__demo dn-label">Démonstration — politique prévue, non active</p>
+    )}
+    <div
+      class="dn-progress__bar"
+      role="progressbar"
+      aria-label="Progression vers la livraison offerte"
+      aria-valuemin={0}
+      aria-valuemax={threshold}
+      aria-valuenow={Math.min(subtotal, threshold ?? 0)}
+    >
+      <span class="dn-progress__fill" style={`--dn-progress: ${ratio}`} />
+    </div>
+    <p class="dn-progress__text dn-body-sm">
+      {remaining > 0 ? (
+        <>Plus que {formatPrice(remaining)} pour la livraison offerte.</>
+      ) : (
+        <span class="dn-progress__done">Livraison offerte.</span>
+      )}
+    </p>
+  </div>
+)}
+
+<style>
+  .dn-progress {
+    display: grid;
+    gap: var(--dn-space-2);
+  }
+  .dn-progress__demo {
+    color: var(--dn-warning);
+  }
+  .dn-progress__bar {
+    block-size: 4px;
+    border-radius: var(--dn-radius-pill);
+    background: var(--dn-line);
+    overflow: hidden;
+  }
+  .dn-progress__fill {
+    display: block;
+    block-size: 100%;
+    inline-size: calc(var(--dn-progress) * 100%);
+    background: var(--dn-green);
+    transition: inline-size var(--dn-dur-base) var(--dn-ease-out);
+  }
+  .dn-progress__done {
+    color: var(--dn-success);
+    font-weight: var(--dn-fw-medium);
+  }
+</style>

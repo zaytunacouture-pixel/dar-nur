@@ -1,0 +1,107 @@
+---
+/** Case à cocher ou bouton radio (§G.1) : ligne entière cliquable, ≥ 44 px. */
+interface Props {
+  type: 'checkbox' | 'radio';
+  id: string;
+  name: string;
+  label: string;
+  value?: string;
+  checked?: boolean;
+  disabled?: boolean;
+  /** Compteur facultatif (facettes de filtre) : « (12) ». */
+  count?: number;
+}
+
+const { type, id, name, label, value = 'on', checked = false, disabled = false, count } = Astro.props;
+---
+
+<label class:list={['dn-choice', `dn-choice--${type}`]} for={id}>
+  <input class="dn-choice__input" {type} {id} {name} {value} {checked} {disabled} />
+  <span class="dn-choice__box" aria-hidden="true"></span>
+  <span class="dn-choice__label">
+    {label}
+    {typeof count === 'number' && <span class="dn-choice__count">({count})</span>}
+  </span>
+</label>
+
+<style>
+  .dn-choice {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--dn-space-3);
+    min-block-size: var(--dn-tap-min);
+    cursor: pointer;
+  }
+  .dn-choice__input {
+    position: absolute;
+    opacity: 0;
+    inline-size: 20px;
+    block-size: 20px;
+    margin: 0;
+  }
+  .dn-choice__box {
+    flex: none;
+    display: grid;
+    place-items: center;
+    inline-size: 20px;
+    block-size: 20px;
+    border: var(--dn-border-ui);
+    background: var(--dn-surface);
+    transition:
+      background-color var(--dn-dur-fast) var(--dn-ease-in-out),
+      border-color var(--dn-dur-fast) var(--dn-ease-in-out);
+  }
+  .dn-choice--checkbox .dn-choice__box {
+    border-radius: var(--dn-radius-xs);
+  }
+  .dn-choice--radio .dn-choice__box {
+    border-radius: var(--dn-radius-pill);
+  }
+  .dn-choice:hover .dn-choice__box {
+    border-color: var(--dn-ink);
+  }
+  .dn-choice__input:focus-visible + .dn-choice__box {
+    outline: var(--dn-focus-ring);
+    outline-offset: var(--dn-focus-offset);
+  }
+  /* Case cochée : fond vert + coche crème (dessinée en CSS, aucune icône chargée) */
+  .dn-choice--checkbox .dn-choice__input:checked + .dn-choice__box {
+    background: var(--dn-green);
+    border-color: var(--dn-green);
+  }
+  .dn-choice--checkbox .dn-choice__input:checked + .dn-choice__box::after {
+    content: '';
+    inline-size: 6px;
+    block-size: 11px;
+    margin-block-start: -2px;
+    border: solid var(--dn-on-dark);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+  /* Radio sélectionné : contour vert 2 px + point central 10 px */
+  .dn-choice--radio .dn-choice__input:checked + .dn-choice__box {
+    border: var(--dn-border-selected);
+  }
+  .dn-choice--radio .dn-choice__input:checked + .dn-choice__box::after {
+    content: '';
+    inline-size: 10px;
+    block-size: 10px;
+    border-radius: var(--dn-radius-pill);
+    background: var(--dn-green);
+  }
+  .dn-choice__input:disabled ~ * {
+    color: var(--dn-disabled-ink);
+  }
+  .dn-choice:has(.dn-choice__input:disabled) {
+    cursor: not-allowed;
+  }
+  .dn-choice__input:disabled + .dn-choice__box {
+    background: var(--dn-disabled-bg);
+    border-color: var(--dn-unavailable);
+  }
+  .dn-choice__count {
+    margin-inline-start: var(--dn-space-1);
+    color: var(--dn-ink-2);
+  }
+</style>

@@ -1,0 +1,41 @@
+---
+/**
+ * Emplacement d'image explicite : décrit la photo attendue au lieu d'afficher une fausse
+ * photo (règle de l'étape 4 : aucune image générée ne remplace un vrai produit).
+ */
+interface Props {
+  /** Description de la photographie attendue. */
+  caption: string;
+  ratio?: string;
+  class?: string;
+}
+
+const { caption, ratio = 'var(--dn-ratio-product)', class: className } = Astro.props;
+---
+
+<div
+  class:list={['dn-placeholder', className]}
+  style={`--dn-ph-ratio: ${ratio}`}
+  role="img"
+  aria-label={caption}
+>
+  <span class="dn-placeholder__caption dn-label">{caption}</span>
+</div>
+
+<style>
+  .dn-placeholder {
+    display: grid;
+    place-items: center;
+    aspect-ratio: var(--dn-ph-ratio);
+    inline-size: 100%;
+    padding: var(--dn-space-4);
+    border-radius: var(--dn-radius-sm);
+    background:
+      repeating-linear-gradient(135deg, transparent 0 14px, var(--dn-hover-tint) 14px 15px), var(--dn-media);
+    color: var(--dn-ink-2);
+    text-align: center;
+  }
+  .dn-placeholder__caption {
+    max-inline-size: 28ch;
+  }
+</style>

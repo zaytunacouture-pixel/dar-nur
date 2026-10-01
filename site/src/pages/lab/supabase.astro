@@ -1,0 +1,162 @@
+---
+/**
+ * Preuve de la chaîne Astro build → Supabase (lecture seule) → HTML statique.
+ * Page interne (noindex). Aucune donnée n'est modifiée ; colonnes listées explicitement.
+ */
+import ProductCard from '@/components/catalog/ProductCard.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { priceLabel } from '@/lib/format';
+import { getCatalogSample } from '@/lib/sample';
+import { PRODUCT_COLUMNS } from '@/lib/supabase';
+
+const sample = await getCatalogSample();
+const fetched = new Date(sample.fetchedAt).toLocaleString('fr-FR', { timeZone: 'Europe/Paris' });
+---
+
+<BaseLayout
+  seo={{
+    title: 'Lecture Supabase',
+    description: 'Page interne : preuve de lecture Supabase au build.',
+    noindex: true,
+  }}
+>
+  <div class="dn-container lab">
+    <h1>Lecture Supabase</h1>
+    {sample.configured ? (
+      <p class="dn-body-lg">
+        Connecté en lecture seule. Données lues au build le <strong>{fetched}</strong> (heure de Paris) :{' '}
+        <strong>{sample.activeProductCount ?? '?'}</strong> produits publiés, {sample.categories.length}{' '}
+        catégories, {sample.brands.length} marques.
+      </p>
+    ) : (
+      <p class="dn-body-lg lab-warning">
+        Supabase non configuré : définir SUPABASE_URL et SUPABASE_ANON_KEY (voir .env.example). Le build reste
+        valide.
+      </p>
+    )}
+
+    <section class="lab-section">
+      <h2 class="dn-h3">
+        Colonnes lues sur <code>products</code>
+      </h2>
+      <p class="dn-small dn-muted">
+        <code>{PRODUCT_COLUMNS}</code>
+      </p>
+    </section>
+
+    <section class="lab-section">
+      <h2 class="dn-h3">Catégories ({sample.categories.length})</h2>
+      <div class="lab-scroll" role="region" aria-label="Catégories" tabindex="0">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">id</th>
+              <th scope="col">label</th>
+              <th scope="col">ordre</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sample.categories.map((c) => (
+              <tr>
+                <td>
+                  <code>{c.id}</code>
+                </td>
+                <td>{c.label}</td>
+                <td>{c.sort_order}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="lab-section">
+      <h2 class="dn-h3">Marques ({sample.brands.length})</h2>
+      <p>{sample.brands.map((b) => b.name).join(' · ')}</p>
+    </section>
+
+    <section class="lab-section">
+      <h2 class="dn-h3">Échantillon de produits ({sample.rows.length})</h2>
+      <div class="lab-scroll" role="region" aria-label="Échantillon de produits" tabindex="0">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">slug</th>
+              <th scope="col">catégorie</th>
+              <th scope="col">prix affiché</th>
+              <th scope="col">variantes</th>
+              <th scope="col">images</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sample.rows.map((row, i) => (
+              <tr>
+                <td>
+                  <code>{row.slug}</code>
+                </td>
+                <td>{row.category_id}</td>
+                <td>{priceLabel(sample.products[i]!.price)}</td>
+                <td>{row.product_variants.length}</td>
+                <td>{row.images?.length ?? 0}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <ul class="lab-cards" role="list">
+        {sample.products.map((p) => (
+          <li>
+            <ProductCard product={p} />
+          </li>
+        ))}
+      </ul>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .lab {
+    display: grid;
+    gap: var(--dn-space-8);
+    padding-block: var(--dn-section-y);
+  }
+  .lab-warning {
+    padding: var(--dn-space-4);
+    border-radius: var(--dn-radius-sm);
+    background: var(--dn-warning-bg);
+    color: var(--dn-warning);
+  }
+  .lab-section {
+    display: grid;
+    gap: var(--dn-space-3);
+  }
+  .lab-scroll {
+    overflow-x: auto;
+  }
+  table {
+    inline-size: 100%;
+    border-collapse: collapse;
+    font-size: var(--dn-fs-body-sm);
+  }
+  th,
+  td {
+    padding: var(--dn-space-2);
+    border-bottom: var(--dn-border-decor);
+    text-align: start;
+    white-space: nowrap;
+  }
+  code {
+    font-size: var(--dn-fs-small);
+    overflow-wrap: anywhere;
+  }
+  .lab-cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--dn-grid-row-gap) var(--dn-grid-gap);
+  }
+  @media (min-width: 1024px) {
+    .lab-cards {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+</style>

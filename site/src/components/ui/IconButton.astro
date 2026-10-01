@@ -1,0 +1,63 @@
+---
+/** Bouton icône 44 × 44 (§G.1). Le libellé français est OBLIGATOIRE (aria-label). */
+import type { HTMLAttributes } from 'astro/types';
+import Icon from './Icon.astro';
+import type { IconName } from './icons';
+
+type Props = {
+  icon: IconName;
+  label: string;
+  href?: string;
+  onDark?: boolean;
+  class?: string;
+} & Omit<HTMLAttributes<'button'>, 'class'>;
+
+const { icon, label, href, onDark = false, class: className, ...rest } = Astro.props;
+const classes = ['dn-icon-btn', { 'dn-icon-btn--on-dark': onDark }, className];
+---
+
+{href ? (
+  <a href={href} class:list={classes} aria-label={label}>
+    <Icon name={icon} />
+    <slot />
+  </a>
+) : (
+  <button type="button" class:list={classes} aria-label={label} {...rest}>
+    <Icon name={icon} />
+    <slot />
+  </button>
+)}
+
+<style>
+  .dn-icon-btn {
+    position: relative;
+    display: inline-grid;
+    place-items: center;
+    inline-size: var(--dn-tap-min);
+    block-size: var(--dn-tap-min);
+    padding: 0;
+    border: 0;
+    border-radius: var(--dn-radius-pill);
+    background: transparent;
+    color: var(--dn-ink);
+    text-decoration: none;
+    transition: background-color var(--dn-dur-fast) var(--dn-ease-in-out);
+  }
+  .dn-icon-btn:hover {
+    background: var(--dn-hover-tint);
+  }
+  .dn-icon-btn:active {
+    background: var(--dn-press-tint);
+  }
+  .dn-icon-btn:disabled {
+    color: var(--dn-unavailable);
+    cursor: not-allowed;
+    background: transparent;
+  }
+  .dn-icon-btn--on-dark {
+    color: var(--dn-on-dark);
+  }
+  .dn-icon-btn--on-dark:focus-visible {
+    outline: var(--dn-focus-ring-on-dark);
+  }
+</style>

@@ -1,0 +1,55 @@
+---
+/**
+ * Accordéon natif <details>/<summary> : zéro JavaScript, état annoncé par le navigateur.
+ * Un accordéon sans contenu ne doit pas être rendu (responsabilité de l'appelant).
+ */
+import Icon from './Icon.astro';
+
+interface Props {
+  title: string;
+  open?: boolean;
+  /** Regroupe des accordéons exclusifs (un seul ouvert à la fois), attribut natif `name`. */
+  group?: string;
+}
+
+const { title, open = false, group } = Astro.props;
+---
+
+<details class="dn-accordion" open={open} name={group}>
+  <summary class="dn-accordion__summary">
+    <span>{title}</span>
+    <Icon name="chevron-down" size={20} class="dn-accordion__chevron" />
+  </summary>
+  <div class="dn-accordion__content">
+    <slot />
+  </div>
+</details>
+
+<style>
+  .dn-accordion {
+    border-bottom: var(--dn-border-decor);
+  }
+  .dn-accordion__summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--dn-space-4);
+    min-block-size: var(--dn-menu-row-h);
+    font-weight: var(--dn-fw-medium);
+    list-style: none;
+    cursor: pointer;
+  }
+  .dn-accordion__summary::-webkit-details-marker {
+    display: none;
+  }
+  .dn-accordion :global(.dn-accordion__chevron) {
+    transition: transform var(--dn-dur-base) var(--dn-ease-out);
+  }
+  .dn-accordion[open] :global(.dn-accordion__chevron) {
+    transform: rotate(180deg);
+  }
+  .dn-accordion__content {
+    padding-bottom: var(--dn-space-6);
+    color: var(--dn-ink);
+  }
+</style>

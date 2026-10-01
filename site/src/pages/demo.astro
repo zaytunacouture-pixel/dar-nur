@@ -1,0 +1,128 @@
+---
+/**
+ * Page de DÉMONSTRATION technique et visuelle (étape 5). Ce n'est PAS la future page
+ * d'accueil : elle sert à juger le header, le hero (emplacement photo), les cartes
+ * d'univers, les cartes produit (échantillon réel Supabase) et le footer.
+ */
+import EntryCard from '@/components/catalog/EntryCard.astro';
+import ProductRow from '@/components/catalog/ProductRow.astro';
+import UniverseCard from '@/components/catalog/UniverseCard.astro';
+import Hero from '@/components/home/Hero.astro';
+import Ornament from '@/components/ui/Ornament.astro';
+import { universes } from '@/config/navigation';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getCatalogSample, onePerCategory } from '@/lib/sample';
+import mode from '@/assets/demo/ensemble-aicha-noir.webp';
+import parfum from '@/assets/demo/parfum-lecode-galaxie.jpg';
+
+const sample = await getCatalogSample();
+const showcase = onePerCategory(sample);
+
+const universeContent: Record<string, { description: string; image?: { src: ImageMetadata; alt: string } }> =
+  {
+    'miels-herboristerie': { description: 'Miels, miels gourmands, poudres & graines, gélules' },
+    'parfums-soins': {
+      description: 'Parfums, muscs & tahara, soins, brumes, huiles',
+      image: { src: parfum, alt: '' },
+    },
+    mode: { description: 'Abayas & ensembles, qamis, sandales, accessoires', image: { src: mode, alt: '' } },
+  };
+---
+
+<BaseLayout
+  seo={{
+    title: 'Démonstration du socle',
+    description: 'Page de démonstration technique du nouveau socle Dar Nūr — pas la future page d’accueil.',
+  }}
+  cartDemo
+>
+  <p class="dn-demo-note dn-small">
+    Page de démonstration technique — pas la future page d’accueil. Photos d’univers et du hero : à produire.
+    Panier : fictif.
+  </p>
+
+  <Hero
+    title="L’authenticité a une maison."
+    subtitle="Miels, parfums, soins et mode modeste, choisis par Dar Nūr."
+    cta={{ label: 'Découvrir les miels', href: '/miels/' }}
+    secondary={{ label: 'Voir les trois univers', href: '#univers' }}
+  />
+
+  <section class="dn-section" id="univers" aria-labelledby="univers-title">
+    <div class="dn-container">
+      <Ornament />
+      <h2 id="univers-title" class="dn-section-head">
+        Nos univers
+      </h2>
+      <div class="dn-universes">
+        {universes.map((u) => {
+          const content = universeContent[u.id];
+          return (
+            <UniverseCard
+              title={u.label}
+              description={content?.description ?? ''}
+              href={u.href}
+              {...(content?.image ? { image: content.image } : {})}
+              placeholder="Photo d’univers à produire — pot de miel et poudre en coupelle"
+            />
+          );
+        })}
+      </div>
+      <div class="dn-entries">
+        <EntryCard
+          title="Idées cadeaux"
+          text="Pour elle, pour lui, par budget"
+          href="/idees-cadeaux/"
+          icon="gift"
+        />
+        <EntryCard
+          title="Offres & packs"
+          text="Composition et économie réelles"
+          href="/offres/"
+          icon="package"
+        />
+      </div>
+    </div>
+  </section>
+
+  <section class="dn-section dn-section--alt" aria-labelledby="echantillon-title">
+    <div class="dn-container">
+      <div class="dn-section-head">
+        <div>
+          <Ornament />
+          <h2 id="echantillon-title">Échantillon du catalogue</h2>
+        </div>
+        <p class="dn-small dn-muted dn-measure">
+          {sample.configured
+            ? `${showcase.length} produits réels lus dans Supabase au build — un par catégorie, dans l’ordre défini en admin. Ce n’est pas une sélection éditoriale.`
+            : 'Supabase non configuré : aucun produit lu (voir .env.example).'}
+        </p>
+      </div>
+      {showcase.length > 0 && <ProductRow products={showcase} label="Échantillon du catalogue" />}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .dn-demo-note {
+    padding: var(--dn-space-2) var(--dn-gutter-x);
+    background: var(--dn-warning-bg);
+    color: var(--dn-warning);
+    text-align: center;
+  }
+  .dn-universes {
+    display: grid;
+  }
+  .dn-entries {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--dn-grid-gap);
+    margin-top: var(--dn-space-6);
+  }
+  @media (min-width: 768px) {
+    .dn-universes {
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--dn-grid-gap);
+    }
+  }
+</style>

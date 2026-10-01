@@ -1,0 +1,306 @@
+---
+/**
+ * Menu mobile à 2 niveaux (§H.5). Tiroir plein écran depuis la gauche (<dialog>).
+ * Niveau 2 : panneau qui glisse par-dessus le niveau 1 ; le titre de l'univers sert de
+ * bouton retour. Pas de 3ᵉ niveau : « Femme » / « Homme » sont des sous-titres non cliquables.
+ */
+import Drawer from '@/components/ui/Drawer.astro';
+import Icon from '@/components/ui/Icon.astro';
+import { cgvUrl, contact } from '@/config/commerce';
+import { navigation } from '@/config/navigation';
+---
+
+<Drawer id="dn-mobile-menu" title="Menu" side="left" class="dn-mobile-menu">
+  <header slot="header" class="dn-mm__header">
+    <button type="button" class="dn-mm__back" data-dn-mm-back hidden>
+      <Icon name="chevron-left" />
+      <span data-dn-mm-back-label>Menu</span>
+    </button>
+    <h2 id="dn-mobile-menu-title" class="dn-mm__title" data-dn-mm-title>
+      Menu
+    </h2>
+    <button type="button" class="dn-mm__close" data-dn-close aria-label="Fermer le menu">
+      <Icon name="x" />
+    </button>
+  </header>
+
+  <div class="dn-mm__viewport">
+    <!-- Niveau 1 -->
+    <div class="dn-mm__level dn-mm__level--1" data-dn-mm-level="root">
+      <div class="dn-mm__search">
+        <button type="button" class="dn-mm__search-field" data-dn-mm-search>
+          <Icon name="search" size={20} />
+          Rechercher un produit
+        </button>
+      </div>
+      <nav aria-label="Navigation principale">
+        <ul class="dn-mm__list" role="list">
+          {navigation.map((item) => (
+            <li>
+              {item.kind === 'universe' ? (
+                <button
+                  type="button"
+                  class="dn-mm__row"
+                  data-dn-mm-open={item.id}
+                  aria-controls={`dn-mm-${item.id}`}
+                  aria-expanded="false"
+                  aria-label={`${item.label}, ouvrir le sous-menu`}
+                >
+                  <span>{item.label}</span>
+                  <Icon name="chevron-right" size={20} />
+                </button>
+              ) : (
+                <a class="dn-mm__row" href={item.href}>
+                  {item.label}
+                </a>
+              )}
+            </li>
+          ))}
+        </ul>
+      </nav>
+      <ul class="dn-mm__list dn-mm__list--secondary" role="list">
+        <li>
+          <a class="dn-mm__row dn-mm__row--sub" href={cgvUrl}>
+            Livraison & paiement
+          </a>
+        </li>
+        <li>
+          <a class="dn-mm__row dn-mm__row--sub" href={contact.whatsappUrl} rel="noopener">
+            <span class="dn-mm__inline-icon">
+              <Icon name="whatsapp" size={20} /> Conseil sur WhatsApp
+            </span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Niveau 2 : un panneau par univers -->
+    {navigation.map(
+      (item) =>
+        item.kind === 'universe' && (
+          <div
+            class="dn-mm__level dn-mm__level--2"
+            id={`dn-mm-${item.id}`}
+            data-dn-mm-level={item.id}
+            data-label={item.label}
+            hidden
+          >
+            <a class="dn-mm__row dn-mm__row--all" href={item.href}>
+              Tout voir {item.label}
+              <Icon name="arrow-right" size={20} />
+            </a>
+            {item.groups.map((group) => (
+              <div class="dn-mm__group">
+                {group.title && <p class="dn-label dn-muted dn-mm__group-title">{group.title}</p>}
+                <ul class="dn-mm__list" role="list">
+                  {group.links.map((link) => (
+                    <li>
+                      <a class="dn-mm__row dn-mm__row--link" href={link.href}>
+                        {link.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        ),
+    )}
+  </div>
+</Drawer>
+
+<style>
+  .dn-mm__header {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    min-block-size: var(--dn-header-h);
+    padding-inline: var(--dn-space-2);
+    border-bottom: var(--dn-border-decor);
+  }
+  .dn-mm__title {
+    grid-column: 2;
+    font-family: var(--dn-font-sans);
+    font-size: var(--dn-fs-body);
+    font-weight: var(--dn-fw-medium);
+  }
+  .dn-mm__back {
+    grid-column: 1;
+    justify-self: start;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--dn-space-1);
+    min-block-size: var(--dn-tap-min);
+    padding: 0 var(--dn-space-2) 0 0;
+    border: 0;
+    background: none;
+    font-weight: var(--dn-fw-medium);
+  }
+  .dn-mm__back[hidden] {
+    display: none;
+  }
+  .dn-mm__close {
+    grid-column: 3;
+    justify-self: end;
+    display: grid;
+    place-items: center;
+    inline-size: var(--dn-tap-min);
+    block-size: var(--dn-tap-min);
+    border: 0;
+    border-radius: var(--dn-radius-pill);
+    background: none;
+  }
+  .dn-mm__close:hover,
+  .dn-mm__back:hover {
+    background: var(--dn-hover-tint);
+  }
+
+  .dn-mm__viewport {
+    position: relative;
+    overflow-x: hidden;
+    min-block-size: 100%;
+  }
+  .dn-mm__level {
+    padding-block-end: var(--dn-space-8);
+    background: var(--dn-bg);
+  }
+  .dn-mm__level--2 {
+    position: absolute;
+    inset: 0;
+    transform: translateX(100%);
+    transition: transform var(--dn-dur-slow) var(--dn-ease-out);
+  }
+  .dn-mm__level--2[data-active] {
+    transform: none;
+  }
+  .dn-mm__level--2[hidden] {
+    display: none;
+  }
+
+  .dn-mm__search {
+    padding: var(--dn-space-4);
+  }
+  .dn-mm__search-field {
+    display: flex;
+    align-items: center;
+    gap: var(--dn-space-2);
+    inline-size: 100%;
+    min-block-size: var(--dn-input-h);
+    padding-inline: var(--dn-space-4);
+    border: 0;
+    border-radius: var(--dn-radius-sm);
+    background: var(--dn-bg-alt);
+    color: var(--dn-ink-2);
+    text-align: start;
+  }
+
+  .dn-mm__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--dn-space-3);
+    inline-size: 100%;
+    min-block-size: var(--dn-menu-row-h);
+    padding-inline: var(--dn-space-4);
+    border: 0;
+    border-bottom: var(--dn-border-decor);
+    background: none;
+    font-size: var(--dn-fs-menu-l1);
+    font-weight: var(--dn-fw-medium);
+    text-align: start;
+    text-decoration: none;
+  }
+  .dn-mm__row:hover {
+    background: var(--dn-hover-tint);
+  }
+  .dn-mm__row--sub,
+  .dn-mm__row--link {
+    min-block-size: var(--dn-menu-row-sub-h);
+    font-size: var(--dn-fs-body);
+    font-weight: var(--dn-fw-regular);
+    border-bottom: 0;
+  }
+  .dn-mm__row--sub {
+    color: var(--dn-ink-2);
+  }
+  .dn-mm__row--link {
+    font-size: var(--dn-fs-menu-l1);
+  }
+  .dn-mm__list--secondary {
+    margin-top: var(--dn-space-4);
+  }
+  .dn-mm__inline-icon {
+    display: inline-flex;
+    gap: var(--dn-space-2);
+    align-items: center;
+  }
+  .dn-mm__group {
+    margin-top: var(--dn-space-4);
+  }
+  .dn-mm__group-title {
+    padding: var(--dn-space-2) var(--dn-space-4);
+  }
+</style>
+
+<script>
+  const dialog = document.getElementById('dn-mobile-menu') as HTMLDialogElement | null;
+  if (dialog) {
+    const root = dialog.querySelector<HTMLElement>('[data-dn-mm-level="root"]')!;
+    const back = dialog.querySelector<HTMLButtonElement>('[data-dn-mm-back]')!;
+    const backLabel = dialog.querySelector<HTMLElement>('[data-dn-mm-back-label]')!;
+    const title = dialog.querySelector<HTMLElement>('[data-dn-mm-title]')!;
+    const body = dialog.querySelector<HTMLElement>('.dn-drawer__body')!;
+    let current: { panel: HTMLElement; opener: HTMLButtonElement } | null = null;
+    let rootScroll = 0;
+
+    const showRoot = (restoreFocus: boolean) => {
+      if (!current) return;
+      const { panel, opener } = current;
+      panel.removeAttribute('data-active');
+      panel.hidden = true;
+      opener.setAttribute('aria-expanded', 'false');
+      root.inert = false;
+      back.hidden = true;
+      title.hidden = false;
+      title.textContent = 'Menu';
+      current = null;
+      body.scrollTop = rootScroll;
+      if (restoreFocus) opener.focus();
+    };
+
+    for (const opener of dialog.querySelectorAll<HTMLButtonElement>('[data-dn-mm-open]')) {
+      opener.addEventListener('click', () => {
+        const panel = dialog.querySelector<HTMLElement>(`[data-dn-mm-level="${opener.dataset.dnMmOpen}"]`);
+        if (!panel) return;
+        rootScroll = body.scrollTop;
+        current = { panel, opener };
+        panel.hidden = false;
+        // Une frame pour que la transition parte de translateX(100%).
+        requestAnimationFrame(() => panel.setAttribute('data-active', ''));
+        opener.setAttribute('aria-expanded', 'true');
+        root.inert = true;
+        backLabel.textContent = panel.dataset.label ?? 'Retour';
+        back.setAttribute('aria-label', `Retour au menu depuis ${panel.dataset.label ?? ''}`);
+        back.hidden = false;
+        title.hidden = true;
+        body.scrollTop = 0;
+        back.focus();
+      });
+    }
+
+    back.addEventListener('click', () => showRoot(true));
+    dialog.addEventListener('close', () => showRoot(false));
+
+    // Recherche depuis le menu : on ferme le menu puis on ouvre la recherche.
+    dialog.querySelector('[data-dn-mm-search]')?.addEventListener('click', () => {
+      dialog.close();
+      const search = document.getElementById('dn-search');
+      const opener = document.querySelector<HTMLElement>('[data-dn-open="dn-search"]');
+      if (search instanceof HTMLDialogElement) {
+        (
+          window as unknown as { dnDrawer: { open: (d: HTMLDialogElement, o: HTMLElement | null) => void } }
+        ).dnDrawer.open(search, opener);
+      }
+    });
+  }
+</script>

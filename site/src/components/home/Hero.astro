@@ -1,0 +1,119 @@
+---
+/**
+ * Hero (§I.2) : UNE image, un produit réel visible, texte sous l'image (mobile) ou à côté
+ * (desktop). Ni carrousel, ni vidéo, ni logo, ni texte sur l'image. Un seul CTA primaire.
+ *
+ * ⚠ PHOTO HERO FINALE À FOURNIR APRÈS SHOOTING. Sans `image`, le composant affiche un
+ * emplacement qui décrit la photo attendue — jamais une image générée.
+ * Quand la photo existera : passer `image` (recadrages 1:1 mobile et 4:3 desktop) ;
+ * elle sera alors l'image LCP, préchargée (`priority`).
+ */
+import CatalogPicture from '@/components/ui/CatalogPicture.astro';
+import Button from '@/components/ui/Button.astro';
+import MediaPlaceholder from '@/components/ui/MediaPlaceholder.astro';
+import type { MediaImage } from '@/types/catalog';
+
+interface Props {
+  title: string;
+  subtitle: string;
+  cta: { label: string; href: string };
+  secondary?: { label: string; href: string };
+  image?: MediaImage;
+}
+
+const { title, subtitle, cta, secondary, image } = Astro.props;
+const placeholder =
+  'Photo hero finale à fournir après shooting — vrais produits Dar Nūr : miel, musc tahara, étoffe, sur lin crème';
+---
+
+<section class="dn-hero">
+  <div class="dn-hero__media">
+    {image ? (
+      <CatalogPicture
+        image={image}
+        width={1600}
+        height={1200}
+        widths={[390, 780, 960, 1280, 1600]}
+        sizes="(min-width: 1024px) 58vw, 100vw"
+        priority
+        class="dn-hero__img"
+      />
+    ) : (
+      <MediaPlaceholder caption={placeholder} class="dn-hero__ph" />
+    )}
+  </div>
+  <div class="dn-hero__text">
+    <h1 class="dn-display">{title}</h1>
+    <p class="dn-hero__subtitle dn-body-lg dn-muted">{subtitle}</p>
+    <div class="dn-hero__actions">
+      <Button href={cta.href} fullWidth class="dn-hero__cta">
+        {cta.label}
+      </Button>
+      {secondary && (
+        <Button variant="tertiary" href={secondary.href}>
+          {secondary.label}
+        </Button>
+      )}
+    </div>
+  </div>
+</section>
+
+<style>
+  .dn-hero {
+    display: grid;
+  }
+  .dn-hero__media {
+    aspect-ratio: var(--dn-ratio-hero-m);
+    background: var(--dn-media);
+    overflow: hidden;
+  }
+  .dn-hero__media :global(.dn-hero__img),
+  .dn-hero__media :global(.dn-hero__ph) {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+    border-radius: 0;
+    aspect-ratio: auto;
+  }
+  .dn-hero__text {
+    display: grid;
+    gap: var(--dn-space-2);
+    padding: var(--dn-space-6) var(--dn-gutter-x) 0;
+  }
+  .dn-hero__actions {
+    display: grid;
+    justify-items: start;
+    gap: var(--dn-space-2);
+    margin-top: var(--dn-space-4);
+  }
+
+  @media (min-width: 768px) {
+    .dn-hero__media {
+      aspect-ratio: var(--dn-ratio-hero-d);
+    }
+    .dn-hero__actions :global(.dn-hero__cta) {
+      inline-size: auto;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .dn-hero {
+      grid-template-columns: 5fr 7fr;
+      align-items: center;
+      max-inline-size: var(--dn-container-wide);
+      margin-inline: auto;
+      min-block-size: min(640px, calc(100dvh - var(--dn-header-h) - var(--dn-announcement-h)));
+    }
+    .dn-hero__media {
+      order: 2;
+      block-size: 100%;
+      aspect-ratio: auto;
+    }
+    .dn-hero__text {
+      order: 1;
+      padding: var(--dn-space-10) var(--dn-space-10) var(--dn-space-10) var(--dn-gutter-x);
+      max-inline-size: 560px;
+      justify-self: end;
+    }
+  }
+</style>

@@ -1,0 +1,53 @@
+# Netlify — PRÉPRODUCTION du nouveau socle Astro (refonte, étape 5).
+#
+# Placé dans site/ VOLONTAIREMENT : Netlify lit netlify.toml dans le « Base directory »
+# du site. Le site Netlify de préproduction doit donc être créé avec Base directory = site.
+# Les deux sites Netlify existants (base = racine, previews de l'ancien site) ne lisent
+# jamais ce fichier : leur comportement reste inchangé, même après une fusion future.
+# Le site de production dar-nur.fr reste servi par GitHub Pages ; rien ici ne le modifie.
+# Aucune redirection SEO définitive n'est déclarée : elles arriveront avec l'étape de
+# migration SEO (fichier _redirects généré, ou [[redirects]] ci-dessous).
+
+[build]
+  # Chemins relatifs au Base directory (site/).
+  publish = "dist"
+  command = "npm ci && npm run build && npm run verify"
+
+[build.environment]
+  NODE_VERSION = "22"
+  # Netlify appelle « production » le déploiement principal de CE site Netlify,
+  # qui est notre PRÉPRODUCTION : on force donc "preprod" partout. Seule une future
+  # bascule explicite (DAR_NUR_ENV = "production") autorisera l'indexation.
+  DAR_NUR_ENV = "preprod"
+  # Lecture seule. Valeurs PUBLIQUES par conception (déjà dans js/config.js de l'ancien
+  # site) : URL du projet et clé « publishable », filtrées par RLS. Jamais de clé secrète ici.
+  SUPABASE_URL = "https://sxlpgcnjerlayitaxxyv.supabase.co"
+  SUPABASE_ANON_KEY = "sb_publishable_3J_jC58tHskgwggDRahQCg_q8xM_xAY"
+
+[context.production.environment]
+  DAR_NUR_ENV = "preprod"
+
+[context.deploy-preview.environment]
+  DAR_NUR_ENV = "preprod"
+
+[context.branch-deploy.environment]
+  DAR_NUR_ENV = "preprod"
+
+# Noindex en en-tête HTTP sur toutes les réponses (doublé par dist/_headers, généré
+# selon l'environnement, et par la balise meta robots de chaque page).
+# ⚠ À RETIRER lors de la bascule en production (étape de migration), sinon dar-nur.fr
+#   serait désindexé : dist/_headers prend alors le relais selon DAR_NUR_ENV.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Frame-Options = "DENY"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+
+# Fichiers versionnés par empreinte (JS, CSS, polices, images optimisées) : cache d'un an.
+[[headers]]
+  for = "/_astro/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

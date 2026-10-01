@@ -1,0 +1,31 @@
+{
+  "name": "dar-nur-site",
+  "private": true,
+  "type": "module",
+  "version": "0.1.0",
+  "description": "Dar Nūr — nouveau socle Astro (refonte, préproduction). N'est pas le site de production.",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "verify": "node scripts/verify-build.mjs",
+    "ci": "npm run format:check && npm run check && npm run build && npm run verify"
+  },
+  "dependencies": {
+    "astro": "7.3.5"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.10",
+    "@types/node": "22.20.4",
+    "lucide-static": "1.49.0",
+    "prettier": "3.9.9",
+    "prettier-plugin-astro": "1.1.0",
+    "typescript": "6.0.3"
+  }
+}

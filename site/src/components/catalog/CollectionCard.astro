@@ -1,0 +1,87 @@
+---
+/**
+ * Carte de sous-collection (pages univers, §J) : image 1:1, titre sous l'image,
+ * nombre de produits facultatif (issu de la base, jamais saisi à la main).
+ */
+import CatalogPicture from '@/components/ui/CatalogPicture.astro';
+import MediaPlaceholder from '@/components/ui/MediaPlaceholder.astro';
+import type { Collection } from '@/types/catalog';
+
+interface Props {
+  collection: Collection;
+  headingLevel?: 'h2' | 'h3';
+}
+
+const { collection, headingLevel: Heading = 'h3' } = Astro.props;
+const { label, href, image, productCount } = collection;
+---
+
+<article class="dn-collection">
+  <div class="dn-collection__media">
+    {image ? (
+      <CatalogPicture
+        image={image}
+        width={600}
+        height={600}
+        widths={[200, 400, 600]}
+        sizes="(min-width: 1024px) 30vw, 46vw"
+        decorative
+        class="dn-collection__img"
+      />
+    ) : (
+      <MediaPlaceholder caption="Photo de collection à produire" ratio="var(--dn-ratio-tile)" />
+    )}
+  </div>
+  <Heading class="dn-collection__title">
+    <a class="dn-collection__link" href={href}>
+      {label}
+    </a>
+  </Heading>
+  {typeof productCount === 'number' && (
+    <p class="dn-small dn-muted">
+      {productCount} produit{productCount > 1 ? 's' : ''}
+    </p>
+  )}
+</article>
+
+<style>
+  .dn-collection {
+    position: relative;
+    display: grid;
+    gap: var(--dn-space-2);
+    align-content: start;
+  }
+  .dn-collection__media {
+    aspect-ratio: var(--dn-ratio-tile);
+    overflow: hidden;
+    border-radius: var(--dn-radius-sm);
+    background: var(--dn-media);
+  }
+  .dn-collection__media :global(.dn-collection__img) {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+  }
+  .dn-collection__title {
+    font-size: var(--dn-fs-card-title);
+    line-height: var(--dn-lh-h3);
+  }
+  .dn-collection__link {
+    text-decoration: none;
+  }
+  .dn-collection__link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+  .dn-collection__link:focus-visible {
+    outline: none;
+  }
+  .dn-collection:has(.dn-collection__link:focus-visible) .dn-collection__media {
+    outline: var(--dn-focus-ring);
+    outline-offset: var(--dn-focus-offset);
+  }
+  .dn-collection:hover .dn-collection__link {
+    text-decoration: underline;
+  }
+</style>

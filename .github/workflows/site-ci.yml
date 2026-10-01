@@ -1,0 +1,63 @@
+name: Nouveau socle Astro — contrôles (site/)
+
+# Contrôles du nouveau socle Astro (refonte). Ne concerne QUE site/ :
+# ne déploie rien, ne touche ni à la production GitHub Pages ni aux workflows existants.
+#   - formatage (Prettier), types (astro check, TypeScript strict), build statique ;
+#   - verify-build : noindex hors production, SEO de base, budgets de poids,
+#     discipline des tokens, absence de clé secrète.
+
+on:
+  pull_request:
+    paths:
+      - 'site/**'
+      - '.github/workflows/site-ci.yml'
+  push:
+    branches:
+      - 'refonte/**'
+    paths:
+      - 'site/**'
+      - '.github/workflows/site-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: site-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: site
+    env:
+      DAR_NUR_ENV: preprod
+      # Valeurs PUBLIQUES par conception (lecture seule sous RLS), identiques à netlify.toml.
+      SUPABASE_URL: https://sxlpgcnjerlayitaxxyv.supabase.co
+      SUPABASE_ANON_KEY: sb_publishable_3J_jC58tHskgwggDRahQCg_q8xM_xAY
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+
+      - name: Installation
+        run: npm ci
+
+      - name: Formatage
+        run: npm run format:check
+
+      - name: Types (astro check)
+        run: npm run check
+
+      - name: Build statique
+        run: npm run build
+
+      - name: Vérifications de sortie (noindex, SEO de base, budgets, tokens)
+        run: npm run verify

@@ -1,0 +1,52 @@
+---
+/**
+ * Point d'entrée UNIQUE du pipeline d'images (§T.2) : AVIF + WebP, srcset/sizes,
+ * largeur/hauteur déclarées (aucun décalage de mise en page), recadrage au ratio voulu,
+ * chargement différé par défaut, `priority` pour la seule image LCP d'une page.
+ * Accepte une image locale (import) ou distante (catalogue sur dar-nur.fr / Supabase).
+ */
+import { Picture } from 'astro:assets';
+import type { MediaImage } from '@/types/catalog';
+
+interface Props {
+  image: MediaImage;
+  /** Dimensions de sortie maximales (fixent aussi le ratio du recadrage). */
+  width: number;
+  height: number;
+  widths: number[];
+  sizes: string;
+  priority?: boolean;
+  /** Image purement décorative (texte équivalent déjà présent à côté). */
+  decorative?: boolean;
+  class?: string;
+}
+
+const {
+  image,
+  width,
+  height,
+  widths,
+  sizes,
+  priority = false,
+  decorative = false,
+  class: className,
+} = Astro.props;
+const common = {
+  alt: decorative ? '' : image.alt,
+  width,
+  height,
+  fit: image.fit ?? 'cover',
+  widths,
+  sizes,
+  formats: ['avif', 'webp'] as ('avif' | 'webp')[],
+  fallbackFormat: 'webp' as const,
+  class: className,
+  ...(priority ? { priority: true } : { loading: 'lazy' as const }),
+};
+---
+
+{typeof image.src === 'string' ? (
+  <Picture src={image.src} {...common} />
+) : (
+  <Picture src={image.src} {...common} />
+)}

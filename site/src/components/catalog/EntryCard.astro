@@ -1,0 +1,58 @@
+---
+/**
+ * Entrée secondaire (Idées cadeaux, Offres & packs — §I.3) : plus petite que les cartes
+ * d'univers, fond sable, sans photo. Traduit l'architecture : 3 univers, 2 entrées transverses.
+ */
+import Icon from '@/components/ui/Icon.astro';
+import type { IconName } from '@/components/ui/icons';
+
+interface Props {
+  title: string;
+  text: string;
+  href: string;
+  icon: IconName;
+}
+
+const { title, text, href, icon } = Astro.props;
+---
+
+<a class="dn-entry-card" href={href}>
+  <Icon name={icon} />
+  <span class="dn-entry-card__title">{title}</span>
+  <span class="dn-small dn-muted">{text}</span>
+</a>
+
+<style>
+  .dn-entry-card {
+    display: grid;
+    align-content: start;
+    gap: var(--dn-space-1);
+    min-block-size: 96px;
+    padding: var(--dn-space-4);
+    border-radius: var(--dn-radius-md);
+    background: var(--dn-bg-alt);
+    text-decoration: none;
+    transition: background-color var(--dn-dur-fast) var(--dn-ease-in-out);
+  }
+  .dn-entry-card:hover {
+    background: var(--dn-line);
+  }
+  .dn-entry-card__title {
+    margin-top: var(--dn-space-1);
+    font-weight: var(--dn-fw-medium);
+  }
+  @media (min-width: 1024px) {
+    .dn-entry-card {
+      grid-template-columns: auto 1fr;
+      column-gap: var(--dn-space-3);
+      min-block-size: 104px;
+      padding: var(--dn-space-6);
+    }
+    .dn-entry-card__title {
+      margin-top: 0;
+    }
+    .dn-entry-card :global(svg) {
+      grid-row: span 2;
+    }
+  }
+</style>

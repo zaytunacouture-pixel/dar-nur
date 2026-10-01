@@ -1,0 +1,187 @@
+---
+/**
+ * Bouton (§G.1). Rend un <a> si `href` est fourni, sinon un <button>.
+ * Primaire : une seule action principale par zone, jamais d'or.
+ */
+import type { HTMLAttributes } from 'astro/types';
+import Icon from './Icon.astro';
+import type { IconName } from './icons';
+
+type Props = {
+  variant?: 'primary' | 'secondary' | 'tertiary';
+  size?: 'sm' | 'md' | 'lg';
+  href?: string;
+  type?: 'button' | 'submit' | 'reset';
+  disabled?: boolean;
+  fullWidth?: boolean;
+  onDark?: boolean;
+  iconStart?: IconName;
+  iconEnd?: IconName;
+  class?: string;
+} & Omit<HTMLAttributes<'button'>, 'type' | 'disabled' | 'class'> &
+  Omit<HTMLAttributes<'a'>, 'type' | 'class'>;
+
+const {
+  variant = 'primary',
+  size = 'md',
+  href,
+  type = 'button',
+  disabled = false,
+  fullWidth = false,
+  onDark = false,
+  iconStart,
+  iconEnd,
+  class: className,
+  ...rest
+} = Astro.props;
+
+const classes = [
+  'dn-btn',
+  `dn-btn--${variant}`,
+  `dn-btn--${size}`,
+  { 'dn-btn--full': fullWidth, 'dn-btn--on-dark': onDark },
+  className,
+];
+const iconSize = 20;
+---
+
+{href && !disabled ? (
+  <a href={href} class:list={classes} {...rest}>
+    {iconStart && <Icon name={iconStart} size={iconSize} />}
+    <span class="dn-btn__label">
+      <slot />
+    </span>
+    {iconEnd && <Icon name={iconEnd} size={iconSize} />}
+  </a>
+) : (
+  <button type={type} class:list={classes} disabled={disabled} {...rest}>
+    {iconStart && <Icon name={iconStart} size={iconSize} />}
+    <span class="dn-btn__label">
+      <slot />
+    </span>
+    {iconEnd && <Icon name={iconEnd} size={iconSize} />}
+  </button>
+)}
+
+<style>
+  .dn-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--dn-space-2);
+    border: var(--dn-border-width) solid transparent;
+    border-radius: var(--dn-radius-sm);
+    font-family: var(--dn-font-sans);
+    font-size: var(--dn-fs-button);
+    font-weight: var(--dn-fw-medium);
+    letter-spacing: var(--dn-tracking-button);
+    line-height: var(--dn-lh-tight);
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+      background-color var(--dn-dur-fast) var(--dn-ease-in-out),
+      border-color var(--dn-dur-fast) var(--dn-ease-in-out),
+      color var(--dn-dur-fast) var(--dn-ease-in-out);
+  }
+
+  .dn-btn--sm {
+    min-height: var(--dn-btn-h-sm);
+    padding-inline: var(--dn-btn-pad-sm);
+  }
+  .dn-btn--md {
+    min-height: var(--dn-btn-h-md);
+    padding-inline: var(--dn-btn-pad-md);
+  }
+  .dn-btn--lg {
+    min-height: var(--dn-btn-h-lg);
+    padding-inline: var(--dn-btn-pad-lg);
+  }
+  .dn-btn--full {
+    width: 100%;
+  }
+
+  /* Primaire : vert plein */
+  .dn-btn--primary {
+    background: var(--dn-green);
+    color: var(--dn-on-dark);
+  }
+  .dn-btn--primary:hover {
+    background: var(--dn-green-hover);
+  }
+  .dn-btn--primary:active {
+    background: var(--dn-green-active);
+  }
+
+  /* Secondaire : contour encre */
+  .dn-btn--secondary {
+    background: transparent;
+    border-color: var(--dn-ink);
+    color: var(--dn-ink);
+  }
+  .dn-btn--secondary:hover {
+    background: var(--dn-bg-alt);
+  }
+  .dn-btn--secondary:active {
+    background: var(--dn-line);
+  }
+
+  /* Tertiaire : lien souligné, zone tactile 44 px */
+  .dn-btn--tertiary {
+    min-height: var(--dn-tap-min);
+    padding-inline: 0;
+    background: transparent;
+    color: var(--dn-ink);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 4px;
+  }
+  .dn-btn--tertiary:hover {
+    color: var(--dn-green);
+  }
+  .dn-btn--tertiary:active {
+    color: var(--dn-green-hover);
+  }
+
+  /* Sur fond vert (footer) : inversé */
+  .dn-btn--primary.dn-btn--on-dark {
+    background: var(--dn-on-dark);
+    color: var(--dn-green-deep);
+  }
+  .dn-btn--primary.dn-btn--on-dark:hover {
+    background: var(--dn-bg-alt);
+  }
+  .dn-btn--secondary.dn-btn--on-dark,
+  .dn-btn--tertiary.dn-btn--on-dark {
+    border-color: var(--dn-on-dark);
+    color: var(--dn-on-dark);
+  }
+  .dn-btn--secondary.dn-btn--on-dark:hover {
+    background: var(--dn-hover-tint);
+  }
+  .dn-btn--on-dark:focus-visible {
+    outline: var(--dn-focus-ring-on-dark);
+  }
+
+  /* Désactivé : identifiable et lisible (5,3:1) */
+  .dn-btn:disabled,
+  .dn-btn[aria-disabled='true'] {
+    cursor: not-allowed;
+  }
+  .dn-btn--primary:disabled,
+  .dn-btn--primary[aria-disabled='true'] {
+    background: var(--dn-disabled-bg);
+    color: var(--dn-disabled-ink);
+  }
+  .dn-btn--secondary:disabled,
+  .dn-btn--secondary[aria-disabled='true'] {
+    background: transparent;
+    border-color: var(--dn-unavailable);
+    color: var(--dn-disabled-ink);
+  }
+  .dn-btn--tertiary:disabled,
+  .dn-btn--tertiary[aria-disabled='true'] {
+    color: var(--dn-disabled-ink);
+    text-decoration: none;
+  }
+</style>

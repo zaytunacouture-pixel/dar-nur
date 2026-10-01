@@ -1,0 +1,222 @@
+---
+/**
+ * Panneau modal (menu mobile, recherche, mini-panier, filtres, guide des tailles).
+ *
+ * Basé sur <dialog> + showModal() : focus contenu dans le panneau et reste de la page
+ * inerte (natif), Échap natif, premier plan natif. Le script ci-dessous ajoute seulement :
+ * ouverture par [data-dn-open], fermeture par [data-dn-close] ou clic sur le voile,
+ * blocage du défilement de la page, retour du focus au bouton d'ouverture.
+ */
+import Icon from './Icon.astro';
+
+interface Props {
+  id: string;
+  /** Titre accessible (et visible si `showTitle`). */
+  title: string;
+  side?: 'left' | 'right' | 'top';
+  showTitle?: boolean;
+  class?: string;
+}
+
+const { id, title, side = 'right', showTitle = true, class: className } = Astro.props;
+const titleId = `${id}-title`;
+---
+
+<dialog id={id} class:list={['dn-drawer', `dn-drawer--${side}`, className]} aria-labelledby={titleId}>
+  <div class="dn-drawer__panel">
+    <slot name="header">
+      <header class="dn-drawer__header">
+        <h2 id={titleId} class:list={['dn-drawer__title', { 'dn-visually-hidden': !showTitle }]}>
+          {title}
+        </h2>
+        <button type="button" class="dn-drawer__close" data-dn-close aria-label="Fermer">
+          <Icon name="x" />
+        </button>
+      </header>
+    </slot>
+    <div class="dn-drawer__body">
+      <slot />
+    </div>
+    {Astro.slots.has('footer') && (
+      <footer class="dn-drawer__footer">
+        <slot name="footer" />
+      </footer>
+    )}
+  </div>
+</dialog>
+
+<style>
+  .dn-drawer {
+    position: fixed;
+    inset: 0;
+    inline-size: 100%;
+    max-inline-size: 100%;
+    block-size: 100dvh;
+    max-block-size: 100dvh;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--dn-ink);
+    overflow: hidden;
+  }
+  .dn-drawer::backdrop {
+    background: var(--dn-scrim);
+    opacity: 0;
+    transition:
+      opacity var(--dn-dur-base) var(--dn-ease-in-out),
+      display var(--dn-dur-base) allow-discrete,
+      overlay var(--dn-dur-base) allow-discrete;
+  }
+  .dn-drawer[open]::backdrop {
+    opacity: 1;
+  }
+  @starting-style {
+    .dn-drawer[open]::backdrop {
+      opacity: 0;
+    }
+  }
+
+  .dn-drawer__panel {
+    display: flex;
+    flex-direction: column;
+    block-size: 100%;
+    inline-size: 100%;
+    background: var(--dn-bg);
+    box-shadow: var(--dn-shadow-overlay);
+    transition: transform var(--dn-dur-slow) var(--dn-ease-out);
+  }
+  .dn-drawer--left .dn-drawer__panel {
+    transform: translateX(-100%);
+  }
+  .dn-drawer--right .dn-drawer__panel {
+    margin-inline-start: auto;
+    transform: translateX(100%);
+  }
+  .dn-drawer--top .dn-drawer__panel {
+    transform: translateY(-16px);
+    opacity: 0;
+    transition:
+      transform var(--dn-dur-base) var(--dn-ease-out),
+      opacity var(--dn-dur-base) var(--dn-ease-out);
+  }
+  .dn-drawer[open] .dn-drawer__panel {
+    transform: none;
+    opacity: 1;
+  }
+  @starting-style {
+    .dn-drawer--left[open] .dn-drawer__panel {
+      transform: translateX(-100%);
+    }
+    .dn-drawer--right[open] .dn-drawer__panel {
+      transform: translateX(100%);
+    }
+    .dn-drawer--top[open] .dn-drawer__panel {
+      transform: translateY(-16px);
+      opacity: 0;
+    }
+  }
+
+  .dn-drawer__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--dn-space-2);
+    min-block-size: var(--dn-header-h);
+    padding-inline: var(--dn-space-4) var(--dn-space-2);
+    border-bottom: var(--dn-border-decor);
+  }
+  .dn-drawer__title {
+    font-family: var(--dn-font-sans);
+    font-size: var(--dn-fs-body);
+    font-weight: var(--dn-fw-medium);
+    line-height: var(--dn-lh-label);
+  }
+  .dn-drawer__close {
+    display: grid;
+    place-items: center;
+    inline-size: var(--dn-tap-min);
+    block-size: var(--dn-tap-min);
+    padding: 0;
+    border: 0;
+    border-radius: var(--dn-radius-pill);
+    background: transparent;
+  }
+  .dn-drawer__close:hover {
+    background: var(--dn-hover-tint);
+  }
+  .dn-drawer__body {
+    flex: 1;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .dn-drawer__footer {
+    padding: var(--dn-space-4);
+    padding-bottom: calc(var(--dn-space-4) + env(safe-area-inset-bottom));
+    border-top: var(--dn-border-decor);
+    background: var(--dn-bg);
+  }
+
+  @media (min-width: 768px) {
+    .dn-drawer--left .dn-drawer__panel,
+    .dn-drawer--right .dn-drawer__panel {
+      inline-size: var(--dn-drawer-w);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    /* Recherche desktop : panneau sous le header, pleine largeur, ≤ 70 vh. */
+    .dn-drawer--top .dn-drawer__panel {
+      block-size: auto;
+      max-block-size: 70dvh;
+      margin-block-start: var(--dn-header-h);
+      border-top: var(--dn-border-decor);
+    }
+  }
+</style>
+
+<script>
+  const openers = new WeakMap<HTMLDialogElement, HTMLElement | null>();
+
+  function open(dialog: HTMLDialogElement, opener: HTMLElement | null) {
+    if (dialog.open) return;
+    openers.set(dialog, opener);
+    dialog.showModal();
+    document.documentElement.classList.add('dn-scroll-locked');
+    opener?.setAttribute('aria-expanded', 'true');
+    dialog.dispatchEvent(new CustomEvent('dn:open'));
+  }
+
+  function onClosed(dialog: HTMLDialogElement) {
+    if (!document.querySelector('dialog.dn-drawer[open]')) {
+      document.documentElement.classList.remove('dn-scroll-locked');
+    }
+    const opener = openers.get(dialog);
+    opener?.setAttribute('aria-expanded', 'false');
+    opener?.focus();
+  }
+
+  document.addEventListener('click', (event) => {
+    const target = event.target as HTMLElement;
+    const trigger = target.closest<HTMLElement>('[data-dn-open]');
+    if (trigger) {
+      const dialog = document.getElementById(trigger.dataset.dnOpen ?? '');
+      if (dialog instanceof HTMLDialogElement) {
+        event.preventDefault();
+        open(dialog, trigger);
+      }
+      return;
+    }
+    const dialog = target.closest<HTMLDialogElement>('dialog.dn-drawer');
+    if (!dialog) return;
+    // Clic sur le voile : la cible est le <dialog> lui-même, hors du panneau.
+    if (target === dialog || target.closest('[data-dn-close]')) dialog.close();
+  });
+
+  for (const dialog of document.querySelectorAll<HTMLDialogElement>('dialog.dn-drawer')) {
+    dialog.addEventListener('close', () => onClosed(dialog));
+  }
+
+  // Exposé aux autres composants (ex. fermeture du menu au clic sur un lien).
+  Object.assign(window, { dnDrawer: { open } });
+</script>
