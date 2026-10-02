@@ -12,8 +12,8 @@
  *  4. Aucun orphelin : chaque produit publié figure sur la page de sa collection principale.
  *  5. Nombre et liste des produits de chaque page = Supabase (collection + descendantes).
  *  6. Pages marque : présence et indexabilité conformes à la règle (≥ N modèles + description).
- *  7. Liens internes (menu, footer, fil d'Ariane, puces, cartes de collection, maillage) :
- *     chacun mène à une page de dist/ ; les liens produit visent un produit publié.
+ *  7. Liens internes (menu, footer, fil d'Ariane, puces, cartes de collection, maillage,
+ *     cartes produit) : chacun mène à une page de dist/ (étape 8 : fiches produit comprises).
  *  8. Aucune page indexable vide ; JSON-LD présent et cohérent (BreadcrumbList, ItemList).
  *
  * Réseau : lecture publique Supabase (clé « publishable »), comme le build.
@@ -183,17 +183,18 @@ if (parfums) {
 }
 
 // 7 et 8. Liens internes, pages indexables vides, JSON-LD.
-const catalogPages = htmlFiles.filter((f) => /data-dn-page="/.test(readFileSync(f, 'utf8')));
+// Pages catalogue de l'étape 7 seulement (les fiches produit ont leurs contrôles : verify-products).
+const catalogPages = htmlFiles.filter((f) =>
+  /data-dn-page="(universe|collection|brand|offers)"/.test(readFileSync(f, 'utf8')),
+);
 for (const file of htmlFiles) {
   const html = readFileSync(file, 'utf8');
   const route = routeOf(file);
   const isCatalog = catalogPages.includes(file);
   for (const [, href] of html.matchAll(/<a [^>]*href="(\/[^"#?]*)/g)) {
+    // Étape 8 : les fiches produit sont générées — un lien produit doit mener à une page
+    // de dist/, comme tout autre lien interne (plus d'exception « fiche non migrée »).
     if (routes.has(href)) continue;
-    const slug = /^\/([a-z0-9-]+)\/$/.exec(href)?.[1];
-    // Fiche produit non encore migrée (étape 8) : le lien doit viser un produit publié.
-    if (isCatalog && slug && published.has(slug)) continue;
-    if (!isCatalog && slug && published.has(slug)) continue; // démonstration du socle
     fail(`${route} : lien interne cassé ${href}`);
   }
   if (!isCatalog) continue;

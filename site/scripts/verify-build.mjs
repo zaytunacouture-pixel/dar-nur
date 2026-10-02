@@ -4,7 +4,7 @@
  * Échoue (code 1) au moindre écart. Aucun réseau, aucune écriture.
  *
  *  1. Indexation : hors production, chaque page est noindex, robots.txt interdit tout,
- *     _headers porte X-Robots-Tag, aucun sitemap. Pages internes noindex dans tous les cas.
+ *     _headers porte X-Robots-Tag, aucun sitemap. Pages internes (dont tout /lab/) noindex dans tous les cas.
  *  2. SEO de base : lang="fr", un seul <h1>, <title>, description, canonical.
  *  3. Aucune police chargée depuis Google Fonts ; aucune clé secrète dans la sortie.
  *  4. Budgets de poids (JS, CSS, polices).
@@ -58,7 +58,7 @@ for (const file of html) {
   const doc = readFileSync(file, 'utf8');
   const robots = /<meta name="robots" content="([^"]+)"/.exec(doc)?.[1];
   if (!robots) fail(`${page} : meta robots absente`);
-  const mustNoindex = !indexable || INTERNAL_PAGES.includes(page);
+  const mustNoindex = !indexable || INTERNAL_PAGES.includes(page) || page.startsWith('lab/');
   if (mustNoindex && !robots?.includes('noindex')) fail(`${page} : devrait être noindex (env ${env})`);
   if (!/<html lang="fr"/.test(doc)) fail(`${page} : <html lang="fr"> absent`);
   const h1 = (doc.match(/<h1[\s>]/g) ?? []).length;

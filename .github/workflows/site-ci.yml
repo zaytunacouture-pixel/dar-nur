@@ -6,7 +6,9 @@ name: Nouveau socle Astro — contrôles (site/)
 #   - verify-build : noindex hors production, SEO de base, budgets de poids,
 #     discipline des tokens, absence de clé secrète ;
 #   - verify-catalog (étape 7) : contenu des pages univers / collections / marques
-#     recalculé indépendamment depuis Supabase (lecture publique) et comparé à dist/.
+#     recalculé indépendamment depuis Supabase (lecture publique) et comparé à dist/ ;
+#   - verify-products (étape 8) : fiches produit (une par produit publié, aucune pour un
+#     brouillon), variantes, prix, fil d'Ariane, canonical, JSON-LD, images, page LAB.
 
 on:
   pull_request:
@@ -31,7 +33,10 @@ concurrency:
 jobs:
   check-build:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # Étape 8 : les galeries des fiches multiplient les images (≈ 5 600 variantes AVIF/WebP).
+    # Avec le cache ci-dessous, un build reprend en quelques minutes ; un build à froid peut
+    # dépasser 15 min, d'où la marge.
+    timeout-minutes: 40
     defaults:
       run:
         working-directory: site
@@ -54,6 +59,17 @@ jobs:
       - name: Installation
         run: npm ci
 
+      # Images optimisées d'Astro (node_modules/.astro, effacé par npm ci) : restaurées APRÈS
+      # l'installation. Clé unique par exécution + préfixe de restauration : toujours le
+      # cache le plus récent, réenregistré enrichi en fin de job.
+      - name: Cache des images optimisées
+        uses: actions/cache@v4
+        with:
+          path: site/node_modules/.astro
+          key: astro-assets-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: |
+            astro-assets-${{ runner.os }}-
+
       - name: Formatage
         run: npm run format:check
 
@@ -68,3 +84,6 @@ jobs:
 
       - name: Contrôles catalogue (pages ↔ Supabase, liens, brouillons, orphelins, JSON-LD)
         run: npm run verify:catalog
+
+      - name: Contrôles fiches produit (Supabase ↔ HTML, variantes, prix, JSON-LD, LAB)
+        run: npm run verify:products
