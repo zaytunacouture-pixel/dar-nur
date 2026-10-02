@@ -56,11 +56,14 @@ function robotsHeaders() {
 }
 
 /**
- * Sitemap des pages catalogue (étape 7) : univers, collections et marques INDEXABLES en
+ * Sitemap des pages catalogue (étape 7) et des fiches produit (étape 8) INDEXABLES en
  * production (attribut data-dn-indexable="true", posé par les gabarits selon les règles de
  * docs/REFONTE_ASTRO.md). Écrit UNIQUEMENT en production ; ailleurs, la liste est calculée et
- * journalisée (la préproduction ne doit exposer aucun sitemap). Pas de <lastmod> : aucune date
- * de modification fiable par page.
+ * journalisée (la préproduction ne doit exposer aucun sitemap). Jamais : brouillons (aucune
+ * page), LAB (pas d'attribut), variantes en query string (pas de page), pages noindex.
+ * <lastmod> : seulement pour les fiches, depuis data-dn-lastmod (max de products.updated_at et
+ * product_variants.updated_at) — JAMAIS la date du build. Univers / collections : aucune
+ * date de modification fiable, donc pas de <lastmod>.
  * @returns {import('astro').AstroIntegration}
  */
 function catalogSitemap() {
@@ -74,7 +77,7 @@ function catalogSitemap() {
           (await readdir(folder, { withFileTypes: true })).flatMap((entry) =>
             entry.isDirectory() ? [join(folder, entry.name)] : [],
           );
-        /** @type {string[]} */
+        /** @type {{ path: string, lastmod: string | undefined }[]} */
         const paths = [];
         const queue = [root];
         while (queue.length) {
@@ -82,10 +85,14 @@ function catalogSitemap() {
           queue.push(...(await walk(folder)));
           const html = await readFile(join(folder, 'index.html'), 'utf8').catch(() => '');
           if (/data-dn-indexable="true"/.test(html)) {
-            paths.push(`/${relative(root, folder).split(sep).join('/')}/`.replace('//', '/'));
+            const lastmod = /data-dn-lastmod="(\d{4}-\d{2}-\d{2})"/.exec(html)?.[1];
+            paths.push({
+              path: `/${relative(root, folder).split(sep).join('/')}/`.replace('//', '/'),
+              lastmod,
+            });
           }
         }
-        paths.sort();
+        paths.sort((a, b) => a.path.localeCompare(b.path));
         if (!INDEXABLE) {
           logger.info(`sitemap non écrit (DAR_NUR_ENV=${DAR_NUR_ENV}) — ${paths.length} URL en production`);
           return;
@@ -93,7 +100,10 @@ function catalogSitemap() {
         const body = [
           '<?xml version="1.0" encoding="UTF-8"?>',
           '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
-          ...paths.map((path) => `  <url><loc>${new URL(path, SITE_URL).toString()}</loc></url>`),
+          ...paths.map(
+            ({ path, lastmod }) =>
+              `  <url><loc>${new URL(path, SITE_URL).toString()}</loc>${lastmod ? `<lastmod>${lastmod}</lastmod>` : ''}</url>`,
+          ),
           '</urlset>',
           '',
         ].join('\n');
