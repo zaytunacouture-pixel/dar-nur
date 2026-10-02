@@ -36,6 +36,25 @@ export interface Collection {
 
 export type UniverseId = 'miels-herboristerie' | 'parfums-soins' | 'mode';
 
+/** Référence courte vers une collection (fil d'Ariane, collection principale d'un produit). */
+export interface CollectionRef {
+  slug: string;
+  name: string;
+  /** URL publique stockée en base (`collections.path`). */
+  href: string;
+}
+
+/** Nœud de l'arbre univers → collection → sous-collection (étape 6). */
+export interface CollectionNode {
+  slug: string;
+  name: string;
+  /** Absente pour un filtre ou un regroupement interne (pas d'URL propre). */
+  href?: string;
+  type: 'universe' | 'collection' | 'subcollection' | 'filter' | 'group' | 'transverse';
+  indexable: boolean;
+  children: CollectionNode[];
+}
+
 /** Liste fermée de badges, un seul par carte, toujours issu d'une donnée (§G.2). */
 export type BadgeKind = 'coming-soon' | 'sold-out' | 'offer' | 'new';
 
@@ -59,6 +78,8 @@ export interface ProductSummary {
   metaLine?: string;
   badge?: BadgeKind;
   availability: Availability;
+  /** Collection principale (fil d'Ariane) ; n'influe jamais sur l'URL du produit. */
+  primaryCollection?: CollectionRef;
   /** Nombre d'options s'il y a un choix à faire (la carte mène alors à la fiche). */
   variantCount: number;
 }

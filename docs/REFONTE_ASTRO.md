@@ -1,6 +1,6 @@
 # Refonte Dar Nūr — nouveau socle Astro (`site/`)
 
-> Statut au 1er octobre 2026 : **étape 5 terminée — socle technique en préproduction.**
+> Statut au 2 octobre 2026 : **étape 6 terminée — schéma Supabase migré (additif), lu par le socle.**
 > Les pages catalogue ne sont **pas** migrées. La production reste **dar-nur.fr** (GitHub Pages,
 > racine du dépôt), que rien dans `site/` ne modifie.
 
@@ -12,7 +12,7 @@
 | Framework | Astro 7, sortie **statique** (aucun SSR à l'exécution), TypeScript `strictest`. |
 | JavaScript client | Aucun framework. Petits `<script>` par composant (bundlés, dédupliqués par Astro) seulement là où il faut de l'interaction : menu mobile, méga-menu, panneaux, recherche, sélecteur de variantes. Header, footer, cartes : HTML statique. |
 | CSS | Variables CSS (`src/styles/tokens.css`) + base globale (`base.css`) + CSS scopé dans chaque composant. Pas de Tailwind ni de bibliothèque d'UI : aucun bénéfice pour ~40 composants, et du poids en plus. |
-| Données | Supabase **en lecture seule, au build** (`src/lib/supabase.ts`, `fetch` natif, colonnes listées explicitement). Traduction vers les types d'affichage dans `src/lib/catalog.ts` : seul fichier à adapter lors de la migration du schéma (étape 6). |
+| Données | Supabase **en lecture seule, au build** (`src/lib/supabase.ts`, `fetch` natif, colonnes listées explicitement). Traduction vers les types d'affichage dans `src/lib/catalog.ts`, seul fichier qui connaît le schéma. Depuis l'étape 6 : `status = published`, collection principale, `availability` (NULL = à arbitrer → repli sur `coming_soon`), `product_media`, options normalisées, arbre `collections`, `settings` publics. Schéma : `docs/SCHEMA_SUPABASE.md`. |
 | Images | `src/components/ui/CatalogPicture.astro`, point d'entrée unique : AVIF + WebP, `srcset`/`sizes`, dimensions déclarées, recadrage au ratio, chargement différé sauf l'image prioritaire (LCP). Images distantes autorisées : `dar-nur.fr` et le stockage public Supabase. |
 | Polices | API Fonts d'Astro, fichiers locaux : Cormorant Garamond 500–600 (29 Ko) + Jost 400–500 (17 Ko), sous-ensemble FR + ū. Générés par `site/scripts/fonts/build-fonts.py` (sources épinglées), versionnés. Polices de repli aux métriques ajustées, préchargement. Aucun appel à Google Fonts. |
 | Icônes | Lucide (contour, trait 1,5), inlinées au build depuis `lucide-static` ; jeu fermé dans `src/components/ui/icons.ts`. Logos de réseaux : Simple Icons (CC0), copiés. |
@@ -90,4 +90,5 @@ compteur ou « best seller » sans données ; aucune photo générée à la plac
 
 | Fait (étape 5) | À venir |
 |---|---|
-| Socle, tokens, polices, logo, header, méga-menu, menu mobile 2 niveaux, bandeau, recherche (visuelle), mini-panier (visuel), footer, réassurance, ProductCard, UniverseCard, CollectionCard, VariantSelector, guide des tailles (repli), primitives UI, pages `/demo/`, `/design-system/`, `/lab/supabase/`, Netlify, CI | Étape 6 : migration additive du schéma Supabase. Puis pages univers/collections/fiches, panier métier, recherche, SEO (301, sitemap, JSON-LD), shooting photo, bascule. |
+| Socle, tokens, polices, logo, header, méga-menu, menu mobile 2 niveaux, bandeau, recherche (visuelle), mini-panier (visuel), footer, réassurance, ProductCard, UniverseCard, CollectionCard, VariantSelector, guide des tailles (repli), primitives UI, pages `/demo/`, `/design-system/`, `/lab/supabase/`, Netlify, CI | Étape 7 : pages univers et collections. Puis fiches, panier métier, recherche, SEO (301 depuis `redirects`, sitemap, JSON-LD), shooting photo, bascule. |
+| **Étape 6** (2026-10-02) : migration additive Supabase (9 migrations, `docs/SCHEMA_SUPABASE.md`), lecture du nouveau schéma dans `catalog.ts`, `/lab/supabase/` affiche l'arbre des collections, banc `scripts/test/schema` + CI `schema-ci.yml` | |

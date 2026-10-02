@@ -1,0 +1,55 @@
+name: Schéma Supabase — banc des migrations (étape 6)
+
+# Rejoue les migrations supabase/migrations/*etape6* sur PGlite (Postgres en WASM)
+# chargé avec le schéma de production figé (scripts/test/schema/baseline.sql) et
+# le catalogue PUBLIC lu avec la clé publique : invariants, idempotence, scénarios
+# de l'ancien admin / import / panier, rollback.
+# Aucun secret, aucune écriture : ne touche ni à Supabase ni à la production.
+
+on:
+  pull_request:
+    paths:
+      - 'supabase/migrations/**'
+      - 'supabase/checks/**'
+      - 'supabase/rollback/**'
+      - 'scripts/test/schema/**'
+      - '.github/workflows/schema-ci.yml'
+  push:
+    branches:
+      - 'refonte/**'
+    paths:
+      - 'supabase/migrations/**'
+      - 'supabase/checks/**'
+      - 'supabase/rollback/**'
+      - 'scripts/test/schema/**'
+      - '.github/workflows/schema-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: schema-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  migrations:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: scripts/test/schema
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: scripts/test/schema/package-lock.json
+
+      - name: Installation (PGlite)
+        run: npm ci
+
+      - name: Migrations, invariants, compatibilité, rollback
+        run: node run.mjs --live

@@ -10,12 +10,38 @@
  */
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from 'astro:env/server';
 
+/** Option normalisée d'une variante (étape 6 : product_variant_options → option_values). */
+export interface SupabaseVariantOptionRow {
+  option_type_id: string;
+  option_values: { code: string; label: string } | null;
+}
+
 export interface SupabaseVariantRow {
   name: string;
   price: number | null;
   active: boolean;
   sort_order: number | null;
+  /** Ancien modèle (jsonb libre), conservé pendant la transition. */
   options: Record<string, string> | null;
+  product_variant_options: SupabaseVariantOptionRow[];
+}
+
+/** Statut éditorial (étape 6) — distinct de la disponibilité commerciale. */
+export type ProductStatus = 'draft' | 'published' | 'archived';
+/** Disponibilité commerciale (étape 6). NULL en base = à arbitrer (coming_soon historique ambigu). */
+export type ProductAvailability = 'available' | 'on_demand' | 'coming_soon' | 'out_of_stock';
+
+export interface SupabaseCollectionRef {
+  slug: string;
+  path: string | null;
+  name: string;
+}
+
+export interface SupabaseMediaRow {
+  url: string;
+  sort_order: number;
+  variant_id: string | null;
+  alt_text: string | null;
 }
 
 export interface SupabaseProductRow {
@@ -30,7 +56,31 @@ export interface SupabaseProductRow {
   coming_soon: boolean;
   featured: boolean;
   variant_axes: string[] | null;
+  status: ProductStatus;
+  availability: ProductAvailability | null;
+  net_quantity: number | null;
+  net_unit: string | null;
   product_variants: SupabaseVariantRow[];
+  product_collections: { role: 'primary' | 'secondary'; collections: SupabaseCollectionRef | null }[];
+  product_media: SupabaseMediaRow[];
+}
+
+export interface SupabaseCollectionRow {
+  id: string;
+  slug: string;
+  path: string | null;
+  parent_id: string | null;
+  type: 'universe' | 'collection' | 'subcollection' | 'filter' | 'group' | 'transverse';
+  name: string;
+  nav_label: string | null;
+  h1: string | null;
+  sort_order: number;
+  is_indexable: boolean;
+}
+
+export interface SupabaseSettingRow {
+  key: string;
+  value: unknown;
 }
 
 export interface SupabaseCategoryRow {
@@ -47,7 +97,10 @@ export interface SupabaseBrandRow {
 
 export const PRODUCT_COLUMNS =
   'slug,name,category_id,tagline,price_value,images,brand,brand_slug,coming_soon,featured,variant_axes,' +
-  'product_variants(name,price,active,sort_order,options)';
+  'status,availability,net_quantity,net_unit,' +
+  'product_variants(name,price,active,sort_order,options,product_variant_options(option_type_id,option_values(code,label))),' +
+  'product_collections(role,collections(slug,path,name)),' +
+  'product_media(url,sort_order,variant_id,alt_text)';
 
 export function isSupabaseConfigured(): boolean {
   return Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
@@ -79,13 +132,21 @@ async function select<T>(table: string, query: Record<string, string>): Promise<
   return (await response.json()) as T[];
 }
 
-/** Produits publiés (active = true) d'une catégorie, dans l'ordre défini en admin. */
-export function fetchProductsByCategory(categoryId: string, limit: number): Promise<SupabaseProductRow[]> {
+/**
+ * Produits publiés dont la collection PRINCIPALE est `collectionSlug`, dans l'ordre admin
+ * (slug en second critère : les ex-aequo de sort_order ne dépendent plus de l'ordre physique).
+ * L'alias `principale` filtre sans tronquer la liste complète product_collections.
+ */
+export function fetchProductsByPrimaryCollection(
+  collectionSlug: string,
+  limit: number,
+): Promise<SupabaseProductRow[]> {
   return select<SupabaseProductRow>('products', {
-    select: PRODUCT_COLUMNS,
-    active: 'eq.true',
-    category_id: `eq.${categoryId}`,
-    order: 'sort_order.asc',
+    select: `${PRODUCT_COLUMNS},principale:product_collections!inner(collections!inner(slug))`,
+    status: 'eq.published',
+    'principale.role': 'eq.primary',
+    'principale.collections.slug': `eq.${collectionSlug}`,
+    order: 'sort_order.asc,slug.asc',
     limit: String(limit),
   });
 }
@@ -94,9 +155,9 @@ export function fetchProductsByCategory(categoryId: string, limit: number): Prom
 export async function fetchFirstWithVariantAxis(axis: string): Promise<SupabaseProductRow | undefined> {
   const rows = await select<SupabaseProductRow>('products', {
     select: PRODUCT_COLUMNS,
-    active: 'eq.true',
+    status: 'eq.published',
     variant_axes: `cs.{${axis}}`,
-    order: 'sort_order.asc',
+    order: 'sort_order.asc,slug.asc',
     limit: '1',
   });
   return rows[0];
@@ -109,6 +170,19 @@ export function fetchCategories(): Promise<SupabaseCategoryRow[]> {
   });
 }
 
+/** Arbre des collections publiées (étape 6). L'URL est `path`, jamais déduite du parent. */
+export function fetchCollections(): Promise<SupabaseCollectionRow[]> {
+  return select<SupabaseCollectionRow>('collections', {
+    select: 'id,slug,path,parent_id,type,name,nav_label,h1,sort_order,is_indexable',
+    order: 'sort_order.asc,slug.asc',
+  });
+}
+
+/** Paramètres globaux PUBLICS (la RLS ne renvoie que is_public = true). */
+export function fetchPublicSettings(): Promise<SupabaseSettingRow[]> {
+  return select<SupabaseSettingRow>('settings', { select: 'key,value', order: 'key.asc' });
+}
+
 export function fetchBrands(): Promise<SupabaseBrandRow[]> {
   return select<SupabaseBrandRow>('brands', {
     select: 'id,name',
@@ -117,12 +191,12 @@ export function fetchBrands(): Promise<SupabaseBrandRow[]> {
   });
 }
 
-/** Nombre de produits publiés (en-tête Content-Range de PostgREST). */
-export async function countActiveProducts(): Promise<number | null> {
+/** Nombre de produits publiés — status = published (en-tête Content-Range de PostgREST). */
+export async function countPublishedProducts(): Promise<number | null> {
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return null;
   const url = new URL('/rest/v1/products', SUPABASE_URL);
   url.searchParams.set('select', 'slug');
-  url.searchParams.set('active', 'eq.true');
+  url.searchParams.set('status', 'eq.published');
   const response = await fetch(url, {
     method: 'HEAD',
     headers: {

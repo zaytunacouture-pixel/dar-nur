@@ -5,11 +5,19 @@
  */
 import ProductCard from '@/components/catalog/ProductCard.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
+import { primaryCollectionOf } from '@/lib/catalog';
 import { priceLabel } from '@/lib/format';
 import { getCatalogSample } from '@/lib/sample';
 import { PRODUCT_COLUMNS } from '@/lib/supabase';
 
 const sample = await getCatalogSample();
+// Parcours à plat de l'arbre (profondeur pour l'indentation).
+const flatTree = (
+  nodes: typeof sample.collections,
+  depth = 0,
+): { node: (typeof nodes)[number]; depth: number }[] =>
+  nodes.flatMap((node) => [{ node, depth }, ...flatTree(node.children, depth + 1)]);
+const collectionRows = flatTree(sample.collections);
 const fetched = new Date(sample.fetchedAt).toLocaleString('fr-FR', { timeZone: 'Europe/Paris' });
 ---
 
@@ -25,8 +33,9 @@ const fetched = new Date(sample.fetchedAt).toLocaleString('fr-FR', { timeZone: '
     {sample.configured ? (
       <p class="dn-body-lg">
         Connecté en lecture seule. Données lues au build le <strong>{fetched}</strong> (heure de Paris) :{' '}
-        <strong>{sample.activeProductCount ?? '?'}</strong> produits publiés, {sample.categories.length}{' '}
-        catégories, {sample.brands.length} marques.
+        <strong>{sample.activeProductCount ?? '?'}</strong> produits publiés (status = published),{' '}
+        {sample.collectionCount} collections, {sample.categories.length} catégories historiques,{' '}
+        {sample.brands.length} marques.
       </p>
     ) : (
       <p class="dn-body-lg lab-warning">
@@ -45,7 +54,44 @@ const fetched = new Date(sample.fetchedAt).toLocaleString('fr-FR', { timeZone: '
     </section>
 
     <section class="lab-section">
-      <h2 class="dn-h3">Catégories ({sample.categories.length})</h2>
+      <h2 class="dn-h3">Collections — nouveau schéma ({sample.collectionCount})</h2>
+      <div class="lab-scroll" role="region" aria-label="Collections" tabindex="0">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">collection</th>
+              <th scope="col">type</th>
+              <th scope="col">URL (path)</th>
+              <th scope="col">indexable</th>
+            </tr>
+          </thead>
+          <tbody>
+            {collectionRows.map(({ node, depth }) => (
+              <tr>
+                <td style={`padding-inline-start: calc(var(--dn-space-2) + ${depth} * var(--dn-space-4))`}>
+                  {node.name}
+                </td>
+                <td>{node.type}</td>
+                <td>
+                  <code>{node.href ?? '—'}</code>
+                </td>
+                <td>{node.indexable ? 'oui' : 'non'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="lab-section">
+      <h2 class="dn-h3">Paramètres publics ({sample.settings.length})</h2>
+      <p class="dn-small">
+        {sample.settings.map((s) => `${s.key} = ${JSON.stringify(s.value)}`).join(' · ')}
+      </p>
+    </section>
+
+    <section class="lab-section">
+      <h2 class="dn-h3">Catégories historiques ({sample.categories.length})</h2>
       <div class="lab-scroll" role="region" aria-label="Catégories" tabindex="0">
         <table>
           <thead>
@@ -82,10 +128,12 @@ const fetched = new Date(sample.fetchedAt).toLocaleString('fr-FR', { timeZone: '
           <thead>
             <tr>
               <th scope="col">slug</th>
-              <th scope="col">catégorie</th>
+              <th scope="col">collection principale</th>
+              <th scope="col">status</th>
+              <th scope="col">disponibilité</th>
               <th scope="col">prix affiché</th>
-              <th scope="col">variantes</th>
-              <th scope="col">images</th>
+              <th scope="col">options normalisées</th>
+              <th scope="col">médias</th>
             </tr>
           </thead>
           <tbody>
@@ -94,10 +142,17 @@ const fetched = new Date(sample.fetchedAt).toLocaleString('fr-FR', { timeZone: '
                 <td>
                   <code>{row.slug}</code>
                 </td>
-                <td>{row.category_id}</td>
+                <td>{primaryCollectionOf(row)?.href ?? '—'}</td>
+                <td>{row.status}</td>
+                <td>{row.availability ?? 'à arbitrer'}</td>
                 <td>{priceLabel(sample.products[i]!.price)}</td>
-                <td>{row.product_variants.length}</td>
-                <td>{row.images?.length ?? 0}</td>
+                <td>
+                  {row.product_variants
+                    .flatMap((v) => v.product_variant_options.map((o) => o.option_values?.label))
+                    .filter(Boolean)
+                    .join(', ') || '—'}
+                </td>
+                <td>{row.product_media.length}</td>
               </tr>
             ))}
           </tbody>
