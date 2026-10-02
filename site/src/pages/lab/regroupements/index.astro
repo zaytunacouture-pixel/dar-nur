@@ -1,0 +1,279 @@
+---
+/**
+ * LAB — futurs regroupements Mode (étape 8). Page d'INSPECTION interne : noindex, hors sitemap
+ * (aucun data-dn-indexable), aucun lien depuis la navigation publique. Rien n'est publié ni
+ * redirigé : les fiches actuelles restent les seules fiches publiques.
+ * Sert au propriétaire à trancher : fusion oui/non, nom du modèle, noms des couleurs, motifs,
+ * photos, écarts de prix — avant la future bascule.
+ */
+import CatalogPicture from '@/components/ui/CatalogPicture.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { groupsPage, labelSourceText, type GroupView } from '@/lib/product-groups';
+
+const page = await groupsPage();
+const memberCount = (groups: GroupView[]) => groups.reduce((t, g) => t + g.members.length, 0);
+const thumb = { width: 192, height: 240, widths: [96, 192], sizes: '96px' };
+const sections = [
+  {
+    id: 'surs',
+    title: 'Regroupements sûrs',
+    intro: `${page.safe.length} futurs modèles proposés à l’étape 6, regroupant ${memberCount(page.safe)} fiches actuelles. Chaque aperçu simule la fiche fusionnée avec les vraies photos, prix et tailles des fiches membres.`,
+    groups: page.safe,
+  },
+  {
+    id: 'validation',
+    title: 'Validation humaine requise',
+    intro:
+      'Regroupements incertains et doublons probables : aucun aperçu fusionné, aucune décision prise. Les différences visibles sont listées pour arbitrage.',
+    groups: page.review,
+  },
+];
+---
+
+<BaseLayout
+  seo={{
+    title: 'LAB — regroupements Mode',
+    description: 'Inspection interne des futurs regroupements Mode. Non publié, non indexé.',
+    noindex: true,
+  }}
+  showReassurance={false}
+>
+  <div class="dn-container dn-lab" data-dn-page="lab-groups">
+    <header class="dn-lab__head dn-stack">
+      <p class="dn-label dn-muted">LAB · interne · noindex</p>
+      <h1>Futurs regroupements Mode</h1>
+      <p class="dn-body-lg dn-muted dn-measure">
+        Aperçu de validation avant la bascule. <strong>Rien n’est publié</strong> : les fiches actuelles,
+        leurs adresses et les redirections restent inchangées.
+      </p>
+      <p class="dn-small dn-muted">
+        Propositions : instantané de l’étape 6 du {page.exportedAt} (tables réservées à l’admin). Photos,
+        prix, tailles et disponibilités : catalogue public lu au moment du build.
+      </p>
+      <nav aria-label="Sections du LAB">
+        <ul class="dn-lab__toc" role="list">
+          {sections.map((s) => (
+            <li>
+              <a href={`#${s.id}`}>
+                {s.title} ({s.groups.length})
+              </a>
+            </li>
+          ))}
+          <li>
+            <a href="#slugs">Futurs slugs à l’étude</a>
+          </li>
+        </ul>
+      </nav>
+    </header>
+
+    {sections.map((section) => (
+      <section class="dn-lab__section" id={section.id} aria-labelledby={`${section.id}-title`}>
+        <h2 id={`${section.id}-title`}>{section.title}</h2>
+        <p class="dn-muted dn-measure">{section.intro}</p>
+        {section.groups.map((group) => (
+          <article class="dn-lab-group" id={`groupe-${group.code.toLowerCase()}`} data-dn-group={group.code}>
+            <header class="dn-lab-group__head">
+              <p class="dn-label dn-muted">
+                {group.code} · {group.kind === 'duplicate' ? 'doublon probable' : 'modèle'} ·{' '}
+                {group.decision === 'safe' ? 'sûr' : 'à valider'}
+                {group.axisLabel && ` · axe : ${group.axisLabel.toLowerCase()}`}
+              </p>
+              <h3>{group.proposedName ?? 'Nom à définir'}</h3>
+              {group.kind === 'model' && (
+                <p class="dn-body-sm">
+                  Futur slug : <code>{group.proposedSlug ? `/${group.proposedSlug}/` : 'à définir'}</code>{' '}
+                  <span class="dn-muted">(non créé, aucune redirection)</span>
+                </p>
+              )}
+              {group.note && <p class="dn-body-sm dn-lab-group__note">Note de l’étape 6 : {group.note}</p>}
+            </header>
+
+            <ul class="dn-lab-members" role="list">
+              {group.members.map((member) => (
+                <li class:list={['dn-lab-member', { 'is-base': member.isBase }]}>
+                  <div class="dn-lab-member__photos">
+                    {member.images.length > 0 ? (
+                      member.images.slice(0, 4).map((image) => <CatalogPicture image={image} {...thumb} />)
+                    ) : (
+                      <span class="dn-lab-member__nophoto dn-small">Sans photo</span>
+                    )}
+                  </div>
+                  <dl class="dn-lab-member__facts dn-small">
+                    <div>
+                      <dt>Libellé proposé</dt>
+                      <dd>
+                        <strong>{member.label ?? '—'}</strong>{' '}
+                        <span class="dn-muted">({labelSourceText(member.labelSource)})</span>
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Fiche actuelle</dt>
+                      <dd>
+                        {member.name ? <a href={member.href}>{member.name}</a> : 'non publiée'}
+                        <br />
+                        <code>{member.href}</code>
+                        {member.isBase && <span class="dn-muted"> · fiche de base</span>}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Prix</dt>
+                      <dd>{member.priceLabel}</dd>
+                    </div>
+                    <div>
+                      <dt>Tailles en base</dt>
+                      <dd>{member.sizes.length ? member.sizes.join(' · ') : 'aucune'}</dd>
+                    </div>
+                    <div>
+                      <dt>Photos</dt>
+                      <dd>{member.images.length}</dd>
+                    </div>
+                    <div>
+                      <dt>Disponibilité</dt>
+                      <dd>{member.availability ?? '—'}</dd>
+                    </div>
+                  </dl>
+                </li>
+              ))}
+            </ul>
+
+            {group.issues.length > 0 ? (
+              <div class="dn-lab-group__issues">
+                <h4 class="dn-body-sm">À trancher ({group.issues.length})</h4>
+                <ul class="dn-body-sm" role="list">
+                  {group.issues.map((issue) => (
+                    <li class:list={{ 'is-conflict': issue.startsWith('CONFLIT') }}>{issue}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <p class="dn-body-sm dn-muted">Aucun écart détecté dans les données.</p>
+            )}
+
+            {group.previewPath && (
+              <p>
+                <a class="dn-lab-group__preview" href={group.previewPath}>
+                  Voir l’aperçu de la fiche fusionnée
+                </a>
+              </p>
+            )}
+          </article>
+        ))}
+      </section>
+    ))}
+
+    <section class="dn-lab__section" id="slugs" aria-labelledby="slugs-title">
+      <h2 id="slugs-title">Futurs slugs à l’étude</h2>
+      <p class="dn-muted dn-measure">
+        Décisions de nommage prises à l’étape 3, <strong>non appliquées</strong> : l’URL actuelle reste servie
+        et aucune 301 n’existe.
+      </p>
+      <ul class="dn-body-sm" role="list">
+        {page.futureSlugs.map((entry) => (
+          <li>
+            {entry.label} : <code>{entry.current ?? '—'}</code> → <code>{entry.future}</code>{' '}
+            {entry.issues.length ? (
+              <strong>{entry.issues.join(' ')}</strong>
+            ) : (
+              <span class="dn-muted">(aucun conflit avec une route actuelle)</span>
+            )}
+          </li>
+        ))}
+      </ul>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .dn-lab {
+    display: grid;
+    gap: var(--dn-space-12);
+    padding-block: var(--dn-space-6) var(--dn-section-y);
+  }
+  .dn-lab__toc {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--dn-space-2) var(--dn-space-5);
+  }
+  .dn-lab__section {
+    display: grid;
+    gap: var(--dn-space-6);
+  }
+  .dn-lab-group {
+    display: grid;
+    gap: var(--dn-space-4);
+    padding-block-start: var(--dn-space-6);
+    border-top: var(--dn-border-decor);
+  }
+  .dn-lab-group__head {
+    display: grid;
+    gap: var(--dn-space-1);
+  }
+  .dn-lab-group__note {
+    color: var(--dn-ink-2);
+  }
+  .dn-lab-members {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+    gap: var(--dn-space-4);
+  }
+  .dn-lab-member {
+    display: grid;
+    gap: var(--dn-space-3);
+    align-content: start;
+    padding: var(--dn-space-3);
+    border: 1px solid var(--dn-line);
+    border-radius: var(--dn-radius-sm);
+    background: var(--dn-surface);
+  }
+  .dn-lab-member.is-base {
+    border: var(--dn-border-selected);
+  }
+  .dn-lab-member__photos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--dn-space-2);
+  }
+  .dn-lab-member__photos :global(img) {
+    display: block;
+    inline-size: 96px;
+    block-size: 120px;
+    object-fit: cover;
+    border-radius: var(--dn-radius-sm);
+    background: var(--dn-media);
+  }
+  .dn-lab-member__nophoto {
+    display: grid;
+    place-items: center;
+    inline-size: 96px;
+    block-size: 120px;
+    background: var(--dn-media);
+  }
+  .dn-lab-member__facts {
+    display: grid;
+    gap: var(--dn-space-1);
+  }
+  .dn-lab-member__facts dt {
+    color: var(--dn-ink-2);
+  }
+  .dn-lab-member__facts code {
+    overflow-wrap: anywhere;
+  }
+  .dn-lab-group__issues {
+    padding: var(--dn-space-3) var(--dn-space-4);
+    border-radius: var(--dn-radius-sm);
+    background: var(--dn-warning-bg);
+  }
+  .dn-lab-group__issues ul {
+    display: grid;
+    gap: var(--dn-space-1);
+    padding-inline-start: var(--dn-space-5);
+    list-style: disc;
+  }
+  .dn-lab-group__issues .is-conflict {
+    color: var(--dn-error);
+    font-weight: var(--dn-fw-medium);
+  }
+  .dn-lab-group__preview {
+    font-weight: var(--dn-fw-medium);
+  }
+</style>

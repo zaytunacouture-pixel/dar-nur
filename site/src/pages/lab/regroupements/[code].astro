@@ -1,0 +1,42 @@
+---
+/**
+ * LAB — aperçu de la future fiche fusionnée d'un regroupement Mode SÛR (étape 8).
+ * Même gabarit que les vraies fiches (ProductTemplate, mode `preview`) : noindex, hors sitemap,
+ * sans JSON-LD, commande désactivée. L'URL /lab/regroupements/{code}/ ne peut entrer en conflit
+ * avec aucune fiche (préfixe /lab/ réservé). Le futur slug n'est qu'affiché.
+ */
+import type { GetStaticPaths } from 'astro';
+import ProductTemplate from '@/components/templates/ProductTemplate.astro';
+import { groupPreview, safeGroupCodes } from '@/lib/product-groups';
+
+export const getStaticPaths = (async () => {
+  const codes = await safeGroupCodes();
+  return codes.map((code) => ({ params: { code: code.toLowerCase() }, props: { code } }));
+}) satisfies GetStaticPaths;
+
+interface Props {
+  code: string;
+}
+
+const { view, group } = await groupPreview(Astro.props.code);
+---
+
+<ProductTemplate view={view}>
+  <aside class="dn-container dn-lab-banner" slot="banner" aria-label="Aperçu interne">
+    <p class="dn-body-sm">
+      <strong>Aperçu LAB {group.code} — non publié.</strong> Fusion simulée de {group.members.length} fiches
+      actuelles ; futur slug proposé : <code>/{group.proposedSlug}/</code> (non créé). Textes repris de la
+      fiche de base. <a href="/lab/regroupements/">Retour au LAB</a> ·{' '}
+      <a href={`/lab/regroupements/#groupe-${group.code.toLowerCase()}`}>écarts à trancher</a>
+    </p>
+  </aside>
+</ProductTemplate>
+
+<style>
+  .dn-lab-banner p {
+    margin-block: var(--dn-space-3);
+    padding: var(--dn-space-3) var(--dn-space-4);
+    border-radius: var(--dn-radius-sm);
+    background: var(--dn-warning-bg);
+  }
+</style>
