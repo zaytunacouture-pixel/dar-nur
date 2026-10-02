@@ -1,0 +1,41 @@
+---
+/**
+ * Pages catalogue générées depuis Supabase (étape 7) : univers, collections, sous-collections,
+ * transverses (Idées cadeaux, Offres & packs) et pages marque de parfum.
+ * L'URL de chaque page est `collections.path` (stockée, jamais recalculée) ; une marque vit
+ * sous le chemin de la collection Parfums. Toute autre URL → 404 (aucun repli vers l'accueil).
+ * Les pages statiques du socle (/, /demo/, …) ont priorité sur cette route.
+ */
+import type { GetStaticPaths } from 'astro';
+import CollectionTemplate from '@/components/templates/CollectionTemplate.astro';
+import UniverseTemplate from '@/components/templates/UniverseTemplate.astro';
+import {
+  brandView,
+  catalogRoutes,
+  collectionView,
+  universeView,
+  type CatalogRoute,
+} from '@/lib/catalog-views';
+
+export const getStaticPaths = (async () => {
+  const routes = await catalogRoutes();
+  return routes.map((route) => ({
+    params: { path: route.path.replace(/^\/|\/$/g, '') },
+    props: { route },
+  }));
+}) satisfies GetStaticPaths;
+
+interface Props {
+  route: CatalogRoute;
+}
+
+const { route } = Astro.props;
+---
+
+{route.kind === 'universe' ? (
+  <UniverseTemplate view={await universeView(route.slug)} />
+) : route.kind === 'brand' ? (
+  <CollectionTemplate view={await brandView(route.slug)} />
+) : (
+  <CollectionTemplate view={await collectionView(route.slug)} />
+)}

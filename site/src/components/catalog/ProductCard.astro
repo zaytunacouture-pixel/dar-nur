@@ -16,11 +16,19 @@ interface Props {
   headingLevel?: 'h2' | 'h3';
   /** Première rangée d'une grille : image prioritaire (LCP probable). */
   priority?: boolean;
+  /**
+   * Ajout rapide autorisé. Faux sur les pages catalogue tant que le panier n'est pas migré :
+   * aucun bouton ne doit faire semblant d'ajouter au panier sur une vraie page.
+   */
+  allowQuickAdd?: boolean;
 }
 
-const { product, headingLevel: Heading = 'h3', priority = false } = Astro.props;
+const { product, headingLevel: Heading = 'h3', priority = false, allowQuickAdd = true } = Astro.props;
 const quickAdd =
-  product.variantCount <= 1 && product.price.kind !== 'on-request' && product.availability === 'available';
+  allowQuickAdd &&
+  product.variantCount <= 1 &&
+  product.price.kind !== 'on-request' &&
+  product.availability === 'available';
 
 const sizes = '(min-width: 1024px) 302px, (min-width: 768px) 30vw, 46vw';
 const frame = { width: 600, height: 750, widths: [200, 400, 600], sizes };

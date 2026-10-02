@@ -1,0 +1,61 @@
+---
+/** Maillage de bas de page (§K.1) : « Dans {Univers} : … », autres univers. De vrais liens. */
+import type { RelatedBlock } from '@/lib/catalog-views';
+
+interface Props {
+  blocks: RelatedBlock[];
+}
+
+const { blocks } = Astro.props;
+---
+
+<div class="dn-related">
+  {blocks
+    .filter((block) => block.links.length > 0)
+    .map((block) => (
+      <section class="dn-related__block">
+        <h2 class="dn-related__title dn-label dn-muted">{block.title}</h2>
+        <ul class="dn-related__list" role="list">
+          {block.links.map((link) => (
+            <li>
+              <a href={link.href}>{link.label}</a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))}
+</div>
+
+<style>
+  .dn-related {
+    display: grid;
+    gap: var(--dn-space-6);
+    padding-block-start: var(--dn-space-8);
+    border-top: var(--dn-border-decor);
+  }
+  .dn-related__block {
+    display: grid;
+    gap: var(--dn-space-2);
+  }
+  /* Titre de section en libellé : la hiérarchie H2 reste lisible, sans gros titre décoratif. */
+  .dn-related__title {
+    font-family: var(--dn-font-sans);
+    font-size: var(--dn-fs-label);
+  }
+  .dn-related__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--dn-space-5);
+  }
+  .dn-related__list a {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: var(--dn-tap-min);
+    font-size: var(--dn-fs-body-sm);
+  }
+  @media (min-width: 1024px) {
+    .dn-related {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+</style>

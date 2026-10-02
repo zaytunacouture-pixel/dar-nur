@@ -12,11 +12,13 @@ import Logo from './Logo.astro';
 
 interface Props {
   currentPath: string;
+  /** Entrée de premier niveau de la page (univers d'une collection), pour la marquer courante. */
+  section?: string | undefined;
   cartCount?: number;
 }
 
-const { currentPath, cartCount = 0 } = Astro.props;
-const isCurrent = (href: string) => currentPath === href || currentPath.startsWith(href);
+const { currentPath, section, cartCount = 0 } = Astro.props;
+const isCurrent = (href: string) => currentPath === href || currentPath.startsWith(href) || section === href;
 const cartLabel =
   cartCount > 0
     ? `Ouvrir le panier, ${cartCount} article${cartCount > 1 ? 's' : ''}`

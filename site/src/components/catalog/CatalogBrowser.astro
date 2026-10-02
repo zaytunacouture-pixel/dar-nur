@@ -1,0 +1,645 @@
+---
+/**
+ * Grille de collection + puces + filtres et tri (§K.1–K.3), sur HTML STATIQUE.
+ *
+ * - Tous les produits de la page sont dans le HTML, dans l'ordre « Sélection » : sans
+ *   JavaScript, la page est complète et lisible (les commandes de filtre restent cachées).
+ * - Le script ne reçoit AUCUN JSON produit : il lit les attributs data-f-* (codes de
+ *   facettes affichées), data-price, data-added et data-order de chaque carte.
+ * - État = fragment d'URL (#contenance=200-g,300-g&tri=prix-croissant), remplacé sans
+ *   nouvelle entrée d'historique : partageable, conservé au retour arrière, jamais indexé.
+ * - Choix appliqués en direct ; le pied du tiroir annonce « Voir N produits ».
+ */
+import Button from '@/components/ui/Button.astro';
+import Drawer from '@/components/ui/Drawer.astro';
+import Choice from '@/components/ui/Choice.astro';
+import Icon from '@/components/ui/Icon.astro';
+import type { CollectionChip, Facet, GridProduct, SortKey } from '@/types/catalog';
+import ProductCard from './ProductCard.astro';
+
+interface Props {
+  products: GridProduct[];
+  facets: Facet[];
+  chips: CollectionChip[];
+  sorts: SortKey[];
+  /** Libellé des puces de navigation (« Sous-collections », « Marques »). */
+  chipsLabel?: string;
+  /** Titre de la grille (masqué par défaut : le H1 de la page la nomme déjà). */
+  heading?: string;
+  showHeading?: boolean;
+}
+
+const {
+  products,
+  facets,
+  chips,
+  sorts,
+  chipsLabel = 'Dans cette collection',
+  heading = 'Produits',
+  showHeading = false,
+} = Astro.props;
+const SORT_LABELS: Record<SortKey, string> = {
+  selection: 'Sélection',
+  'prix-croissant': 'Prix croissant',
+  'prix-decroissant': 'Prix décroissant',
+  nouveautes: 'Nouveautés',
+};
+const linkChips = chips.filter((c): c is Extract<CollectionChip, { kind: 'link' }> => c.kind === 'link');
+const filterChips = chips.filter(
+  (c): c is Extract<CollectionChip, { kind: 'filter' }> => c.kind === 'filter',
+);
+const hasTools = facets.length > 0 || sorts.length > 1;
+const panelTitle = facets.length > 0 ? 'Filtrer et trier' : 'Trier';
+const quickFacet = filterChips[0]?.facet;
+const quickLabel = facets.find((f) => f.key === quickFacet)?.label.toLowerCase() ?? '';
+---
+
+<section class="dn-browser" data-dn-catalog aria-labelledby="dn-products-title">
+  <h2 id="dn-products-title" class:list={['dn-browser__heading', { 'dn-visually-hidden': !showHeading }]}>
+    {heading}
+  </h2>
+
+  {(hasTools || chips.length > 0) && (
+    <div class="dn-browser__tools">
+      {hasTools && (
+        <button
+          type="button"
+          class="dn-browser__filter"
+          data-dn-open="dn-filters"
+          data-dn-js
+          hidden
+          aria-haspopup="dialog"
+          aria-expanded="false"
+          aria-controls="dn-filters"
+          data-dn-has-facets={facets.length > 0 ? 'true' : 'false'}
+        >
+          <Icon name="sliders-horizontal" size={20} />
+          <span>{facets.length > 0 ? 'Filtrer' : 'Trier'}</span>
+          <span class="dn-browser__filter-count" data-dn-filter-count />
+        </button>
+      )}
+      {linkChips.length > 0 && (
+        <nav class="dn-chips" aria-label={chipsLabel}>
+          <ul class="dn-chips__list" role="list">
+            {linkChips.map((chip) => (
+              <li>
+                <a class="dn-chip" href={chip.href} aria-current={chip.current ? 'page' : undefined}>
+                  {chip.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )}
+      {filterChips.length > 0 && (
+        <div class="dn-chips" role="group" aria-label={`Filtrer par ${quickLabel}`} data-dn-js hidden>
+          <ul class="dn-chips__list" role="list">
+            {filterChips.map((chip) => (
+              <li>
+                <button
+                  type="button"
+                  class="dn-chip"
+                  aria-pressed={chip.code === null ? 'true' : 'false'}
+                  data-dn-chip={chip.facet}
+                  data-dn-code={chip.code ?? ''}
+                >
+                  {chip.label}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {sorts.length > 1 && (
+        <label class="dn-browser__sort" data-dn-js hidden>
+          <span class="dn-small dn-muted">Trier :</span>
+          <select data-dn-sort-select>
+            {sorts.map((sort) => (
+              <option value={sort}>{SORT_LABELS[sort]}</option>
+            ))}
+          </select>
+        </label>
+      )}
+    </div>
+  )}
+
+  <div class="dn-browser__active" data-dn-active hidden>
+    <ul class="dn-chips__list dn-chips__list--wrap" role="list" data-dn-active-list></ul>
+    <button type="button" class="dn-browser__clear" data-dn-clear>
+      Tout effacer
+    </button>
+  </div>
+
+  <ul class="dn-grid" role="list" data-dn-grid>
+    {products.map((item, index) => (
+      <li
+        data-dn-item
+        data-order={item.order}
+        data-price={item.minPrice ?? ''}
+        data-added={item.added}
+        {...Object.fromEntries(
+          Object.entries(item.facets).map(([key, codes]) => [`data-f-${key}`, codes.join(' ')]),
+        )}
+      >
+        <ProductCard product={item.summary} priority={index < 2} allowQuickAdd={false} />
+      </li>
+    ))}
+  </ul>
+
+  <div class="dn-browser__empty" data-dn-empty hidden>
+    <p>Aucun produit ne correspond à ces filtres.</p>
+    <button type="button" class="dn-browser__clear" data-dn-clear>
+      Effacer les filtres
+    </button>
+  </div>
+
+  {hasTools && (
+    <Drawer id="dn-filters" title={panelTitle} side="right">
+      <form class="dn-filters" data-dn-filters>
+        {sorts.length > 1 && (
+          <fieldset class="dn-facet">
+            <legend class="dn-label dn-muted">Trier par</legend>
+            {sorts.map((sort) => (
+              <Choice
+                type="radio"
+                id={`dn-sort-${sort}`}
+                name="tri"
+                value={sort}
+                label={SORT_LABELS[sort]}
+                checked={sort === 'selection'}
+              />
+            ))}
+          </fieldset>
+        )}
+        {facets.map((facet) => (
+          <fieldset class="dn-facet" data-dn-facet={facet.key}>
+            <legend class="dn-facet__legend">
+              {facet.label}
+              <span class="dn-facet__selected dn-small dn-muted" data-dn-facet-selected />
+            </legend>
+            {facet.values.map((value) => (
+              <Choice
+                type="checkbox"
+                id={`dn-f-${facet.key}-${value.code}`}
+                name={facet.key}
+                value={value.code}
+                label={value.label}
+                count={value.count}
+              />
+            ))}
+          </fieldset>
+        ))}
+      </form>
+      <div slot="footer" class="dn-filters__footer">
+        {facets.length > 0 && (
+          <Button variant="secondary" data-dn-clear>
+            Tout effacer
+          </Button>
+        )}
+        <Button variant="primary" data-dn-close data-dn-apply>
+          Voir {products.length} produits
+        </Button>
+      </div>
+    </Drawer>
+  )}
+</section>
+
+<style>
+  .dn-browser {
+    container-type: inline-size;
+  }
+  .dn-browser__heading {
+    margin-block-end: var(--dn-section-title-gap);
+  }
+
+  /* ── Ligne d'outils : [Filtrer] | puces défilantes | [Trier] (desktop) ── */
+  .dn-browser__tools {
+    display: flex;
+    align-items: center;
+    gap: var(--dn-space-3);
+    min-block-size: var(--dn-chip-h);
+    margin-block-end: var(--dn-space-5);
+  }
+  .dn-browser__filter {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--dn-space-2);
+    block-size: var(--dn-chip-h);
+    padding-inline: var(--dn-space-4);
+    border: var(--dn-border-width) solid var(--dn-ink);
+    border-radius: var(--dn-radius-sm);
+    background: transparent;
+    font-size: var(--dn-fs-button);
+    font-weight: var(--dn-fw-medium);
+  }
+  .dn-browser__filter:hover {
+    background: var(--dn-bg-alt);
+  }
+  .dn-browser__filter:not([hidden]) + .dn-chips {
+    padding-inline-start: var(--dn-space-3);
+    border-inline-start: var(--dn-border-decor);
+  }
+  .dn-browser__filter-count:empty {
+    display: none;
+  }
+
+  .dn-chips {
+    flex: 1;
+    min-inline-size: 0;
+    /* Les puces défilent dans leur propre zone : jamais de défilement horizontal de la page. */
+    overflow-x: auto;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+  }
+  .dn-chips::-webkit-scrollbar {
+    display: none;
+  }
+  .dn-chips__list {
+    display: flex;
+    gap: var(--dn-space-2);
+    inline-size: max-content;
+  }
+  .dn-chips__list--wrap {
+    flex-wrap: wrap;
+    inline-size: auto;
+  }
+  /* :global — les puces de filtres actifs sont créées par le script (sans attribut de portée). */
+  .dn-browser :global(.dn-chip) {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--dn-space-2);
+    block-size: var(--dn-chip-h);
+    padding-inline: var(--dn-space-4);
+    border: var(--dn-border-ui);
+    border-radius: var(--dn-radius-pill);
+    background: var(--dn-bg);
+    color: var(--dn-ink);
+    font-size: var(--dn-fs-body-sm);
+    font-weight: var(--dn-fw-medium);
+    white-space: nowrap;
+    text-decoration: none;
+  }
+  .dn-browser :global(.dn-chip:hover) {
+    background: var(--dn-hover-tint);
+  }
+  .dn-browser :global(.dn-chip[aria-current='page']),
+  .dn-browser :global(.dn-chip[aria-pressed='true']) {
+    border: var(--dn-border-selected);
+    background: var(--dn-green-50);
+  }
+
+  .dn-browser__sort {
+    display: none;
+  }
+
+  /* ── Filtres actifs ── */
+  .dn-browser__active {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--dn-space-2) var(--dn-space-4);
+    margin-block-end: var(--dn-space-5);
+  }
+  .dn-browser__active[hidden],
+  .dn-browser__empty[hidden] {
+    display: none;
+  }
+  .dn-browser__clear {
+    min-block-size: var(--dn-tap-min);
+    padding: 0;
+    border: 0;
+    background: none;
+    font-size: var(--dn-fs-body-sm);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  /* ── Grille : 2 colonnes mobile, 3 tablette, 4 desktop (§E.2) ── */
+  .dn-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--dn-grid-row-gap) var(--dn-grid-gap);
+  }
+  .dn-grid > [hidden] {
+    display: none;
+  }
+  /* Très petit écran (< 280 px de contenu, ex. 280 px plié) : une colonne plutôt que des cartes illisibles. */
+  @container (max-width: 279px) {
+    .dn-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  .dn-browser__empty {
+    display: grid;
+    justify-items: start;
+    gap: var(--dn-space-2);
+    padding-block: var(--dn-space-8);
+  }
+
+  /* ── Tiroir ── */
+  .dn-filters {
+    display: grid;
+  }
+  .dn-facet {
+    display: grid;
+    padding: var(--dn-space-4);
+    border: 0;
+    border-bottom: var(--dn-border-decor);
+  }
+  .dn-facet legend {
+    float: left;
+    inline-size: 100%;
+    margin-block-end: var(--dn-space-2);
+  }
+  .dn-facet__legend {
+    display: flex;
+    justify-content: space-between;
+    font-weight: var(--dn-fw-medium);
+  }
+  .dn-facet :global(.dn-choice__input:disabled ~ .dn-choice__label) {
+    text-decoration: line-through;
+  }
+  .dn-filters__footer {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: var(--dn-space-3);
+  }
+  .dn-filters__footer > :only-child {
+    grid-column: 1 / -1;
+  }
+  @media (min-width: 768px) {
+    .dn-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .dn-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    .dn-browser__tools {
+      flex-wrap: nowrap;
+    }
+    /* Desktop : puces à gauche, [Filtrer] et [Trier] à droite (§K.2). */
+    .dn-browser__filter {
+      order: 2;
+    }
+    .dn-browser__filter[data-dn-has-facets='false'] {
+      display: none;
+    }
+    .dn-browser__filter:not([hidden]) + .dn-chips {
+      padding-inline-start: 0;
+      border-inline-start: 0;
+    }
+    .dn-browser__sort:not([hidden]) {
+      order: 3;
+      display: inline-flex;
+      align-items: center;
+      gap: var(--dn-space-2);
+    }
+    .dn-browser__sort select {
+      block-size: var(--dn-chip-h);
+      padding-inline: var(--dn-space-3);
+      border: var(--dn-border-ui);
+      border-radius: var(--dn-radius-sm);
+      background: var(--dn-bg);
+      font-size: var(--dn-fs-body-sm);
+    }
+  }
+</style>
+
+<script>
+  type Sort = 'selection' | 'prix-croissant' | 'prix-decroissant' | 'nouveautes';
+
+  const root = document.querySelector<HTMLElement>('[data-dn-catalog]');
+  if (root) initCatalog(root);
+
+  function initCatalog(root: HTMLElement) {
+    const grid = root.querySelector<HTMLElement>('[data-dn-grid]')!;
+    const items = [...grid.querySelectorAll<HTMLElement>('[data-dn-item]')];
+    const form = root.querySelector<HTMLFormElement>('[data-dn-filters]');
+    const facetKeys = [...root.querySelectorAll<HTMLElement>('[data-dn-facet]')].map(
+      (el) => el.dataset.dnFacet!,
+    );
+    const sortValues = new Set<string>(
+      [...root.querySelectorAll<HTMLInputElement>('input[name="tri"]')].map((input) => input.value),
+    );
+    const labels = new Map<string, string>(); // « facette:code » → « Libellé facette : valeur »
+    for (const input of root.querySelectorAll<HTMLInputElement>('[data-dn-facet] input')) {
+      const legend =
+        input.closest('fieldset')?.querySelector('legend')?.firstChild?.textContent?.trim() ?? '';
+      const label = input
+        .closest('label')
+        ?.querySelector('.dn-choice__label')
+        ?.firstChild?.textContent?.trim();
+      labels.set(`${input.name}:${input.value}`, `${legend} : ${label ?? input.value}`);
+    }
+
+    const state = { filters: new Map<string, Set<string>>(), sort: 'selection' as Sort };
+    const countEl = document.querySelector<HTMLElement>('[data-dn-count]');
+
+    for (const el of root.querySelectorAll<HTMLElement>('[data-dn-js]')) el.hidden = false;
+
+    // Puce courante (marque, sous-collection) amenée dans la zone visible de sa rangée.
+    const current = root.querySelector<HTMLElement>('.dn-chip[aria-current="page"]');
+    const strip = current?.closest<HTMLElement>('.dn-chips');
+    if (current && strip) {
+      const chip = current.getBoundingClientRect();
+      const box = strip.getBoundingClientRect();
+      if (chip.right > box.right) strip.scrollLeft += chip.left - box.left - 16;
+    }
+
+    const codesOf = (item: HTMLElement, key: string) => (item.getAttribute(`data-f-${key}`) ?? '').split(' ');
+
+    function matches(item: HTMLElement, except?: string): boolean {
+      for (const [key, selected] of state.filters) {
+        if (key === except || selected.size === 0) continue;
+        if (!codesOf(item, key).some((code) => selected.has(code))) return false;
+      }
+      return true;
+    }
+
+    function parseHash() {
+      state.filters.clear();
+      state.sort = 'selection';
+      const params = new URLSearchParams(location.hash.slice(1));
+      for (const [key, value] of params) {
+        if (key === 'tri') {
+          if (sortValues.has(value)) state.sort = value as Sort;
+        } else if (facetKeys.includes(key)) {
+          // Seules les valeurs réellement proposées sont retenues (fragment saisi à la main).
+          const known = value
+            .split(',')
+            .filter((code) =>
+              root.querySelector(`[data-dn-facet="${key}"] input[value="${CSS.escape(code)}"]`),
+            );
+          if (known.length) state.filters.set(key, new Set(known));
+        }
+      }
+    }
+
+    function writeHash() {
+      const parts: string[] = [];
+      for (const key of facetKeys) {
+        const selected = state.filters.get(key);
+        if (selected?.size) parts.push(`${key}=${[...selected].join(',')}`);
+      }
+      if (state.sort !== 'selection') parts.push(`tri=${state.sort}`);
+      const url = parts.length ? `#${parts.join('&')}` : `${location.pathname}${location.search}`;
+      history.replaceState(history.state, '', url);
+    }
+
+    function compare(a: HTMLElement, b: HTMLElement): number {
+      const order = Number(a.dataset.order) - Number(b.dataset.order);
+      const price = (el: HTMLElement) => (el.dataset.price === '' ? null : Number(el.dataset.price));
+      switch (state.sort) {
+        case 'prix-croissant':
+        case 'prix-decroissant': {
+          const pa = price(a);
+          const pb = price(b);
+          if (pa === null || pb === null) return pa === pb ? order : pa === null ? 1 : -1;
+          return (state.sort === 'prix-croissant' ? pa - pb : pb - pa) || order;
+        }
+        case 'nouveautes':
+          return (b.dataset.added ?? '').localeCompare(a.dataset.added ?? '') || order;
+        default:
+          return order;
+      }
+    }
+
+    function render() {
+      let visible = 0;
+      for (const item of items) {
+        const show = matches(item);
+        item.hidden = !show;
+        if (show) visible += 1;
+      }
+      grid.append(...[...items].sort(compare));
+
+      const plural = visible > 1 ? 's' : '';
+      if (countEl) countEl.textContent = `${visible} produit${plural}`;
+      const empty = root.querySelector<HTMLElement>('[data-dn-empty]');
+      if (empty) empty.hidden = visible > 0;
+
+      // Contrôles du tiroir : cases, compteurs dynamiques, valeurs sans résultat désactivées.
+      for (const key of facetKeys) {
+        const selected = state.filters.get(key) ?? new Set<string>();
+        const fieldset = root.querySelector<HTMLElement>(`[data-dn-facet="${key}"]`)!;
+        for (const input of fieldset.querySelectorAll<HTMLInputElement>('input')) {
+          input.checked = selected.has(input.value);
+          const count = items.filter(
+            (item) => matches(item, key) && codesOf(item, key).includes(input.value),
+          ).length;
+          const countSpan = input.closest('label')?.querySelector('.dn-choice__count');
+          if (countSpan) countSpan.textContent = `(${count})`;
+          input.disabled = count === 0 && !input.checked;
+        }
+        const badge = fieldset.querySelector('[data-dn-facet-selected]');
+        if (badge) badge.textContent = selected.size ? String(selected.size) : '';
+      }
+      for (const input of root.querySelectorAll<HTMLInputElement>('input[name="tri"]')) {
+        input.checked = input.value === state.sort;
+      }
+      const select = root.querySelector<HTMLSelectElement>('[data-dn-sort-select]');
+      if (select) select.value = state.sort;
+
+      // Puces de filtre rapide.
+      for (const chip of root.querySelectorAll<HTMLButtonElement>('[data-dn-chip]')) {
+        const selected = state.filters.get(chip.dataset.dnChip!) ?? new Set<string>();
+        const code = chip.dataset.dnCode ?? '';
+        chip.setAttribute('aria-pressed', String(code === '' ? selected.size === 0 : selected.has(code)));
+      }
+
+      // Filtres actifs (retirables) et compteur du bouton.
+      const active = [...state.filters].flatMap(([key, codes]) => [...codes].map((code) => ({ key, code })));
+      const activeBox = root.querySelector<HTMLElement>('[data-dn-active]');
+      const activeList = root.querySelector<HTMLElement>('[data-dn-active-list]');
+      if (activeBox && activeList) {
+        activeBox.hidden = active.length === 0;
+        activeList.replaceChildren(
+          ...active.map(({ key, code }) => {
+            const li = document.createElement('li');
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'dn-chip';
+            button.dataset.dnRemove = `${key}:${code}`;
+            const text = labels.get(`${key}:${code}`) ?? code;
+            button.textContent = `${text} ✕`;
+            button.setAttribute('aria-label', `Retirer le filtre ${text}`);
+            li.append(button);
+            return li;
+          }),
+        );
+      }
+      const filterCount = root.querySelector<HTMLElement>('[data-dn-filter-count]');
+      if (filterCount) filterCount.textContent = active.length ? `(${active.length})` : '';
+      const apply = root.querySelector<HTMLButtonElement>('[data-dn-apply]');
+      if (apply) {
+        const label = apply.querySelector('.dn-btn__label') ?? apply;
+        label.textContent = visible ? `Voir ${visible} produit${plural}` : 'Aucun produit';
+        apply.disabled = visible === 0;
+      }
+    }
+
+    function update() {
+      writeHash();
+      render();
+    }
+
+    form?.addEventListener('change', (event) => {
+      const input = event.target as HTMLInputElement;
+      if (input.name === 'tri') state.sort = input.value as Sort;
+      else {
+        const selected = state.filters.get(input.name) ?? new Set<string>();
+        if (input.checked) selected.add(input.value);
+        else selected.delete(input.value);
+        state.filters.set(input.name, selected);
+      }
+      update();
+    });
+
+    root.querySelector<HTMLSelectElement>('[data-dn-sort-select]')?.addEventListener('change', (event) => {
+      state.sort = (event.target as HTMLSelectElement).value as Sort;
+      update();
+    });
+
+    root.addEventListener('click', (event) => {
+      const target = event.target as HTMLElement;
+      const chip = target.closest<HTMLButtonElement>('[data-dn-chip]');
+      if (chip) {
+        const key = chip.dataset.dnChip!;
+        const code = chip.dataset.dnCode ?? '';
+        const selected = state.filters.get(key) ?? new Set<string>();
+        if (code === '') selected.clear();
+        else if (selected.has(code)) selected.delete(code);
+        else selected.add(code);
+        state.filters.set(key, selected);
+        update();
+        return;
+      }
+      const remove = target.closest<HTMLElement>('[data-dn-remove]');
+      if (remove) {
+        const [key, code] = remove.dataset.dnRemove!.split(':');
+        state.filters.get(key!)?.delete(code!);
+        update();
+        // Le bouton retiré disparaît : le focus revient au bouton « Filtrer ».
+        root.querySelector<HTMLElement>('.dn-browser__filter:not([hidden])')?.focus();
+        return;
+      }
+      if (target.closest('[data-dn-clear]')) {
+        state.filters.clear();
+        update();
+      }
+    });
+
+    window.addEventListener('hashchange', () => {
+      parseHash();
+      render();
+    });
+
+    parseHash();
+    render();
+  }
+</script>

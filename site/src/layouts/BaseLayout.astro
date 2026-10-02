@@ -23,13 +23,17 @@ interface Props {
   /** Affiche le panier fictif étiqueté (pages de démonstration uniquement). */
   cartDemo?: boolean;
   showReassurance?: boolean;
+  /** Univers (ou entrée transverse) de la page, marqué courant dans la navigation. */
+  section?: string | undefined;
 }
 
-const { seo, cartDemo = false, showReassurance = true } = Astro.props;
+const { seo, cartDemo = false, showReassurance = true, section } = Astro.props;
 const title = seo.title.includes(siteName) ? seo.title : `${seo.title} — ${siteName}`;
 const description = seo.description || defaultDescription;
 const canonical = new URL(seo.canonicalPath ?? Astro.url.pathname, Astro.site).toString();
-const robots = isIndexable && !seo.noindex ? 'index, follow' : 'noindex, nofollow';
+// Hors production : tout est fermé. En production, une page noindex par règle (marque à moins
+// de N modèles, collection vide…) laisse suivre ses liens vers les produits.
+const robots = !isIndexable ? 'noindex, nofollow' : seo.noindex ? 'noindex, follow' : 'index, follow';
 const ogImage = seo.ogImage ? new URL(seo.ogImage, Astro.site).toString() : undefined;
 ---
 
@@ -63,7 +67,7 @@ const ogImage = seo.ogImage ? new URL(seo.ogImage, Astro.site).toString() : unde
       Aller au contenu
     </a>
     <AnnouncementBar messages={announcementMessages} rotation={announcementRotation} />
-    <Header currentPath={Astro.url.pathname} cartCount={cartDemo ? demoCartCount : 0} />
+    <Header currentPath={Astro.url.pathname} section={section} cartCount={cartDemo ? demoCartCount : 0} />
     <main id="contenu" tabindex="-1">
       <slot />
     </main>

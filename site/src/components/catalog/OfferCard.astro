@@ -1,0 +1,113 @@
+---
+/**
+ * Offre métier (table `offers`) : pack composé ou promotion produit.
+ * - Prix affiché : le prix de l'offre (`promo_price`).
+ * - Prix barré / économie : UNIQUEMENT si prouvés par les prix réels des produits
+ *   (catalog-store, provenCompareAt). Un pack dont les formats ne sont pas renseignés
+ *   n'affiche aucune économie, même si un badge « Économisez … » existe en base.
+ * - La commande d'une offre passe encore par la boutique actuelle (panier non migré).
+ */
+import CatalogPicture from '@/components/ui/CatalogPicture.astro';
+import MediaPlaceholder from '@/components/ui/MediaPlaceholder.astro';
+import Price from '@/components/ui/Price.astro';
+import type { CatalogOffer } from '@/lib/catalog-store';
+import type { PriceInfo } from '@/types/catalog';
+
+interface Props {
+  offer: CatalogOffer;
+  priority?: boolean;
+}
+
+const { offer, priority = false } = Astro.props;
+const price: PriceInfo | undefined =
+  offer.price === null
+    ? undefined
+    : {
+        kind: 'fixed',
+        amount: offer.price,
+        ...(offer.provenCompareAt ? { compareAt: offer.provenCompareAt } : {}),
+      };
+const listed = offer.items.filter((item) => item.product);
+const intro =
+  offer.type === 'pack'
+    ? `Contenu du pack (${listed.length} produit${listed.length > 1 ? 's' : ''})`
+    : `Produits concernés (${listed.length})`;
+---
+
+<article class="dn-offer">
+  <div class="dn-offer__media">
+    {offer.image ? (
+      <CatalogPicture
+        image={{ src: offer.image, alt: '' }}
+        width={800}
+        height={600}
+        widths={[400, 800]}
+        sizes="(min-width: 1024px) 40vw, 92vw"
+        priority={priority}
+        decorative
+        class="dn-offer__img"
+      />
+    ) : (
+      <MediaPlaceholder caption="Visuel de l’offre à produire" ratio="var(--dn-ratio-pack)" />
+    )}
+  </div>
+  <div class="dn-offer__body">
+    <p class="dn-label dn-muted">{offer.type === 'pack' ? 'Pack' : 'Offre'}</p>
+    <h3 class="dn-offer__title">{offer.title}</h3>
+    {offer.description && <p class="dn-body-sm dn-muted">{offer.description}</p>}
+    {price && <Price price={price} />}
+    {listed.length > 0 && (
+      <details class="dn-offer__items">
+        <summary class="dn-body-sm">{intro}</summary>
+        <ul role="list">
+          {listed.map((item) => (
+            <li class="dn-body-sm">
+              <a href={item.product!.summary.href}>{item.product!.name}</a>
+              {item.quantity > 1 && <span class="dn-muted"> × {item.quantity}</span>}
+            </li>
+          ))}
+        </ul>
+      </details>
+    )}
+  </div>
+</article>
+
+<style>
+  .dn-offer {
+    display: grid;
+    gap: var(--dn-space-4);
+    align-content: start;
+  }
+  .dn-offer__media {
+    aspect-ratio: var(--dn-ratio-pack);
+    overflow: hidden;
+    border-radius: var(--dn-radius-sm);
+    background: var(--dn-media);
+  }
+  .dn-offer__media :global(.dn-offer__img) {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+  }
+  .dn-offer__body {
+    display: grid;
+    gap: var(--dn-space-2);
+    justify-items: start;
+  }
+  .dn-offer__title {
+    font-size: var(--dn-fs-h3);
+  }
+  .dn-offer__items summary {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: var(--dn-tap-min);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+  .dn-offer__items ul {
+    display: grid;
+    gap: var(--dn-space-1);
+    padding-block-end: var(--dn-space-2);
+  }
+</style>

@@ -1,31 +1,57 @@
 ---
+/**
+ * 404 de la préproduction : jamais de redirection silencieuse vers l'accueil.
+ * Collection, marque ou adresse inconnues aboutissent ici (Netlify sert 404.html avec le
+ * statut 404). Les fiches produit ne sont pas encore migrées (étape 8) : un lien EXPLICITE
+ * vers la même adresse sur la boutique actuelle est proposé, sans redirection.
+ */
 import Button from '@/components/ui/Button.astro';
-import { universes } from '@/config/navigation';
+import { navigation } from '@/config/navigation';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 ---
 
 <BaseLayout
   seo={{
     title: 'Page introuvable',
-    description: 'Cette page n’existe pas encore dans la nouvelle version.',
+    description: 'Cette adresse n’existe pas sur la nouvelle version de Dar Nūr.',
     noindex: true,
   }}
 >
   <section class="dn-section dn-container dn-stack dn-measure">
-    <h1>Cette page n’est pas encore là</h1>
+    <h1>Page introuvable</h1>
     <p class="dn-body-lg dn-muted">
-      La nouvelle version de Dar Nūr est en construction : les pages catalogue ne sont pas encore migrées. La
-      boutique actuelle reste disponible sur <a href="https://dar-nur.fr/">dar-nur.fr</a>.
+      Cette adresse n’existe pas sur la nouvelle version de Dar Nūr. Les univers et les collections sont en
+      ligne ; les fiches produit n’ont pas encore été migrées.
+    </p>
+    <p class="dn-body-lg" data-dn-legacy hidden>
+      Cette page existe peut-être sur la boutique actuelle :
+      <a data-dn-legacy-link href="https://dar-nur.fr/">
+        dar-nur.fr
+      </a>
     </p>
     <div class="dn-404__links">
-      {universes.map((u) => (
-        <Button variant="secondary" href={u.href}>
-          {u.label}
+      {navigation.map((item) => (
+        <Button variant="secondary" href={item.href}>
+          {item.label}
         </Button>
       ))}
     </div>
   </section>
 </BaseLayout>
+
+<script>
+  // Lien vers la même adresse sur la boutique actuelle (fiches produit non migrées).
+  const path = location.pathname;
+  if (/^\/[a-z0-9-]+\/?$/.test(path)) {
+    const box = document.querySelector<HTMLElement>('[data-dn-legacy]');
+    const link = document.querySelector<HTMLAnchorElement>('[data-dn-legacy-link]');
+    if (box && link) {
+      link.href = `https://dar-nur.fr${path}`;
+      link.textContent = `dar-nur.fr${path}`;
+      box.hidden = false;
+    }
+  }
+</script>
 
 <style>
   .dn-404__links {

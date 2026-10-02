@@ -1,0 +1,82 @@
+---
+/**
+ * Fil d'Ariane (§K.1) : complet sur desktop (« Accueil / Univers / Collection »), compact sur
+ * mobile (le parent seul, précédé de ‹). Le dernier élément est la page courante, sans lien.
+ * Le JSON-LD BreadcrumbList complet est émis par la page (structured-data.ts).
+ */
+import type { BreadcrumbItem } from '@/types/catalog';
+
+interface Props {
+  items: BreadcrumbItem[];
+}
+
+const { items } = Astro.props;
+const lastIndex = items.length - 1;
+---
+
+<nav class="dn-crumbs dn-small" aria-label="Fil d’Ariane">
+  <ol role="list" class="dn-crumbs__list">
+    {items.map((item, index) => (
+      <li class:list={['dn-crumbs__item', { 'dn-crumbs__item--parent': index === lastIndex - 1 }]}>
+        {index === lastIndex ? (
+          <span aria-current="page">{item.name}</span>
+        ) : (
+          <a href={item.href}>{item.name}</a>
+        )}
+      </li>
+    ))}
+  </ol>
+</nav>
+
+<style>
+  .dn-crumbs {
+    color: var(--dn-ink-2);
+  }
+  .dn-crumbs__list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    min-block-size: 28px;
+  }
+  .dn-crumbs a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .dn-crumbs a:hover {
+    color: var(--dn-ink);
+    text-decoration: underline;
+  }
+  /* Mobile : parent seul, précédé d'un chevron ; la zone tactile atteint 44 px en hauteur. */
+  .dn-crumbs__item {
+    display: none;
+  }
+  .dn-crumbs__item--parent {
+    display: inline-flex;
+  }
+  .dn-crumbs__item--parent a {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: var(--dn-tap-min);
+  }
+  .dn-crumbs__item--parent a::before {
+    content: '‹';
+    margin-inline-end: var(--dn-space-2);
+    font-size: var(--dn-fs-body);
+  }
+  @media (min-width: 1024px) {
+    .dn-crumbs__item {
+      display: inline-flex;
+    }
+    .dn-crumbs__item--parent a {
+      min-block-size: auto;
+    }
+    .dn-crumbs__item--parent a::before {
+      content: none;
+    }
+    .dn-crumbs__item + .dn-crumbs__item::before {
+      content: '/';
+      margin-inline: var(--dn-space-2);
+      color: var(--dn-line-strong);
+    }
+  }
+</style>

@@ -1,0 +1,200 @@
+---
+/**
+ * Gabarit des pages univers (§J) : une page d'ORIENTATION, pas une grille géante.
+ * Fil d'Ariane · H1 + intro · cartes des collections · sélection réduite (8) ·
+ * (savoir-faire / FAQ : aucun contenu en base aujourd'hui, donc rien) · autres univers.
+ */
+import CollectionCard from '@/components/catalog/CollectionCard.astro';
+import EntryCard from '@/components/catalog/EntryCard.astro';
+import ProductRow from '@/components/catalog/ProductRow.astro';
+import UniverseCard from '@/components/catalog/UniverseCard.astro';
+import Breadcrumb from '@/components/layout/Breadcrumb.astro';
+import Ornament from '@/components/ui/Ornament.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import type { UniverseView } from '@/lib/catalog-views';
+import { collectionPageJsonLd, serializeJsonLd } from '@/lib/structured-data';
+
+interface Props {
+  view: UniverseView;
+}
+
+const { view } = Astro.props;
+const site = Astro.site ?? new URL(Astro.url.origin);
+const jsonLd = collectionPageJsonLd({
+  path: view.path,
+  name: view.h1,
+  description: view.seoDescription,
+  breadcrumb: view.breadcrumb,
+  items: view.groups.flatMap((g) => g.cards).map((c) => ({ name: c.label, href: c.href })),
+  site,
+});
+// 6 collections → 3 × 2 (§J.1) ; sinon jusqu'à 4 par ligne.
+const columns = view.cardCount % 3 === 0 && view.cardCount > 4 ? 3 : 4;
+let cardIndex = 0;
+---
+
+<BaseLayout
+  seo={{
+    title: view.seoTitle,
+    description: view.seoDescription,
+    canonicalPath: view.path,
+    noindex: !view.indexable,
+  }}
+  section={view.path}
+>
+  <script type="application/ld+json" slot="head" set:html={serializeJsonLd(jsonLd)} />
+  <div
+    class="dn-container dn-universe-page"
+    data-dn-page="universe"
+    data-dn-indexable={String(view.indexable)}
+    data-dn-products={view.productCount}
+  >
+    <header class="dn-universe-head">
+      <Breadcrumb items={view.breadcrumb} />
+      <h1>{view.h1}</h1>
+      {view.intro && <p class="dn-body-sm dn-muted dn-universe-head__intro">{view.intro}</p>}
+    </header>
+
+    <section aria-labelledby="dn-collections-title">
+      <h2 id="dn-collections-title" class="dn-visually-hidden">
+        Collections
+      </h2>
+      <div class="dn-ugroups" style={`--dn-ucols: ${columns}`}>
+        {view.groups.map((group) => (
+          <div class="dn-ugroup" style={`--dn-uspan: ${Math.min(group.cards.length, columns)}`}>
+            {(group.label || group.link || view.groups.length > 1) && (
+              <p class="dn-ugroup__label dn-label dn-muted">
+                {group.label && <span>{group.label}</span>}
+                {group.link && <a href={group.link.href}>{group.link.label}</a>}
+              </p>
+            )}
+            <ul class="dn-ugroup__cards" role="list">
+              {group.cards.map((card) => (
+                <li>
+                  <CollectionCard collection={card} priority={cardIndex++ < 2} />
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    {view.selection.length > 0 && (
+      <section class="dn-universe-page__selection" aria-labelledby="dn-selection-title">
+        <Ornament />
+        <h2 id="dn-selection-title" class="dn-section-head">
+          À découvrir
+        </h2>
+        <ProductRow products={view.selection} label={`À découvrir dans ${view.h1}`} allowQuickAdd={false} />
+      </section>
+    )}
+
+    <section class="dn-universe-page__others" aria-labelledby="dn-others-title">
+      <h2 id="dn-others-title" class="dn-section-head">
+        Autres univers
+      </h2>
+      <div class="dn-universe-page__universes">
+        {view.otherUniverses.map((u) => (
+          <UniverseCard
+            title={u.title}
+            description={u.description}
+            href={u.href}
+            {...(u.image ? { image: u.image } : {})}
+          />
+        ))}
+      </div>
+      <div class="dn-universe-page__entries">
+        {view.transverses.map((t) => (
+          <EntryCard title={t.title} text={t.text} href={t.href} icon={t.icon} />
+        ))}
+      </div>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .dn-universe-page {
+    display: grid;
+    gap: var(--dn-space-10);
+    padding-block: var(--dn-space-3) var(--dn-section-y);
+  }
+  .dn-universe-head {
+    display: grid;
+    gap: var(--dn-space-2);
+    margin-block-end: calc(-1 * var(--dn-space-4));
+  }
+  .dn-universe-head h1 {
+    margin-block-start: var(--dn-space-1);
+  }
+  .dn-universe-head__intro {
+    max-inline-size: 640px;
+  }
+
+  /* Cartes de collections : 2 colonnes mobile, 3 tablette, 3 ou 4 desktop (§J.1). */
+  .dn-ugroups {
+    display: grid;
+    gap: var(--dn-space-8);
+  }
+  .dn-ugroup {
+    display: grid;
+    gap: var(--dn-space-3);
+    align-content: start;
+  }
+  .dn-ugroup__label {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--dn-space-1) var(--dn-space-4);
+    min-block-size: 1lh;
+  }
+  .dn-ugroup__label a {
+    color: var(--dn-ink);
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .dn-ugroup__cards {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--dn-space-6) var(--dn-grid-gap);
+  }
+
+  .dn-universe-page__universes {
+    display: grid;
+  }
+  .dn-universe-page__entries {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--dn-grid-gap);
+    margin-block-start: var(--dn-space-6);
+  }
+
+  @media (min-width: 768px) {
+    .dn-ugroup__cards {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .dn-universe-page__universes {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--dn-grid-gap);
+    }
+  }
+  @media (min-width: 1024px) {
+    .dn-universe-page {
+      gap: var(--dn-space-16);
+      padding-block-start: var(--dn-space-5);
+    }
+    /* Les groupes partagent une même rangée quand ils tiennent dans --dn-ucols colonnes. */
+    .dn-ugroups {
+      grid-template-columns: repeat(var(--dn-ucols), minmax(0, 1fr));
+      gap: var(--dn-space-8) var(--dn-grid-gap);
+    }
+    .dn-ugroup {
+      grid-column: span var(--dn-uspan);
+    }
+    .dn-ugroup__cards {
+      grid-template-columns: repeat(var(--dn-uspan), minmax(0, 1fr));
+    }
+    .dn-universe-page__universes {
+      gap: var(--dn-grid-gap);
+    }
+  }
+</style>

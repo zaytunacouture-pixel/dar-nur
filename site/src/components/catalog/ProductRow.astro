@@ -10,16 +10,18 @@ import ProductCard from './ProductCard.astro';
 interface Props {
   products: ProductSummary[];
   label: string;
+  /** Transmis aux cartes (faux tant que le panier n'est pas migré, sur les pages catalogue). */
+  allowQuickAdd?: boolean;
 }
 
-const { products, label } = Astro.props;
+const { products, label, allowQuickAdd = true } = Astro.props;
 ---
 
 <div class="dn-row" role="region" aria-label={label} tabindex="0">
   <ul class="dn-row__list" role="list">
     {products.map((product) => (
       <li class="dn-row__item">
-        <ProductCard product={product} />
+        <ProductCard product={product} allowQuickAdd={allowQuickAdd} />
       </li>
     ))}
   </ul>

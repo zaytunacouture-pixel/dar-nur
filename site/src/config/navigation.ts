@@ -4,8 +4,9 @@ import type { NavigationItem } from '@/types/site';
  * Arbre de navigation validé (étapes 2, 3 et 4). Source unique : header desktop,
  * méga-menu, menu mobile et footer lisent ce fichier.
  *
- * Les URL sont les URL cibles validées. Tant que les pages ne sont pas migrées,
- * elles mènent à la page 404 de la préproduction (« page non encore migrée »).
+ * Les URL sont les URL cibles validées ; depuis l'étape 7, chacune est une vraie page générée
+ * depuis `collections.path` (contrôlé par scripts/verify-catalog.mjs : toute URL du menu
+ * doit exister dans dist/).
  */
 export const navigation: NavigationItem[] = [
   {

@@ -10,9 +10,11 @@ import type { Collection } from '@/types/catalog';
 interface Props {
   collection: Collection;
   headingLevel?: 'h2' | 'h3';
+  /** Première rangée d'une page univers : image prioritaire (LCP probable). */
+  priority?: boolean;
 }
 
-const { collection, headingLevel: Heading = 'h3' } = Astro.props;
+const { collection, headingLevel: Heading = 'h3', priority = false } = Astro.props;
 const { label, href, image, productCount } = collection;
 ---
 
@@ -25,6 +27,7 @@ const { label, href, image, productCount } = collection;
         height={600}
         widths={[200, 400, 600]}
         sizes="(min-width: 1024px) 30vw, 46vw"
+        priority={priority}
         decorative
         class="dn-collection__img"
       />

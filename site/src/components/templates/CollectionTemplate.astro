@@ -1,0 +1,211 @@
+---
+/**
+ * Gabarit UNIQUE des pages collection, sous-collection, transverse, marque et offres (§K).
+ * Ordre mobile : fil d'Ariane compact · H1 + compteur · intro courte · puces + filtrer/trier ·
+ * produits · (contenu long : aucun champ en base aujourd'hui, donc rien) · maillage.
+ */
+import CatalogBrowser from '@/components/catalog/CatalogBrowser.astro';
+import OfferCard from '@/components/catalog/OfferCard.astro';
+import RelatedLinks from '@/components/catalog/RelatedLinks.astro';
+import Breadcrumb from '@/components/layout/Breadcrumb.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import type { CollectionView } from '@/lib/catalog-views';
+import { collectionPageJsonLd, serializeJsonLd } from '@/lib/structured-data';
+
+interface Props {
+  view: CollectionView;
+}
+
+const { view } = Astro.props;
+const site = Astro.site ?? new URL(Astro.url.origin);
+const count = view.products.length;
+const countLabel = `${count} produit${count > 1 ? 's' : ''}`;
+const jsonLd = collectionPageJsonLd({
+  path: view.path,
+  name: view.h1,
+  description: view.seoDescription,
+  breadcrumb: view.breadcrumb,
+  items: view.products.map((p) => ({ name: p.summary.name, href: p.summary.href })),
+  ...(view.brandName ? { brand: view.brandName } : {}),
+  site,
+});
+const section = view.breadcrumb[1]?.href;
+const isOffers = view.kind === 'offers';
+---
+
+<BaseLayout
+  seo={{
+    title: view.seoTitle,
+    description: view.seoDescription,
+    canonicalPath: view.path,
+    noindex: !view.indexable,
+  }}
+  section={section}
+>
+  <script type="application/ld+json" slot="head" set:html={serializeJsonLd(jsonLd)} />
+  <div
+    class="dn-container dn-collection-page"
+    data-dn-page={view.kind}
+    data-dn-indexable={String(view.indexable)}
+    data-dn-products={count}
+  >
+    <Breadcrumb items={view.breadcrumb} />
+
+    <header class="dn-collection-head">
+      <div class="dn-collection-head__row">
+        <h1>{view.h1}</h1>
+        {!isOffers && (
+          <p
+            class="dn-small dn-muted dn-collection-head__count"
+            data-dn-count
+            role="status"
+            aria-live="polite"
+          >
+            {countLabel}
+          </p>
+        )}
+      </div>
+      {view.intro && (
+        <div class="dn-intro">
+          <p class="dn-body-sm dn-muted dn-intro__text" id="dn-intro" data-dn-intro>
+            {view.intro}
+          </p>
+          <button
+            type="button"
+            class="dn-intro__more dn-body-sm"
+            aria-expanded="false"
+            aria-controls="dn-intro"
+            data-dn-intro-toggle
+            hidden
+          >
+            Lire la suite
+          </button>
+        </div>
+      )}
+    </header>
+
+    {isOffers && view.offers.length > 0 && (
+      <section class="dn-offers" aria-labelledby="dn-offers-title">
+        <h2 id="dn-offers-title">Offres en cours</h2>
+        <ul class="dn-offers__list" role="list">
+          {view.offers.map((offer, index) => (
+            <li>
+              <OfferCard offer={offer} priority={index === 0} />
+            </li>
+          ))}
+        </ul>
+        <p class="dn-small dn-muted">
+          La commande des offres se fait encore sur la boutique actuelle :{' '}
+          <a href="https://dar-nur.fr/#offres">voir les offres sur dar-nur.fr</a>.
+        </p>
+      </section>
+    )}
+
+    {count > 0 ? (
+      <CatalogBrowser
+        products={view.products}
+        facets={view.facets}
+        chips={view.chips}
+        sorts={isOffers ? ['selection'] : view.sorts}
+        chipsLabel={view.kind === 'brand' || view.collectionSlug === 'parfums' ? 'Marques' : 'Collections'}
+        {...(isOffers ? { heading: 'Packs & coffrets à l’unité', showHeading: true } : {})}
+      />
+    ) : (
+      <p class="dn-collection-page__empty dn-body-lg dn-muted">
+        Aucun produit n’est publié dans cette collection pour le moment.
+      </p>
+    )}
+
+    {view.seeAlso && (
+      <p class="dn-collection-page__see-also">
+        <a href={view.seeAlso.href}>{view.seeAlso.label}</a>
+      </p>
+    )}
+
+    <RelatedLinks blocks={view.related} />
+  </div>
+</BaseLayout>
+
+<script>
+  // « Lire la suite » n'apparaît que si l'intro dépasse réellement 2 lignes.
+  for (const text of document.querySelectorAll<HTMLElement>('[data-dn-intro]')) {
+    const toggle = text.parentElement?.querySelector<HTMLButtonElement>('[data-dn-intro-toggle]');
+    if (!toggle || text.scrollHeight <= text.clientHeight + 1) continue;
+    toggle.hidden = false;
+    toggle.addEventListener('click', () => {
+      const open = text.parentElement!.classList.toggle('is-open');
+      toggle.setAttribute('aria-expanded', String(open));
+      toggle.textContent = open ? 'Réduire' : 'Lire la suite';
+    });
+  }
+</script>
+
+<style>
+  .dn-collection-page {
+    display: grid;
+    gap: var(--dn-space-5);
+    padding-block: var(--dn-space-1) var(--dn-section-y);
+  }
+  .dn-collection-head {
+    display: grid;
+    gap: var(--dn-space-1);
+    margin-block-start: calc(-1 * var(--dn-space-3));
+  }
+  .dn-collection-head__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--dn-space-1) var(--dn-space-4);
+  }
+  .dn-collection-head__count {
+    flex: none;
+  }
+  /* Intro coupée à 2 lignes (§K.1) ; le texte complet est dans le HTML. */
+  .dn-intro {
+    max-inline-size: 640px;
+  }
+  .dn-intro__text {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+  }
+  .dn-intro.is-open .dn-intro__text {
+    display: block;
+  }
+  .dn-intro__more {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--dn-ink);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+  .dn-offers {
+    display: grid;
+    gap: var(--dn-section-title-gap);
+  }
+  .dn-offers__list {
+    display: grid;
+    gap: var(--dn-space-10) var(--dn-grid-gap);
+  }
+  .dn-collection-page__empty {
+    padding-block: var(--dn-space-8);
+  }
+  @media (min-width: 768px) {
+    .dn-offers__list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 1024px) {
+    .dn-collection-page {
+      gap: var(--dn-space-8);
+      padding-block-start: var(--dn-space-5);
+    }
+    .dn-offers__list {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+</style>
