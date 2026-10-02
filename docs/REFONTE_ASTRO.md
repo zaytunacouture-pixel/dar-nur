@@ -1,8 +1,8 @@
 # Refonte Dar Nūr — nouveau socle Astro (`site/`)
 
-> Statut au 2 octobre 2026 : **étape 7 terminée — pages univers, collections, transverses et marques
-> générées depuis le nouveau schéma.** Les fiches produit, le panier métier et les redirections ne sont
-> **pas** migrés. La production reste **dar-nur.fr** (GitHub Pages, racine du dépôt), que rien dans
+> Statut au 2 octobre 2026 : **étape 8 terminée — 245 fiches produit et leurs variantes réelles générées
+> depuis le nouveau schéma, page LAB des futurs regroupements Mode.** Le panier métier, l'accueil final et
+> les redirections ne sont **pas** migrés ; aucune fusion de fiches n'est publiée. La production reste **dar-nur.fr** (GitHub Pages, racine du dépôt), que rien dans
 > `site/` ne modifie.
 
 ## Architecture
@@ -46,6 +46,8 @@ site/
 | `npm run format` / `format:check` | Prettier |
 | `npm run verify` | Contrôles de sortie (après build) |
 | `npm run verify:catalog` | Contrôles de données des pages catalogue contre Supabase (après build, réseau) |
+| `npm run verify:products` | Contrôles des fiches produit et du LAB contre Supabase (après build, réseau) |
+| `npm run lab:groupings` | Rafraîchit l'instantané des regroupements Mode (lecture admin, CLI Supabase authentifiée) |
 | `npm run ci` | Tout, dans l'ordre de la CI |
 
 ## Variables d'environnement
@@ -92,9 +94,10 @@ compteur ou « best seller » sans données ; aucune photo générée à la plac
 
 | Fait (étape 5) | À venir |
 |---|---|
-| Socle, tokens, polices, logo, header, méga-menu, menu mobile 2 niveaux, bandeau, recherche (visuelle), mini-panier (visuel), footer, réassurance, ProductCard, UniverseCard, CollectionCard, VariantSelector, guide des tailles (repli), primitives UI, pages `/demo/`, `/design-system/`, `/lab/supabase/`, Netlify, CI | Étape 8 : fiches produit + variantes (JSON-LD Product). Puis panier métier, recherche, SEO (301 depuis `redirects`), shooting photo, bascule. |
+| Socle, tokens, polices, logo, header, méga-menu, menu mobile 2 niveaux, bandeau, recherche (visuelle), mini-panier (visuel), footer, réassurance, ProductCard, UniverseCard, CollectionCard, VariantSelector, guide des tailles (repli), primitives UI, pages `/demo/`, `/design-system/`, `/lab/supabase/`, Netlify, CI | Puis panier métier, recherche, SEO (301 depuis `redirects`), shooting photo, bascule. |
 | **Étape 6** (2026-10-02) : migration additive Supabase (9 migrations, `docs/SCHEMA_SUPABASE.md`), lecture du nouveau schéma dans `catalog.ts`, `/lab/supabase/` affiche l'arbre des collections, banc `scripts/test/schema` + CI `schema-ci.yml` | |
 | **Étape 7** (2026-10-02) : 3 univers, 15 collections, 2 transverses, 4 pages marque, filtres/tri, fil d'Ariane, JSON-LD, sitemap (production), 404, `verify-catalog` — section ci-dessous | |
+| **Étape 8** (2026-10-02) : 245 fiches `/{slug}/`, galerie, variantes réelles, prix au kg/L, disponibilité, commande WhatsApp, accordéons conditionnels, similaires, offres, JSON-LD Product/ProductGroup, sitemap avec `lastmod`, LAB des regroupements Mode, `verify-products` — section ci-dessous | Étape 9 : accueil final et blocs éditoriaux |
 
 ## Pages catalogue (étape 7)
 
@@ -136,3 +139,85 @@ au maximum, 25 Ko gzip de HTML).
 **Tests** : `npm run verify:catalog` recalcule indépendamment chaque page depuis Supabase et la compare à
 `dist/` (chemins uniques, une principale par produit, aucun brouillon, aucun orphelin, nombres et listes,
 pages marque, liens internes, pages indexables vides, JSON-LD). Lancé en CI (`site-ci.yml`).
+
+## Fiches produit (étape 8)
+
+**Route.** La même route `src/pages/[...path].astro` génère une fiche par produit **publié** à l'URL plate
+`/{slug}/` (décision figée : changer de collection ne change pas l'URL). Un brouillon n'a pas de page →
+404. Le build échoue si deux pages visent la même URL ou si un produit occupe `/demo/`, `/lab/`… Les slugs
+actuels sont conservés (Khamrah reste à son URL longue ; `/khamrah/` n'existe pas).
+
+**Gabarit unique** `src/components/templates/ProductTemplate.astro` + `components/product/ProductGallery.astro`
+et `ProductPurchase.astro`. Le modèle de vue `src/lib/product-page.ts` décide des sections ; les règles par
+famille (bien-être / parfum / mode) sont dans `src/config/product-pages.ts`. Mobile : fil d'Ariane compact ·
+galerie · marque · H1 · faits · prix · variantes · disponibilité · commande · livraison · accordéons · même
+collection · offres. Desktop : 7/12 galerie (rail de miniatures), 5/12 informations, **aucune colonne
+collante**.
+
+**Sources et replis** (nouveau schéma d'abord ; ancien champ seulement s'il est vide) :
+
+| Donnée | Source | Repli |
+|---|---|---|
+| Galerie | `product_media` sans variante (ordre `sort_order`) | `images[]` (aucun cas aujourd'hui) ; aucune image → « Photo à venir » |
+| Médias de variante | `product_media.variant_id` | format sans photo → photo du format précédent (repli 300 g → 200 g validé, §M.2) |
+| Options | `product_variant_options` → `option_values` | `options` jsonb, puis nom de variante (aucun cas : 115/115 normalisées) |
+| Prix au kg / L | `option_values.numeric_value` + `unit`, ou `net_quantity` + `net_unit` | aucun (« 100 », « 200 » sans unité → rien) |
+| Composition / origine | `product_food_details` / `product_apparel_details` (vides) | `products.composition` / `products.provenance` |
+| Disponibilité | `availability` | NULL → `coming_soon` (jamais `available`) |
+| Title | `seo_title` (vide partout) | `{Nom} – {concentration} {marque}` (parfums, vocabulaire fermé) ; nom seul sinon |
+| Meta | `seo_description` (vide partout) | accroche + début de la description ; jamais prix / livraison / WhatsApp |
+| Alt | `alt_text` (vide partout) | nom du produit (+ « – 200 g » pour une image de variante) |
+| `lastmod` | max(`products.updated_at`, `product_variants.updated_at`) | — (`product_media.updated_at` = date du remplissage de l'étape 6, ignorée) |
+
+**Contenus volontairement non rendus** (aucune modification en base) :
+
+- `products.accordions` (HTML libre, 78 produits) : mentions « À compléter », ancien mot
+  « Thérapeutiques », styles en ligne, liens texte non cliquables. Remplacé par des accordéons construits
+  depuis les champs structurés (Description, Composition [& origine] / Notes olfactives, Conseils
+  d'utilisation, Précautions, Livraison & paiement) ; une section sans donnée n'est pas rendue.
+- `products.benefits` pour le bien-être (112 produits sur 115) : allégations de santé (« Renforce
+  l'immunité », « Soulage les douleurs dentaires »…). Affiché pour parfums et mode seulement.
+- Phrases ou éléments contenant « À compléter » (49 produits : composition, précautions).
+- `usage_advice` des fiches mode (« Précisez votre taille lors de la commande ») : la taille se choisit
+  dans le sélecteur.
+
+**Variantes.** `VariantSelector` (radios natifs) branché aux vraies variantes : contenance en cartes (valeur,
+prix, prix au kg), taille en boutons texte (2XL et XXL restent distincts). Aucune présélection ; option
+épuisée barrée et désactivée. Le choix est reporté dans l'URL (`?contenance=200-g`, `history.replaceState`)
+et relu au chargement ; le canonical reste `/{slug}/`. Les anciennes fiches couleur restent des produits
+distincts (aucun sélecteur couleur public).
+
+**Commande.** Stratégie actuelle : lien WhatsApp prérempli (produit, option, prix, lien), paiement à la
+réception. Aucun bouton panier ni paiement en ligne. Produit `coming_soon` / `out_of_stock` : simple lien
+« Une question ? ». Livraison : texte de `config/commerce.ts` (Île-de-France), jamais le seuil de 50 €.
+
+**Recommandations.** « Dans la même collection » : 4 produits de la collection principale, ordre
+« Sélection » en commençant après le produit courant (déterministe), hors autres fiches du même futur modèle
+**sûr**, complété par la collection parente. « À associer » : `product_relations` (vide → section absente).
+« Disponible aussi dans » : offres actives contenant le produit (`OfferCard`, économie seulement si prouvée).
+
+**JSON-LD.** `Product` + `Offer`, ou `ProductGroup` + `hasVariant` + `variesBy: size` pour les 33 produits à
+variantes (URL de variante = query string). Disponibilité : available → InStock, on_demand → BackOrder,
+coming_soon / out_of_stock → OutOfStock. Jamais : avis, note, GTIN/SKU, état, stock chiffré ; `brand`
+seulement si la marque existe. Plus `BreadcrumbList` (collection principale et ses ancêtres).
+
+**Sitemap.** Fiches indexables en production avec `<lastmod>` réel ; jamais brouillons, LAB, variantes en
+query string ni pages noindex. Contrôlé par `verify-products` sur un build `DAR_NUR_ENV=production`.
+
+**LAB `/lab/regroupements/`** (noindex, hors sitemap, sans lien public). Instantané versionné
+`src/data/lab/product-groupings.json` (tables `product_groupings*` réservées à l'admin, exportées en lecture
+par `npm run lab:groupings`) croisé avec le catalogue public lu au build. « Regroupements sûrs » (15 modèles,
+72 fiches, aperçu fusionné `/lab/regroupements/g01/`… sur le même gabarit, commande désactivée, sans
+JSON-LD) et « Validation humaine requise » (Nilla, Sultan Saphir, Comera 6/8, Musc Tahara, Farasha,
+2 doublons). Écarts calculés : prix, tailles, libellés lus sur photo, photos identiques, conflits de slug.
+L'instantané doit être rafraîchi si les propositions changent en base.
+
+**Tests.** `npm run verify:products` (en CI) recalcule chaque fiche depuis Supabase et la compare à `dist/` :
+une fiche par produit publié et aucune autre, canonical, H1, fil d'Ariane, prix, variantes, prix au kg,
+disponibilité, commande, JSON-LD, images, mentions interdites, similaires, `lastmod`, liens produit de toutes
+les pages, LAB, produits témoins, sitemap (build de production). Contrôle négatif fait : fiche non publiée,
+faux avis et prix modifié sont détectés.
+
+**Build.** ≈ 5 600 variantes d'images (AVIF + WebP). La CI met en cache `site/node_modules/.astro` (restauré
+après `npm ci`) et passe à 40 min de délai. **Netlify** : `npm ci` efface ce cache à chaque build ; un build à
+froid peut approcher la limite de 15 min de Netlify (non vérifiable sans accès au compte).
