@@ -1,0 +1,337 @@
+---
+/**
+ * Bloc d'achat de la fiche produit (étape 8) : prix, variantes réelles, disponibilité,
+ * commande, livraison.
+ *
+ * - Prix : « À partir de X € » tant qu'aucune variante n'est choisie (minimum des variantes
+ *   ACTIVES), puis le prix exact de la variante ; changement annoncé (aria-live).
+ * - Variantes : VariantSelector (radios natifs), aucune présélection ; une option unique est
+ *   une information. Une combinaison inexistante ou épuisée est désactivée et annoncée.
+ * - URL : l'option choisie est reportée dans la query string (?contenance=200-g), sans
+ *   entrée d'historique ; un lien partagé la présélectionne. Canonical inchangé (/{slug}/).
+ * - Commande : stratégie ACTUELLE — message WhatsApp prérempli, paiement à la réception.
+ *   Aucun panier ni paiement en ligne simulé (le panier n'est pas migré).
+ * - Sans JavaScript : prix de base, options visibles, lien de commande générique.
+ */
+import SizeGuide from '@/components/catalog/SizeGuide.astro';
+import VariantSelector from '@/components/catalog/VariantSelector.astro';
+import Button from '@/components/ui/Button.astro';
+import Icon from '@/components/ui/Icon.astro';
+import Price from '@/components/ui/Price.astro';
+import { formatPrice } from '@/lib/format';
+import type { ProductPageView } from '@/lib/product-page';
+
+interface Props {
+  view: ProductPageView;
+}
+
+const { view } = Astro.props;
+const script = {
+  axes: view.axes.map((axis) => ({
+    id: axis.id,
+    param: axis.param,
+    legend: axis.legend,
+    verb: axis.verb,
+    single: axis.options.length === 1 ? axis.options[0]!.id : null,
+    labels: Object.fromEntries(axis.options.map((o) => [o.id, o.label])),
+  })),
+  variants: view.variants.map((v) => ({
+    o: v.options,
+    l: v.label,
+    p: v.price === null ? null : formatPrice(v.price),
+    a: v.available,
+    u: v.unitPrice,
+    m: v.media ?? '',
+  })),
+  order: { head: view.order.messageHead, tail: view.order.messageTail, orderable: view.order.orderable },
+};
+const icon =
+  view.availability === 'available' ? 'check' : view.availability === 'on_demand' ? 'info' : 'circle-alert';
+---
+
+<div class="dn-purchase" data-dn-purchase>
+  <div class="dn-purchase__price" aria-live="polite" data-dn-purchase-price>
+    <Price price={view.price} size="lg" />
+  </div>
+  <p class="dn-small dn-muted dn-purchase__unit" data-dn-purchase-unit hidden={!view.unitPrice}>
+    {view.unitPrice ? `Soit ${view.unitPrice}` : ''}
+  </p>
+
+  {view.axes.length > 0 && (
+    <div class="dn-purchase__axes">
+      {view.axes.map((axis) => (
+        <div class="dn-purchase__axis">
+          <VariantSelector
+            name={axis.id}
+            axis={axis.id as 'contenance'}
+            legend={axis.legend}
+            presentation={axis.presentation}
+            options={axis.options}
+          />
+          {axis.id === 'taille' && <SizeGuide id="dn-size-guide" guide={view.sizeGuide} />}
+        </div>
+      ))}
+    </div>
+  )}
+
+  {view.availabilityLabel && (
+    <p class:list={['dn-availability', `dn-availability--${view.availability}`]} data-dn-availability>
+      <Icon name={icon} size={16} />
+      <span>{view.availabilityLabel}</span>
+    </p>
+  )}
+
+  {view.kind === 'preview' ? (
+    <p class="dn-purchase__preview dn-body-sm">
+      Aperçu de validation : aucune commande possible ici. Les fiches actuelles restent les seules fiches
+      publiques et commandables.
+    </p>
+  ) : (
+    <div class="dn-purchase__cta">
+      {view.order.orderable ? (
+        <Button
+          href={view.order.href}
+          variant="primary"
+          size="lg"
+          fullWidth
+          iconStart="whatsapp"
+          target="_blank"
+          rel="noopener"
+          data-dn-order
+        >
+          Commander sur WhatsApp
+        </Button>
+      ) : (
+        <Button
+          href={view.order.href}
+          variant="secondary"
+          size="lg"
+          fullWidth
+          iconStart="whatsapp"
+          target="_blank"
+          rel="noopener"
+        >
+          Une question ? Écrivez-nous
+        </Button>
+      )}
+      <p class="dn-small dn-muted dn-purchase__note">
+        {view.order.orderable
+          ? 'Pas de paiement en ligne : la commande se fait sur WhatsApp, vous payez à la réception.'
+          : 'Ce produit ne peut pas encore être commandé.'}
+      </p>
+    </div>
+  )}
+
+  {view.delivery && (
+    <p class="dn-purchase__delivery dn-body-sm">
+      <Icon name="truck" size={16} />
+      <span>{view.delivery}</span>
+    </p>
+  )}
+
+  <script
+    is:inline
+    type="application/json"
+    id="dn-product-data"
+    set:html={JSON.stringify(script).replace(/</g, '\\u003c')}
+  />
+</div>
+
+<style>
+  .dn-purchase {
+    display: grid;
+    gap: var(--dn-space-4);
+  }
+  .dn-purchase__unit {
+    margin-block-start: calc(-1 * var(--dn-space-3));
+  }
+  .dn-purchase__unit[hidden] {
+    display: none;
+  }
+  .dn-purchase__axes {
+    display: grid;
+    gap: var(--dn-space-5);
+  }
+  .dn-purchase__axis {
+    display: grid;
+    gap: var(--dn-space-1);
+    justify-items: start;
+  }
+  .dn-purchase__axis > :global(*) {
+    inline-size: 100%;
+  }
+  .dn-purchase__axis > :global(.dn-sizeguide__help),
+  .dn-purchase__axis > :global(.dn-sizeguide__link) {
+    inline-size: auto;
+  }
+  .dn-availability {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--dn-space-2);
+    font-size: var(--dn-fs-body-sm);
+    font-weight: var(--dn-fw-medium);
+  }
+  .dn-availability--available {
+    color: var(--dn-success);
+  }
+  .dn-availability--on_demand {
+    color: var(--dn-ink-2);
+  }
+  .dn-availability--coming_soon,
+  .dn-availability--out_of_stock {
+    color: var(--dn-warning);
+  }
+  .dn-purchase__cta {
+    display: grid;
+    gap: var(--dn-space-2);
+  }
+  .dn-purchase__preview {
+    padding: var(--dn-space-3) var(--dn-space-4);
+    border-radius: var(--dn-radius-sm);
+    background: var(--dn-warning-bg);
+    color: var(--dn-warning);
+  }
+  .dn-purchase__delivery {
+    display: flex;
+    align-items: center;
+    gap: var(--dn-space-2);
+    color: var(--dn-ink-2);
+  }
+</style>
+
+<script>
+  interface AxisData {
+    id: string;
+    param: string;
+    legend: string;
+    verb: string;
+    single: string | null;
+    labels: Record<string, string>;
+  }
+  interface VariantData {
+    o: Record<string, string>;
+    l: string;
+    p: string | null;
+    a: boolean;
+    u: string | null;
+    m: string;
+  }
+
+  const root = document.querySelector<HTMLElement>('[data-dn-purchase]');
+  const source = document.getElementById('dn-product-data');
+  if (root && source) {
+    const data = JSON.parse(source.textContent ?? '{}') as {
+      axes: AxisData[];
+      variants: VariantData[];
+      order: { head: string; tail: string; orderable: boolean };
+    };
+    const priceText = root.querySelector<HTMLElement>('[data-dn-purchase-price] .dn-price__current');
+    const unit = root.querySelector<HTMLElement>('[data-dn-purchase-unit]');
+    const order = root.querySelector<HTMLAnchorElement>('[data-dn-order]');
+    const base = {
+      price: priceText?.textContent ?? '',
+      unit: unit?.textContent ?? '',
+      unitHidden: unit?.hidden ?? true,
+    };
+    const selection: Record<string, string> = {};
+    for (const axis of data.axes) if (axis.single) selection[axis.id] = axis.single;
+
+    const groupOf = (axis: AxisData) =>
+      root.querySelector<HTMLFieldSetElement>(`[data-dn-variant][data-axis="${axis.id}"]`);
+    const matching = (partial: Record<string, string>) =>
+      data.variants.filter((v) => Object.entries(partial).every(([axis, code]) => v.o[axis] === code));
+    const complete = () => data.axes.every((axis) => selection[axis.id]);
+
+    /** Options impossibles avec les autres choix : désactivées, barrées, annoncées. */
+    const refreshOptions = () => {
+      for (const axis of data.axes) {
+        const group = groupOf(axis);
+        if (!group) continue;
+        const others = { ...selection };
+        delete others[axis.id];
+        for (const input of group.querySelectorAll<HTMLInputElement>('input[type="radio"]')) {
+          const ok = matching({ ...others, [axis.id]: input.value }).some((v) => v.a);
+          input.disabled = !ok;
+          input.closest('label')?.classList.toggle('is-unavailable', !ok);
+          if (ok) input.removeAttribute('aria-label');
+          else input.setAttribute('aria-label', `${input.dataset.label ?? input.value}, épuisé`);
+        }
+      }
+    };
+
+    const refresh = () => {
+      const variant = complete() ? matching(selection)[0] : undefined;
+      if (priceText) priceText.textContent = variant?.p ?? base.price;
+      if (unit) {
+        const text = variant ? (variant.u ? `Soit ${variant.u}` : '') : base.unit;
+        unit.textContent = text;
+        unit.hidden = variant ? !variant.u : base.unitHidden;
+      }
+      // Galerie : jeu d'images commun à toutes les variantes compatibles avec le choix.
+      const chosen = Object.keys(selection).length > data.axes.filter((a) => a.single).length;
+      const keys = new Set(matching(selection).map((v) => v.m));
+      document.dispatchEvent(
+        new CustomEvent('dn:gallery-set', { detail: { key: chosen && keys.size === 1 ? [...keys][0] : '' } }),
+      );
+      if (order && data.order.orderable) {
+        const lines = data.axes
+          .map((axis) => {
+            const code = selection[axis.id];
+            return `\n• ${axis.legend} : ${(code && axis.labels[code]) || 'à préciser'}`;
+          })
+          .join('');
+        const price = variant?.p ? `\n• Prix : ${variant.p}` : '';
+        const text = `${data.order.head}${lines}${price}${data.order.tail}`;
+        order.href = `${order.href.split('?')[0]}?text=${encodeURIComponent(text)}`;
+      }
+      refreshOptions();
+    };
+
+    const writeUrl = () => {
+      const url = new URL(location.href);
+      for (const axis of data.axes) {
+        if (axis.single) continue;
+        if (selection[axis.id]) url.searchParams.set(axis.param, selection[axis.id]!);
+        else url.searchParams.delete(axis.param);
+      }
+      history.replaceState(history.state, '', url);
+    };
+
+    root.addEventListener('dn:variant-change', (event) => {
+      const detail = (event as CustomEvent<{ axis: string; value: string }>).detail;
+      selection[detail.axis] = detail.value;
+      refresh();
+      writeUrl();
+    });
+
+    // Commande avant choix : message d'aide, focus sur le groupe (§M.2).
+    order?.addEventListener('click', (event) => {
+      const missing = data.axes.find((axis) => !selection[axis.id]);
+      if (!missing) return;
+      event.preventDefault();
+      const group = groupOf(missing);
+      const error = group?.querySelector<HTMLElement>('[data-dn-variant-error]');
+      if (error) {
+        error.textContent = `Choisissez ${missing.verb} pour continuer.`;
+        error.hidden = false;
+      }
+      group?.querySelector<HTMLInputElement>('input:not(:disabled)')?.focus();
+      group?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    });
+
+    // Présélection depuis l'URL (lien partagé, retour sur la page) : seulement une valeur
+    // existante et disponible ; sinon rien n'est choisi.
+    const params = new URLSearchParams(location.search);
+    for (const axis of data.axes) {
+      const code = params.get(axis.param);
+      const input = code
+        ? groupOf(axis)?.querySelector<HTMLInputElement>(`input[value="${CSS.escape(code)}"]`)
+        : null;
+      if (input && !input.disabled && matching({ ...selection, [axis.id]: code! }).some((v) => v.a)) {
+        input.checked = true;
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    }
+    refreshOptions();
+  }
+</script>

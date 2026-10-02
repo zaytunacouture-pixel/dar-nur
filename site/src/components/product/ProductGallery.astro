@@ -1,0 +1,370 @@
+---
+/**
+ * Galerie de fiche produit (§L.4, étape 8).
+ * - Défilement horizontal natif aimanté (aucune bibliothèque de carrousel), mobile et desktop.
+ * - Mobile : compteur « 1 / 5 ». Desktop : rail vertical de miniatures (liens d'ancre :
+ *   utilisables sans JavaScript) + boutons précédent / suivant.
+ * - UNE image (78 % du catalogue) : ni compteur, ni rail, ni boutons ; aucune image :
+ *   emplacement « Photo à venir » (jamais de fausse photo).
+ * - Première image = LCP (prioritaire) ; les suivantes en chargement différé.
+ * - Images propres à une variante : rendues dans des <template> (aucun téléchargement tant
+ *   que la variante n'est pas choisie), insérées par l'événement `dn:gallery-set`.
+ * - Cadrage : l'image entière est montrée (fit `inside` + object-fit: contain) dans un cadre
+ *   4:5 : une abaya en pied ou un flacon ne sont jamais coupés.
+ */
+import CatalogPicture from '@/components/ui/CatalogPicture.astro';
+import Icon from '@/components/ui/Icon.astro';
+import MediaPlaceholder from '@/components/ui/MediaPlaceholder.astro';
+import type { MediaImage } from '@/types/catalog';
+
+interface Props {
+  name: string;
+  images: MediaImage[];
+  /** Jeux d'images de variantes (clé → images), insérés seulement à la sélection. */
+  sets?: Record<string, MediaImage[]>;
+}
+
+const { name, images, sets = {} } = Astro.props;
+const main = {
+  width: 1200,
+  height: 1500,
+  widths: [480, 800, 1200],
+  sizes: '(min-width: 1024px) 52vw, 100vw',
+};
+const thumb = { width: 128, height: 160, widths: [64, 128], sizes: '64px' };
+const asInside = (image: MediaImage): MediaImage => ({ ...image, fit: 'inside' });
+---
+
+<div class="dn-gallery" data-dn-gallery>
+  {images.length === 0 ? (
+    <div class="dn-gallery__viewport">
+      <MediaPlaceholder caption="Photo à venir" />
+    </div>
+  ) : (
+    <>
+      <div class="dn-gallery__viewport">
+        <div
+          class="dn-gallery__track"
+          role="region"
+          aria-label={`Galerie de ${name}`}
+          tabindex="0"
+          data-dn-gallery-track
+        >
+          {images.map((image, index) => (
+            <div
+              class="dn-gallery__slide"
+              id={`dn-slide-${index + 1}`}
+              role="group"
+              aria-label={`Image ${index + 1} sur ${images.length}`}
+            >
+              <CatalogPicture
+                image={asInside(image)}
+                {...main}
+                priority={index === 0}
+                class="dn-gallery__img"
+              />
+            </div>
+          ))}
+        </div>
+        <p class="dn-gallery__counter" aria-hidden="true" hidden={images.length < 2} data-dn-gallery-counter>
+          <span data-dn-gallery-index>1</span> / <span data-dn-gallery-total>{images.length}</span>
+        </p>
+        <button
+          type="button"
+          class="dn-gallery__nav dn-gallery__nav--prev"
+          aria-label="Image précédente"
+          hidden={images.length < 2}
+          data-dn-gallery-prev
+        >
+          <Icon name="chevron-left" size={20} />
+        </button>
+        <button
+          type="button"
+          class="dn-gallery__nav dn-gallery__nav--next"
+          aria-label="Image suivante"
+          hidden={images.length < 2}
+          data-dn-gallery-next
+        >
+          <Icon name="chevron-right" size={20} />
+        </button>
+      </div>
+      <ol class="dn-gallery__thumbs" role="list" hidden={images.length < 2} data-dn-gallery-thumbs>
+        {images.map((image, index) => (
+          <li>
+            <a
+              class="dn-gallery__thumb"
+              href={`#dn-slide-${index + 1}`}
+              aria-label={`Afficher l’image ${index + 1}`}
+              aria-current={index === 0 ? 'true' : undefined}
+            >
+              <CatalogPicture image={image} {...thumb} decorative />
+            </a>
+          </li>
+        ))}
+      </ol>
+    </>
+  )}
+
+  {Object.entries(sets).map(([key, setImages]) => (
+    <template data-dn-media-set={key}>
+      <div data-slides>
+        {setImages.map((image, index) => (
+          <div
+            class="dn-gallery__slide"
+            id={`dn-slide-${index + 1}`}
+            role="group"
+            aria-label={`Image ${index + 1} sur ${setImages.length}`}
+          >
+            <CatalogPicture image={asInside(image)} {...main} class="dn-gallery__img" />
+          </div>
+        ))}
+      </div>
+      <ol data-thumbs>
+        {setImages.map((image, index) => (
+          <li>
+            <a
+              class="dn-gallery__thumb"
+              href={`#dn-slide-${index + 1}`}
+              aria-label={`Afficher l’image ${index + 1}`}
+              aria-current={index === 0 ? 'true' : undefined}
+            >
+              <CatalogPicture image={image} {...thumb} decorative />
+            </a>
+          </li>
+        ))}
+      </ol>
+    </template>
+  ))}
+</div>
+
+<style>
+  .dn-gallery {
+    position: relative;
+    display: grid;
+    gap: var(--dn-space-3);
+    margin-inline: calc(-1 * var(--dn-gutter-x));
+  }
+  .dn-gallery__viewport {
+    position: relative;
+    min-inline-size: 0;
+  }
+  .dn-gallery__track {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 100%;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+    background: var(--dn-media);
+  }
+  .dn-gallery__track::-webkit-scrollbar {
+    display: none;
+  }
+  .dn-gallery__track:focus-visible {
+    outline: var(--dn-focus-ring);
+    outline-offset: calc(-1 * var(--dn-focus-offset) - 2px);
+  }
+  .dn-gallery__slide {
+    aspect-ratio: var(--dn-ratio-product);
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+  .dn-gallery__slide :global(picture) {
+    display: block;
+    block-size: 100%;
+  }
+  .dn-gallery :global(.dn-gallery__img) {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: contain;
+  }
+  .dn-gallery__counter {
+    position: absolute;
+    inset-block-end: var(--dn-space-2);
+    inset-inline-end: var(--dn-space-2);
+    padding: var(--dn-space-1) var(--dn-space-3);
+    border-radius: var(--dn-radius-pill);
+    background: var(--dn-glass);
+    font-size: var(--dn-fs-small);
+    font-variant-numeric: tabular-nums;
+  }
+  .dn-gallery__counter[hidden],
+  .dn-gallery__nav[hidden],
+  .dn-gallery__thumbs[hidden] {
+    display: none;
+  }
+  .dn-gallery__nav {
+    position: absolute;
+    inset-block-start: 50%;
+    display: grid;
+    place-items: center;
+    inline-size: var(--dn-tap-min);
+    block-size: var(--dn-tap-min);
+    margin-block-start: calc(var(--dn-tap-min) / -2);
+    border: 0;
+    border-radius: var(--dn-radius-pill);
+    background: var(--dn-glass);
+    box-shadow: var(--dn-shadow-raised);
+    color: var(--dn-ink);
+    opacity: 0;
+    transition: opacity var(--dn-dur-fast) var(--dn-ease-in-out);
+  }
+  .dn-gallery__nav--prev {
+    inset-inline-start: var(--dn-space-2);
+  }
+  .dn-gallery__nav--next {
+    inset-inline-end: var(--dn-space-2);
+  }
+  /* Boutons visibles au focus clavier (mobile compris) et au survol desktop (§L.4). */
+  .dn-gallery__nav:focus-visible,
+  .dn-gallery__viewport:hover .dn-gallery__nav {
+    opacity: 1;
+  }
+  .dn-gallery__thumbs {
+    display: none;
+  }
+  .dn-gallery__thumb {
+    display: block;
+    inline-size: 64px;
+    block-size: 80px;
+    overflow: hidden;
+    border: 1px solid var(--dn-line);
+    border-radius: var(--dn-radius-sm);
+    background: var(--dn-media);
+  }
+  .dn-gallery__thumb :global(img) {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+  }
+  .dn-gallery__thumb[aria-current='true'] {
+    border: var(--dn-border-selected);
+  }
+  .dn-gallery__thumb:focus-visible {
+    outline: var(--dn-focus-ring);
+    outline-offset: var(--dn-focus-offset);
+  }
+
+  @media (min-width: 768px) {
+    .dn-gallery {
+      margin-inline: 0;
+    }
+    /* Tablette (une colonne) : image plafonnée pour garder prix et variantes près du haut. */
+    .dn-gallery__viewport {
+      inline-size: 100%;
+      max-inline-size: 560px;
+      margin-inline: auto;
+    }
+    .dn-gallery__track {
+      border-radius: var(--dn-radius-sm);
+    }
+  }
+  @media (min-width: 1024px) {
+    /* Rail vertical à gauche, image plafonnée à la hauteur de l'écran (§L.3). */
+    .dn-gallery {
+      grid-template-columns: auto minmax(0, 1fr);
+      align-items: start;
+      gap: var(--dn-space-3);
+    }
+    .dn-gallery__viewport {
+      grid-column: 2;
+      grid-row: 1;
+      inline-size: 100%;
+      max-inline-size: calc((100vh - 140px) * 0.8);
+      justify-self: center;
+    }
+    .dn-gallery__counter {
+      display: none;
+    }
+    .dn-gallery__thumbs {
+      grid-column: 1;
+      grid-row: 1;
+      display: grid;
+      gap: var(--dn-space-3);
+    }
+    .dn-gallery__thumbs[hidden] {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  /**
+   * Compteur (mobile), miniatures et boutons (desktop), changement de jeu d'images.
+   * Sans JavaScript : défilement natif, ancres des miniatures.
+   */
+  for (const gallery of document.querySelectorAll<HTMLElement>('[data-dn-gallery]')) {
+    const track = gallery.querySelector<HTMLElement>('[data-dn-gallery-track]');
+    if (!track) continue;
+    const counter = gallery.querySelector<HTMLElement>('[data-dn-gallery-counter]');
+    const index = gallery.querySelector<HTMLElement>('[data-dn-gallery-index]');
+    const total = gallery.querySelector<HTMLElement>('[data-dn-gallery-total]');
+    const thumbs = gallery.querySelector<HTMLElement>('[data-dn-gallery-thumbs]');
+    const prev = gallery.querySelector<HTMLButtonElement>('[data-dn-gallery-prev]');
+    const next = gallery.querySelector<HTMLButtonElement>('[data-dn-gallery-next]');
+    const initial = { slides: track.innerHTML, thumbs: thumbs?.innerHTML ?? '' };
+    let current = 0;
+
+    const count = () => track.children.length;
+    const show = (target: number) => {
+      const slide = track.children[Math.max(0, Math.min(target, count() - 1))] as HTMLElement | undefined;
+      if (slide) track.scrollTo({ left: slide.offsetLeft - track.offsetLeft });
+    };
+    const sync = () => {
+      const width = track.clientWidth || 1;
+      current = Math.round(track.scrollLeft / width);
+      if (index) index.textContent = String(current + 1);
+      thumbs?.querySelectorAll('a').forEach((link, i) => {
+        if (i === current) link.setAttribute('aria-current', 'true');
+        else link.removeAttribute('aria-current');
+      });
+    };
+    const layout = () => {
+      const many = count() > 1;
+      if (counter) counter.hidden = !many;
+      if (thumbs) thumbs.hidden = !many;
+      if (prev) prev.hidden = !many;
+      if (next) next.hidden = !many;
+      if (total) total.textContent = String(count());
+      track.scrollLeft = 0;
+      sync();
+    };
+
+    let frame = 0;
+    track.addEventListener('scroll', () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(sync);
+    });
+    thumbs?.addEventListener('click', (event) => {
+      const link = (event.target as HTMLElement).closest('a');
+      if (!link || !thumbs.contains(link)) return;
+      event.preventDefault(); // pas de saut de page vertical : seul le rail défile
+      show([...thumbs.querySelectorAll('a')].indexOf(link));
+    });
+    prev?.addEventListener('click', () => show(current - 1));
+    next?.addEventListener('click', () => show(current + 1));
+
+    // Jeu d'images d'une variante (clé) ou galerie du produit (clé vide).
+    document.addEventListener('dn:gallery-set', (event) => {
+      const key = (event as CustomEvent<{ key: string }>).detail.key;
+      if (gallery.dataset.dnSet === key || (!gallery.dataset.dnSet && !key)) return;
+      const template = key
+        ? gallery.querySelector<HTMLTemplateElement>(`template[data-dn-media-set="${CSS.escape(key)}"]`)
+        : null;
+      if (key && !template) return;
+      track.innerHTML = template
+        ? template.content.querySelector('[data-slides]')!.innerHTML
+        : initial.slides;
+      if (thumbs)
+        thumbs.innerHTML = template
+          ? template.content.querySelector('[data-thumbs]')!.innerHTML
+          : initial.thumbs;
+      gallery.dataset.dnSet = key;
+      layout();
+    });
+  }
+</script>

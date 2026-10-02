@@ -1,0 +1,273 @@
+---
+/**
+ * Gabarit UNIQUE des fiches produit (étape 8) — miels, parfums, soins, huiles, gélules,
+ * poudres, abayas, qamis, sandales, accessoires, packs. Les sections sont conditionnelles :
+ * chacune n'apparaît que si sa donnée existe (product-page.ts).
+ *
+ * Mobile : fil d'Ariane compact · galerie · marque · H1 · faits · prix · variantes ·
+ * disponibilité · commande · livraison · accordéons · même collection · offres / associations.
+ * Desktop : galerie (7 colonnes) | informations (5 colonnes). PAS de colonne d'achat collante
+ * (§L.3 de l'étape 4 : bug de buy-box déjà rencontré sur l'ancien site).
+ *
+ * Mode `preview` (page LAB des regroupements Mode) : même gabarit, noindex, sans JSON-LD.
+ */
+import Accordion from '@/components/ui/Accordion.astro';
+import OfferCard from '@/components/catalog/OfferCard.astro';
+import ProductRow from '@/components/catalog/ProductRow.astro';
+import Breadcrumb from '@/components/layout/Breadcrumb.astro';
+import ProductGallery from '@/components/product/ProductGallery.astro';
+import ProductPurchase from '@/components/product/ProductPurchase.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import type { ProductPageView } from '@/lib/product-page';
+import { breadcrumbPageJsonLd, productJsonLd, serializeJsonLd } from '@/lib/structured-data';
+
+interface Props {
+  view: ProductPageView;
+}
+
+const { view } = Astro.props;
+const site = Astro.site ?? new URL(Astro.url.origin);
+const isPreview = view.kind === 'preview';
+const jsonLd =
+  !isPreview && view.structured
+    ? [
+        productJsonLd({
+          path: view.path,
+          slug: view.slug,
+          data: view.structured,
+          availability: view.availability,
+          site,
+        }),
+        breadcrumbPageJsonLd(view.breadcrumb, site),
+      ]
+    : [];
+const section = view.breadcrumb[1]?.href;
+const ogImage = view.gallery[0] ? String(view.gallery[0].src) : undefined;
+---
+
+<BaseLayout
+  seo={{
+    title: view.seoTitle,
+    description: view.seoDescription,
+    canonicalPath: view.path,
+    noindex: !view.indexable,
+    ogType: 'product',
+    ...(ogImage ? { ogImage } : {}),
+  }}
+  section={section}
+>
+  {jsonLd.map((data) => (
+    <script type="application/ld+json" slot="head" set:html={serializeJsonLd(data)} />
+  ))}
+  <slot name="banner" />
+  <div
+    class="dn-container dn-product-page"
+    data-dn-page={isPreview ? 'product-preview' : 'product'}
+    data-dn-slug={view.slug}
+    data-dn-indexable={isPreview ? undefined : String(view.indexable)}
+    data-dn-lastmod={isPreview ? undefined : view.lastmod}
+  >
+    <Breadcrumb items={view.breadcrumb} />
+
+    <div class="dn-product">
+      <div class="dn-product__media">
+        <ProductGallery name={view.name} images={view.gallery} sets={view.mediaSets} />
+      </div>
+
+      <div class="dn-product__info">
+        <header class="dn-product__head">
+          {view.brand &&
+            (view.brand.href ? (
+              <p class="dn-label dn-product__brand">
+                <a href={view.brand.href}>{view.brand.name}</a>
+              </p>
+            ) : (
+              <p class="dn-label dn-product__brand">{view.brand.name}</p>
+            ))}
+          <h1 class="dn-product__title">{view.name}</h1>
+          {view.facts.length > 0 && <p class="dn-body-sm dn-muted">{view.facts.join(' · ')}</p>}
+          {view.tagline && <p class="dn-product__tagline">{view.tagline}</p>}
+        </header>
+
+        <ProductPurchase view={view} />
+
+        <div class="dn-product__accordions">
+          {view.accordions.map((accordion) => (
+            <Accordion title={accordion.title} open={accordion.open ?? false}>
+              <div class="dn-product__text" data-dn-accordion={accordion.id}>
+                {accordion.blocks.map((block) =>
+                  block.kind === 'paragraphs' ? (
+                    block.items.map((text) => <p>{text}</p>)
+                  ) : block.kind === 'list' ? (
+                    <>
+                      {block.title && <p class="dn-product__list-title">{block.title}</p>}
+                      <ul class="dn-product__list">
+                        {block.items.map((item) => (
+                          <li>{item}</li>
+                        ))}
+                      </ul>
+                    </>
+                  ) : block.kind === 'facts' ? (
+                    <dl class="dn-product__facts">
+                      {block.items.map(([term, value]) => (
+                        <div>
+                          <dt>{term}</dt>
+                          <dd>{value}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  ) : (
+                    <p>
+                      {block.items.map((link) => (
+                        <a href={link.href} {...(link.external ? { rel: 'noopener' } : {})}>
+                          {link.label}
+                        </a>
+                      ))}
+                    </p>
+                  ),
+                )}
+              </div>
+            </Accordion>
+          ))}
+        </div>
+      </div>
+    </div>
+
+    {view.similar.length > 0 && (
+      <section class="dn-product-section" aria-labelledby="dn-similar-title">
+        <h2 id="dn-similar-title" class="dn-product-section__title">
+          {view.similarTitle}
+        </h2>
+        <ProductRow products={view.similar} label={view.similarTitle} allowQuickAdd={false} />
+      </section>
+    )}
+
+    {view.related.length > 0 && (
+      <section class="dn-product-section" aria-labelledby="dn-related-title">
+        <h2 id="dn-related-title" class="dn-product-section__title">
+          À associer
+        </h2>
+        <ProductRow products={view.related} label="À associer" allowQuickAdd={false} />
+      </section>
+    )}
+
+    {view.offers.length > 0 && (
+      <section class="dn-product-section" aria-labelledby="dn-offers-title" data-dn-product-offers>
+        <h2 id="dn-offers-title" class="dn-product-section__title">
+          Disponible aussi dans {view.offers.length > 1 ? 'ces offres' : 'cette offre'}
+        </h2>
+        <ul class="dn-product-offers" role="list">
+          {view.offers.map((offer) => (
+            <li>
+              <OfferCard offer={offer} />
+            </li>
+          ))}
+        </ul>
+        <p class="dn-small dn-muted">
+          Toutes les offres en cours : <a href="/offres/">Offres &amp; packs</a>.
+        </p>
+      </section>
+    )}
+  </div>
+</BaseLayout>
+
+<style>
+  .dn-product-page {
+    display: grid;
+    gap: var(--dn-space-8);
+    padding-block: var(--dn-space-1) var(--dn-section-y);
+  }
+  .dn-product {
+    display: grid;
+    gap: var(--dn-space-5);
+    margin-block-start: calc(-1 * var(--dn-space-4));
+  }
+  .dn-product__info {
+    display: grid;
+    align-content: start;
+    gap: var(--dn-space-5);
+    min-inline-size: 0;
+  }
+  .dn-product__head {
+    display: grid;
+    gap: var(--dn-space-2);
+  }
+  .dn-product__brand a {
+    color: inherit;
+    text-underline-offset: 4px;
+  }
+  .dn-product__title {
+    font-size: var(--dn-fs-product-title);
+    line-height: var(--dn-lh-product-title);
+  }
+  .dn-product__tagline {
+    color: var(--dn-ink-2);
+  }
+  .dn-product__accordions {
+    border-top: var(--dn-border-decor);
+  }
+  .dn-product__text {
+    display: grid;
+    gap: var(--dn-space-3);
+    max-inline-size: var(--dn-measure);
+  }
+  .dn-product__list-title {
+    font-weight: var(--dn-fw-medium);
+  }
+  .dn-product__list {
+    display: grid;
+    gap: var(--dn-space-1);
+    padding-inline-start: var(--dn-space-5);
+    list-style: disc;
+  }
+  .dn-product__facts {
+    display: grid;
+    gap: var(--dn-space-1);
+  }
+  .dn-product__facts div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--dn-space-1);
+  }
+  .dn-product__facts dt {
+    font-weight: var(--dn-fw-medium);
+  }
+  .dn-product__facts dt::after {
+    content: ' :';
+  }
+  .dn-product-section {
+    display: grid;
+    gap: var(--dn-section-title-gap);
+  }
+  .dn-product-section__title {
+    font-size: var(--dn-fs-h3);
+  }
+  .dn-product-offers {
+    display: grid;
+    gap: var(--dn-space-8) var(--dn-grid-gap);
+  }
+  @media (min-width: 768px) {
+    .dn-product-offers {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 1024px) {
+    .dn-product-page {
+      gap: var(--dn-space-12);
+      padding-block-start: var(--dn-space-5);
+    }
+    /* Deux colonnes équilibrées : galerie 7/12, informations 5/12 (texte ≤ 480 px). */
+    .dn-product {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+      gap: var(--dn-space-12);
+      align-items: start;
+      margin-block-start: 0;
+    }
+    .dn-product__info {
+      max-inline-size: 520px;
+    }
+    .dn-product-offers {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+</style>

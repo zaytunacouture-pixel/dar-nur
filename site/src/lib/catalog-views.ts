@@ -46,9 +46,14 @@ export type CatalogRoute =
   | { kind: 'universe'; path: string; slug: string }
   | { kind: 'collection'; path: string; slug: string }
   | { kind: 'offers'; path: string; slug: string }
-  | { kind: 'brand'; path: string; slug: string };
+  | { kind: 'brand'; path: string; slug: string }
+  | { kind: 'product'; path: string; slug: string };
 
-/** Toutes les pages catalogue à générer. Une collection vide garde sa page, en noindex (voir docs). */
+/**
+ * Toutes les pages catalogue à générer. Une collection vide garde sa page, en noindex (voir docs).
+ * Étape 8 : + une fiche par produit PUBLIÉ, à l'URL plate /{slug}/ (décision figée : l'URL ne
+ * dépend jamais de la collection). Le build échoue si deux pages visent la même URL.
+ */
 export async function catalogRoutes(): Promise<CatalogRoute[]> {
   const catalog = await getCatalog();
   const routes: CatalogRoute[] = catalog.collections.map((c) => ({
@@ -57,8 +62,24 @@ export async function catalogRoutes(): Promise<CatalogRoute[]> {
     slug: c.slug,
   }));
   for (const brand of catalog.brands) routes.push({ kind: 'brand', path: brand.path, slug: brand.slug });
+  for (const product of catalog.products)
+    routes.push({ kind: 'product', path: `/${product.slug}/`, slug: product.slug });
+  const seen = new Map<string, string>();
+  for (const route of routes) {
+    const other = seen.get(route.path);
+    if (other)
+      throw new Error(
+        `[catalogue] URL ${route.path} visée deux fois (${other} et ${route.kind} ${route.slug})`,
+      );
+    if (route.kind === 'product' && RESERVED_PRODUCT_PATHS.some((p) => route.path.startsWith(p)))
+      throw new Error(`[catalogue] le produit « ${route.slug} » occupe un chemin réservé (${route.path})`);
+    seen.set(route.path, `${route.kind} ${route.slug}`);
+  }
   return routes;
 }
+
+/** Préfixes des pages statiques du socle : aucun produit ne peut y vivre. */
+const RESERVED_PRODUCT_PATHS = ['/demo/', '/design-system/', '/lab/', '/404/'];
 
 /* ── Éléments communs ───────────────────────────────────────────────────── */
 

@@ -9,6 +9,9 @@
  * Règles : aucune présélection ; une option épuisée reste visible, barrée, non
  * sélectionnable et annoncée ; une seule option = information, pas sélecteur.
  * Les options avec `href` (couleurs stockées en produits séparés) sont des liens.
+ * Étape 8 : branché aux vraies variantes par la fiche produit (ProductPurchase.astro), qui
+ * écoute `dn:variant-change`. Prix au kg / litre : `option.unitPrice` (calculé depuis une
+ * quantité et une unité certaines) ; à défaut seulement, déduit d'un libellé « 200 g ».
  */
 import CatalogPicture from '@/components/ui/CatalogPicture.astro';
 import { formatPrice, unitPrice } from '@/lib/format';
@@ -30,7 +33,12 @@ const { name, axis, legend, presentation, options, currentId, aside } = Astro.pr
 const current = options.find((o) => o.id === currentId);
 const single = options.length === 1 ? options[0] : undefined;
 const groupId = `dn-variant-${name}`;
-const showUnitPrice = presentation === 'format';
+const unitOf = (option: VariantOption) =>
+  option.unitPrice !== undefined
+    ? option.unitPrice
+    : option.price !== undefined
+      ? unitPrice(option.price, option.label)
+      : null;
 // « Épuisé » est annoncé par aria-label (l'option reste visible, barrée, désactivée).
 ---
 
@@ -61,7 +69,7 @@ const showUnitPrice = presentation === 'format';
     <div class="dn-variant__options">
       {options.map((option) => {
         const inputId = `${groupId}-${option.id}`;
-        const unit = option.price !== undefined ? unitPrice(option.price, option.label) : null;
+        const unit = presentation === 'format' ? unitOf(option) : null;
         const content = (
           <>
             {presentation === 'thumbnail' &&
@@ -94,6 +102,7 @@ const showUnitPrice = presentation === 'format';
               {presentation === 'format' && option.price !== undefined && (
                 <span class="dn-variant__price">{formatPrice(option.price)}</span>
               )}
+              {unit && <span class="dn-variant__unit-price">{unit.replace(/^Soit /, '')}</span>}
               {presentation === 'text' && option.detail && (
                 <span class="dn-variant__detail">{option.detail}</span>
               )}
@@ -127,7 +136,6 @@ const showUnitPrice = presentation === 'format';
               checked={option.id === currentId}
               data-label={option.label}
               data-price={option.price}
-              data-unit={unit ?? undefined}
             />
             {content}
           </label>
@@ -135,9 +143,6 @@ const showUnitPrice = presentation === 'format';
       })}
     </div>
 
-    {showUnitPrice && (
-      <p class="dn-variant__unit dn-small dn-muted" data-dn-variant-unit aria-live="polite" />
-    )}
     <p class="dn-variant__error dn-small" id={`${groupId}-error`} data-dn-variant-error hidden role="alert" />
   </fieldset>
 )}
@@ -221,7 +226,8 @@ const showUnitPrice = presentation === 'format';
     font-weight: var(--dn-fw-medium);
   }
   .dn-variant__price,
-  .dn-variant__detail {
+  .dn-variant__detail,
+  .dn-variant__unit-price {
     font-size: var(--dn-fs-body-sm);
     color: var(--dn-ink-2);
     font-variant-numeric: tabular-nums;
@@ -231,6 +237,14 @@ const showUnitPrice = presentation === 'format';
   }
   .dn-variant--format .dn-variant__label {
     font-size: var(--dn-fs-body);
+  }
+  .dn-variant__unit-price {
+    font-size: var(--dn-fs-small);
+    white-space: nowrap;
+  }
+  .dn-variant--format .dn-variant__text {
+    padding: var(--dn-space-2);
+    text-align: center;
   }
 
   /* ── Sélectionnée : 3 signaux (contour 2 px, fond, coche/anneau) ─ */
@@ -315,10 +329,6 @@ const showUnitPrice = presentation === 'format';
     transform: rotate(-52deg);
   }
 
-  .dn-variant__unit:empty {
-    display: none;
-  }
-  .dn-variant__unit,
   .dn-variant__error {
     margin-top: var(--dn-space-2);
   }
@@ -333,18 +343,17 @@ const showUnitPrice = presentation === 'format';
 <script>
   for (const group of document.querySelectorAll<HTMLFieldSetElement>('[data-dn-variant]')) {
     const value = group.querySelector<HTMLElement>('[data-dn-variant-value]');
-    const unit = group.querySelector<HTMLElement>('[data-dn-variant-unit]');
     const error = group.querySelector<HTMLElement>('[data-dn-variant-error]');
     group.addEventListener('change', (event) => {
       const input = event.target as HTMLInputElement;
       if (value) value.textContent = ` : ${input.dataset.label ?? ''}`;
-      if (unit) unit.textContent = input.dataset.unit ?? '';
       if (error) error.hidden = true;
       group.dispatchEvent(
         new CustomEvent('dn:variant-change', {
           bubbles: true,
           detail: {
             axis: group.dataset.axis,
+            value: input.value,
             label: input.dataset.label,
             price: input.dataset.price ? Number(input.dataset.price) : undefined,
           },
