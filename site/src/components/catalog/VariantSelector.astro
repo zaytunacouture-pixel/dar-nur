@@ -14,6 +14,7 @@
  * quantité et une unité certaines) ; à défaut seulement, déduit d'un libellé « 200 g ».
  */
 import CatalogPicture from '@/components/ui/CatalogPicture.astro';
+import { THUMBNAIL } from '@/config/images';
 import { formatPrice, unitPrice } from '@/lib/format';
 import type { VariantAxis, VariantOption, VariantPresentation } from '@/types/catalog';
 
@@ -76,9 +77,7 @@ const unitOf = (option: VariantOption) =>
               (option.image ? (
                 <CatalogPicture
                   image={option.image}
-                  width={96}
-                  height={120}
-                  widths={[48, 96]}
+                  {...THUMBNAIL}
                   sizes="48px"
                   decorative
                   class="dn-variant__thumb"

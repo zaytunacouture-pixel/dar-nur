@@ -8,6 +8,7 @@
  * - La commande d'une offre passe encore par la boutique actuelle (panier non migré).
  */
 import CatalogPicture from '@/components/ui/CatalogPicture.astro';
+import { OFFER_CARD } from '@/config/images';
 import MediaPlaceholder from '@/components/ui/MediaPlaceholder.astro';
 import Price from '@/components/ui/Price.astro';
 import type { CatalogOffer } from '@/lib/catalog-store';
@@ -39,9 +40,7 @@ const intro =
     {offer.image ? (
       <CatalogPicture
         image={{ src: offer.image, alt: '' }}
-        width={800}
-        height={600}
-        widths={[400, 800]}
+        {...OFFER_CARD}
         sizes="(min-width: 1024px) 40vw, 92vw"
         priority={priority}
         decorative

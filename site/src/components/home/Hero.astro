@@ -9,6 +9,7 @@
  * elle sera alors l'image LCP, préchargée (`priority`).
  */
 import CatalogPicture from '@/components/ui/CatalogPicture.astro';
+import { HERO } from '@/config/images';
 import Button from '@/components/ui/Button.astro';
 import MediaPlaceholder from '@/components/ui/MediaPlaceholder.astro';
 import type { MediaImage } from '@/types/catalog';
@@ -31,9 +32,7 @@ const placeholder =
     {image ? (
       <CatalogPicture
         image={image}
-        width={1600}
-        height={1200}
-        widths={[390, 780, 960, 1280, 1600]}
+        {...HERO}
         sizes="(min-width: 1024px) 58vw, 100vw"
         priority
         class="dn-hero__img"

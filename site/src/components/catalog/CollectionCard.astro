@@ -4,6 +4,7 @@
  * nombre de produits facultatif (issu de la base, jamais saisi à la main).
  */
 import CatalogPicture from '@/components/ui/CatalogPicture.astro';
+import { COLLECTION_CARD } from '@/config/images';
 import MediaPlaceholder from '@/components/ui/MediaPlaceholder.astro';
 import type { Collection } from '@/types/catalog';
 
@@ -23,9 +24,7 @@ const { label, href, image, productCount } = collection;
     {image ? (
       <CatalogPicture
         image={image}
-        width={600}
-        height={600}
-        widths={[200, 400, 600]}
+        {...COLLECTION_CARD}
         sizes="(min-width: 1024px) 30vw, 46vw"
         priority={priority}
         decorative

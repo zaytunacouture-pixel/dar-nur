@@ -22,6 +22,11 @@ on:
       - 'site/**'
       - '.github/workflows/site-ci.yml'
   workflow_dispatch:
+    inputs:
+      cold:
+        description: 'Build à froid : ne pas restaurer le cache des images (mesure du pire cas Netlify)'
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -33,10 +38,10 @@ concurrency:
 jobs:
   check-build:
     runs-on: ubuntu-latest
-    # Étape 8 : les galeries des fiches multiplient les images (≈ 5 600 variantes AVIF/WebP).
-    # Avec le cache ci-dessous, un build reprend en quelques minutes ; un build à froid peut
-    # dépasser 15 min, d'où la marge.
-    timeout-minutes: 40
+    # Étape 8B : build À FROID mesuré sous la limite de 15 min de Netlify (AVIF effort 3,
+    # préréglages mutualisés : docs/REFONTE_ASTRO.md, « Build et images »). Le cache ci-dessous
+    # n'accélère que les builds suivants ; il n'est PAS nécessaire pour tenir ce délai.
+    timeout-minutes: 20
     defaults:
       run:
         working-directory: site
@@ -61,8 +66,10 @@ jobs:
 
       # Images optimisées d'Astro (node_modules/.astro, effacé par npm ci) : restaurées APRÈS
       # l'installation. Clé unique par exécution + préfixe de restauration : toujours le
-      # cache le plus récent, réenregistré enrichi en fin de job.
+      # cache le plus récent, réenregistré enrichi en fin de job. Lancement manuel avec
+      # « cold » : aucune restauration, le build est mesuré à froid comme sur Netlify.
       - name: Cache des images optimisées
+        if: ${{ !inputs.cold }}
         uses: actions/cache@v4
         with:
           path: site/node_modules/.astro

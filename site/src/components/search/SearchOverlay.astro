@@ -8,6 +8,7 @@
  */
 import { getImage } from 'astro:assets';
 import Drawer from '@/components/ui/Drawer.astro';
+import { THUMBNAIL } from '@/config/images';
 import Icon from '@/components/ui/Icon.astro';
 import { contact, frequentSearches } from '@/config/commerce';
 import { navigation, universes } from '@/config/navigation';
@@ -20,7 +21,13 @@ const products = await Promise.all(
   sample.products.map(async (product) => {
     const thumb =
       product.image && typeof product.image.src === 'string'
-        ? await getImage({ src: product.image.src, width: 96, height: 120, fit: 'cover', format: 'webp' })
+        ? await getImage({
+            src: product.image.src,
+            width: THUMBNAIL.width,
+            height: THUMBNAIL.height,
+            fit: 'cover',
+            format: 'webp',
+          })
         : undefined;
     return { label: product.name, href: product.href, meta: priceLabel(product.price), thumb: thumb?.src };
   }),

@@ -7,12 +7,14 @@
  * photos, écarts de prix — avant la future bascule.
  */
 import CatalogPicture from '@/components/ui/CatalogPicture.astro';
+import { THUMBNAIL } from '@/config/images';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { groupsPage, labelSourceText, type GroupView } from '@/lib/product-groups';
 
 const page = await groupsPage();
 const memberCount = (groups: GroupView[]) => groups.reduce((t, g) => t + g.members.length, 0);
-const thumb = { width: 192, height: 240, widths: [96, 192], sizes: '96px' };
+// Miniature commune (page interne) : aucun fichier propre au LAB, ceux des fiches sont réutilisés.
+const thumb = { ...THUMBNAIL, sizes: '96px' };
 const sections = [
   {
     id: 'surs',

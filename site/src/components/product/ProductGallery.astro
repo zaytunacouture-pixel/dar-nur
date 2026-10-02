@@ -9,12 +9,14 @@
  * - Première image = LCP (prioritaire) ; les suivantes en chargement différé.
  * - Images propres à une variante : rendues dans des <template> (aucun téléchargement tant
  *   que la variante n'est pas choisie), insérées par l'événement `dn:gallery-set`.
+ *   Miniatures rendues seulement à partir de 2 images (rail masqué sinon : aucun fichier inutile).
  * - Cadrage : l'image entière est montrée (fit `inside` + object-fit: contain) dans un cadre
  *   4:5 : une abaya en pied ou un flacon ne sont jamais coupés.
  */
 import CatalogPicture from '@/components/ui/CatalogPicture.astro';
 import Icon from '@/components/ui/Icon.astro';
 import MediaPlaceholder from '@/components/ui/MediaPlaceholder.astro';
+import { GALLERY, THUMBNAIL } from '@/config/images';
 import type { MediaImage } from '@/types/catalog';
 
 interface Props {
@@ -25,13 +27,10 @@ interface Props {
 }
 
 const { name, images, sets = {} } = Astro.props;
-const main = {
-  width: 1200,
-  height: 1500,
-  widths: [480, 800, 1200],
-  sizes: '(min-width: 1024px) 52vw, 100vw',
-};
-const thumb = { width: 128, height: 160, widths: [64, 128], sizes: '64px' };
+const main = { ...GALLERY, sizes: '(min-width: 1024px) 52vw, 100vw' };
+const thumb = { ...THUMBNAIL, sizes: '64px' };
+/** Le rail n'est montré qu'à partir de 2 images : en dessous, ses miniatures ne seraient jamais vues. */
+const railOf = (list: MediaImage[]) => (list.length > 1 ? list : []);
 const asInside = (image: MediaImage): MediaImage => ({ ...image, fit: 'inside' });
 ---
 
@@ -89,7 +88,7 @@ const asInside = (image: MediaImage): MediaImage => ({ ...image, fit: 'inside' }
         </button>
       </div>
       <ol class="dn-gallery__thumbs" role="list" hidden={images.length < 2} data-dn-gallery-thumbs>
-        {images.map((image, index) => (
+        {railOf(images).map((image, index) => (
           <li>
             <a
               class="dn-gallery__thumb"
@@ -120,7 +119,7 @@ const asInside = (image: MediaImage): MediaImage => ({ ...image, fit: 'inside' }
         ))}
       </div>
       <ol data-thumbs>
-        {setImages.map((image, index) => (
+        {railOf(setImages).map((image, index) => (
           <li>
             <a
               class="dn-gallery__thumb"

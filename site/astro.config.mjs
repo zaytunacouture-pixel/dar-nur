@@ -2,7 +2,7 @@
 import { readdir, readFile, writeFile } from 'node:fs/promises';
 import { join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { defineConfig, envField, fontProviders } from 'astro/config';
+import { defineConfig, envField, fontProviders, sharpImageService } from 'astro/config';
 
 /**
  * Environnement Dar Nūr. Seule la valeur "production" autorise l'indexation.
@@ -139,6 +139,11 @@ export default defineConfig({
   },
 
   image: {
+    // Étape 8B : l'encodage AVIF était 93 % du temps de build (effort 4, réglage par défaut de
+    // sharp : ≈ 1,5 s CPU par image). Effort 3 : 3,6–3,8× plus rapide, poids +1 à +3 %, qualité
+    // inchangée (SSIM −0,001, comparaison visuelle agrandie). Qualités par défaut conservées
+    // (AVIF 50, WebP 80). Mesures : docs/REFONTE_ASTRO.md, « Build et images ».
+    service: sharpImageService({ avif: { effort: 3 } }),
     // Images catalogue existantes : chemins relatifs servis par dar-nur.fr, ou stockage Supabase.
     remotePatterns: [
       { protocol: 'https', hostname: 'dar-nur.fr' },

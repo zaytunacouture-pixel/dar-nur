@@ -6,6 +6,7 @@
  */
 import Badge from '@/components/ui/Badge.astro';
 import CatalogPicture from '@/components/ui/CatalogPicture.astro';
+import { PRODUCT_CARD } from '@/config/images';
 import Icon from '@/components/ui/Icon.astro';
 import MediaPlaceholder from '@/components/ui/MediaPlaceholder.astro';
 import Price from '@/components/ui/Price.astro';
@@ -31,7 +32,7 @@ const quickAdd =
   product.availability === 'available';
 
 const sizes = '(min-width: 1024px) 302px, (min-width: 768px) 30vw, 46vw';
-const frame = { width: 600, height: 750, widths: [200, 400, 600], sizes };
+const frame = { ...PRODUCT_CARD, sizes };
 ---
 
 <article class:list={['dn-card', { 'dn-card--unavailable': product.availability !== 'available' }]}>
