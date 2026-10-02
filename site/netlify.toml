@@ -19,6 +19,10 @@
   # qui est notre PRÉPRODUCTION : on force donc "preprod" partout. Seule une future
   # bascule explicite (DAR_NUR_ENV = "production") autorisera l'indexation.
   DAR_NUR_ENV = "preprod"
+  # Étape 7 : canonical, Open Graph et JSON-LD pointent DÈS la préproduction vers le domaine
+  # final (URL définitives). Sans effet sur l'indexation : la préproduction reste noindex
+  # (meta robots, X-Robots-Tag, robots.txt) et n'écrit aucun sitemap.
+  SITE_URL = "https://dar-nur.fr"
   # Lecture seule. Valeurs PUBLIQUES par conception (déjà dans js/config.js de l'ancien
   # site) : URL du projet et clé « publishable », filtrées par RLS. Jamais de clé secrète ici.
   SUPABASE_URL = "https://sxlpgcnjerlayitaxxyv.supabase.co"

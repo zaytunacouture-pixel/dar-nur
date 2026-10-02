@@ -99,7 +99,8 @@ for (const file of html) {
   const inline = (re) => [...doc.matchAll(re)].reduce((t, m) => t + gz(Buffer.from(m[1] ?? '')), 0);
   const jsGzip =
     external(/<script[^>]+src="([^"]+)"/g) +
-    inline(/<script(?![^>]*application\/json)(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g);
+    // JSON et JSON-LD (données structurées) ne sont pas du JavaScript exécuté : hors budget.
+    inline(/<script(?![^>]*application\/(?:ld\+)?json)(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g);
   const cssGzip =
     external(/<link[^>]+rel="stylesheet"[^>]+href="([^"]+)"/g) + inline(/<style[^>]*>([\s\S]*?)<\/style>/g);
   if (jsGzip + cssGzip > heaviest.jsGzip + heaviest.cssGzip) {

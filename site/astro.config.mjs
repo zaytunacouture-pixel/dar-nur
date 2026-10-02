@@ -1,5 +1,7 @@
 // @ts-check
-import { writeFile } from 'node:fs/promises';
+import { readdir, readFile, writeFile } from 'node:fs/promises';
+import { join, relative, sep } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { defineConfig, envField, fontProviders } from 'astro/config';
 
 /**
@@ -53,6 +55,55 @@ function robotsHeaders() {
   };
 }
 
+/**
+ * Sitemap des pages catalogue (étape 7) : univers, collections et marques INDEXABLES en
+ * production (attribut data-dn-indexable="true", posé par les gabarits selon les règles de
+ * docs/REFONTE_ASTRO.md). Écrit UNIQUEMENT en production ; ailleurs, la liste est calculée et
+ * journalisée (la préproduction ne doit exposer aucun sitemap). Pas de <lastmod> : aucune date
+ * de modification fiable par page.
+ * @returns {import('astro').AstroIntegration}
+ */
+function catalogSitemap() {
+  return {
+    name: 'dar-nur-catalog-sitemap',
+    hooks: {
+      'astro:build:done': async ({ dir, logger }) => {
+        const root = fileURLToPath(dir);
+        /** @param {string} folder @returns {Promise<string[]>} */
+        const walk = async (folder) =>
+          (await readdir(folder, { withFileTypes: true })).flatMap((entry) =>
+            entry.isDirectory() ? [join(folder, entry.name)] : [],
+          );
+        /** @type {string[]} */
+        const paths = [];
+        const queue = [root];
+        while (queue.length) {
+          const folder = /** @type {string} */ (queue.shift());
+          queue.push(...(await walk(folder)));
+          const html = await readFile(join(folder, 'index.html'), 'utf8').catch(() => '');
+          if (/data-dn-indexable="true"/.test(html)) {
+            paths.push(`/${relative(root, folder).split(sep).join('/')}/`.replace('//', '/'));
+          }
+        }
+        paths.sort();
+        if (!INDEXABLE) {
+          logger.info(`sitemap non écrit (DAR_NUR_ENV=${DAR_NUR_ENV}) — ${paths.length} URL en production`);
+          return;
+        }
+        const body = [
+          '<?xml version="1.0" encoding="UTF-8"?>',
+          '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+          ...paths.map((path) => `  <url><loc>${new URL(path, SITE_URL).toString()}</loc></url>`),
+          '</urlset>',
+          '',
+        ].join('\n');
+        await writeFile(new URL('sitemap.xml', dir), body);
+        logger.info(`sitemap.xml écrit : ${paths.length} URL`);
+      },
+    },
+  };
+}
+
 export default defineConfig({
   site: SITE_URL,
   output: 'static',
@@ -60,7 +111,7 @@ export default defineConfig({
   build: { format: 'directory' },
   compressHTML: true,
   devToolbar: { enabled: false },
-  integrations: [robotsHeaders()],
+  integrations: [robotsHeaders(), catalogSitemap()],
 
   env: {
     schema: {
