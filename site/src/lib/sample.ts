@@ -97,7 +97,7 @@ async function load(): Promise<CatalogSample> {
     settings,
     brands: brandRows.map((b) => ({ slug: b.id, name: b.name })),
     rows,
-    products: rows.map(toProductSummary),
+    products: rows.map((row) => toProductSummary(row)),
     variantExamples: {
       ...(format ? { format } : {}),
       ...(contenance ? { contenance } : {}),

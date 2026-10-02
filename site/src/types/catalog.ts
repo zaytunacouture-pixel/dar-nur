@@ -113,3 +113,48 @@ export interface SizeGuide {
   rows: string[][];
   howToMeasure?: string[];
 }
+
+/* ── Pages catalogue (étape 7) ─────────────────────────────────────────── */
+
+/** Élément de fil d'Ariane ; le dernier est la page courante. */
+export interface BreadcrumbItem {
+  name: string;
+  href: string;
+}
+
+/** Valeur de facette : `code` sert au fragment d'URL (#contenance=200-g). */
+export interface FacetOption {
+  code: string;
+  label: string;
+}
+
+export interface FacetValue extends FacetOption {
+  /** Produits de la page portant cette valeur (avant tout filtrage). */
+  count: number;
+}
+
+export interface Facet {
+  key: string;
+  label: string;
+  values: FacetValue[];
+}
+
+/** Produit d'une grille : la carte + les attributs nécessaires aux filtres et aux tris. */
+export interface GridProduct {
+  summary: ProductSummary;
+  /** Codes de valeurs par facette (plusieurs possibles : contenances, tailles). */
+  facets: Record<string, string[]>;
+  /** Rang dans l'ordre « Sélection » (ordre admin). */
+  order: number;
+  /** Prix le plus bas réellement proposé ; null = prix sur demande (classé en fin). */
+  minPrice: number | null;
+  /** Date d'ajout au catalogue (AAAAMMJJ), pour le tri « Nouveautés ». */
+  added: string;
+}
+
+/** Puce sous le H1 : lien vers une vraie page, ou filtre de la page (fragment). */
+export type CollectionChip =
+  | { kind: 'link'; label: string; href: string; current: boolean }
+  | { kind: 'filter'; label: string; facet: string; code: string | null };
+
+export type SortKey = 'selection' | 'prix-croissant' | 'prix-decroissant' | 'nouveautes';

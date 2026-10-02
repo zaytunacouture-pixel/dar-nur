@@ -95,6 +95,46 @@ export interface SupabaseBrandRow {
   name: string;
 }
 
+/** Collection publiée avec ses champs éditoriaux et SEO (étape 3, stockés à l'étape 6). */
+export interface SupabaseCollectionPageRow extends SupabaseCollectionRow {
+  description: string | null;
+  seo_title: string | null;
+  seo_description: string | null;
+  image_url: string | null;
+}
+
+/** Produit du catalogue complet (pages collections) : ordre admin et date d'ajout en plus. */
+export interface SupabaseCatalogProductRow extends SupabaseProductRow {
+  sort_order: number | null;
+  created_at: string;
+}
+
+export interface SupabaseBrandPageRow {
+  id: string;
+  name: string;
+  description: string | null;
+  sort_order: number | null;
+}
+
+export interface SupabaseOfferRow {
+  id: string;
+  type: 'pack' | 'product_promo' | string;
+  title: string;
+  description: string | null;
+  image: string | null;
+  normal_price: number | null;
+  promo_price: number | null;
+  starts_at: string | null;
+  ends_at: string | null;
+  sort_order: number | null;
+  offer_products: {
+    product_slug: string | null;
+    sort_order: number | null;
+    quantity: number | null;
+    variant_id: string | null;
+  }[];
+}
+
 export const PRODUCT_COLUMNS =
   'slug,name,category_id,tagline,price_value,images,brand,brand_slug,coming_soon,featured,variant_axes,' +
   'status,availability,net_quantity,net_unit,' +
@@ -175,6 +215,53 @@ export function fetchCollections(): Promise<SupabaseCollectionRow[]> {
   return select<SupabaseCollectionRow>('collections', {
     select: 'id,slug,path,parent_id,type,name,nav_label,h1,sort_order,is_indexable',
     order: 'sort_order.asc,slug.asc',
+  });
+}
+
+/**
+ * Collections PUBLIÉES avec leurs champs de page (pages univers / collections, étape 7).
+ * Le filtre `status` est explicite : il ne repose pas seulement sur la RLS.
+ */
+export function fetchCollectionPages(): Promise<SupabaseCollectionPageRow[]> {
+  return select<SupabaseCollectionPageRow>('collections', {
+    select:
+      'id,slug,path,parent_id,type,name,nav_label,h1,sort_order,is_indexable,' +
+      'description,seo_title,seo_description,image_url',
+    status: 'eq.published',
+    order: 'sort_order.asc,slug.asc',
+  });
+}
+
+/**
+ * Catalogue publié complet (≈ 250 lignes, une seule requête par build), ordre admin.
+ * `status = published` explicite : un brouillon n'entre jamais dans le HTML, même si la
+ * RLS changeait un jour.
+ */
+export function fetchPublishedCatalog(): Promise<SupabaseCatalogProductRow[]> {
+  return select<SupabaseCatalogProductRow>('products', {
+    select: `${PRODUCT_COLUMNS},sort_order,created_at`,
+    status: 'eq.published',
+    order: 'sort_order.asc,slug.asc',
+  });
+}
+
+/** Marques actives, avec leur description (règle d'indexation des pages marque). */
+export function fetchBrandPages(): Promise<SupabaseBrandPageRow[]> {
+  return select<SupabaseBrandPageRow>('brands', {
+    select: 'id,name,description,sort_order',
+    active: 'eq.true',
+    order: 'sort_order.asc,name.asc',
+  });
+}
+
+/** Offres actives (la fenêtre de dates est appliquée dans catalog-store, au build). */
+export function fetchActiveOffers(): Promise<SupabaseOfferRow[]> {
+  return select<SupabaseOfferRow>('offers', {
+    select:
+      'id,type,title,description,image,normal_price,promo_price,starts_at,ends_at,sort_order,' +
+      'offer_products(product_slug,sort_order,quantity,variant_id)',
+    active: 'eq.true',
+    order: 'sort_order.asc,title.asc',
   });
 }
 

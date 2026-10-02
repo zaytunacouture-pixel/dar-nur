@@ -11,6 +11,7 @@ import type {
   BadgeKind,
   CollectionNode,
   CollectionRef,
+  FacetOption,
   MediaImage,
   PriceInfo,
   ProductSummary,
@@ -91,12 +92,18 @@ function availabilityOf(row: SupabaseProductRow): Availability {
   return 'available'; // available et on_demand sont commandables
 }
 
-function badgeOf(row: SupabaseProductRow): BadgeKind | undefined {
+/** Contexte facultatif d'une carte : faits calculés hors de la ligne produit. */
+export interface SummaryContext {
+  /** Le produit fait partie d'une offre `product_promo` active, dans sa fenêtre de dates (§G.2). */
+  onOffer?: boolean;
+}
+
+function badgeOf(row: SupabaseProductRow, context: SummaryContext): BadgeKind | undefined {
   const availability = availabilityOf(row);
   if (availability === 'coming-soon') return 'coming-soon';
   if (availability === 'unavailable') return 'sold-out';
-  // « Offre » et « Nouveau » exigent des règles validées (offres actives, fenêtre de
-  // nouveauté) : non calculés dans le socle plutôt qu'approximés.
+  if (context.onOffer) return 'offer';
+  // « Nouveau » exige une fenêtre de nouveauté validée (§G.2, à confirmer) : non calculé.
   return undefined;
 }
 
@@ -119,9 +126,9 @@ export function primaryCollectionOf(row: SupabaseProductRow): CollectionRef | un
   return primary?.path ? { slug: primary.slug, name: primary.name, href: primary.path } : undefined;
 }
 
-export function toProductSummary(row: SupabaseProductRow): ProductSummary {
+export function toProductSummary(row: SupabaseProductRow, context: SummaryContext = {}): ProductSummary {
   const variants = activeVariants(row);
-  const badge = badgeOf(row);
+  const badge = badgeOf(row, context);
   const price = priceOf(row, variants);
   const images = productImages(row);
   const primaryCollection = primaryCollectionOf(row);
@@ -139,6 +146,72 @@ export function toProductSummary(row: SupabaseProductRow): ProductSummary {
     availability: availabilityOf(row),
     ...(primaryCollection ? { primaryCollection } : {}),
     variantCount: variants.length,
+  };
+}
+
+/** Images du produit dans l'ordre (product_media d'abord, images[] à défaut), URL absolues. */
+export function productImageUrls(row: SupabaseProductRow): string[] {
+  return productImages(row).map(resolveMediaUrl);
+}
+
+const UNIT_LABELS: Record<string, [singular: string, plural: string]> = {
+  g: ['g', 'g'],
+  kg: ['kg', 'kg'],
+  ml: ['ml', 'ml'],
+  l: ['L', 'L'],
+  capsule: ['gélule', 'gélules'],
+};
+
+function slugify(text: string): string {
+  return text
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+/** Valeurs d'un axe sur les variantes ACTIVES : option normalisée, sinon jsonb historique. */
+function axisValues(row: SupabaseProductRow, axis: 'contenance' | 'taille'): FacetOption[] {
+  const values = new Map<string, string>();
+  for (const variant of activeVariants(row)) {
+    const normalized = variant.product_variant_options.find((o) => o.option_type_id === axis)?.option_values;
+    if (normalized) {
+      values.set(normalized.code, normalized.label);
+      continue;
+    }
+    const legacy =
+      axis === 'contenance'
+        ? (variant.options?.['contenance'] ?? variant.options?.['format'])
+        : variant.options?.[axis];
+    if (legacy) values.set(slugify(legacy), legacy);
+  }
+  return [...values].map(([code, label]) => ({ code, label }));
+}
+
+/**
+ * Attributs filtrables d'un produit, tous issus de colonnes réelles :
+ * - contenance : variantes actives (axe contenance), sinon quantité nette normalisée (étape 6) ;
+ * - taille : variantes actives (axe taille) ; « 2XL » et « XXL » restent deux valeurs (étape 6) ;
+ * - minPrice : prix le plus bas réellement proposé, null = prix sur demande.
+ */
+export function productFacetData(row: SupabaseProductRow): {
+  contenance: FacetOption[];
+  taille: FacetOption[];
+  minPrice: number | null;
+} {
+  let contenance = axisValues(row, 'contenance');
+  if (contenance.length === 0 && row.net_quantity !== null && row.net_unit) {
+    const quantity = Number(row.net_quantity);
+    const unit = UNIT_LABELS[row.net_unit];
+    const label = unit ? `${quantity} ${quantity > 1 ? unit[1] : unit[0]}` : `${quantity} ${row.net_unit}`;
+    contenance = [{ code: slugify(`${quantity} ${row.net_unit}`), label }];
+  }
+  const price = priceOf(row, activeVariants(row));
+  return {
+    contenance,
+    taille: axisValues(row, 'taille'),
+    minPrice: price.kind === 'on-request' ? null : price.amount,
   };
 }
 

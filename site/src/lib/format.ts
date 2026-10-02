@@ -14,7 +14,8 @@ export function priceLabel(price: PriceInfo): string {
     case 'fixed':
       return formatPrice(price.amount);
     case 'from':
-      return `dès ${formatPrice(price.amount)}`;
+      // Seulement si plusieurs prix différents existent réellement (catalog.ts, priceOf).
+      return `À partir de ${formatPrice(price.amount)}`;
     case 'on-request':
       return 'Prix sur demande';
   }
