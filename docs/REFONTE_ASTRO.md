@@ -1,8 +1,9 @@
 # Refonte Dar Nūr — nouveau socle Astro (`site/`)
 
-> Statut au 2 octobre 2026 : **étape 6 terminée — schéma Supabase migré (additif), lu par le socle.**
-> Les pages catalogue ne sont **pas** migrées. La production reste **dar-nur.fr** (GitHub Pages,
-> racine du dépôt), que rien dans `site/` ne modifie.
+> Statut au 2 octobre 2026 : **étape 7 terminée — pages univers, collections, transverses et marques
+> générées depuis le nouveau schéma.** Les fiches produit, le panier métier et les redirections ne sont
+> **pas** migrés. La production reste **dar-nur.fr** (GitHub Pages, racine du dépôt), que rien dans
+> `site/` ne modifie.
 
 ## Architecture
 
@@ -44,6 +45,7 @@ site/
 | `npm run check` | Types (`astro check`) |
 | `npm run format` / `format:check` | Prettier |
 | `npm run verify` | Contrôles de sortie (après build) |
+| `npm run verify:catalog` | Contrôles de données des pages catalogue contre Supabase (après build, réseau) |
 | `npm run ci` | Tout, dans l'ordre de la CI |
 
 ## Variables d'environnement
@@ -53,7 +55,7 @@ Copier `site/.env.example` en `site/.env` (ignoré par Git).
 | Variable | Valeurs | Rôle |
 |---|---|---|
 | `DAR_NUR_ENV` | `development` (défaut) · `preprod` · `production` | **Seule `production` autorise l'indexation.** Toute autre valeur : meta `noindex, nofollow`, `robots.txt` « Disallow: / », en-tête `X-Robots-Tag`. |
-| `SITE_URL` | URL absolue | Canonical et Open Graph. À défaut : `DEPLOY_PRIME_URL` / `URL` (Netlify), puis `http://localhost:4321`. |
+| `SITE_URL` | URL absolue | Canonical, Open Graph, JSON-LD, sitemap. **`https://dar-nur.fr` en préproduction Netlify et en CI** (URL définitives dès maintenant ; la préproduction reste noindex). À défaut : `DEPLOY_PRIME_URL` / `URL` (Netlify), puis `http://localhost:4321`. |
 | `SUPABASE_URL`, `SUPABASE_ANON_KEY` | URL du projet, clé `sb_publishable_…` | Lecture publique sous RLS (valeurs déjà publiques sur l'ancien site). Toute autre clé est refusée par le code. Sans elles, le build passe et les pages l'indiquent. |
 
 ## Préproduction Netlify
@@ -90,5 +92,47 @@ compteur ou « best seller » sans données ; aucune photo générée à la plac
 
 | Fait (étape 5) | À venir |
 |---|---|
-| Socle, tokens, polices, logo, header, méga-menu, menu mobile 2 niveaux, bandeau, recherche (visuelle), mini-panier (visuel), footer, réassurance, ProductCard, UniverseCard, CollectionCard, VariantSelector, guide des tailles (repli), primitives UI, pages `/demo/`, `/design-system/`, `/lab/supabase/`, Netlify, CI | Étape 7 : pages univers et collections. Puis fiches, panier métier, recherche, SEO (301 depuis `redirects`, sitemap, JSON-LD), shooting photo, bascule. |
+| Socle, tokens, polices, logo, header, méga-menu, menu mobile 2 niveaux, bandeau, recherche (visuelle), mini-panier (visuel), footer, réassurance, ProductCard, UniverseCard, CollectionCard, VariantSelector, guide des tailles (repli), primitives UI, pages `/demo/`, `/design-system/`, `/lab/supabase/`, Netlify, CI | Étape 8 : fiches produit + variantes (JSON-LD Product). Puis panier métier, recherche, SEO (301 depuis `redirects`), shooting photo, bascule. |
 | **Étape 6** (2026-10-02) : migration additive Supabase (9 migrations, `docs/SCHEMA_SUPABASE.md`), lecture du nouveau schéma dans `catalog.ts`, `/lab/supabase/` affiche l'arbre des collections, banc `scripts/test/schema` + CI `schema-ci.yml` | |
+| **Étape 7** (2026-10-02) : 3 univers, 15 collections, 2 transverses, 4 pages marque, filtres/tri, fil d'Ariane, JSON-LD, sitemap (production), 404, `verify-catalog` — section ci-dessous | |
+
+## Pages catalogue (étape 7)
+
+**Routes.** Une seule route, `src/pages/[...path].astro`, génère toutes les pages depuis `collections.path`
+(jamais recalculé) : univers → `UniverseTemplate`, collection / sous-collection / transverse / marque →
+`CollectionTemplate`. Marque de parfum : `{chemin de Parfums}{brands.id}/`, générée seulement si elle a au
+moins un parfum publié. Toute autre adresse → `404.html` (statut 404, aucune redirection).
+
+**Données** (`src/lib/catalog-store.ts`, 5 requêtes par build, mémoïsées) :
+
+| Règle | Source |
+|---|---|
+| Classement | `collections` + `product_collections`. `category_id` n'est jamais lu. Une page contient les produits rattachés (principale **ou** secondaire) à la collection **et à ses descendantes** (`/miels/` = Miels + Miels gourmands ; `/mode-homme/` = qamis, sandales, accessoires). |
+| Ordre « Sélection » | Ordre de l'arbre de la collection principale (la collection avant ses sous-collections), puis `sort_order`, puis slug. |
+| Produits | `status = published` filtré explicitement (pas seulement par la RLS). Le build échoue si un produit n'a pas exactement une principale publiée. |
+| Disponibilité | `availability` ; NULL → repli sur `coming_soon` (jamais converti en `available`). |
+| Images | `product_media` (hors images de variante), sinon `images[]`. Les 3 premières de chaque produit sont vérifiées (HEAD) : une image inaccessible est écartée et signalée, le produit passe à la suivante ou au repli « Photo à venir ». |
+| Prix | « À partir de X € » seulement si plusieurs prix **différents** existent parmi les variantes actives. |
+| Badges | Bientôt disponible · Épuisé · **Offre** (produit d'une offre `product_promo` active, dans sa fenêtre de dates). « Nouveau » non calculé (§G.2 à confirmer). |
+| Offres (`/offres/`) | Offres actives + produits de la collection Offres & packs. Prix barré **uniquement s'il est prouvé** : promotion produit dont le prix de référence est le prix fixe réel de chaque produit. Aucune économie pour les packs (formats inclus non renseignés). |
+| Marques | Indexable si ≥ `settings.brand_min_models_indexable` (4) parfums publiés **et** `brands.description` renseignée. |
+| Intro | `collections.description`, sinon `seo_description` (validée à l'étape 3). Aucun champ « contenu long » en base : rien après la grille hormis le maillage. |
+
+**Indexation.** Préproduction : tout est `noindex, nofollow`. Production : univers / collection / transverse
+indexables si `is_indexable` **et** au moins un produit ; une collection vide garde sa page (les liens du menu
+ne cassent pas) mais en `noindex, follow` avec un message neutre. Chaque page porte
+`data-dn-indexable`, que lisent le sitemap et les tests. Le sitemap (`astro.config.mjs`,
+`catalogSitemap`) n'est écrit qu'en production et annoncé dans `robots.txt`.
+
+**Filtres et tri** (`src/config/catalog-pages.ts`, `CatalogBrowser.astro`) — HTML statique, aucun JSON produit
+envoyé au client : chaque carte porte `data-f-*` (codes des facettes affichées), `data-price`, `data-added`,
+`data-order`. État dans le fragment (`#contenance=200-g&tri=prix-croissant`), remplacé sans entrée
+d'historique. Une facette n'est affichée que si ≥ 2 valeurs et ≥ 80 % des produits renseignés. « Types » =
+règles lexicales sur le nom réel (« Savon… ») ou appartenance réelle à une sous-collection ; le build échoue
+si une règle ne trouve rien ou si un produit en vérifie deux. « Nouveautés » = `products.created_at`
+décroissant, proposé seulement si la page compte au moins deux dates d'ajout. Pas de pagination (62 produits
+au maximum, 25 Ko gzip de HTML).
+
+**Tests** : `npm run verify:catalog` recalcule indépendamment chaque page depuis Supabase et la compare à
+`dist/` (chemins uniques, une principale par produit, aucun brouillon, aucun orphelin, nombres et listes,
+pages marque, liens internes, pages indexables vides, JSON-LD). Lancé en CI (`site-ci.yml`).
