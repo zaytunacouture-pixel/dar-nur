@@ -12,8 +12,11 @@ export interface MediaImage {
   /** Dimensions de la source quand elles sont connues ; sinon déduites au build. */
   width?: number;
   height?: number;
-  /** `contain` pour les packshots détourés sur blanc (aucun flacon coupé). */
-  fit?: 'cover' | 'contain';
+  /**
+   * `contain` pour les packshots détourés sur blanc (aucun flacon coupé) ; `inside` garde
+   * les proportions de la photo sans rien ajouter ni couper (galerie de fiche, étape 8).
+   */
+  fit?: 'cover' | 'contain' | 'inside';
 }
 
 export interface Brand {
@@ -95,6 +98,11 @@ export interface VariantOption {
   label: string;
   /** Prix propre à l'option (formats, contenances). */
   price?: number;
+  /**
+   * Prix au kg / litre déjà calculé depuis une quantité et une unité CERTAINES (étape 8).
+   * `null` = non calculable : aucun calcul de repli à partir du libellé.
+   */
+  unitPrice?: string | null;
   /** Deuxième ligne d'un bouton texte (ex. stature) — uniquement si la donnée existe. */
   detail?: string;
   available: boolean;

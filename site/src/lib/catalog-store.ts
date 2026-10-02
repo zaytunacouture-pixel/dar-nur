@@ -18,12 +18,15 @@ import {
   fetchActiveOffers,
   fetchBrandPages,
   fetchCollectionPages,
+  fetchProductRelations,
   fetchPublicSettings,
   fetchPublishedCatalog,
+  fetchSizeGuides,
   isSupabaseConfigured,
   type SupabaseCatalogProductRow,
   type SupabaseCollectionPageRow,
   type SupabaseOfferRow,
+  type SupabaseSizeGuideRow,
 } from './supabase';
 
 export interface CatalogCollection {
@@ -64,6 +67,8 @@ export interface CatalogProduct {
   featured: boolean;
   /** Images vérifiées (URL absolues), dans l'ordre. */
   images: string[];
+  /** Ligne Supabase complète (fiche produit, étape 8). Seul catalog.ts / product-page.ts la lisent. */
+  row: SupabaseCatalogProductRow;
 }
 
 export interface CatalogBrand {
@@ -98,6 +103,12 @@ export interface Catalog {
   settings: Map<string, unknown>;
   /** Images écartées (inaccessibles) : signalées au build, jamais affichées cassées. */
   droppedImages: string[];
+  /** URL d'images vérifiées accessibles (HEAD) : les fiches n'en rendent aucune autre. */
+  reachable: Set<string>;
+  /** Guides des tailles publiés, par id. */
+  sizeGuides: Map<string, SupabaseSizeGuideRow>;
+  /** Relations « à associer » : slug produit → slugs liés, dans l'ordre admin. */
+  relations: Map<string, string[]>;
 }
 
 /** Chemins déjà pris par des pages statiques du socle : une collection ne peut pas les occuper. */
@@ -122,26 +133,35 @@ function empty(): Catalog {
     offers: [],
     settings: new Map(),
     droppedImages: [],
+    reachable: new Set(),
+    sizeGuides: new Map(),
+    relations: new Map(),
   };
 }
 
 async function load(): Promise<Catalog> {
   if (!isSupabaseConfigured()) return empty();
-  const [collectionRows, productRows, brandRows, offerRows, settingRows] = await Promise.all([
-    fetchCollectionPages(),
-    fetchPublishedCatalog(),
-    fetchBrandPages(),
-    fetchActiveOffers(),
-    fetchPublicSettings(),
-  ]);
+  const [collectionRows, productRows, brandRows, offerRows, settingRows, guideRows, relationRows] =
+    await Promise.all([
+      fetchCollectionPages(),
+      fetchPublishedCatalog(),
+      fetchBrandPages(),
+      fetchActiveOffers(),
+      fetchPublicSettings(),
+      fetchSizeGuides(),
+      fetchProductRelations(),
+    ]);
 
   const settings = new Map(settingRows.map((s) => [s.key, s.value]));
   const { collections, bySlug } = buildTree(collectionRows);
   const promoSlugs = activePromoSlugs(offerRows);
   const droppedImages: string[] = [];
+  // Étape 8 : TOUTES les images des fiches (produit et variantes) sont vérifiées, plus
+  // seulement les trois premières : la galerie les rend toutes.
   const reachable = await checkImages(
     [
-      ...productRows.flatMap((row) => productImageUrls(row).slice(0, 3)),
+      ...productRows.flatMap((row) => row.product_media.map((m) => resolveMediaUrl(m.url))),
+      ...productRows.flatMap((row) => productImageUrls(row)),
       ...offerRows.flatMap((offer) => (offer.image ? [resolveMediaUrl(offer.image)] : [])),
     ],
     droppedImages,
@@ -158,7 +178,26 @@ async function load(): Promise<Catalog> {
   if (droppedImages.length) {
     console.warn(`[catalogue] ${droppedImages.length} image(s) inaccessible(s) écartée(s) :`, droppedImages);
   }
-  return { configured: true, collections, bySlug, products, brands, offers, settings, droppedImages };
+  const relations = new Map<string, string[]>();
+  for (const relation of relationRows) {
+    const from = relation.product?.slug;
+    const to = relation.related?.slug;
+    if (!from || !to) continue;
+    relations.set(from, [...(relations.get(from) ?? []), to]);
+  }
+  return {
+    configured: true,
+    collections,
+    bySlug,
+    products,
+    brands,
+    offers,
+    settings,
+    droppedImages,
+    reachable,
+    sizeGuides: new Map(guideRows.map((guide) => [guide.id, guide])),
+    relations,
+  };
 }
 
 /* ── Arbre des collections ──────────────────────────────────────────────── */
@@ -278,6 +317,7 @@ function toCatalogProduct(
     added: row.created_at.slice(0, 10).replaceAll('-', ''),
     featured: row.featured,
     images,
+    row,
   };
 }
 
@@ -325,8 +365,8 @@ export function matchesRule(product: CatalogProduct, rule: TypeRule): boolean {
 /* ── Images ─────────────────────────────────────────────────────────────── */
 
 /**
- * Vérifie (HEAD, 16 en parallèle) les images susceptibles d'être rendues : les trois premières
- * de chaque produit et celles des offres. Une image inaccessible est écartée et signalée ; le produit passe à
+ * Vérifie (HEAD, 16 en parallèle) les images susceptibles d'être rendues : toutes celles des
+ * produits (galeries des fiches, étape 8) et celles des offres. Une image inaccessible est écartée et signalée ; le produit passe à
  * l'image suivante ou au repli « Photo à venir ». Sans cette étape, une seule image
  * supprimée côté stockage ferait échouer tout le build d'images.
  */

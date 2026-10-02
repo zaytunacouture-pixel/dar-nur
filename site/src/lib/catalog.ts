@@ -19,6 +19,7 @@ import type {
 } from '@/types/catalog';
 import {
   LEGACY_MEDIA_ORIGIN,
+  type ProductAvailability,
   type SupabaseCollectionRow,
   type SupabaseProductRow,
   type SupabaseVariantRow,
@@ -80,12 +81,16 @@ function metaLineOf(row: SupabaseProductRow, variants: SupabaseVariantRow[]): st
 }
 
 /**
- * Disponibilité commerciale (≠ statut éditorial). availability NULL = « à arbitrer » :
- * on retombe sur le comportement historique (coming_soon → non commandable), sans le
- * convertir en donnée nouvelle.
+ * Disponibilité commerciale à 4 états (≠ statut éditorial). availability NULL = « à arbitrer » :
+ * repli sur `coming_soon` (non commandable), JAMAIS sur `available`. Au 2 octobre 2026, les
+ * 22 NULL ont tous `coming_soon = true` : le repli reproduit exactement l'ancien site.
  */
+export function commercialAvailability(row: SupabaseProductRow): ProductAvailability {
+  return row.availability ?? 'coming_soon';
+}
+
 function availabilityOf(row: SupabaseProductRow): Availability {
-  const value = row.availability ?? (row.coming_soon ? 'coming_soon' : 'available');
+  const value = commercialAvailability(row);
   if (value === 'coming_soon') return 'coming-soon';
   if (value === 'out_of_stock') return 'unavailable';
   if (row.product_variants.length > 0 && row.product_variants.every((v) => !v.active)) return 'unavailable';
@@ -162,6 +167,14 @@ const UNIT_LABELS: Record<string, [singular: string, plural: string]> = {
   capsule: ['gélule', 'gélules'],
 };
 
+/** Quantité nette normalisée (étape 6) en libellé (« 200 g », « 60 gélules ») ; null si absente. */
+export function netQuantityLabel(row: SupabaseProductRow): string | null {
+  if (row.net_quantity === null || !row.net_unit) return null;
+  const quantity = Number(row.net_quantity);
+  const unit = UNIT_LABELS[row.net_unit];
+  return unit ? `${quantity} ${quantity > 1 ? unit[1] : unit[0]}` : `${quantity} ${row.net_unit}`;
+}
+
 function slugify(text: string): string {
   return text
     .normalize('NFD')
@@ -201,11 +214,9 @@ export function productFacetData(row: SupabaseProductRow): {
   minPrice: number | null;
 } {
   let contenance = axisValues(row, 'contenance');
-  if (contenance.length === 0 && row.net_quantity !== null && row.net_unit) {
-    const quantity = Number(row.net_quantity);
-    const unit = UNIT_LABELS[row.net_unit];
-    const label = unit ? `${quantity} ${quantity > 1 ? unit[1] : unit[0]}` : `${quantity} ${row.net_unit}`;
-    contenance = [{ code: slugify(`${quantity} ${row.net_unit}`), label }];
+  const net = netQuantityLabel(row);
+  if (contenance.length === 0 && net) {
+    contenance = [{ code: slugify(`${Number(row.net_quantity)} ${row.net_unit}`), label: net }];
   }
   const price = priceOf(row, activeVariants(row));
   return {

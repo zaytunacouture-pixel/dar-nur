@@ -1,0 +1,772 @@
+{
+  "source": "product_groupings + product_grouping_members (lecture admin, CLI Supabase)",
+  "exportedAt": "2026-10-02",
+  "groupings": [
+    {
+      "code": "G01",
+      "kind": "model",
+      "decision": "safe",
+      "proposedName": "Abaya Nouha",
+      "proposedSlug": "abaya-nouha",
+      "axis": "couleur",
+      "baseSlug": "vt-abaya-nouha-gris-argente",
+      "note": "Axes couleur × taille.",
+      "updatedAt": "2026-10-02 06:57:04.644947+00",
+      "members": [
+        {
+          "slug": "vt-abaya-nouha-gris-argente",
+          "label": "Gris argenté",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "vt-abaya-nouha-noir-dentelle",
+          "label": "Noir dentelle",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "vt-abaya-nouha-bleu-ciel",
+          "label": "Bleu ciel",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "vt-abaya-nouha-rose-marrone",
+          "label": "Rose marron",
+          "labelSource": "product_name"
+        }
+      ]
+    },
+    {
+      "code": "G02",
+      "kind": "model",
+      "decision": "safe",
+      "proposedName": "Ensemble Aïcha",
+      "proposedSlug": "ensemble-aicha",
+      "axis": "couleur",
+      "baseSlug": "vt-aicha-noir",
+      "note": "Axes couleur × taille.",
+      "updatedAt": "2026-10-02 06:57:04.644947+00",
+      "members": [
+        {
+          "slug": "vt-aicha-vert-sapin",
+          "label": "Vert sapin",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "vt-aicha-orange",
+          "label": "Orange",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "vt-aicha-violet",
+          "label": "Violet",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "vt-aicha-bordeaux",
+          "label": "Bordeaux",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "vt-aicha-blanc",
+          "label": "Blanc",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "vt-aicha-noir",
+          "label": "Noir",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "vt-aicha-kaki",
+          "label": "Kaki",
+          "labelSource": "product_name"
+        }
+      ]
+    },
+    {
+      "code": "G03",
+      "kind": "model",
+      "decision": "safe",
+      "proposedName": "Ensemble Layali",
+      "proposedSlug": "ensemble-layali",
+      "axis": "couleur",
+      "baseSlug": "vt-layali-beige",
+      "note": "Tailles en base sur Beige seulement : à compléter pour les 3 autres couleurs.",
+      "updatedAt": "2026-10-02 06:57:04.644947+00",
+      "members": [
+        {
+          "slug": "vt-layali-beige",
+          "label": "Beige",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "vt-layali-blanc",
+          "label": "Blanc",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "vt-layali-doree",
+          "label": "Doré",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "vt-layali-noir",
+          "label": "Noir",
+          "labelSource": "product_name"
+        }
+      ]
+    },
+    {
+      "code": "G04",
+      "kind": "model",
+      "decision": "safe",
+      "proposedName": "Ensemble Nissah Mastoura",
+      "proposedSlug": "ensemble-nissah-mastoura",
+      "axis": "couleur",
+      "baseSlug": "vt-nissah-bleu",
+      "note": "Aucune taille en base.",
+      "updatedAt": "2026-10-02 06:57:04.644947+00",
+      "members": [
+        {
+          "slug": "vt-nissah-blanc",
+          "label": "Blanc",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "vt-nissah-bleu",
+          "label": "Bleu",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "vt-nissah-bordeaux",
+          "label": "Bordeaux",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "vt-nissah-noir",
+          "label": "Noir",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "vt-nissah-vert",
+          "label": "Vert sapin",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "vt-nissah-violet",
+          "label": "Violet",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "vt-nissah-kaki",
+          "label": "Kaki",
+          "labelSource": "product_name"
+        }
+      ]
+    },
+    {
+      "code": "G05",
+      "kind": "model",
+      "decision": "safe",
+      "proposedName": "Abaya Demi-Papillon",
+      "proposedSlug": "abaya-demi-papillon",
+      "axis": "couleur",
+      "baseSlug": "dn-abaya-demi-papillon-0",
+      "note": "Couleurs des fiches 0 et 1 lues sur photo : à confirmer.",
+      "updatedAt": "2026-10-02 06:57:04.644947+00",
+      "members": [
+        {
+          "slug": "dn-abaya-demi-papillon-0",
+          "label": "Noir",
+          "labelSource": "photo"
+        },
+        {
+          "slug": "dn-abaya-demi-papillon-1",
+          "label": "Caramel & noir",
+          "labelSource": "photo"
+        },
+        {
+          "slug": "dn-abaya-demi-papillon-2",
+          "label": "Brique satiné",
+          "labelSource": "product_name"
+        }
+      ]
+    },
+    {
+      "code": "G06",
+      "kind": "model",
+      "decision": "safe",
+      "proposedName": "Abaya Farasha",
+      "proposedSlug": "abaya-farasha",
+      "axis": "couleur",
+      "baseSlug": "dn-abaya-papillon-0",
+      "note": "Fusion éventuelle avec G07 à arbitrer (voir FARASHA).",
+      "updatedAt": "2026-10-02 06:57:04.644947+00",
+      "members": [
+        {
+          "slug": "dn-abaya-papillon-0",
+          "label": "Taupe & noir",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "dn-abaya-papillon-1",
+          "label": "Noir",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "dn-abaya-papillon-2",
+          "label": "Bleu marine",
+          "labelSource": "photo"
+        }
+      ]
+    },
+    {
+      "code": "G07",
+      "kind": "model",
+      "decision": "safe",
+      "proposedName": "Abaya Farasha brodée",
+      "proposedSlug": "abaya-farasha-brodee",
+      "axis": "couleur",
+      "baseSlug": "dn-abaya-papillon-3",
+      "note": "Slug PROVISOIRE : à figer après l'arbitrage Farasha (étape 3).",
+      "updatedAt": "2026-10-02 06:57:04.644947+00",
+      "members": [
+        {
+          "slug": "dn-abaya-papillon-3",
+          "label": "Taupe brodé",
+          "labelSource": "interpreted"
+        },
+        {
+          "slug": "dn-abaya-papillon-4",
+          "label": "Noir brodé",
+          "labelSource": "product_name"
+        }
+      ]
+    },
+    {
+      "code": "G08",
+      "kind": "model",
+      "decision": "safe",
+      "proposedName": "Abaya Roumeyssa",
+      "proposedSlug": "abaya-roumeyssa",
+      "axis": "couleur",
+      "baseSlug": "dn-abaya-saoudienne-0",
+      "note": null,
+      "updatedAt": "2026-10-02 06:57:04.644947+00",
+      "members": [
+        {
+          "slug": "dn-abaya-saoudienne-0",
+          "label": "Marron caramel",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "dn-abaya-saoudienne-1",
+          "label": "Taupe & or",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "dn-abaya-saoudienne-2",
+          "label": "Bleu anthracite",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "dn-abaya-saoudienne-3",
+          "label": "Aubergine & or",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "dn-abaya-saoudienne-4",
+          "label": "Beige poudré",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "dn-abaya-saoudienne-5",
+          "label": "Vert d’eau",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "dn-abaya-saoudienne-6",
+          "label": "Blanc & or",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "dn-abaya-saoudienne-7",
+          "label": "Gris souris",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "dn-abaya-saoudienne-8",
+          "label": "Bleu marine",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "dn-abaya-saoudienne-9",
+          "label": "Beige clair",
+          "labelSource": "product_name"
+        }
+      ]
+    },
+    {
+      "code": "G09",
+      "kind": "model",
+      "decision": "safe",
+      "proposedName": "Abaya Iltihad",
+      "proposedSlug": "abaya-iltihad",
+      "axis": "couleur",
+      "baseSlug": "dn-abaya-iltihad-0",
+      "note": "Modèle sûr ; libellés de coloris lus sur photo, à valider.",
+      "updatedAt": "2026-10-02 06:57:04.644947+00",
+      "members": [
+        {
+          "slug": "dn-abaya-iltihad-0",
+          "label": "Beige & marron à pois",
+          "labelSource": "photo"
+        },
+        {
+          "slug": "dn-abaya-iltihad-1",
+          "label": "Noir fleuri",
+          "labelSource": "photo"
+        },
+        {
+          "slug": "dn-abaya-iltihad-2",
+          "label": "Noir & gris",
+          "labelSource": "photo"
+        }
+      ]
+    },
+    {
+      "code": "G10",
+      "kind": "model",
+      "decision": "safe",
+      "proposedName": "Abaya Mme Dar Nūr 4 pièces",
+      "proposedSlug": "abaya-mme-dar-nur-4-pieces",
+      "axis": "couleur",
+      "baseSlug": "dn-abaya-mme-dn-0",
+      "note": "Nom PROVISOIRE (« Mme » ou « Madame ») ; dn-abaya-mme-dn-3 est un autre modèle.",
+      "updatedAt": "2026-10-02 06:57:04.644947+00",
+      "members": [
+        {
+          "slug": "dn-abaya-mme-dn-0",
+          "label": "Noir & vert",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "dn-abaya-mme-dn-1",
+          "label": "Blanc & noir",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "dn-abaya-mme-dn-2",
+          "label": "Noir & rouge",
+          "labelSource": "interpreted"
+        }
+      ]
+    },
+    {
+      "code": "G11",
+      "kind": "model",
+      "decision": "safe",
+      "proposedName": "Abaya Chita",
+      "proposedSlug": "abaya-chita",
+      "axis": "couleur",
+      "baseSlug": "dn-abaya-chita-0",
+      "note": null,
+      "updatedAt": "2026-10-02 06:57:04.644947+00",
+      "members": [
+        {
+          "slug": "dn-abaya-chita-0",
+          "label": "Rose",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "dn-abaya-chita-1",
+          "label": "Marron",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "dn-abaya-chita-2",
+          "label": "Rouge",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "dn-abaya-chita-3",
+          "label": "Bleu roi",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "dn-abaya-chita-4",
+          "label": "Vert d’eau",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "dn-abaya-chita-5",
+          "label": "Aubergine",
+          "labelSource": "product_name"
+        }
+      ]
+    },
+    {
+      "code": "G12",
+      "kind": "model",
+      "decision": "safe",
+      "proposedName": "Abaya kimono Seyra",
+      "proposedSlug": "abaya-kimono-seyra",
+      "axis": "couleur",
+      "baseSlug": "dn-abaya-kimono-seyra-0",
+      "note": null,
+      "updatedAt": "2026-10-02 06:57:04.644947+00",
+      "members": [
+        {
+          "slug": "dn-abaya-kimono-seyra-0",
+          "label": "Noir & gris",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "dn-abaya-kimono-seyra-1",
+          "label": "Noir & marron",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "dn-abaya-kimono-seyra-2",
+          "label": "Noir",
+          "labelSource": "product_name"
+        }
+      ]
+    },
+    {
+      "code": "G14",
+      "kind": "model",
+      "decision": "safe",
+      "proposedName": "Qamis saoudien",
+      "proposedSlug": "qamis-saoudien",
+      "axis": "couleur",
+      "baseSlug": "qms-blanc",
+      "note": "Axes couleur × taille (XXL en base, 2XL ailleurs : non unifié).",
+      "updatedAt": "2026-10-02 06:57:04.644947+00",
+      "members": [
+        {
+          "slug": "qms-blanc",
+          "label": "Blanc",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "qms-bleu-ciel",
+          "label": "Bleu ciel",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "qms-gris",
+          "label": "Gris foncé",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "qms-marron",
+          "label": "Marron",
+          "labelSource": "product_name"
+        }
+      ]
+    },
+    {
+      "code": "G16",
+      "kind": "model",
+      "decision": "safe",
+      "proposedName": "Sandale Comera",
+      "proposedSlug": "sandale-comera",
+      "axis": "couleur",
+      "baseSlug": "dn-sandale-homme-0",
+      "note": "Aucune pointure en base.",
+      "updatedAt": "2026-10-02 06:57:04.644947+00",
+      "members": [
+        {
+          "slug": "dn-sandale-homme-0",
+          "label": "Blanc",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "dn-sandale-homme-1",
+          "label": "Beige",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "dn-sandale-homme-2",
+          "label": "Beige tressé",
+          "labelSource": "interpreted"
+        },
+        {
+          "slug": "dn-sandale-homme-3",
+          "label": "Vert militaire",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "dn-sandale-homme-4",
+          "label": "Noir",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "dn-sandale-homme-5",
+          "label": "Marron",
+          "labelSource": "product_name"
+        }
+      ]
+    },
+    {
+      "code": "G17",
+      "kind": "model",
+      "decision": "safe",
+      "proposedName": "Chéchia Cairo",
+      "proposedSlug": "chechia-cairo",
+      "axis": "couleur",
+      "baseSlug": "dn-chechia-cairo-0",
+      "note": null,
+      "updatedAt": "2026-10-02 06:57:04.644947+00",
+      "members": [
+        {
+          "slug": "dn-chechia-cairo-0",
+          "label": "Blanc",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "dn-chechia-cairo-1",
+          "label": "Noir",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "dn-chechia-cairo-2",
+          "label": "Marron",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "dn-chechia-cairo-3",
+          "label": "Bleu",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "dn-chechia-cairo-4",
+          "label": "Vert",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "dn-chechia-cairo-5",
+          "label": "Gris clair",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "dn-chechia-cairo-6",
+          "label": "Beige",
+          "labelSource": "product_name"
+        }
+      ]
+    },
+    {
+      "code": "DUP-ABAYA-NILLA",
+      "kind": "duplicate",
+      "decision": "needs_review",
+      "proposedName": "Abaya Nilla (broderie D)",
+      "proposedSlug": null,
+      "axis": null,
+      "baseSlug": "dn-abaya-nilla-3",
+      "note": "À VALIDER : dn-abaya-nilla-5 a la même photo que dn-abaya-nilla-3. Ne pas supprimer sans accord.",
+      "updatedAt": "2026-10-02 06:57:04.644947+00",
+      "members": [
+        {
+          "slug": "dn-abaya-nilla-3",
+          "label": null,
+          "labelSource": "unknown"
+        },
+        {
+          "slug": "dn-abaya-nilla-5",
+          "label": null,
+          "labelSource": "unknown"
+        }
+      ]
+    },
+    {
+      "code": "DUP-MIEL-HIBISCUS",
+      "kind": "duplicate",
+      "decision": "needs_review",
+      "proposedName": "Miel Hibiscus, Nigelle & Zamzam",
+      "proposedSlug": null,
+      "axis": null,
+      "baseSlug": "miel-hibiscus-zamzam",
+      "note": "À VALIDER : dn-miel-nigelle-hibiscus doublon probable (étiquette photo identique) ; prix 25 € contre 24,99 €. Ne pas supprimer sans accord.",
+      "updatedAt": "2026-10-02 06:57:04.644947+00",
+      "members": [
+        {
+          "slug": "miel-hibiscus-zamzam",
+          "label": null,
+          "labelSource": "unknown"
+        },
+        {
+          "slug": "dn-miel-nigelle-hibiscus",
+          "label": null,
+          "labelSource": "unknown"
+        }
+      ]
+    },
+    {
+      "code": "FARASHA",
+      "kind": "model",
+      "decision": "needs_review",
+      "proposedName": "Abaya Farasha (avec la version brodée ?)",
+      "proposedSlug": null,
+      "axis": "couleur",
+      "baseSlug": "dn-abaya-papillon-0",
+      "note": "À VALIDER : réunir G06 et G07 en un seul modèle (même prix, finition différente) ou les garder distincts.",
+      "updatedAt": "2026-10-02 06:57:04.644947+00",
+      "members": [
+        {
+          "slug": "dn-abaya-papillon-0",
+          "label": null,
+          "labelSource": "unknown"
+        },
+        {
+          "slug": "dn-abaya-papillon-1",
+          "label": null,
+          "labelSource": "unknown"
+        },
+        {
+          "slug": "dn-abaya-papillon-2",
+          "label": null,
+          "labelSource": "unknown"
+        },
+        {
+          "slug": "dn-abaya-papillon-3",
+          "label": null,
+          "labelSource": "unknown"
+        },
+        {
+          "slug": "dn-abaya-papillon-4",
+          "label": null,
+          "labelSource": "unknown"
+        }
+      ]
+    },
+    {
+      "code": "G13",
+      "kind": "model",
+      "decision": "needs_review",
+      "proposedName": "Abaya Nilla",
+      "proposedSlug": "abaya-nilla",
+      "axis": "motif",
+      "baseSlug": "dn-abaya-nilla-0",
+      "note": "À VALIDER : 5 broderies différentes (pas des couleurs) ; regrouper exige de nommer les motifs. dn-abaya-nilla-5 = doublon de -3.",
+      "updatedAt": "2026-10-02 06:57:04.644947+00",
+      "members": [
+        {
+          "slug": "dn-abaya-nilla-0",
+          "label": null,
+          "labelSource": "unknown"
+        },
+        {
+          "slug": "dn-abaya-nilla-1",
+          "label": null,
+          "labelSource": "unknown"
+        },
+        {
+          "slug": "dn-abaya-nilla-2",
+          "label": null,
+          "labelSource": "unknown"
+        },
+        {
+          "slug": "dn-abaya-nilla-3",
+          "label": null,
+          "labelSource": "unknown"
+        },
+        {
+          "slug": "dn-abaya-nilla-4",
+          "label": null,
+          "labelSource": "unknown"
+        }
+      ]
+    },
+    {
+      "code": "G15",
+      "kind": "model",
+      "decision": "needs_review",
+      "proposedName": "Qamis Sultan Saphir",
+      "proposedSlug": null,
+      "axis": "couleur",
+      "baseSlug": "dn-qamiss-sultan-saphir-0",
+      "note": "À VALIDER : prix différents selon la couleur ; la fiche -0 montre une pièce bicolore à cape.",
+      "updatedAt": "2026-10-02 06:57:04.644947+00",
+      "members": [
+        {
+          "slug": "dn-qamiss-sultan-saphir-0",
+          "label": "Noir & moutarde",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "dn-qamiss-sultan-saphir-1",
+          "label": "Bleu ciel",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "dn-qamiss-sultan-saphir-2",
+          "label": "Beige",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "dn-qamiss-sultan-saphir-3",
+          "label": "Noir satiné",
+          "labelSource": "product_name"
+        }
+      ]
+    },
+    {
+      "code": "G16b",
+      "kind": "model",
+      "decision": "needs_review",
+      "proposedName": "Sandale Comera (dessin différent)",
+      "proposedSlug": null,
+      "axis": "couleur",
+      "baseSlug": "dn-sandale-homme-6",
+      "note": "À VALIDER : rattacher à G16 ou garder séparées (tige de dessin différent sur la photo).",
+      "updatedAt": "2026-10-02 06:57:04.644947+00",
+      "members": [
+        {
+          "slug": "dn-sandale-homme-6",
+          "label": "Noir & blanc",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "dn-sandale-homme-8",
+          "label": "Bleu marine",
+          "labelSource": "product_name"
+        }
+      ]
+    },
+    {
+      "code": "G18",
+      "kind": "model",
+      "decision": "needs_review",
+      "proposedName": "Musc Tahara 6 ml",
+      "proposedSlug": null,
+      "axis": "senteur",
+      "baseSlug": "dn-musc-tahara-0",
+      "note": "À VALIDER : une fiche avec choix de senteur, ou 4 fiches ? Choix commercial.",
+      "updatedAt": "2026-10-02 06:57:04.644947+00",
+      "members": [
+        {
+          "slug": "dn-musc-tahara-0",
+          "label": "Lavande",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "dn-musc-tahara-1",
+          "label": "Blanc",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "dn-musc-tahara-2",
+          "label": "Myrtille",
+          "labelSource": "product_name"
+        },
+        {
+          "slug": "dn-musc-tahara-grenade",
+          "label": "Grenade",
+          "labelSource": "product_name"
+        }
+      ]
+    }
+  ]
+}

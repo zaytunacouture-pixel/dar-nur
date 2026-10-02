@@ -103,10 +103,95 @@ export interface SupabaseCollectionPageRow extends SupabaseCollectionRow {
   image_url: string | null;
 }
 
-/** Produit du catalogue complet (pages collections) : ordre admin et date d'ajout en plus. */
+/** Valeur d'option avec sa quantité normalisée (prix au kg / litre) — étape 6. */
+export interface SupabaseCatalogOptionValue {
+  code: string;
+  label: string;
+  numeric_value: number | null;
+  unit: string | null;
+  color_hex: string | null;
+  sort_order: number | null;
+}
+
+export interface SupabaseCatalogVariantRow extends SupabaseVariantRow {
+  id: string;
+  updated_at: string;
+  product_variant_options: { option_type_id: string; option_values: SupabaseCatalogOptionValue | null }[];
+}
+
+export interface SupabaseCatalogMediaRow extends SupabaseMediaRow {
+  width: number | null;
+  height: number | null;
+}
+
+/** Détails alimentaires (étape 6, vides au 2 octobre 2026). */
+export interface SupabaseFoodDetailsRow {
+  food_type: string | null;
+  legal_name: string | null;
+  ingredients: string | null;
+  origin: string | null;
+  notes: string | null;
+}
+
+/** Détails textiles (étape 6, vides au 2 octobre 2026). */
+export interface SupabaseApparelDetailsRow {
+  material: string | null;
+  composition: string | null;
+  opacity: string | null;
+  thickness: string | null;
+  fit: string | null;
+  care_instructions: string | null;
+}
+
+/**
+ * Produit du catalogue complet (pages collections ET fiches produit) : ordre admin, dates,
+ * contenus éditoriaux structurés. Le champ historique `accordions` (HTML libre) n'est PAS lu :
+ * voir docs/REFONTE_ASTRO.md, « Fiches produit ».
+ */
 export interface SupabaseCatalogProductRow extends SupabaseProductRow {
   sort_order: number | null;
   created_at: string;
+  updated_at: string;
+  description: string[] | null;
+  benefits: string[] | null;
+  benefits_label: string | null;
+  composition: string | null;
+  provenance: string | null;
+  usage_advice: string | null;
+  precautions: string[] | null;
+  weight: string | null;
+  volume: string | null;
+  seo_title: string | null;
+  seo_description: string | null;
+  size_guide_id: string | null;
+  product_variants: SupabaseCatalogVariantRow[];
+  product_media: SupabaseCatalogMediaRow[];
+  product_food_details: SupabaseFoodDetailsRow | null;
+  product_apparel_details: SupabaseApparelDetailsRow | null;
+}
+
+/** Guide des tailles publié (étape 6 ; aucun au 2 octobre 2026). */
+export interface SupabaseSizeGuideRow {
+  id: string;
+  slug: string;
+  name: string;
+  unit: string;
+  measuring_instructions: string | null;
+  size_guide_rows: {
+    size_label: string;
+    measure: string;
+    value_min: number;
+    value_max: number | null;
+    sort_order: number | null;
+  }[];
+}
+
+/** Relation « à associer » choisie à la main (étape 6 ; vide au 2 octobre 2026). */
+export interface SupabaseRelationRow {
+  relation_type: string;
+  sort_order: number | null;
+  product: { slug: string } | null;
+  related: { slug: string } | null;
 }
 
 export interface SupabaseBrandPageRow {
@@ -234,12 +319,26 @@ export function fetchCollectionPages(): Promise<SupabaseCollectionPageRow[]> {
 
 /**
  * Catalogue publié complet (≈ 250 lignes, une seule requête par build), ordre admin.
+ * Sert aux pages catalogue (étape 7) et aux fiches produit (étape 8).
  * `status = published` explicite : un brouillon n'entre jamais dans le HTML, même si la
  * RLS changeait un jour.
  */
+/** Colonnes du catalogue complet : celles des cartes + celles des fiches produit (étape 8). */
+const CATALOG_COLUMNS =
+  'slug,name,category_id,tagline,price_value,images,brand,brand_slug,coming_soon,featured,variant_axes,' +
+  'status,availability,net_quantity,net_unit,sort_order,created_at,updated_at,' +
+  'description,benefits,benefits_label,composition,provenance,usage_advice,precautions,weight,volume,' +
+  'seo_title,seo_description,size_guide_id,' +
+  'product_variants(id,name,price,active,sort_order,options,updated_at,' +
+  'product_variant_options(option_type_id,option_values(code,label,numeric_value,unit,color_hex,sort_order))),' +
+  'product_collections(role,collections(slug,path,name)),' +
+  'product_media(url,sort_order,variant_id,alt_text,width,height),' +
+  'product_food_details(food_type,legal_name,ingredients,origin,notes),' +
+  'product_apparel_details(material,composition,opacity,thickness,fit,care_instructions)';
+
 export function fetchPublishedCatalog(): Promise<SupabaseCatalogProductRow[]> {
   return select<SupabaseCatalogProductRow>('products', {
-    select: `${PRODUCT_COLUMNS},sort_order,created_at`,
+    select: CATALOG_COLUMNS,
     status: 'eq.published',
     order: 'sort_order.asc,slug.asc',
   });
@@ -262,6 +361,27 @@ export function fetchActiveOffers(): Promise<SupabaseOfferRow[]> {
       'offer_products(product_slug,sort_order,quantity,variant_id)',
     active: 'eq.true',
     order: 'sort_order.asc,title.asc',
+  });
+}
+
+/** Guides des tailles PUBLIÉS, avec leurs lignes de mesures. */
+export function fetchSizeGuides(): Promise<SupabaseSizeGuideRow[]> {
+  return select<SupabaseSizeGuideRow>('size_guides', {
+    select:
+      'id,slug,name,unit,measuring_instructions,size_guide_rows(size_label,measure,value_min,value_max,sort_order)',
+    status: 'eq.published',
+    order: 'slug.asc',
+  });
+}
+
+/** Relations « à associer » (la RLS ne renvoie que les couples de produits actifs). */
+export function fetchProductRelations(): Promise<SupabaseRelationRow[]> {
+  return select<SupabaseRelationRow>('product_relations', {
+    select:
+      'relation_type,sort_order,' +
+      'product:products!product_relations_product_id_fkey(slug),' +
+      'related:products!product_relations_related_product_id_fkey(slug)',
+    order: 'sort_order.asc',
   });
 }
 
