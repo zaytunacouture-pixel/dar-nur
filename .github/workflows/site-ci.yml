@@ -4,7 +4,9 @@ name: Nouveau socle Astro — contrôles (site/)
 # ne déploie rien, ne touche ni à la production GitHub Pages ni aux workflows existants.
 #   - formatage (Prettier), types (astro check, TypeScript strict), build statique ;
 #   - verify-build : noindex hors production, SEO de base, budgets de poids,
-#     discipline des tokens, absence de clé secrète.
+#     discipline des tokens, absence de clé secrète ;
+#   - verify-catalog (étape 7) : contenu des pages univers / collections / marques
+#     recalculé indépendamment depuis Supabase (lecture publique) et comparé à dist/.
 
 on:
   pull_request:
@@ -35,6 +37,8 @@ jobs:
         working-directory: site
     env:
       DAR_NUR_ENV: preprod
+      # Domaine final pour canonical / JSON-LD (comme netlify.toml) ; la sortie reste noindex.
+      SITE_URL: https://dar-nur.fr
       # Valeurs PUBLIQUES par conception (lecture seule sous RLS), identiques à netlify.toml.
       SUPABASE_URL: https://sxlpgcnjerlayitaxxyv.supabase.co
       SUPABASE_ANON_KEY: sb_publishable_3J_jC58tHskgwggDRahQCg_q8xM_xAY
@@ -61,3 +65,6 @@ jobs:
 
       - name: Vérifications de sortie (noindex, SEO de base, budgets, tokens)
         run: npm run verify
+
+      - name: Contrôles catalogue (pages ↔ Supabase, liens, brouillons, orphelins, JSON-LD)
+        run: npm run verify:catalog

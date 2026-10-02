@@ -15,7 +15,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "verify": "node scripts/verify-build.mjs",
-    "ci": "npm run format:check && npm run check && npm run build && npm run verify"
+    "ci": "npm run format:check && npm run check && npm run build && npm run verify && npm run verify:catalog",
+    "verify:catalog": "node scripts/verify-catalog.mjs"
   },
   "dependencies": {
     "astro": "7.3.5"
