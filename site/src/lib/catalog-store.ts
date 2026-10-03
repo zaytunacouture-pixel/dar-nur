@@ -109,10 +109,35 @@ export interface Catalog {
   sizeGuides: Map<string, SupabaseSizeGuideRow>;
   /** Relations « à associer » : slug produit → slugs liés, dans l'ordre admin. */
   relations: Map<string, string[]>;
+  /**
+   * Promotions produit PROUVÉES (étape 10) : slug → prix de l'offre. Même règle que le serveur de
+   * commande (orders_private.resolve_lines) : le panier facture exactement le prix affiché.
+   */
+  promos: Map<string, ProductPromo>;
+}
+
+/** Offre `product_promo` applicable à un produit sans variante dont le prix réel = prix de référence. */
+export interface ProductPromo {
+  offerId: string;
+  title: string;
+  price: number;
+  compareAt: number;
 }
 
 /** Chemins déjà pris par des pages statiques du socle : une collection ne peut pas les occuper. */
-const RESERVED_PATHS = ['/', '/demo/', '/design-system/', '/lab/supabase/', '/404/'];
+const RESERVED_PATHS = [
+  '/',
+  '/demo/',
+  '/design-system/',
+  '/lab/supabase/',
+  '/404/',
+  // Étape 10 : parcours de commande et administration.
+  '/panier/',
+  '/commande/',
+  '/suivi/',
+  '/admin/',
+  '/admin/commandes/',
+];
 
 const PARFUMS_SLUG = 'parfums';
 
@@ -136,6 +161,7 @@ function empty(): Catalog {
     reachable: new Set(),
     sizeGuides: new Map(),
     relations: new Map(),
+    promos: new Map(),
   };
 }
 
@@ -197,6 +223,7 @@ async function load(): Promise<Catalog> {
     reachable,
     sizeGuides: new Map(guideRows.map((guide) => [guide.id, guide])),
     relations,
+    promos: provenPromos(offerRows, products),
   };
 }
 
@@ -474,6 +501,32 @@ function buildOffers(rows: SupabaseOfferRow[], products: CatalogProduct[], reach
         items,
       };
     });
+}
+
+/**
+ * Promotions produit appliquées au prix de la fiche et du panier (étape 10). Offre product_promo
+ * active et en cours, prix de l'offre inférieur au prix de référence, produit SANS variante dont le
+ * prix réel est exactement ce prix de référence. Plusieurs offres : la moins chère. Jamais un pack.
+ * Identique à la règle SQL de orders_private.resolve_lines (le serveur refuse tout autre prix).
+ */
+function provenPromos(rows: SupabaseOfferRow[], products: CatalogProduct[]): Map<string, ProductPromo> {
+  const bySlug = new Map(products.map((p) => [p.slug, p]));
+  const cents = (n: number) => Math.round(n * 100);
+  const promos = new Map<string, ProductPromo>();
+  for (const offer of rows) {
+    if (offer.type !== 'product_promo' || !isLive(offer)) continue;
+    const { promo_price: price, normal_price: compareAt } = offer;
+    if (price === null || compareAt === null || !(price > 0) || cents(price) >= cents(compareAt)) continue;
+    for (const item of offer.offer_products) {
+      const product = item.product_slug ? bySlug.get(item.product_slug) : undefined;
+      if (!product || product.row.product_variants.length > 0 || product.row.price_value === null) continue;
+      if (cents(product.row.price_value) !== cents(compareAt)) continue;
+      const current = promos.get(product.slug);
+      if (!current || price < current.price)
+        promos.set(product.slug, { offerId: offer.id, title: offer.title, price, compareAt });
+    }
+  }
+  return promos;
 }
 
 /**

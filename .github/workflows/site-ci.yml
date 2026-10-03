@@ -87,6 +87,9 @@ jobs:
       - name: Types (astro check)
         run: npm run check
 
+      - name: Tests du panier local (étape 10)
+        run: npm run test:cart
+
       - name: Build statique
         run: npm run build
 
@@ -101,3 +104,6 @@ jobs:
 
       - name: Contrôles de l'accueil (liens, produits mis en avant, mentions interdites, JSON-LD)
         run: npm run verify:home
+
+      - name: Contrôles du parcours de commande (noindex, formulaire, suivi, aucun faux paiement)
+        run: npm run verify:orders

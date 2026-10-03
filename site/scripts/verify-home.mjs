@@ -164,7 +164,16 @@ notes.push(`${cardSlugs.length} produits « À découvrir » + hero contrôlés 
 // ── 5. Honnêteté du contenu ──────────────────────────────────────────────────
 const FORBIDDEN = [
   [/livraison offerte/i, 'livraison offerte'],
-  [/livraison (?:en|dans toute la|partout en) France|partout en France/i, 'livraison nationale'],
+  // Étape 10 : « Livraison en France et à l'international » est vrai (frais confirmés avant paiement) ;
+  // une livraison France SEULE, mondiale, gratuite ou sans frais de douane ne l'est pas.
+  [
+    /livraison (?:en|dans toute la|partout en) France(?! et à l[’']international)|partout en France/i,
+    'livraison nationale',
+  ],
+  [
+    /livraison (?:mondiale|partout dans le monde|gratuite)|sans frais de (?:douane|livraison)/i,
+    'promesse de livraison',
+  ],
   [/meilleures? ventes?|best[- ]?sellers?|favoris clients|les plus vendus/i, 'classement de ventes'],
   [/\bavis\b|★|☆|\bnote moyenne\b|\/5\b/i, 'avis ou note'],
   [

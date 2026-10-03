@@ -21,6 +21,13 @@ interface Props {
   disabled?: boolean;
   autocomplete?: string;
   options?: { value: string; label: string }[];
+  maxlength?: number;
+  inputmode?: 'text' | 'email' | 'tel' | 'numeric';
+  /**
+   * Erreur gérée par JavaScript (formulaire de commande, étape 10) : conteneur d'erreur rendu
+   * masqué, relié par aria-describedby ; le script y écrit le message et pose aria-invalid.
+   */
+  liveError?: boolean;
 }
 
 const {
@@ -38,16 +45,20 @@ const {
   disabled = false,
   autocomplete,
   options = [],
+  maxlength,
+  inputmode,
+  liveError = false,
 } = Astro.props;
 
 const helpId = help ? `${id}-help` : undefined;
-const errorId = error ? `${id}-error` : undefined;
+const errorId = error || liveError ? `${id}-error` : undefined;
 const describedBy = [helpId, errorId].filter(Boolean).join(' ') || undefined;
 const common = {
   id,
   name,
   required,
   disabled,
+  autocomplete,
   'aria-describedby': describedBy,
   'aria-invalid': error ? ('true' as const) : undefined,
 };
@@ -59,7 +70,12 @@ const common = {
     {optional && <span class="dn-field__optional"> (facultatif)</span>}
   </label>
   {control === 'textarea' ? (
-    <textarea class="dn-field__control dn-field__control--textarea" placeholder={placeholder} {...common}>
+    <textarea
+      class="dn-field__control dn-field__control--textarea"
+      placeholder={placeholder}
+      maxlength={maxlength}
+      {...common}
+    >
         {value}
       </textarea>
   ) : control === 'select' ? (
@@ -79,7 +95,8 @@ const common = {
       type={type}
       value={value}
       placeholder={placeholder}
-      autocomplete={autocomplete}
+      maxlength={maxlength}
+      inputmode={inputmode}
       {...common}
     />
   )}
@@ -92,6 +109,12 @@ const common = {
     <p class="dn-field__error" id={errorId}>
       <Icon name="circle-alert" size={16} />
       {error}
+    </p>
+  )}
+  {!error && liveError && (
+    <p class="dn-field__error" id={errorId} data-dn-field-error hidden>
+      <Icon name="circle-alert" size={16} />
+      <span />
     </p>
   )}
 </div>
@@ -161,6 +184,9 @@ const common = {
     font-size: var(--dn-fs-small);
     line-height: var(--dn-lh-small);
     color: var(--dn-ink-2);
+  }
+  .dn-field__error[hidden] {
+    display: none;
   }
   .dn-field__error {
     display: flex;

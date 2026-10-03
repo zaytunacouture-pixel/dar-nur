@@ -23,7 +23,17 @@ const dist = join(root, 'dist');
 const src = join(root, 'src');
 const env = process.env.DAR_NUR_ENV ?? 'development';
 const indexable = env === 'production';
-const INTERNAL_PAGES = ['demo/index.html', 'design-system/index.html', 'lab/supabase/index.html', '404.html'];
+const INTERNAL_PAGES = [
+  'demo/index.html',
+  'design-system/index.html',
+  'lab/supabase/index.html',
+  '404.html',
+  // Étape 10 : parcours de commande et administration, noindex dans TOUS les environnements.
+  'panier/index.html',
+  'commande/index.html',
+  'suivi/index.html',
+  'admin/commandes/index.html',
+];
 const BUDGET = { jsGzip: 20_000, cssGzip: 30_000, fonts: 50_000 };
 
 const errors = [];

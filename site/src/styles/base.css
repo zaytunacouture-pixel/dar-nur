@@ -213,6 +213,125 @@ h3,
   white-space: nowrap;
 }
 
+/* ── Panier (étape 10) ───────────────────────────────────────────
+   Classes GLOBALES : les lignes sont construites par JavaScript (src/scripts/cart-view.ts),
+   sans les attributs de portée d'Astro. */
+.dn-cartline {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: var(--dn-space-3);
+  padding-block: var(--dn-space-4);
+  border-bottom: var(--dn-border-decor);
+}
+.dn-cartline.is-invalid {
+  border-inline-start: var(--dn-border-width-strong) solid var(--dn-error);
+  padding-inline-start: var(--dn-space-3);
+}
+.dn-cartline__thumb {
+  display: block;
+  inline-size: 64px;
+  block-size: 80px;
+  border-radius: var(--dn-radius-sm);
+  background: var(--dn-media);
+  object-fit: cover;
+}
+.dn-cartline__info {
+  display: grid;
+  gap: var(--dn-space-1);
+  align-content: start;
+  min-inline-size: 0;
+}
+.dn-cartline__name {
+  font-size: var(--dn-fs-button);
+  font-weight: var(--dn-fw-medium);
+  color: var(--dn-ink);
+  text-decoration: none;
+}
+.dn-cartline__name:hover {
+  text-decoration: underline;
+}
+.dn-cartline__unit s {
+  color: var(--dn-ink-2);
+}
+.dn-cartline__ondemand {
+  color: var(--dn-ink-2);
+}
+.dn-cartline__notice.is-error {
+  color: var(--dn-error);
+  font-weight: var(--dn-fw-medium);
+}
+.dn-cartline__notice.is-warning {
+  color: var(--dn-warning);
+  font-weight: var(--dn-fw-medium);
+}
+.dn-cartline__notice.is-info {
+  color: var(--dn-ink-2);
+}
+.dn-cartline__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--dn-space-3);
+  margin-top: var(--dn-space-1);
+}
+.dn-cartline__total {
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--dn-fw-medium);
+}
+.dn-cartline__remove {
+  justify-self: start;
+  min-block-size: var(--dn-tap-min);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--dn-ink-2);
+  font-size: var(--dn-fs-small);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.dn-cartline__remove:hover {
+  color: var(--dn-ink);
+}
+.dn-qty {
+  display: inline-flex;
+  align-items: center;
+  border: var(--dn-border-ui);
+  border-radius: var(--dn-radius-sm);
+}
+.dn-qty__btn {
+  display: inline-grid;
+  place-items: center;
+  inline-size: var(--dn-tap-min);
+  block-size: var(--dn-tap-min);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--dn-ink);
+  cursor: pointer;
+}
+.dn-qty__btn:hover {
+  background: var(--dn-hover-tint);
+}
+.dn-qty__btn:disabled {
+  color: var(--dn-unavailable);
+  cursor: not-allowed;
+  background: transparent;
+}
+.dn-qty__value {
+  min-inline-size: var(--dn-space-6);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Bandeau de préproduction des pages de commande. */
+.dn-preprod-note {
+  padding: var(--dn-space-3) var(--dn-space-4);
+  border-radius: var(--dn-radius-sm);
+  background: var(--dn-warning-bg);
+  color: var(--dn-warning);
+  font-size: var(--dn-fs-body-sm);
+}
+
 /* ── Mouvement réduit : coupe toute transition et animation ──── */
 @media (prefers-reduced-motion: reduce) {
   *,

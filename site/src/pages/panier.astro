@@ -1,0 +1,245 @@
+---
+/**
+ * Panier (étape 10). Contenu lu dans le navigateur (localStorage) : la page statique ne contient
+ * aucune donnée client. Au chargement, les prix et disponibilités sont revérifiés (check_cart) :
+ * un écart est affiché, jamais appliqué en silence. noindex, hors sitemap.
+ */
+import ApiConfig from '@/components/order/ApiConfig.astro';
+import Button from '@/components/ui/Button.astro';
+import Icon from '@/components/ui/Icon.astro';
+import { currentShipping, orderingSteps } from '@/config/commerce';
+import { universes } from '@/config/navigation';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+
+const seo = {
+  title: 'Panier',
+  description: 'Votre panier Dar Nūr : vérifiez vos articles avant d’envoyer votre demande de commande.',
+  canonicalPath: '/panier/',
+  noindex: true,
+};
+---
+
+<BaseLayout seo={seo} showReassurance={false}>
+  <ApiConfig />
+  <div class="dn-container dn-cartpage">
+    <h1 class="dn-h1">Panier</h1>
+
+    <div class="dn-cartpage__empty" data-dn-page-empty>
+      <p>Votre panier est vide.</p>
+      <div class="dn-cartpage__links">
+        {universes.map((u) => (
+          <Button variant="secondary" href={u.href}>
+            {u.label}
+          </Button>
+        ))}
+      </div>
+      <noscript>
+        <p class="dn-small dn-muted">Le panier a besoin de JavaScript pour fonctionner.</p>
+      </noscript>
+    </div>
+
+    <div class="dn-cartpage__grid" data-dn-page-filled hidden>
+      <section class="dn-cartpage__lines" aria-labelledby="dn-cart-articles">
+        <h2 id="dn-cart-articles" class="dn-visually-hidden">
+          Articles
+        </h2>
+        <p class="dn-cartpage__notice" role="status" data-dn-page-notice hidden></p>
+        <ul role="list" data-dn-page-lines tabindex="-1" aria-label="Articles du panier"></ul>
+      </section>
+
+      <aside class="dn-summary" aria-labelledby="dn-cart-recap">
+        <h2 id="dn-cart-recap" class="dn-summary__title">
+          Récapitulatif
+        </h2>
+        <dl class="dn-summary__rows">
+          <div>
+            <dt>Sous-total</dt>
+            <dd data-dn-page-subtotal></dd>
+          </div>
+          <div>
+            <dt>Livraison</dt>
+            <dd>À confirmer par Dar Nūr</dd>
+          </div>
+          <div class="dn-summary__total">
+            <dt>Total</dt>
+            <dd>Confirmé avant paiement</dd>
+          </div>
+        </dl>
+        <Button href="/commande/" size="lg" fullWidth data-dn-to-checkout>
+          Continuer vers la demande de commande
+        </Button>
+        <p class="dn-small dn-cartpage__blocked" data-dn-page-blocked hidden>
+          <Icon name="circle-alert" size={16} />
+          <span>Retirez les articles signalés pour continuer.</span>
+        </p>
+        <div class="dn-summary__how">
+          <h3 class="dn-label">Comment ça marche</h3>
+          <ol class="dn-small">
+            {orderingSteps.map((step) => (
+              <li>{step}</li>
+            ))}
+          </ol>
+          <p class="dn-small dn-muted">
+            <Icon name="truck" size={16} />
+            <span>{currentShipping.summary}.</span>
+          </p>
+        </div>
+      </aside>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .dn-cartpage {
+    display: grid;
+    gap: var(--dn-space-6);
+    padding-block: var(--dn-space-8) var(--dn-section-y);
+  }
+  .dn-cartpage__empty {
+    display: grid;
+    gap: var(--dn-space-4);
+    justify-items: start;
+  }
+  .dn-cartpage__empty[hidden],
+  .dn-cartpage__grid[hidden],
+  [data-dn-page-notice][hidden],
+  [data-dn-page-blocked][hidden] {
+    display: none;
+  }
+  .dn-cartpage__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--dn-space-3);
+  }
+  .dn-cartpage__grid {
+    display: grid;
+    gap: var(--dn-space-8);
+    align-items: start;
+  }
+  .dn-cartpage__lines ul:focus {
+    outline: none;
+  }
+  .dn-cartpage__notice {
+    padding: var(--dn-space-3) var(--dn-space-4);
+    border-radius: var(--dn-radius-sm);
+    background: var(--dn-warning-bg);
+    color: var(--dn-warning);
+    font-size: var(--dn-fs-body-sm);
+  }
+  .dn-summary :global(.dn-btn.is-disabled) {
+    border-color: var(--dn-disabled-bg);
+    background: var(--dn-disabled-bg);
+    color: var(--dn-disabled-ink);
+    cursor: not-allowed;
+  }
+  .dn-cartpage__blocked {
+    display: flex;
+    gap: var(--dn-space-2);
+    align-items: center;
+    color: var(--dn-error);
+  }
+  .dn-summary {
+    display: grid;
+    gap: var(--dn-space-4);
+    padding: var(--dn-space-5);
+    border: var(--dn-border-decor);
+    border-radius: var(--dn-radius-md);
+    background: var(--dn-surface);
+  }
+  .dn-summary__title {
+    font-family: var(--dn-font-serif);
+    font-size: var(--dn-fs-h3);
+    font-weight: var(--dn-fw-semibold);
+  }
+  .dn-summary__rows {
+    display: grid;
+    gap: var(--dn-space-2);
+  }
+  .dn-summary__rows div {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--dn-space-4);
+  }
+  .dn-summary__rows dd {
+    text-align: end;
+    font-variant-numeric: tabular-nums;
+  }
+  .dn-summary__total {
+    padding-block-start: var(--dn-space-2);
+    border-block-start: var(--dn-border-decor);
+    font-weight: var(--dn-fw-medium);
+  }
+  .dn-summary__how {
+    display: grid;
+    gap: var(--dn-space-2);
+  }
+  .dn-summary__how ol {
+    display: grid;
+    gap: var(--dn-space-1);
+    padding-inline-start: var(--dn-space-5);
+    color: var(--dn-ink-2);
+  }
+  .dn-summary__how p {
+    display: flex;
+    gap: var(--dn-space-2);
+    align-items: flex-start;
+  }
+  @media (min-width: 1024px) {
+    .dn-cartpage__grid {
+      grid-template-columns: 7fr 5fr;
+      gap: var(--dn-space-12);
+    }
+  }
+</style>
+
+<script>
+  import { formatCents } from '@/lib/orders/labels';
+  import { cartSubtotal, onCartChange, readCart, type CartLine } from '@/scripts/cart-store';
+  import { syncCart, type SyncResult } from '@/scripts/cart-sync';
+  import { renderLines } from '@/scripts/cart-view';
+
+  const list = document.querySelector<HTMLElement>('[data-dn-page-lines]');
+  const empty = document.querySelector<HTMLElement>('[data-dn-page-empty]');
+  const filled = document.querySelector<HTMLElement>('[data-dn-page-filled]');
+  const notice = document.querySelector<HTMLElement>('[data-dn-page-notice]');
+  const blocked = document.querySelector<HTMLElement>('[data-dn-page-blocked]');
+  const next = document.querySelector<HTMLAnchorElement>('[data-dn-to-checkout]');
+  let sync: SyncResult | null = null;
+
+  function render(lines: CartLine[]) {
+    if (!list || !empty || !filled) return;
+    empty.hidden = lines.length > 0;
+    filled.hidden = lines.length === 0;
+    const keys = new Set(lines.map((l) => `${l.productId}/${l.variantId ?? '-'}`));
+    // Une ligne retirée emporte son signalement.
+    if (sync) for (const key of [...sync.notices.keys()]) if (!keys.has(key)) sync.notices.delete(key);
+    renderLines(list, lines, { editable: true, notices: sync?.notices ?? new Map() });
+    document.querySelector('[data-dn-page-subtotal]')!.textContent = formatCents(cartSubtotal(lines));
+    const blocking = [...(sync?.notices.values() ?? [])].some((n) => n.tone === 'error');
+    if (blocked) blocked.hidden = !blocking;
+    if (next) {
+      next.toggleAttribute('aria-disabled', blocking);
+      next.classList.toggle('is-disabled', blocking);
+    }
+  }
+
+  next?.addEventListener('click', (event) => {
+    if (next.hasAttribute('aria-disabled')) {
+      event.preventDefault();
+      list?.querySelector<HTMLElement>('.is-invalid .dn-cartline__remove')?.focus();
+    }
+  });
+
+  render(readCart());
+  onCartChange(render);
+  syncCart().then((result) => {
+    sync = result;
+    if (notice && result && (result.repriced || result.blocking)) {
+      notice.textContent = result.blocking
+        ? 'Certains articles ne peuvent plus être commandés : ils sont signalés ci-dessous.'
+        : 'Des prix ont changé depuis votre ajout au panier : le panier affiche les prix actuels.';
+      notice.hidden = false;
+    }
+    render(readCart());
+  });
+</script>

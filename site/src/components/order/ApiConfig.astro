@@ -1,0 +1,21 @@
+---
+/**
+ * Configuration PUBLIQUE des appels de commande (étape 10), lue par src/scripts/order-api.ts.
+ * URL du projet + clé « publishable » (déjà publiques par conception, filtrées par RLS) ; toute
+ * autre clé est refusée. `orderingOpen` : faux en PRODUCTION tant que les CGV ne sont pas révisées.
+ */
+import { DAR_NUR_ENV, SUPABASE_ANON_KEY, SUPABASE_URL } from 'astro:env/server';
+import { ordering } from '@/config/commerce';
+
+const publishable = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY?.startsWith('sb_publishable_'));
+const config = publishable
+  ? {
+      url: SUPABASE_URL,
+      key: SUPABASE_ANON_KEY,
+      env: DAR_NUR_ENV,
+      orderingOpen: DAR_NUR_ENV !== 'production' || ordering.termsReviewed,
+    }
+  : null;
+---
+
+{config && <script is:inline type="application/json" id="dn-api" set:html={JSON.stringify(config)} />}

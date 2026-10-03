@@ -83,3 +83,50 @@ des migrations de la CLI n'est pas utilisée). Ils sont idempotents.
 
 Codes stables dans toutes les contraintes, libellés en colonnes texte : les traductions iront dans des
 tables `*_translations (id, locale, …)` (collections, option_values, produits) sans toucher aux tables actuelles.
+
+## Commandes (étape 10, 2026-10-03)
+
+> Migrations `supabase/migrations/20261003*_etape10_*.sql`, **appliquées en production le 2026-10-03**
+> (sauvegarde préalable hors dépôt : `C:\Users\youcef\dar-nur-backups\etape10-supabase-2026-10-03\`).
+> Additives : aucune table existante n'est modifiée. Rollback : `supabase/rollback/20261003_etape10_rollback.sql`
+> (⚠ détruit les commandes : les exporter avant). Contrôles : `supabase/checks/etape10_invariants.sql`
+> (14 lignes `ok = true`). Banc : `scripts/test/schema/orders.mjs` (139 contrôles, en CI `schema-ci`).
+
+**Parcours.** DEMANDE de commande (aucun paiement) → vérification par Dar Nūr (disponibilités, frais de
+livraison, remise éventuelle) → total confirmé et paiement demandé → paiement confirmé → préparation →
+expédition → livraison. Annulation possible avant expédition.
+
+| Table | Rôle | anon | admin (`is_admin()`) |
+|---|---|---|---|
+| `orders` | Demande + client + adresse + montants (centimes, EUR) + paiement + expédition. `public_number` `DN-AAAA-XXXXXX` (aléatoire, non séquentiel) ; `token_hash` = sha256 du jeton de suivi (jamais stocké) ; `idempotency_key` unique ; `environment` (`development`/`preprod`/`production`) et `is_test`. | aucun droit | lecture |
+| `order_items` | **Snapshot** : `product_slug`, `product_name`, `variant_label`, `options` (axe, libellé, valeur), `availability_at_order`, `quantity`, `list_unit_price_cents`, `unit_price_cents` (offre produit prouvée), `offer_id`/`offer_title`, `line_total_cents` ; `product_id`/`variant_id` indicatifs (`on delete set null`). `availability_confirmed` : NULL à vérifier, false = indisponible (exclue du sous-total). | aucun droit | lecture |
+| `order_events` | Journal append-only (création, statuts, paiement, devis de livraison, lien de paiement, suivi, disponibilités, note) avec acteur (`customer`/`admin`/`provider`/`system`) ; `notify_customer` + `notified_at` = file des notifications client (aucun envoi automatique). Aucune donnée personnelle. | aucun droit | lecture |
+| `orders_private.config` | Schéma NON exposé par l'API : secret de dérivation des jetons, sel des IP, hôtes de paiement autorisés (vide = tout hôte https), version des CGV enregistrée, `production_ordering_open` (**false** tant que les CGV ne sont pas révisées). | — | — (SQL Editor / CLI) |
+| `orders_private.submissions` | Empreintes salées des IP des demandes enregistrées (limitation de débit), purgées après 2 jours. | — | — |
+
+**Statuts.** `status` : `submitted` → `reviewing` → `awaiting_payment` → `paid` → `preparing_shipment` →
+`shipped` → `completed` ; `cancelled` depuis tout statut avant `shipped` ; `awaiting_payment` → `reviewing`
+(correction, total à reconfirmer). `payment_status` : `not_requested` → `pending` → `paid` ; `failed`
+(réservé à un futur prestataire) ; à l'annulation `pending`/`failed` → `cancelled`, `paid` → `refund_due` →
+`refunded` (manuel). Toute autre transition est refusée par `trg_orders_guard` (valable pour **tous** les
+rôles, superutilisateur compris).
+
+**Invariants en base** (CHECK + trigger) : `shipped`/`completed` ⇒ `payment_status = 'paid'`, `paid_at` et
+`shipped_at` renseignés ; `awaiting_payment` et au-delà ⇒ livraison fixée, total > 0, `total_confirmed_at` ;
+`paid` ⇒ `paid_at` + `payment_confirmation_source` (`admin_manual` ou `provider_webhook`) ; montants figés hors
+vérification ; coordonnées, adresse, numéro et lignes immuables ; aucune suppression (commande, ligne,
+événement) ; URL de paiement / suivi en `https://` sans identifiants (et hors `localhost`/IP).
+
+**Fonctions** (SECURITY DEFINER, seuls points d'écriture) :
+
+| Fonction | Rôle | Exécution |
+|---|---|---|
+| `create_order_request(payload)` | Valide coordonnées (e-mail, téléphone 6–15 chiffres sans format national, pays ISO, code postal 5 chiffres en France seulement, caractères de contrôle refusés), relit chaque ligne en base (publié, `available`/`on_demand`, variante du bon produit et active, prix = variante sinon produit, offre produit prouvée), refuse tout écart (`cart_changed` + lignes), idempotence (même clé + même contenu = même commande, contenu différent = refus), pot de miel, 16 Ko max, 30 lignes, quantités entières 1–99, limitation 5/10 min et 20/24 h par IP (`cf-connecting-ip`, non falsifiable : vérifié) + 100/h au total. « production » seulement depuis l'origine dar-nur.fr **et** si `production_ordering_open`. Rend numéro + jeton + vue client. Réponse `Cache-Control: no-store, private`. | anon, authenticated |
+| `check_cart(items)` | Même résolution, sans écriture (affichage des écarts). | anon, authenticated |
+| `get_order_tracking(token)` | Vue client : numéro, statuts, articles, montants **une fois confirmés**, lien de paiement si `awaiting_payment`, suivi du colis si expédiée. Jamais adresse, e-mail, téléphone, note, motif d'annulation, référence. | anon, authenticated |
+| `admin_update_order(id, action, data)` | `start_review`, `set_item_availability`, `set_shipping`, `set_discount` (motif obligatoire), `request_payment`, `set_payment_link`, `reopen_review`, `confirm_payment` (manuel, auteur tracé), `start_preparation`, `set_tracking`, `mark_shipped`, `mark_completed`, `cancel` (motif), `mark_refunded`, `set_note`, `mark_notified`. `expected_status` = concurrence optimiste. | authenticated (refus si non admin) |
+| `admin_order_tracking_token(id)` | Lien de suivi à renvoyer au client. | authenticated (admin) |
+
+**Vérifié en production après application** : 14/14 invariants ; `products?select=*,product_variants(*)`
+(ancien site) inchangé ; `orders`/`order_items`/`order_events` → 42501 pour anon ; fonctions d'admin → 42501
+pour anon ; `orders_private` non exposé (PGRST106) ; en-tête `Cache-Control: no-store, private`.

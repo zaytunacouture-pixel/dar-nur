@@ -1,0 +1,851 @@
+---
+/**
+ * Demande de commande (étape 10) — PAS une page de paiement.
+ * Récapitulatif du panier, coordonnées, adresse (France ou international), conditions, envoi.
+ * Le serveur (create_order_request) relit prix et disponibilités, enregistre la DEMANDE et rend
+ * un numéro + un lien de suivi. Le paiement n'est demandé qu'après vérification par Dar Nūr.
+ * La page statique ne contient aucune donnée client ; noindex, hors sitemap.
+ */
+import ApiConfig from '@/components/order/ApiConfig.astro';
+import Button from '@/components/ui/Button.astro';
+import Field from '@/components/ui/Field.astro';
+import Icon from '@/components/ui/Icon.astro';
+import { contact, currentShipping, ordering, orderingSteps } from '@/config/commerce';
+import { countryOptions } from '@/config/countries';
+import { siteEnv } from '@/config/site';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+
+const seo = {
+  title: 'Demande de commande',
+  description:
+    'Envoyez votre demande de commande à Dar Nūr : vérification, frais de livraison confirmés, puis paiement.',
+  canonicalPath: '/commande/',
+  noindex: true,
+};
+const orderingOpen = siteEnv !== 'production' || ordering.termsReviewed;
+const countries = [
+  { value: '', label: 'Choisir un pays' },
+  ...countryOptions().map((c) => ({ value: c.code, label: c.name })),
+];
+---
+
+<BaseLayout seo={seo} showReassurance={false}>
+  <ApiConfig />
+  <div class="dn-container dn-checkout">
+    <h1 class="dn-h1">Demande de commande</h1>
+
+    {siteEnv !== 'production' && (
+      <div class="dn-preprod-note" role="note">
+        <p>
+          <strong>Préproduction :</strong> les demandes envoyées ici sont des commandes de TEST. Elles ne sont
+          ni traitées ni livrées.
+        </p>
+        {!ordering.termsReviewed && (
+          <p>
+            Blocage avant ouverture : les conditions générales de vente publiées décrivent encore l’ancien
+            fonctionnement et doivent être révisées.
+          </p>
+        )}
+      </div>
+    )}
+
+    <div class="dn-checkout__empty" data-dn-checkout-empty hidden>
+      <p>Votre panier est vide : ajoutez des articles avant d’envoyer une demande de commande.</p>
+      <Button href="/" variant="secondary">
+        Retour à l’accueil
+      </Button>
+    </div>
+
+    {!orderingOpen ? (
+      <div class="dn-checkout__closed">
+        <p>La commande en ligne ouvre bientôt. En attendant, écrivez-nous :</p>
+        <Button
+          href={contact.whatsappUrl}
+          variant="secondary"
+          iconStart="whatsapp"
+          target="_blank"
+          rel="noopener"
+        >
+          Écrire sur WhatsApp
+        </Button>
+      </div>
+    ) : (
+      <div class="dn-checkout__grid" data-dn-checkout hidden>
+        <aside class="dn-checkout__recap" aria-labelledby="dn-recap-title">
+          <div class="dn-checkout__recap-head">
+            <h2 id="dn-recap-title" class="dn-checkout__h2">
+              Votre commande
+            </h2>
+            <a href="/panier/" class="dn-small">
+              Modifier le panier
+            </a>
+          </div>
+          <p class="dn-checkout__alert" role="status" data-dn-recap-notice hidden></p>
+          <ul role="list" data-dn-recap-lines aria-label="Articles de la demande"></ul>
+          <dl class="dn-checkout__totals">
+            <div>
+              <dt>Sous-total</dt>
+              <dd data-dn-recap-subtotal></dd>
+            </div>
+            <div>
+              <dt>Livraison</dt>
+              <dd>À confirmer par Dar Nūr</dd>
+            </div>
+            <div class="dn-checkout__total">
+              <dt>Total</dt>
+              <dd>Confirmé avant paiement</dd>
+            </div>
+          </dl>
+        </aside>
+
+        <form class="dn-checkout__form" novalidate data-dn-checkout-form>
+          <div class="dn-checkout__errors" role="alert" tabindex="-1" data-dn-error-summary hidden>
+            <h2 class="dn-body-sm">Corrigez les points suivants :</h2>
+            <ul></ul>
+          </div>
+
+          <fieldset class="dn-checkout__section">
+            <legend class="dn-checkout__h2">Coordonnées</legend>
+            <div class="dn-checkout__pair">
+              <Field
+                id="dn-first-name"
+                name="first_name"
+                label="Prénom"
+                required
+                autocomplete="given-name"
+                maxlength={80}
+                liveError
+              />
+              <Field
+                id="dn-last-name"
+                name="last_name"
+                label="Nom"
+                required
+                autocomplete="family-name"
+                maxlength={80}
+                liveError
+              />
+            </div>
+            <Field
+              id="dn-email"
+              name="email"
+              type="email"
+              label="E-mail"
+              required
+              autocomplete="email"
+              inputmode="email"
+              maxlength={254}
+              help="Pour vous envoyer le suivi de votre commande."
+              liveError
+            />
+            <Field
+              id="dn-phone"
+              name="phone"
+              type="tel"
+              label="Téléphone"
+              required
+              autocomplete="tel"
+              inputmode="tel"
+              maxlength={25}
+              help="Hors de France, indiquez l’indicatif du pays (ex. +32, +971)."
+              liveError
+            />
+          </fieldset>
+
+          <fieldset class="dn-checkout__section">
+            <legend class="dn-checkout__h2">Livraison</legend>
+            <Field
+              id="dn-country"
+              name="country_code"
+              control="select"
+              label="Pays"
+              required
+              autocomplete="country"
+              options={countries}
+              value=""
+              liveError
+            />
+            <Field
+              id="dn-line1"
+              name="address_line1"
+              label="Adresse"
+              required
+              autocomplete="address-line1"
+              maxlength={200}
+              liveError
+            />
+            <Field
+              id="dn-line2"
+              name="address_line2"
+              label="Complément d’adresse"
+              optional
+              autocomplete="address-line2"
+              maxlength={200}
+              help="Bâtiment, étage, appartement…"
+              liveError
+            />
+            <div class="dn-checkout__pair">
+              <Field
+                id="dn-postal"
+                name="postal_code"
+                label="Code postal"
+                autocomplete="postal-code"
+                maxlength={16}
+                help="Facultatif si votre pays n’utilise pas de code postal."
+                liveError
+              />
+              <Field
+                id="dn-city"
+                name="city"
+                label="Ville"
+                required
+                autocomplete="address-level2"
+                maxlength={100}
+                liveError
+              />
+            </div>
+            <Field
+              id="dn-region"
+              name="region"
+              label="Région, province ou état"
+              optional
+              autocomplete="address-level1"
+              maxlength={100}
+              liveError
+            />
+            <Field
+              id="dn-instructions"
+              name="instructions"
+              control="textarea"
+              label="Instructions de livraison"
+              optional
+              maxlength={500}
+              liveError
+            />
+            <p class="dn-small dn-muted dn-checkout__customs" data-dn-customs hidden>
+              Livraison hors de France : selon le pays, des droits ou taxes d’importation peuvent être
+              demandés à la livraison. Dar Nūr ne les calcule pas.
+            </p>
+            {/* Pot de miel : invisible et ignoré par les humains, rempli par les robots. */}
+            <div class="dn-checkout__trap" aria-hidden="true">
+              <label for="dn-website">Site web</label>
+              <input id="dn-website" name="website" type="text" tabindex="-1" autocomplete="off" />
+            </div>
+          </fieldset>
+
+          <section class="dn-checkout__section dn-checkout__next" aria-labelledby="dn-next-title">
+            <h2 id="dn-next-title" class="dn-checkout__h2">
+              Avant d’envoyer
+            </h2>
+            <ol class="dn-body-sm">
+              {orderingSteps.map((step) => (
+                <li>{step}</li>
+              ))}
+            </ol>
+            <p class="dn-small dn-muted">
+              <Icon name="truck" size={16} />
+              <span>{currentShipping.summary}.</span>
+            </p>
+          </section>
+
+          <div class="dn-checkout__consent">
+            <label class="dn-checkout__check" for="dn-terms">
+              <input
+                id="dn-terms"
+                name="terms_accepted"
+                type="checkbox"
+                required
+                aria-describedby="dn-terms-error"
+              />
+              <span>
+                J’ai lu et j’accepte les
+                <a href={ordering.termsUrl} target="_blank" rel="noopener">
+                  conditions générales de vente
+                </a>
+                .
+              </span>
+            </label>
+            <p class="dn-checkout__check-error" id="dn-terms-error" data-dn-field-error hidden>
+              <Icon name="circle-alert" size={16} />
+              <span></span>
+            </p>
+            <p class="dn-small dn-muted">
+              Vos coordonnées servent uniquement à traiter votre commande (
+              <a href={ordering.privacyUrl} target="_blank" rel="noopener">
+                confidentialité
+              </a>
+              ).
+            </p>
+          </div>
+
+          <p class="dn-checkout__alert is-error" role="alert" data-dn-global-error hidden></p>
+          <Button type="submit" size="lg" fullWidth data-dn-submit>
+            Envoyer ma demande de commande
+          </Button>
+          <p class="dn-small dn-muted dn-checkout__nopay">Aucun paiement maintenant.</p>
+        </form>
+      </div>
+    )}
+
+    <section class="dn-confirm" aria-labelledby="dn-confirm-title" data-dn-confirm hidden>
+      <div class="dn-confirm__head">
+        <Icon name="check" size={24} />
+        <h2 id="dn-confirm-title" class="dn-checkout__h2" tabindex="-1">
+          Commande reçue
+        </h2>
+      </div>
+      <p class="dn-confirm__number">
+        Numéro de commande : <strong data-dn-confirm-number></strong>
+      </p>
+      <p>
+        Statut : <span class="dn-confirm__status">Commande reçue</span>
+      </p>
+      <p data-dn-confirm-next>
+        Prochaine étape : Dar Nūr vérifie la disponibilité de vos articles et calcule les frais de livraison.
+        Vous recevrez ensuite le total final et les instructions de paiement. Rien n’est à payer pour
+        l’instant.
+      </p>
+      <ul role="list" class="dn-confirm__lines" data-dn-confirm-lines></ul>
+      <dl class="dn-checkout__totals">
+        <div>
+          <dt>Sous-total</dt>
+          <dd data-dn-confirm-subtotal></dd>
+        </div>
+        <div>
+          <dt>Livraison</dt>
+          <dd>À confirmer par Dar Nūr</dd>
+        </div>
+      </dl>
+      <div class="dn-confirm__actions">
+        <Button href="/suivi/" size="lg" data-dn-confirm-track>
+          Suivre ma commande
+        </Button>
+        <a
+          class="dn-body-sm"
+          href={contact.whatsappUrl}
+          target="_blank"
+          rel="noopener"
+          data-dn-confirm-whatsapp
+        >
+          Une question sur cette commande ? WhatsApp
+        </a>
+      </div>
+      <p class="dn-small dn-muted">
+        Conservez le lien « Suivre ma commande » : il donne accès au suivi de cette commande. Il est aussi
+        mémorisé sur cet appareil.
+      </p>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .dn-checkout {
+    display: grid;
+    gap: var(--dn-space-6);
+    padding-block: var(--dn-space-8) var(--dn-section-y);
+  }
+  [hidden] {
+    display: none !important;
+  }
+  .dn-preprod-note p + p {
+    margin-block-start: var(--dn-space-2);
+  }
+  .dn-checkout__empty,
+  .dn-checkout__closed {
+    display: grid;
+    gap: var(--dn-space-4);
+    justify-items: start;
+  }
+  .dn-checkout__grid {
+    display: grid;
+    gap: var(--dn-space-8);
+    align-items: start;
+  }
+  .dn-checkout__h2 {
+    font-family: var(--dn-font-serif);
+    font-size: var(--dn-fs-h3);
+    font-weight: var(--dn-fw-semibold);
+    color: var(--dn-ink);
+  }
+  .dn-checkout__recap {
+    display: grid;
+    gap: var(--dn-space-3);
+    padding: var(--dn-space-5);
+    border: var(--dn-border-decor);
+    border-radius: var(--dn-radius-md);
+    background: var(--dn-surface);
+  }
+  .dn-checkout__recap-head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--dn-space-2);
+    align-items: baseline;
+    justify-content: space-between;
+  }
+  .dn-checkout__totals {
+    display: grid;
+    gap: var(--dn-space-2);
+  }
+  .dn-checkout__totals div {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--dn-space-4);
+  }
+  .dn-checkout__totals dd {
+    text-align: end;
+    font-variant-numeric: tabular-nums;
+  }
+  .dn-checkout__total {
+    padding-block-start: var(--dn-space-2);
+    border-block-start: var(--dn-border-decor);
+    font-weight: var(--dn-fw-medium);
+  }
+  .dn-checkout__form {
+    display: grid;
+    gap: var(--dn-space-8);
+  }
+  .dn-checkout__section {
+    display: grid;
+    gap: var(--dn-space-4);
+    min-inline-size: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  .dn-checkout__section legend {
+    margin-block-end: var(--dn-space-4);
+    padding: 0;
+  }
+  .dn-checkout__pair {
+    display: grid;
+    gap: var(--dn-space-4);
+  }
+  .dn-checkout__trap {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .dn-checkout__next ol {
+    display: grid;
+    gap: var(--dn-space-2);
+    padding-inline-start: var(--dn-space-5);
+  }
+  .dn-checkout__next p {
+    display: flex;
+    gap: var(--dn-space-2);
+    align-items: flex-start;
+  }
+  .dn-checkout__consent {
+    display: grid;
+    gap: var(--dn-space-2);
+  }
+  .dn-checkout__check {
+    display: flex;
+    gap: var(--dn-space-3);
+    align-items: flex-start;
+    min-block-size: var(--dn-tap-min);
+    cursor: pointer;
+  }
+  .dn-checkout__check input {
+    flex: none;
+    inline-size: 20px;
+    block-size: 20px;
+    margin-block-start: 2px;
+    accent-color: var(--dn-green);
+  }
+  .dn-checkout__check-error,
+  .dn-checkout__alert.is-error {
+    display: flex;
+    gap: var(--dn-space-1);
+    align-items: center;
+    color: var(--dn-error);
+    font-size: var(--dn-fs-small);
+  }
+  .dn-checkout__alert {
+    padding: var(--dn-space-3) var(--dn-space-4);
+    border-radius: var(--dn-radius-sm);
+    background: var(--dn-warning-bg);
+    color: var(--dn-warning);
+    font-size: var(--dn-fs-body-sm);
+  }
+  .dn-checkout__alert.is-error {
+    background: var(--dn-error-bg);
+    font-size: var(--dn-fs-body-sm);
+  }
+  .dn-checkout__errors {
+    display: grid;
+    gap: var(--dn-space-2);
+    padding: var(--dn-space-4);
+    border: var(--dn-border-width-strong) solid var(--dn-error);
+    border-radius: var(--dn-radius-sm);
+    background: var(--dn-error-bg);
+    color: var(--dn-error);
+  }
+  .dn-checkout__errors ul {
+    display: grid;
+    gap: var(--dn-space-1);
+    padding-inline-start: var(--dn-space-5);
+    list-style: disc;
+  }
+  .dn-checkout__errors a {
+    color: inherit;
+  }
+  .dn-checkout__nopay {
+    text-align: center;
+    margin-block-start: calc(-1 * var(--dn-space-6));
+  }
+  .dn-confirm {
+    display: grid;
+    gap: var(--dn-space-4);
+    max-inline-size: 720px;
+    padding: var(--dn-space-6);
+    border: var(--dn-border-decor);
+    border-radius: var(--dn-radius-md);
+    background: var(--dn-surface);
+  }
+  .dn-confirm__head {
+    display: flex;
+    gap: var(--dn-space-3);
+    align-items: center;
+    color: var(--dn-success);
+  }
+  .dn-confirm__head h2:focus {
+    outline: none;
+  }
+  .dn-confirm__number strong {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.04em;
+  }
+  .dn-confirm__status {
+    padding: 2px var(--dn-space-2);
+    border-radius: var(--dn-radius-pill);
+    background: var(--dn-success-bg);
+    color: var(--dn-success);
+    font-weight: var(--dn-fw-medium);
+  }
+  .dn-confirm__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--dn-space-4);
+    align-items: center;
+  }
+  @media (min-width: 768px) {
+    .dn-checkout__pair {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  @media (min-width: 1024px) {
+    .dn-checkout__grid {
+      grid-template-columns: 7fr 5fr;
+      gap: var(--dn-space-12);
+    }
+    .dn-checkout__recap {
+      order: 2;
+    }
+  }
+</style>
+
+<script>
+  import { formatCents, ORDER_ERRORS } from '@/lib/orders/labels';
+  import { cartSubtotal, clearCart, onCartChange, readCart, type CartLine } from '@/scripts/cart-store';
+  import { applyResolved, syncCart, toItem } from '@/scripts/cart-sync';
+  import { h, renderLines, type LineNotice } from '@/scripts/cart-view';
+  import { apiConfig, rpc, saveOrder, type PublicOrder, type ResolvedLine } from '@/scripts/order-api';
+
+  interface CreateResult {
+    ok: boolean;
+    error?: string;
+    fields?: Record<string, string>;
+    lines?: ResolvedLine[];
+    token?: string;
+    order?: PublicOrder;
+  }
+
+  const form = document.querySelector<HTMLFormElement>('[data-dn-checkout-form]');
+  const grid = document.querySelector<HTMLElement>('[data-dn-checkout]');
+  const empty = document.querySelector<HTMLElement>('[data-dn-checkout-empty]');
+  const recap = document.querySelector<HTMLElement>('[data-dn-recap-lines]');
+  const recapNotice = document.querySelector<HTMLElement>('[data-dn-recap-notice]');
+  const summary = document.querySelector<HTMLElement>('[data-dn-error-summary]');
+  const globalError = document.querySelector<HTMLElement>('[data-dn-global-error]');
+  const submit = document.querySelector<HTMLButtonElement>('[data-dn-submit]');
+  const confirm = document.querySelector<HTMLElement>('[data-dn-confirm]');
+  const config = apiConfig();
+  let notices = new Map<string, LineNotice>();
+  let idempotencyKey = crypto.randomUUID();
+  let busy = false;
+  let done = false;
+
+  /** Champ serveur → identifiant du contrôle. */
+  const FIELDS: Record<string, string> = {
+    first_name: 'dn-first-name',
+    last_name: 'dn-last-name',
+    email: 'dn-email',
+    phone: 'dn-phone',
+    country_code: 'dn-country',
+    address_line1: 'dn-line1',
+    address_line2: 'dn-line2',
+    postal_code: 'dn-postal',
+    city: 'dn-city',
+    region: 'dn-region',
+    instructions: 'dn-instructions',
+    terms_accepted: 'dn-terms',
+  };
+  const MESSAGES: Record<string, Record<string, string>> = {
+    first_name: { required: 'Indiquez votre prénom.', invalid: 'Prénom invalide.' },
+    last_name: { required: 'Indiquez votre nom.', invalid: 'Nom invalide.' },
+    email: { required: 'Indiquez votre e-mail.', invalid: 'E-mail invalide (exemple : nom@domaine.fr).' },
+    phone: {
+      required: 'Indiquez votre téléphone.',
+      invalid: 'Numéro invalide : 6 à 15 chiffres, indicatif du pays possible (ex. +32 470 12 34 56).',
+    },
+    country_code: { required: 'Choisissez le pays de livraison.', invalid: 'Pays non reconnu.' },
+    address_line1: { required: 'Indiquez l’adresse de livraison.', invalid: 'Adresse invalide.' },
+    address_line2: { invalid: 'Complément d’adresse invalide.' },
+    postal_code: {
+      required: 'Indiquez le code postal (5 chiffres en France).',
+      invalid: 'Code postal invalide (5 chiffres en France ; lettres, chiffres, espace ou tiret ailleurs).',
+    },
+    city: { required: 'Indiquez la ville.', invalid: 'Ville invalide.' },
+    region: { invalid: 'Région invalide.' },
+    instructions: { invalid: 'Instructions invalides (500 caractères au maximum).' },
+    terms_accepted: { required: 'Acceptez les conditions générales de vente pour envoyer votre demande.' },
+  };
+
+  const control = (field: string) => document.getElementById(FIELDS[field]!) as HTMLInputElement | null;
+  const value = (field: string) => control(field)?.value.trim() ?? '';
+  const CONTROL_CHARS = /[\u0000-\u001f\u007f]/;
+  const EMAIL =
+    /^[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)+$/;
+
+  /** Mêmes règles que le serveur (qui revalide tout). */
+  function validate(): Record<string, string> {
+    const errors: Record<string, string> = {};
+    for (const field of ['first_name', 'last_name', 'address_line1', 'city', 'region', 'address_line2']) {
+      const v = value(field);
+      const required = !['region', 'address_line2'].includes(field);
+      if (!v && required) errors[field] = 'required';
+      else if (CONTROL_CHARS.test(v)) errors[field] = 'invalid';
+    }
+    const email = value('email');
+    if (!email) errors['email'] = 'required';
+    else if (!EMAIL.test(email) || email.includes('..') || email.length > 254) errors['email'] = 'invalid';
+    const phone = value('phone');
+    const digits = phone.replace(/\D/g, '').length;
+    if (!phone) errors['phone'] = 'required';
+    else if (!/^\+?[0-9 ().-]{6,25}$/.test(phone) || digits < 6 || digits > 15) errors['phone'] = 'invalid';
+    const country = value('country_code');
+    if (!country) errors['country_code'] = 'required';
+    const postal = value('postal_code').toUpperCase();
+    if (country === 'FR' && !/^[0-9]{5}$/.test(postal))
+      errors['postal_code'] = postal ? 'invalid' : 'required';
+    else if (postal && !/^[A-Z0-9][A-Z0-9 -]{1,14}[A-Z0-9]$/.test(postal)) errors['postal_code'] = 'invalid';
+    const instructions = control('instructions')?.value ?? '';
+    if (instructions.length > 500 || /[\u0000-\u0009\u000b\u000c\u000e-\u001f\u007f]/.test(instructions))
+      errors['instructions'] = 'invalid';
+    if (!(document.getElementById('dn-terms') as HTMLInputElement).checked)
+      errors['terms_accepted'] = 'required';
+    return errors;
+  }
+
+  function clearErrors() {
+    if (summary) summary.hidden = true;
+    if (globalError) globalError.hidden = true;
+    for (const field of Object.keys(FIELDS)) {
+      const input = control(field);
+      if (!input) continue;
+      input.removeAttribute('aria-invalid');
+      input.closest('.dn-field')?.classList.remove('dn-field--error');
+      const error = document.getElementById(`${FIELDS[field]}-error`);
+      if (error) error.hidden = true;
+    }
+  }
+
+  function showErrors(errors: Record<string, string>) {
+    const entries = Object.entries(errors).sort(
+      ([a], [b]) => Object.keys(FIELDS).indexOf(a) - Object.keys(FIELDS).indexOf(b),
+    );
+    const items: HTMLElement[] = [];
+    for (const [field, code] of entries) {
+      const input = control(field);
+      const message = MESSAGES[field]?.[code] ?? 'Valeur invalide.';
+      if (!input) continue;
+      input.setAttribute('aria-invalid', 'true');
+      input.closest('.dn-field')?.classList.add('dn-field--error');
+      const error = document.getElementById(`${FIELDS[field]}-error`);
+      const text = error?.querySelector('span');
+      if (error && text) {
+        text.textContent = message;
+        error.hidden = false;
+      }
+      const link = h('a', { href: `#${FIELDS[field]}` }, message);
+      link.addEventListener('click', (event) => {
+        event.preventDefault();
+        input.focus();
+      });
+      items.push(h('li', {}, link));
+    }
+    if (summary && items.length) {
+      summary.querySelector('ul')!.replaceChildren(...items);
+      summary.hidden = false;
+      summary.focus();
+    }
+  }
+
+  function showGlobal(message: string) {
+    if (!globalError) return;
+    globalError.textContent = message;
+    globalError.hidden = false;
+    globalError.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }
+
+  function renderRecap(lines: CartLine[]) {
+    if (done) return;
+    if (empty) empty.hidden = lines.length > 0;
+    if (grid) grid.hidden = lines.length === 0;
+    if (!recap) return;
+    renderLines(recap, lines, { editable: false, notices });
+    document.querySelector('[data-dn-recap-subtotal]')!.textContent = formatCents(cartSubtotal(lines));
+    if (recapNotice) {
+      const errors = [...notices.values()].some((n) => n.tone === 'error');
+      const warnings = [...notices.values()].some((n) => n.tone === 'warning');
+      recapNotice.hidden = !errors && !warnings;
+      recapNotice.textContent = errors
+        ? 'Certains articles ne peuvent plus être commandés : retirez-les depuis le panier.'
+        : 'Des prix ont changé : le récapitulatif affiche les prix actuels. Vérifiez avant d’envoyer.';
+    }
+  }
+
+  function setBusy(state: boolean) {
+    busy = state;
+    if (!submit) return;
+    submit.disabled = state;
+    submit.setAttribute('aria-busy', String(state));
+    const label = submit.querySelector('.dn-btn__label');
+    if (label) label.textContent = state ? 'Envoi en cours…' : 'Envoyer ma demande de commande';
+  }
+
+  function showConfirmation(token: string, order: PublicOrder) {
+    done = true;
+    if (grid) grid.hidden = true;
+    if (empty) empty.hidden = true;
+    if (!confirm) return;
+    confirm.querySelector('[data-dn-confirm-number]')!.textContent = order.number;
+    confirm.querySelector('[data-dn-confirm-subtotal]')!.textContent = formatCents(order.subtotal_cents);
+    confirm
+      .querySelector('[data-dn-confirm-lines]')!
+      .replaceChildren(
+        ...order.items.map((item) =>
+          h(
+            'li',
+            { class: 'dn-small' },
+            `${item.quantity} × ${item.name}${item.variant ? ` (${item.variant})` : ''} — ${formatCents(item.line_total_cents)}`,
+          ),
+        ),
+      );
+    confirm.querySelector<HTMLAnchorElement>('[data-dn-confirm-track]')!.href = `/suivi/#${token}`;
+    const whatsapp = confirm.querySelector<HTMLAnchorElement>('[data-dn-confirm-whatsapp]');
+    if (whatsapp)
+      whatsapp.href = `${whatsapp.href.split('?')[0]}?text=${encodeURIComponent(
+        `Salam alaykoum, j’ai une question au sujet de ma commande ${order.number}.`,
+      )}`;
+    confirm.hidden = false;
+    confirm.querySelector<HTMLElement>('#dn-confirm-title')?.focus();
+    window.scrollTo({ top: 0 });
+  }
+
+  // Code postal : obligatoire en France seulement ; mention douanière hors de France.
+  const country = control('country_code');
+  country?.addEventListener('change', () => {
+    const fr = country.value === 'FR';
+    const postal = control('postal_code');
+    if (postal) postal.required = fr;
+    const help = document.getElementById('dn-postal-help');
+    if (help)
+      help.textContent = fr ? '5 chiffres.' : 'Facultatif si votre pays n’utilise pas de code postal.';
+    const customs = document.querySelector<HTMLElement>('[data-dn-customs]');
+    if (customs) customs.hidden = !country.value || fr;
+  });
+
+  form?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (busy || done) return;
+    clearErrors();
+    const errors = validate();
+    if (Object.keys(errors).length) {
+      showErrors(errors);
+      return;
+    }
+    const lines = readCart();
+    if (!lines.length) {
+      renderRecap(lines);
+      return;
+    }
+    if ([...notices.values()].some((n) => n.tone === 'error')) {
+      showGlobal(ORDER_ERRORS['cart_changed']!);
+      return;
+    }
+    const payload = {
+      idempotency_key: idempotencyKey,
+      environment: config?.env ?? 'preprod',
+      website: (document.getElementById('dn-website') as HTMLInputElement).value,
+      terms_accepted: true,
+      customer: {
+        first_name: value('first_name'),
+        last_name: value('last_name'),
+        email: value('email'),
+        phone: value('phone'),
+      },
+      shipping: {
+        country_code: value('country_code'),
+        address_line1: value('address_line1'),
+        address_line2: value('address_line2') || null,
+        postal_code: value('postal_code').toUpperCase() || null,
+        city: value('city'),
+        region: value('region') || null,
+        instructions: (control('instructions')?.value ?? '').trim() || null,
+      },
+      items: lines.map(toItem),
+    };
+    setBusy(true);
+    let result: CreateResult;
+    try {
+      result = await rpc<CreateResult>('create_order_request', { p_payload: payload });
+    } catch {
+      // Réseau coupé : la saisie reste ; un nouvel envoi rejoue la MÊME clé (aucun doublon).
+      setBusy(false);
+      showGlobal(ORDER_ERRORS['network']!);
+      return;
+    }
+    setBusy(false);
+    if (result.ok && result.token && result.order) {
+      saveOrder({ number: result.order.number, token: result.token, at: result.order.created_at });
+      // Panier vidé seulement maintenant : la commande est enregistrée et confirmée par le serveur.
+      clearCart();
+      showConfirmation(result.token, result.order);
+      return;
+    }
+    const code = result.error ?? 'payload_invalid';
+    if (code === 'invalid_fields' && result.fields) {
+      showErrors(result.fields);
+      return;
+    }
+    if (code === 'cart_changed' && result.lines) {
+      notices = applyResolved(lines, result.lines).notices;
+      renderRecap(readCart());
+    }
+    // Le contenu va changer : nouvelle clé pour le prochain envoi.
+    if (code === 'cart_changed' || code === 'idempotency_conflict') idempotencyKey = crypto.randomUUID();
+    showGlobal(ORDER_ERRORS[code] ?? ORDER_ERRORS['payload_invalid']!);
+  });
+
+  renderRecap(readCart());
+  onCartChange((lines) => renderRecap(lines));
+  if (form)
+    syncCart().then((result) => {
+      if (result) notices = result.notices;
+      renderRecap(readCart());
+    });
+</script>

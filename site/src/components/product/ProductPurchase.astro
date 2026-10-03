@@ -9,10 +9,17 @@
  *   une information. Une combinaison inexistante ou épuisée est désactivée et annoncée.
  * - URL : l'option choisie est reportée dans la query string (?contenance=200-g), sans
  *   entrée d'historique ; un lien partagé la présélectionne. Canonical inchangé (/{slug}/).
- * - Commande : stratégie ACTUELLE — message WhatsApp prérempli, aucun paiement sur le site.
- *   Aucun panier ni paiement en ligne simulé (le panier n'est pas migré).
- * - Sans JavaScript : prix de base, options visibles, lien de commande générique.
+ * - Commande (étape 10) : « Ajouter au panier » (option obligatoire si le produit en a), puis
+ *   demande de commande depuis le panier ; AUCUN paiement à cette étape. WhatsApp reste un lien
+ *   secondaire « Une question ? » (nom et lien du produit seulement, aucune donnée client).
+ *   coming_soon / out_of_stock : aucun ajout possible. on_demand : ajout possible, disponibilité
+ *   annoncée « à confirmer ».
+ * - Sans JavaScript : prix de base, options visibles, lien « Une question ? » ; le panier
+ *   (localStorage) exige JavaScript, le bouton reste alors sans effet.
  */
+import { getImage } from 'astro:assets';
+import { orderingSteps } from '@/config/commerce';
+import { THUMBNAIL } from '@/config/images';
 import SizeGuide from '@/components/catalog/SizeGuide.astro';
 import VariantSelector from '@/components/catalog/VariantSelector.astro';
 import Button from '@/components/ui/Button.astro';
@@ -26,6 +33,21 @@ interface Props {
 }
 
 const { view } = Astro.props;
+const cart = view.kind === 'product' ? view.cart : undefined;
+// Vignette du panier : une seule image WebP 128 × 160 (cadre THUMBNAIL), générée au build.
+const first = view.gallery[0];
+const thumbnail =
+  cart?.orderable && first
+    ? (
+        await getImage({
+          src: first.src,
+          width: THUMBNAIL.width,
+          height: THUMBNAIL.height,
+          fit: 'cover',
+          format: 'webp',
+        })
+      ).src
+    : null;
 const script = {
   axes: view.axes.map((axis) => ({
     id: axis.id,
@@ -42,8 +64,10 @@ const script = {
     a: v.available,
     u: v.unitPrice,
     m: v.media ?? '',
+    i: v.id ?? null,
+    c: v.priceCents ?? null,
   })),
-  order: { head: view.order.messageHead, tail: view.order.messageTail, orderable: view.order.orderable },
+  cart: cart?.orderable ? { ...cart, image: thumbnail } : null,
 };
 const icon =
   view.availability === 'available' ? 'check' : view.availability === 'on_demand' ? 'info' : 'circle-alert';
@@ -88,37 +112,49 @@ const icon =
     </p>
   ) : (
     <div class="dn-purchase__cta">
-      {view.order.orderable ? (
-        <Button
-          href={view.order.href}
-          variant="primary"
-          size="lg"
-          fullWidth
-          iconStart="whatsapp"
-          target="_blank"
-          rel="noopener"
-          data-dn-order
-        >
-          Commander sur WhatsApp
-        </Button>
+      {cart?.orderable ? (
+        <>
+          <Button
+            type="button"
+            variant="primary"
+            size="lg"
+            fullWidth
+            iconStart="shopping-bag"
+            data-dn-add-to-cart
+          >
+            Ajouter au panier
+          </Button>
+          <p class="dn-small dn-purchase__added" role="status" data-dn-cart-status hidden>
+            <Icon name="check" size={16} />
+            <span data-dn-cart-status-text>Ajouté au panier.</span>
+            <a href="/panier/">Voir le panier</a>
+          </p>
+          <p class="dn-small dn-muted dn-purchase__note">
+            {cart.onDemand
+              ? 'Sur commande : Dar Nūr confirme la disponibilité après votre demande. Aucun paiement maintenant.'
+              : orderingSteps[0]}
+          </p>
+          <a class="dn-purchase__question dn-body-sm" href={view.order.href} target="_blank" rel="noopener">
+            <Icon name="whatsapp" size={16} />
+            <span>Une question ? Écrivez-nous sur WhatsApp</span>
+          </a>
+        </>
       ) : (
-        <Button
-          href={view.order.href}
-          variant="secondary"
-          size="lg"
-          fullWidth
-          iconStart="whatsapp"
-          target="_blank"
-          rel="noopener"
-        >
-          Une question ? Écrivez-nous
-        </Button>
+        <>
+          <Button
+            href={view.order.href}
+            variant="secondary"
+            size="lg"
+            fullWidth
+            iconStart="whatsapp"
+            target="_blank"
+            rel="noopener"
+          >
+            Une question ? Écrivez-nous
+          </Button>
+          <p class="dn-small dn-muted dn-purchase__note">Ce produit ne peut pas encore être commandé.</p>
+        </>
       )}
-      <p class="dn-small dn-muted dn-purchase__note">
-        {view.order.orderable
-          ? 'La commande se fait sur WhatsApp : rien n’est à payer sur le site.'
-          : 'Ce produit ne peut pas encore être commandé.'}
-      </p>
     </div>
   )}
 
@@ -185,6 +221,31 @@ const icon =
     display: grid;
     gap: var(--dn-space-2);
   }
+  .dn-purchase__added {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--dn-space-2);
+    align-items: center;
+    color: var(--dn-success);
+    font-weight: var(--dn-fw-medium);
+  }
+  .dn-purchase__added[hidden] {
+    display: none;
+  }
+  .dn-purchase__added a {
+    color: inherit;
+  }
+  .dn-purchase__question {
+    display: inline-flex;
+    gap: var(--dn-space-2);
+    align-items: center;
+    justify-self: start;
+    min-block-size: var(--dn-tap-min);
+    color: var(--dn-ink-2);
+  }
+  .dn-purchase__question:hover {
+    color: var(--dn-ink);
+  }
   .dn-purchase__preview {
     padding: var(--dn-space-3) var(--dn-space-4);
     border-radius: var(--dn-radius-sm);
@@ -208,6 +269,8 @@ const icon =
     single: string | null;
     labels: Record<string, string>;
   }
+  import { addToCart } from '@/scripts/cart-store';
+
   interface VariantData {
     o: Record<string, string>;
     l: string;
@@ -215,6 +278,19 @@ const icon =
     a: boolean;
     u: string | null;
     m: string;
+    i: string | null;
+    c: number | null;
+  }
+  interface CartData {
+    productId: string;
+    slug: string;
+    name: string;
+    href: string;
+    orderable: boolean;
+    onDemand: boolean;
+    priceCents: number | null;
+    listPriceCents: number | null;
+    image: string | null;
   }
 
   const root = document.querySelector<HTMLElement>('[data-dn-purchase]');
@@ -223,11 +299,12 @@ const icon =
     const data = JSON.parse(source.textContent ?? '{}') as {
       axes: AxisData[];
       variants: VariantData[];
-      order: { head: string; tail: string; orderable: boolean };
+      cart: CartData | null;
     };
     const priceText = root.querySelector<HTMLElement>('[data-dn-purchase-price] .dn-price__current');
     const unit = root.querySelector<HTMLElement>('[data-dn-purchase-unit]');
-    const order = root.querySelector<HTMLAnchorElement>('[data-dn-order]');
+    const addButton = root.querySelector<HTMLButtonElement>('[data-dn-add-to-cart]');
+    const added = root.querySelector<HTMLElement>('[data-dn-cart-status]');
     const base = {
       price: priceText?.textContent ?? '',
       unit: unit?.textContent ?? '',
@@ -273,17 +350,7 @@ const icon =
       document.dispatchEvent(
         new CustomEvent('dn:gallery-set', { detail: { key: chosen && keys.size === 1 ? [...keys][0] : '' } }),
       );
-      if (order && data.order.orderable) {
-        const lines = data.axes
-          .map((axis) => {
-            const code = selection[axis.id];
-            return `\n• ${axis.legend} : ${(code && axis.labels[code]) || 'à préciser'}`;
-          })
-          .join('');
-        const price = variant?.p ? `\n• Prix : ${variant.p}` : '';
-        const text = `${data.order.head}${lines}${price}${data.order.tail}`;
-        order.href = `${order.href.split('?')[0]}?text=${encodeURIComponent(text)}`;
-      }
+      if (added) added.hidden = true;
       refreshOptions();
     };
 
@@ -304,19 +371,58 @@ const icon =
       writeUrl();
     });
 
-    // Commande avant choix : message d'aide, focus sur le groupe (§M.2).
-    order?.addEventListener('click', (event) => {
+    // Ajout au panier. Option manquante : message d'aide, focus sur le groupe (§M.2).
+    addButton?.addEventListener('click', () => {
+      const cart = data.cart;
+      if (!cart) return;
       const missing = data.axes.find((axis) => !selection[axis.id]);
-      if (!missing) return;
-      event.preventDefault();
-      const group = groupOf(missing);
-      const error = group?.querySelector<HTMLElement>('[data-dn-variant-error]');
-      if (error) {
-        error.textContent = `Choisissez ${missing.verb} pour continuer.`;
-        error.hidden = false;
+      if (missing) {
+        const group = groupOf(missing);
+        const error = group?.querySelector<HTMLElement>('[data-dn-variant-error]');
+        if (error) {
+          error.textContent = `Choisissez ${missing.verb} pour continuer.`;
+          error.hidden = false;
+        }
+        group?.querySelector<HTMLInputElement>('input:not(:disabled)')?.focus();
+        group?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        return;
       }
-      group?.querySelector<HTMLInputElement>('input:not(:disabled)')?.focus();
-      group?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      const variant = data.axes.length ? matching(selection)[0] : undefined;
+      const priceCents = data.axes.length ? variant?.c : cart.priceCents;
+      if ((data.axes.length && (!variant?.i || !variant.a)) || !priceCents) return;
+      const label = data.axes
+        .map((axis) => `${axis.legend} : ${axis.labels[selection[axis.id]!] ?? ''}`)
+        .join(' · ');
+      const result = addToCart({
+        productId: cart.productId,
+        variantId: variant?.i ?? null,
+        slug: cart.slug,
+        name: cart.name,
+        variant: label || null,
+        unitPriceCents: priceCents,
+        listPriceCents: data.axes.length ? null : cart.listPriceCents,
+        image: cart.image,
+        href: cart.href,
+        onDemand: cart.onDemand,
+      });
+      if (added) {
+        const text = added.querySelector('[data-dn-cart-status-text]');
+        if (text)
+          text.textContent =
+            result === 'full'
+              ? 'Panier complet : 30 articles différents au maximum.'
+              : result === 'capped'
+                ? 'Quantité maximale déjà atteinte.'
+                : 'Ajouté au panier.';
+        added.hidden = false;
+      }
+      // Ouvre le mini-panier (focus contenu ; il revient sur ce bouton à la fermeture).
+      const drawer = document.getElementById('dn-cart');
+      const api = (
+        window as unknown as { dnDrawer?: { open: (d: HTMLDialogElement, o: HTMLElement) => void } }
+      ).dnDrawer;
+      if (result !== 'full' && drawer instanceof HTMLDialogElement && api && addButton)
+        api.open(drawer, addButton);
     });
 
     // Présélection depuis l'URL (lien partagé, retour sur la page) : seulement une valeur

@@ -1,0 +1,417 @@
+---
+/**
+ * Suivi de commande (étape 10) : /suivi/#<jeton>. Le jeton (256 bits, imprévisible) est dans le
+ * FRAGMENT : il n'est jamais envoyé au serveur web, ni journalisé, ni transmis dans le Referer.
+ * Le navigateur le soumet à get_order_tracking, qui ne renvoie que l'utile au client (numéro,
+ * statut, articles, montants confirmés, lien de paiement si demandé, suivi du colis) — jamais
+ * l'adresse, l'e-mail, le téléphone ni une note interne. Page statique sans donnée ; noindex.
+ */
+import ApiConfig from '@/components/order/ApiConfig.astro';
+import Button from '@/components/ui/Button.astro';
+import Icon from '@/components/ui/Icon.astro';
+import { contact } from '@/config/commerce';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+
+const seo = {
+  title: 'Suivi de commande',
+  description: 'Suivez votre commande Dar Nūr : vérification, paiement, expédition.',
+  canonicalPath: '/suivi/',
+  noindex: true,
+};
+---
+
+<BaseLayout seo={seo} showReassurance={false}>
+  <ApiConfig />
+  <div class="dn-container dn-track">
+    <h1 class="dn-h1">Suivi de commande</h1>
+    <p class="dn-track__loading" data-dn-track-loading role="status">
+      Chargement…
+    </p>
+
+    <div class="dn-track__none" data-dn-track-none hidden>
+      <p data-dn-track-none-text>
+        Ouvrez le lien « Suivre ma commande » reçu après votre demande pour voir le suivi.
+      </p>
+      <div data-dn-track-saved hidden>
+        <h2 class="dn-track__h2">Commandes passées depuis cet appareil</h2>
+        <ul role="list" class="dn-track__saved"></ul>
+      </div>
+      <Button
+        href={contact.whatsappUrl}
+        variant="secondary"
+        iconStart="whatsapp"
+        target="_blank"
+        rel="noopener"
+      >
+        Nous écrire sur WhatsApp
+      </Button>
+    </div>
+
+    <article class="dn-track__order" data-dn-track-order hidden aria-labelledby="dn-track-number">
+      <header class="dn-track__head">
+        <p class="dn-label dn-muted">Commande</p>
+        <h2 id="dn-track-number" class="dn-track__number" data-dn-track-number></h2>
+        <p class="dn-small dn-muted" data-dn-track-date></p>
+        <p class="dn-track__test dn-small" data-dn-track-test hidden>
+          Commande de test (préproduction)
+        </p>
+      </header>
+
+      <section class="dn-track__status" aria-labelledby="dn-track-status-title">
+        <h3 id="dn-track-status-title" class="dn-visually-hidden">
+          Statut
+        </h3>
+        <p class="dn-track__badge" data-dn-track-status></p>
+        <ol class="dn-track__timeline" role="list" data-dn-track-timeline></ol>
+        <p class="dn-track__next" data-dn-track-next></p>
+      </section>
+
+      <section class="dn-track__payment" data-dn-track-payment hidden aria-labelledby="dn-track-pay-title">
+        <h3 id="dn-track-pay-title" class="dn-track__h2">
+          Votre commande est prête à être réglée
+        </h3>
+        <p data-dn-track-pay-total></p>
+        <a class="dn-btn-like" data-dn-track-pay-link target="_blank" rel="noopener noreferrer" hidden>
+          <Icon name="wallet" size={20} />
+          <span>Payer ma commande</span>
+        </a>
+        <p data-dn-track-pay-manual hidden>
+          Les instructions de paiement vous seront transmises par Dar Nūr.
+        </p>
+        <p class="dn-small dn-muted">
+          Si vous avez déjà réglé, votre paiement est en cours de vérification : le statut passera à «
+          Paiement reçu » dès sa confirmation par Dar Nūr.
+        </p>
+      </section>
+
+      <section class="dn-track__shipment" data-dn-track-shipment hidden aria-labelledby="dn-track-ship-title">
+        <h3 id="dn-track-ship-title" class="dn-track__h2">
+          Expédition
+        </h3>
+        <dl class="dn-track__rows" data-dn-track-ship-rows></dl>
+        <a class="dn-body-sm" data-dn-track-ship-link target="_blank" rel="noopener noreferrer" hidden>
+          Suivre le colis chez le transporteur
+        </a>
+      </section>
+
+      <section aria-labelledby="dn-track-items-title">
+        <h3 id="dn-track-items-title" class="dn-track__h2">
+          Articles
+        </h3>
+        <ul role="list" class="dn-track__items" data-dn-track-items></ul>
+        <dl class="dn-track__rows dn-track__totals" data-dn-track-totals></dl>
+      </section>
+
+      <p class="dn-body-sm">
+        <a data-dn-track-whatsapp href={contact.whatsappUrl} target="_blank" rel="noopener">
+          Une question sur cette commande ? Écrivez-nous sur WhatsApp
+        </a>
+      </p>
+    </article>
+  </div>
+</BaseLayout>
+
+<style>
+  .dn-track {
+    display: grid;
+    gap: var(--dn-space-6);
+    max-inline-size: 760px;
+    padding-block: var(--dn-space-8) var(--dn-section-y);
+  }
+  [hidden] {
+    display: none !important;
+  }
+  .dn-track__none {
+    display: grid;
+    gap: var(--dn-space-4);
+    justify-items: start;
+  }
+  .dn-track__saved {
+    display: grid;
+    gap: var(--dn-space-2);
+  }
+  .dn-track__order {
+    display: grid;
+    gap: var(--dn-space-8);
+  }
+  .dn-track__number {
+    font-family: var(--dn-font-serif);
+    font-size: var(--dn-fs-h2);
+    font-weight: var(--dn-fw-semibold);
+    letter-spacing: 0.03em;
+  }
+  .dn-track__test {
+    color: var(--dn-warning);
+  }
+  .dn-track__h2 {
+    font-family: var(--dn-font-serif);
+    font-size: var(--dn-fs-h3);
+    font-weight: var(--dn-fw-semibold);
+    margin-block-end: var(--dn-space-3);
+  }
+  .dn-track__status {
+    display: grid;
+    gap: var(--dn-space-4);
+  }
+  .dn-track__badge {
+    justify-self: start;
+    padding: var(--dn-space-1) var(--dn-space-3);
+    border-radius: var(--dn-radius-pill);
+    background: var(--dn-success-bg);
+    color: var(--dn-success);
+    font-weight: var(--dn-fw-medium);
+  }
+  .dn-track__badge.is-cancelled {
+    background: var(--dn-error-bg);
+    color: var(--dn-error);
+  }
+  .dn-track__timeline {
+    display: grid;
+    gap: var(--dn-space-2);
+  }
+  .dn-track__timeline :global(li) {
+    display: flex;
+    gap: var(--dn-space-3);
+    align-items: center;
+    color: var(--dn-ink-3);
+    font-size: var(--dn-fs-body-sm);
+  }
+  .dn-track__timeline :global(li::before) {
+    content: '';
+    flex: none;
+    inline-size: 12px;
+    block-size: 12px;
+    border: var(--dn-border-width-strong) solid currentColor;
+    border-radius: var(--dn-radius-pill);
+  }
+  .dn-track__timeline :global(li.is-done) {
+    color: var(--dn-ink-2);
+  }
+  .dn-track__timeline :global(li.is-done::before) {
+    background: var(--dn-green);
+    border-color: var(--dn-green);
+  }
+  .dn-track__timeline :global(li.is-current) {
+    color: var(--dn-ink);
+    font-weight: var(--dn-fw-medium);
+  }
+  .dn-track__timeline :global(li.is-current::before) {
+    border-color: var(--dn-green);
+    background: var(--dn-surface);
+  }
+  .dn-track__payment,
+  .dn-track__shipment {
+    display: grid;
+    gap: var(--dn-space-3);
+    padding: var(--dn-space-5);
+    border: var(--dn-border-decor);
+    border-radius: var(--dn-radius-md);
+    background: var(--dn-surface);
+  }
+  .dn-btn-like {
+    display: inline-flex;
+    gap: var(--dn-space-2);
+    align-items: center;
+    justify-content: center;
+    justify-self: start;
+    min-block-size: var(--dn-btn-h-lg);
+    padding-inline: var(--dn-btn-pad-lg);
+    border-radius: var(--dn-radius-sm);
+    background: var(--dn-green);
+    color: var(--dn-on-dark);
+    font-weight: var(--dn-fw-medium);
+    text-decoration: none;
+  }
+  .dn-track__items {
+    display: grid;
+  }
+  .dn-track__items :global(li) {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--dn-space-4);
+    padding-block: var(--dn-space-3);
+    border-bottom: var(--dn-border-decor);
+    font-size: var(--dn-fs-body-sm);
+  }
+  .dn-track__items :global(.is-unavailable) {
+    color: var(--dn-ink-3);
+    text-decoration: line-through;
+  }
+  .dn-track__rows {
+    display: grid;
+    gap: var(--dn-space-2);
+  }
+  .dn-track__rows :global(div) {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--dn-space-4);
+  }
+  .dn-track__rows :global(dd) {
+    text-align: end;
+    font-variant-numeric: tabular-nums;
+  }
+  .dn-track__totals {
+    margin-block-start: var(--dn-space-3);
+  }
+  .dn-track__totals :global(div:last-child) {
+    padding-block-start: var(--dn-space-2);
+    border-block-start: var(--dn-border-decor);
+    font-weight: var(--dn-fw-medium);
+  }
+</style>
+
+<script>
+  import { CUSTOMER_NEXT_STEP, CUSTOMER_STATUS, formatCents, TIMELINE } from '@/lib/orders/labels';
+  import { h } from '@/scripts/cart-view';
+  import { rpc, savedOrders, type PublicOrder } from '@/scripts/order-api';
+
+  const $ = <T extends HTMLElement = HTMLElement>(selector: string) => document.querySelector<T>(selector)!;
+  const loading = $('[data-dn-track-loading]');
+  const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long', timeStyle: 'short' });
+  const countryName = new Intl.DisplayNames(['fr'], { type: 'region' });
+
+  function row(term: string, value: string) {
+    return h('div', {}, h('dt', {}, term), h('dd', {}, value));
+  }
+
+  function showNone(message?: string) {
+    loading.hidden = true;
+    if (message) $('[data-dn-track-none-text]').textContent = message;
+    const saved = savedOrders();
+    if (saved.length) {
+      $('[data-dn-track-saved] ul').replaceChildren(
+        ...saved.map((o) =>
+          h(
+            'li',
+            {},
+            h('a', { href: `/suivi/#${o.token}` }, `${o.number} — ${dateFormat.format(new Date(o.at))}`),
+          ),
+        ),
+      );
+      $('[data-dn-track-saved]').hidden = false;
+    }
+    $('[data-dn-track-none]').hidden = false;
+  }
+
+  function render(order: PublicOrder) {
+    loading.hidden = true;
+    $('[data-dn-track-number]').textContent = order.number;
+    $('[data-dn-track-date]').textContent =
+      `Demande envoyée le ${dateFormat.format(new Date(order.created_at))} · Livraison : ${countryName.of(order.country_code) ?? order.country_code}`;
+    $('[data-dn-track-test]').hidden = order.environment === 'production';
+
+    const badge = $('[data-dn-track-status]');
+    let status = CUSTOMER_STATUS[order.status];
+    if (order.status === 'cancelled' && order.payment_status === 'refund_due')
+      status = 'Annulée — remboursement en cours';
+    if (order.status === 'cancelled' && order.payment_status === 'refunded')
+      status = 'Annulée — remboursement effectué';
+    badge.textContent = status;
+    badge.classList.toggle('is-cancelled', order.status === 'cancelled');
+    const current = TIMELINE.findIndex((step) => step.statuses.includes(order.status));
+    $('[data-dn-track-timeline]').replaceChildren(
+      ...(order.status === 'cancelled'
+        ? []
+        : TIMELINE.map((step, i) =>
+            h(
+              'li',
+              {
+                class:
+                  i < current || order.status === 'completed' ? 'is-done' : i === current ? 'is-current' : '',
+                'aria-current': i === current ? 'step' : undefined,
+              },
+              step.label,
+              i < current ? h('span', { class: 'dn-visually-hidden' }, ' (terminé)') : null,
+            ),
+          )),
+    );
+    $('[data-dn-track-next]').textContent = CUSTOMER_NEXT_STEP[order.status];
+
+    // Paiement : bouton seulement si une VRAIE URL de paiement existe ; sinon instructions.
+    const payment = $('[data-dn-track-payment]');
+    payment.hidden = order.status !== 'awaiting_payment';
+    if (order.status === 'awaiting_payment') {
+      $('[data-dn-track-pay-total]').textContent =
+        order.total_cents !== null ? `Total à régler : ${formatCents(order.total_cents)}` : '';
+      const link = $<HTMLAnchorElement>('[data-dn-track-pay-link]');
+      const url = order.payment_url && /^https:\/\//.test(order.payment_url) ? order.payment_url : null;
+      link.hidden = !url;
+      if (url) link.href = url;
+      $('[data-dn-track-pay-manual]').hidden = Boolean(url);
+    }
+
+    const shipment = $('[data-dn-track-shipment]');
+    shipment.hidden = !order.shipment;
+    if (order.shipment) {
+      const s = order.shipment;
+      $('[data-dn-track-ship-rows]').replaceChildren(
+        ...[
+          s.shipped_at ? row('Expédiée le', dateFormat.format(new Date(s.shipped_at))) : null,
+          s.carrier ? row('Transporteur', s.service ? `${s.carrier} — ${s.service}` : s.carrier) : null,
+          s.tracking_number ? row('Numéro de suivi', s.tracking_number) : null,
+        ].filter((x): x is HTMLDivElement => x !== null),
+      );
+      const link = $<HTMLAnchorElement>('[data-dn-track-ship-link]');
+      const url = s.tracking_url && /^https:\/\//.test(s.tracking_url) ? s.tracking_url : null;
+      link.hidden = !url;
+      if (url) link.href = url;
+    }
+
+    $('[data-dn-track-items]').replaceChildren(
+      ...order.items.map((item) =>
+        h(
+          'li',
+          { class: item.unavailable ? 'is-unavailable' : '' },
+          h(
+            'span',
+            {},
+            `${item.quantity} × ${item.name}${item.variant ? ` (${item.variant})` : ''}`,
+            item.unavailable
+              ? ' — indisponible, non facturé'
+              : item.on_demand && !order.total_confirmed
+                ? ' — disponibilité à confirmer'
+                : '',
+          ),
+          h('span', {}, formatCents(item.line_total_cents)),
+        ),
+      ),
+    );
+    const totals = [row('Sous-total', formatCents(order.subtotal_cents))];
+    if (order.total_confirmed && order.total_cents !== null) {
+      totals.push(row('Livraison', formatCents(order.shipping_cents ?? 0)));
+      if (order.discount_cents) totals.push(row('Remise', `− ${formatCents(order.discount_cents)}`));
+      if (order.shipping_estimate) totals.splice(1, 0, row('Délai indicatif', order.shipping_estimate));
+      totals.push(row('Total', formatCents(order.total_cents)));
+    } else {
+      totals.push(row('Livraison', 'À confirmer par Dar Nūr'), row('Total', 'Confirmé avant paiement'));
+    }
+    $('[data-dn-track-totals]').replaceChildren(...totals);
+    const whatsapp = $<HTMLAnchorElement>('[data-dn-track-whatsapp]');
+    whatsapp.href = `${whatsapp.href.split('?')[0]}?text=${encodeURIComponent(
+      `Salam alaykoum, j’ai une question au sujet de ma commande ${order.number}.`,
+    )}`;
+    $('[data-dn-track-order]').hidden = false;
+  }
+
+  async function load() {
+    const token = location.hash.replace(/^#/, '');
+    $('[data-dn-track-order]').hidden = true;
+    $('[data-dn-track-none]').hidden = true;
+    if (!token) return showNone();
+    if (!/^[A-Za-z0-9_-]{43}$/.test(token))
+      return showNone('Ce lien de suivi n’est pas valide. Vérifiez qu’il est complet.');
+    loading.hidden = false;
+    try {
+      const result = await rpc<{ found: boolean; order?: PublicOrder }>('get_order_tracking', {
+        p_token: token,
+      });
+      if (result.found && result.order) render(result.order);
+      else showNone('Aucune commande ne correspond à ce lien. Vérifiez qu’il est complet.');
+    } catch {
+      showNone('Le suivi est momentanément indisponible. Réessayez dans quelques instants.');
+    }
+  }
+
+  window.addEventListener('hashchange', load);
+  load();
+</script>

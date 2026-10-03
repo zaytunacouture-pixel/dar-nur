@@ -1,0 +1,1118 @@
+---
+/**
+ * Administration des commandes (étape 10) — volontairement simple : liste, détail, actions.
+ *
+ * Connexion par le compte administrateur Supabase existant (celui d'admin.html) ; session gardée
+ * dans sessionStorage (fermée avec l'onglet). Lecture : tables orders / order_items / order_events
+ * sous RLS (public.is_admin()). Écriture : UNIQUEMENT admin_update_order, qui vérifie l'admin et
+ * dont chaque transition est recontrôlée par la base (expédition impossible sans paiement
+ * confirmé, montants figés après la demande de paiement…). Aucune clé secrète.
+ * Page statique sans donnée ; noindex ; interdite aux robots en production.
+ */
+import ApiConfig from '@/components/order/ApiConfig.astro';
+import Button from '@/components/ui/Button.astro';
+import Field from '@/components/ui/Field.astro';
+import { siteEnv } from '@/config/site';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+
+const seo = {
+  title: 'Commandes — administration',
+  description: 'Administration des commandes Dar Nūr (accès réservé).',
+  canonicalPath: '/admin/commandes/',
+  noindex: true,
+};
+---
+
+<BaseLayout seo={seo} showReassurance={false}>
+  <ApiConfig />
+  <div class="dn-container dn-admin" data-env={siteEnv}>
+    <h1 class="dn-h1">Commandes</h1>
+
+    <form class="dn-admin__login" data-dn-login hidden>
+      <p class="dn-body-sm dn-muted">Accès réservé à l’administration de Dar Nūr.</p>
+      <Field id="dn-admin-email" name="email" type="email" label="E-mail" required autocomplete="username" />
+      <div class="dn-field">
+        <label class="dn-admin__label" for="dn-admin-password">
+          Mot de passe
+        </label>
+        <input
+          class="dn-admin__input"
+          id="dn-admin-password"
+          name="password"
+          type="password"
+          required
+          autocomplete="current-password"
+        />
+      </div>
+      <p class="dn-admin__error" role="alert" data-dn-login-error hidden></p>
+      <Button type="submit" size="lg">
+        Se connecter
+      </Button>
+    </form>
+
+    <div class="dn-admin__app" data-dn-app hidden>
+      <div class="dn-admin__bar">
+        <label class="dn-admin__filter">
+          <span class="dn-small">Environnement</span>
+          <select data-dn-filter-env>
+            <option value="">Tous</option>
+            <option value="preprod" selected={siteEnv !== 'production'}>
+              Préproduction (tests)
+            </option>
+            <option value="production" selected={siteEnv === 'production'}>
+              Production
+            </option>
+          </select>
+        </label>
+        <label class="dn-admin__filter">
+          <span class="dn-small">Statut</span>
+          <select data-dn-filter-status>
+            <option value="">À traiter</option>
+            <option value="all">Toutes</option>
+            <option value="submitted">Reçues</option>
+            <option value="reviewing">En vérification</option>
+            <option value="awaiting_payment">Paiement demandé</option>
+            <option value="paid">Payées</option>
+            <option value="preparing_shipment">Préparation expédition</option>
+            <option value="shipped">Expédiées</option>
+            <option value="completed">Livrées</option>
+            <option value="cancelled">Annulées</option>
+          </select>
+        </label>
+        <button type="button" class="dn-admin__link" data-dn-refresh>
+          Actualiser
+        </button>
+        <button type="button" class="dn-admin__link" data-dn-logout>
+          Se déconnecter
+        </button>
+      </div>
+      <p class="dn-admin__flash" role="status" aria-live="polite" data-dn-flash></p>
+      <div class="dn-admin__grid">
+        <section aria-labelledby="dn-admin-list-title">
+          <h2 id="dn-admin-list-title" class="dn-visually-hidden">
+            Liste des commandes
+          </h2>
+          <ul role="list" class="dn-admin__list" data-dn-list></ul>
+        </section>
+        <section class="dn-admin__detail" aria-live="polite" data-dn-detail tabindex="-1">
+          <p class="dn-muted dn-body-sm">Sélectionnez une commande.</p>
+        </section>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .dn-admin {
+    display: grid;
+    gap: var(--dn-space-6);
+    padding-block: var(--dn-space-8) var(--dn-section-y);
+  }
+  [hidden] {
+    display: none !important;
+  }
+  .dn-admin__login {
+    display: grid;
+    gap: var(--dn-space-4);
+    max-inline-size: 420px;
+  }
+  .dn-admin__label {
+    font-size: var(--dn-fs-body-sm);
+    font-weight: var(--dn-fw-medium);
+  }
+  .dn-admin__input,
+  .dn-admin :global(.dn-admin__in) {
+    inline-size: 100%;
+    min-block-size: var(--dn-input-h);
+    padding: 0 var(--dn-space-3);
+    border: var(--dn-border-ui);
+    border-radius: var(--dn-radius-sm);
+    background: var(--dn-surface);
+    font-size: var(--dn-fs-input);
+    color: var(--dn-ink);
+  }
+  .dn-admin :global(textarea.dn-admin__in) {
+    min-block-size: 88px;
+    padding-block: var(--dn-space-2);
+  }
+  .dn-admin__error,
+  .dn-admin :global(.is-error) {
+    color: var(--dn-error);
+    font-size: var(--dn-fs-body-sm);
+  }
+  .dn-admin__bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--dn-space-3) var(--dn-space-5);
+    align-items: end;
+  }
+  .dn-admin__filter {
+    display: grid;
+    gap: var(--dn-space-1);
+  }
+  .dn-admin__filter select {
+    min-block-size: var(--dn-tap-min);
+    padding-inline: var(--dn-space-3);
+    border: var(--dn-border-ui);
+    border-radius: var(--dn-radius-sm);
+    background: var(--dn-surface);
+  }
+  .dn-admin__link,
+  .dn-admin :global(.dn-admin__link) {
+    min-block-size: var(--dn-tap-min);
+    padding: 0 var(--dn-space-2);
+    border: 0;
+    background: none;
+    color: var(--dn-green);
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: var(--dn-fs-body-sm);
+  }
+  .dn-admin__flash:empty {
+    display: none;
+  }
+  .dn-admin__flash {
+    padding: var(--dn-space-3) var(--dn-space-4);
+    border-radius: var(--dn-radius-sm);
+    background: var(--dn-success-bg);
+    color: var(--dn-success);
+    font-size: var(--dn-fs-body-sm);
+  }
+  .dn-admin__flash.is-error {
+    background: var(--dn-error-bg);
+    color: var(--dn-error);
+  }
+  .dn-admin__grid {
+    display: grid;
+    gap: var(--dn-space-6);
+    align-items: start;
+  }
+  .dn-admin__list {
+    display: grid;
+    gap: var(--dn-space-2);
+  }
+  .dn-admin :global(.dn-admin__item) {
+    display: grid;
+    gap: 2px;
+    inline-size: 100%;
+    padding: var(--dn-space-3);
+    border: var(--dn-border-decor);
+    border-radius: var(--dn-radius-sm);
+    background: var(--dn-surface);
+    text-align: start;
+    cursor: pointer;
+    font-size: var(--dn-fs-body-sm);
+  }
+  .dn-admin :global(.dn-admin__item[aria-current='true']) {
+    border: var(--dn-border-selected);
+  }
+  .dn-admin :global(.dn-admin__item strong) {
+    font-variant-numeric: tabular-nums;
+  }
+  .dn-admin__detail {
+    display: grid;
+    gap: var(--dn-space-6);
+    min-inline-size: 0;
+  }
+  .dn-admin__detail:focus {
+    outline: none;
+  }
+  .dn-admin :global(.dn-admin__card) {
+    display: grid;
+    gap: var(--dn-space-3);
+    padding: var(--dn-space-4);
+    border: var(--dn-border-decor);
+    border-radius: var(--dn-radius-md);
+    background: var(--dn-surface);
+  }
+  .dn-admin :global(.dn-admin__card h3) {
+    font-family: var(--dn-font-serif);
+    font-size: var(--dn-fs-h3);
+    font-weight: var(--dn-fw-semibold);
+  }
+  .dn-admin :global(.dn-admin__badges) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--dn-space-2);
+  }
+  .dn-admin :global(.dn-admin__badge) {
+    padding: 2px var(--dn-space-2);
+    border-radius: var(--dn-radius-pill);
+    background: var(--dn-bg-alt);
+    font-size: var(--dn-fs-small);
+    font-weight: var(--dn-fw-medium);
+  }
+  .dn-admin :global(.dn-admin__badge.is-test) {
+    background: var(--dn-warning-bg);
+    color: var(--dn-warning);
+  }
+  .dn-admin :global(.dn-admin__rows) {
+    display: grid;
+    gap: var(--dn-space-1);
+    font-size: var(--dn-fs-body-sm);
+  }
+  .dn-admin :global(.dn-admin__rows div) {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--dn-space-4);
+  }
+  .dn-admin :global(.dn-admin__rows dd) {
+    text-align: end;
+    font-variant-numeric: tabular-nums;
+    overflow-wrap: anywhere;
+  }
+  .dn-admin :global(.dn-admin__line) {
+    display: grid;
+    gap: var(--dn-space-2);
+    padding-block: var(--dn-space-3);
+    border-bottom: var(--dn-border-decor);
+    font-size: var(--dn-fs-body-sm);
+  }
+  .dn-admin :global(.dn-admin__choices) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--dn-space-2);
+  }
+  .dn-admin :global(.dn-admin__choices button),
+  .dn-admin :global(.dn-admin__btn) {
+    min-block-size: var(--dn-tap-min);
+    padding: 0 var(--dn-space-4);
+    border: var(--dn-border-ui);
+    border-radius: var(--dn-radius-sm);
+    background: var(--dn-surface);
+    color: var(--dn-ink);
+    font-weight: var(--dn-fw-medium);
+    cursor: pointer;
+  }
+  .dn-admin :global(.dn-admin__choices button[aria-pressed='true']) {
+    border: var(--dn-border-selected);
+    background: var(--dn-bg-alt);
+  }
+  .dn-admin :global(.dn-admin__btn.is-primary) {
+    border-color: var(--dn-green);
+    background: var(--dn-green);
+    color: var(--dn-on-dark);
+  }
+  .dn-admin :global(.dn-admin__btn.is-danger) {
+    border-color: var(--dn-error);
+    color: var(--dn-error);
+  }
+  .dn-admin :global(.dn-admin__btn:disabled) {
+    background: var(--dn-disabled-bg);
+    border-color: var(--dn-disabled-bg);
+    color: var(--dn-disabled-ink);
+    cursor: not-allowed;
+  }
+  .dn-admin :global(.dn-admin__form) {
+    display: grid;
+    gap: var(--dn-space-3);
+  }
+  .dn-admin :global(.dn-admin__form label) {
+    display: grid;
+    gap: var(--dn-space-1);
+    font-size: var(--dn-fs-body-sm);
+    font-weight: var(--dn-fw-medium);
+  }
+  .dn-admin :global(.dn-admin__actions) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--dn-space-2);
+  }
+  .dn-admin :global(.dn-admin__events) {
+    display: grid;
+    gap: var(--dn-space-1);
+    font-size: var(--dn-fs-small);
+    color: var(--dn-ink-2);
+  }
+  @media (min-width: 1024px) {
+    .dn-admin__grid {
+      grid-template-columns: 4fr 8fr;
+    }
+  }
+</style>
+
+<script>
+  import {
+    ADMIN_PAYMENT,
+    ADMIN_STATUS,
+    formatCents,
+    type OrderStatus,
+    type PaymentStatus,
+  } from '@/lib/orders/labels';
+  import { h } from '@/scripts/cart-view';
+  import { ApiError, apiConfig, rpc } from '@/scripts/order-api';
+
+  interface Session {
+    access_token: string;
+    refresh_token: string;
+    expires_at: number;
+  }
+  interface Item {
+    id: string;
+    position: number;
+    product_slug: string;
+    product_name: string;
+    variant_label: string | null;
+    availability_at_order: string;
+    quantity: number;
+    unit_price_cents: number;
+    list_unit_price_cents: number;
+    offer_title: string | null;
+    line_total_cents: number;
+    availability_confirmed: boolean | null;
+  }
+  interface OrderEvent {
+    id: number;
+    type: string;
+    from_status: string | null;
+    to_status: string | null;
+    to_payment_status: string | null;
+    actor: string;
+    notify_customer: boolean;
+    notified_at: string | null;
+    created_at: string;
+  }
+  interface Order {
+    id: string;
+    public_number: string;
+    environment: string;
+    status: OrderStatus;
+    payment_status: PaymentStatus;
+    subtotal_cents: number;
+    shipping_cents: number | null;
+    discount_cents: number;
+    discount_reason: string | null;
+    total_cents: number | null;
+    customer_first_name: string;
+    customer_last_name: string;
+    customer_email: string;
+    customer_phone: string;
+    ship_address_line1: string;
+    ship_address_line2: string | null;
+    ship_postal_code: string | null;
+    ship_city: string;
+    ship_region: string | null;
+    ship_country_code: string;
+    delivery_instructions: string | null;
+    payment_provider: string | null;
+    payment_url: string | null;
+    payment_reference: string | null;
+    paid_at: string | null;
+    shipping_carrier: string | null;
+    shipping_service: string | null;
+    shipping_estimate: string | null;
+    tracking_number: string | null;
+    tracking_url: string | null;
+    shipped_at: string | null;
+    cancel_reason: string | null;
+    admin_note: string | null;
+    created_at: string;
+    order_items?: Item[];
+    order_events?: OrderEvent[];
+  }
+
+  const config = apiConfig();
+  const KEY = 'dn-admin-session';
+  const $ = <T extends HTMLElement = HTMLElement>(s: string) => document.querySelector<T>(s)!;
+  const loginForm = $<HTMLFormElement>('[data-dn-login]');
+  const app = $('[data-dn-app]');
+  const list = $('[data-dn-list]');
+  const detail = $('[data-dn-detail]');
+  const flash = $('[data-dn-flash]');
+  const dates = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'short', timeStyle: 'short' });
+  const countries = new Intl.DisplayNames(['fr'], { type: 'region' });
+  const LIST_COLUMNS =
+    'id,public_number,environment,status,payment_status,subtotal_cents,total_cents,customer_first_name,customer_last_name,ship_country_code,created_at';
+  const DETAIL_COLUMNS =
+    'id,public_number,environment,status,payment_status,subtotal_cents,shipping_cents,discount_cents,discount_reason,total_cents,' +
+    'customer_first_name,customer_last_name,customer_email,customer_phone,ship_address_line1,ship_address_line2,ship_postal_code,' +
+    'ship_city,ship_region,ship_country_code,delivery_instructions,payment_provider,payment_url,payment_reference,paid_at,' +
+    'shipping_carrier,shipping_service,shipping_estimate,tracking_number,tracking_url,shipped_at,cancel_reason,admin_note,created_at,' +
+    'order_items(id,position,product_slug,product_name,variant_label,availability_at_order,quantity,unit_price_cents,' +
+    'list_unit_price_cents,offer_title,line_total_cents,availability_confirmed),' +
+    'order_events(id,type,from_status,to_status,to_payment_status,actor,notify_customer,notified_at,created_at)';
+  const ERRORS: Record<string, string> = {
+    forbidden: 'Accès refusé : ce compte n’est pas administrateur.',
+    stale_order: 'La commande a changé entre-temps : elle a été rechargée.',
+    invalid_transition: 'Transition refusée par la base de données.',
+    invalid_payment_transition: 'Changement de paiement refusé par la base de données.',
+    availability_unchecked: 'Indiquez la disponibilité de chaque article avant de demander le paiement.',
+    no_available_item: 'Aucun article disponible : revoyez les disponibilités ou annulez.',
+    shipping_missing: 'Renseignez les frais de livraison (0 possible) avant de demander le paiement.',
+    invalid_payment_url: 'URL de paiement refusée : https obligatoire, sans identifiants, hôte autorisé.',
+    invalid_tracking_url: 'URL de suivi refusée : https obligatoire, sans identifiants.',
+    payment_not_confirmed: 'Expédition impossible : le paiement n’est pas confirmé.',
+    amounts_locked: 'Montants figés : repassez la commande en vérification pour les modifier.',
+    payment_link_locked: 'Le lien de paiement ne se modifie que pendant la demande de paiement.',
+    shipping_locked: 'Suivi et expédition seulement après paiement confirmé.',
+    order_items_locked: 'Disponibilités figées une fois le paiement demandé.',
+    reason_required: 'Indiquez un motif (3 caractères au moins).',
+    invalid_amount: 'Montant invalide.',
+    invalid_text: 'Texte trop long ou invalide.',
+    event_not_found: 'Notification déjà marquée.',
+    order_not_found: 'Commande introuvable.',
+  };
+
+  let session: Session | null = null;
+  let selected: string | null = null;
+
+  /* ── Session ───────────────────────────────────────────────────────── */
+  function loadSession(): Session | null {
+    try {
+      return JSON.parse(sessionStorage.getItem(KEY) ?? 'null') as Session | null;
+    } catch {
+      return null;
+    }
+  }
+  function storeSession(value: Session | null) {
+    session = value;
+    try {
+      if (value) sessionStorage.setItem(KEY, JSON.stringify(value));
+      else sessionStorage.removeItem(KEY);
+    } catch {
+      // Session gardée en mémoire seulement.
+    }
+  }
+  async function auth(body: Record<string, string>, grant: 'password' | 'refresh_token'): Promise<Session> {
+    const response = await fetch(`${config!.url}/auth/v1/token?grant_type=${grant}`, {
+      method: 'POST',
+      headers: { apikey: config!.key, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      credentials: 'omit',
+    });
+    const data = (await response.json().catch(() => ({}))) as Partial<Session> & { expires_in?: number };
+    if (!response.ok || !data.access_token || !data.refresh_token) throw new Error('auth');
+    return {
+      access_token: data.access_token,
+      refresh_token: data.refresh_token,
+      expires_at: data.expires_at ?? Math.floor(Date.now() / 1000) + (data.expires_in ?? 3600),
+    };
+  }
+  async function token(): Promise<string> {
+    if (!session) throw new ApiError('Session absente', 401, 'session');
+    if (session.expires_at - 60 < Date.now() / 1000) {
+      try {
+        storeSession(await auth({ refresh_token: session.refresh_token }, 'refresh_token'));
+      } catch {
+        storeSession(null);
+        showLogin('Session expirée : reconnectez-vous.');
+        throw new ApiError('Session expirée', 401, 'session');
+      }
+    }
+    return session!.access_token;
+  }
+  async function select<T>(table: string, params: Record<string, string>): Promise<T[]> {
+    const url = new URL(`${config!.url}/rest/v1/${table}`);
+    for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
+    const response = await fetch(url, {
+      headers: { apikey: config!.key, Authorization: `Bearer ${await token()}` },
+      cache: 'no-store',
+      credentials: 'omit',
+    });
+    if (!response.ok) throw new ApiError(`HTTP ${response.status}`, response.status, 'http');
+    return (await response.json()) as T[];
+  }
+
+  function showLogin(message?: string) {
+    app.hidden = true;
+    loginForm.hidden = false;
+    const error = $('[data-dn-login-error]');
+    error.hidden = !message;
+    error.textContent = message ?? '';
+  }
+
+  function say(message: string, error = false) {
+    flash.textContent = message;
+    flash.classList.toggle('is-error', error);
+  }
+
+  /* ── Liste ─────────────────────────────────────────────────────────── */
+  async function loadList() {
+    const env = $<HTMLSelectElement>('[data-dn-filter-env]').value;
+    const status = $<HTMLSelectElement>('[data-dn-filter-status]').value;
+    const params: Record<string, string> = { select: LIST_COLUMNS, order: 'created_at.desc', limit: '200' };
+    if (env) params['environment'] = `eq.${env}`;
+    if (status === '') params['status'] = 'not.in.(completed,cancelled)';
+    else if (status !== 'all') params['status'] = `eq.${status}`;
+    const orders = await select<Order>('orders', params);
+    list.replaceChildren(
+      ...(orders.length
+        ? orders.map((o) => {
+            const button = h(
+              'button',
+              { type: 'button', class: 'dn-admin__item', 'aria-current': String(o.id === selected) },
+              h('strong', {}, o.public_number),
+              h(
+                'span',
+                {},
+                `${ADMIN_STATUS[o.status]} · paiement ${ADMIN_PAYMENT[o.payment_status].toLowerCase()}`,
+              ),
+              h(
+                'span',
+                { class: 'dn-muted' },
+                `${dates.format(new Date(o.created_at))} · ${o.customer_first_name} ${o.customer_last_name} · ${o.ship_country_code} · ${formatCents(o.total_cents ?? o.subtotal_cents)}${o.total_cents === null ? ' + livraison' : ''}`,
+              ),
+              o.environment !== 'production' ? h('span', { class: 'dn-admin__badge is-test' }, 'TEST') : null,
+            );
+            button.addEventListener('click', () => openOrder(o.id, true));
+            return h('li', {}, button);
+          })
+        : [h('li', { class: 'dn-muted dn-body-sm' }, 'Aucune commande pour ces filtres.')]),
+    );
+  }
+
+  /* ── Détail ────────────────────────────────────────────────────────── */
+  const rows = (pairs: [string, string | null | undefined][]) =>
+    h(
+      'dl',
+      { class: 'dn-admin__rows' },
+      ...pairs.filter(([, v]) => v).map(([t, v]) => h('div', {}, h('dt', {}, t), h('dd', {}, v!))),
+    );
+  const card = (title: string, ...children: (Node | null)[]) =>
+    h('div', { class: 'dn-admin__card' }, h('h3', {}, title), ...children);
+  const button = (label: string, onClick: () => void, kind = '', disabled = false) => {
+    const b = h('button', { type: 'button', class: `dn-admin__btn ${kind}`, disabled }, label);
+    b.addEventListener('click', onClick);
+    return b;
+  };
+  const input = (
+    label: string,
+    name: string,
+    value = '',
+    type = 'text',
+    attrs: Record<string, string> = {},
+  ) => h('label', {}, label, h('input', { class: 'dn-admin__in', name, value, type, ...attrs }));
+  const cents = (text: string): number | null => {
+    const m = /^\s*(\d{1,6})(?:[.,](\d{1,2}))?\s*$/.exec(text);
+    return m ? Number(m[1]) * 100 + Number((m[2] ?? '0').padEnd(2, '0')) : null;
+  };
+  const euros = (value: number | null) => (value === null ? '' : (value / 100).toFixed(2).replace('.', ','));
+  function form(
+    fields: HTMLElement[],
+    submitLabel: string,
+    onSubmit: (data: FormData) => void,
+    kind = 'is-primary',
+  ) {
+    const f = h(
+      'form',
+      { class: 'dn-admin__form' },
+      ...fields,
+      h(
+        'div',
+        { class: 'dn-admin__actions' },
+        h('button', { type: 'submit', class: `dn-admin__btn ${kind}` }, submitLabel),
+      ),
+    );
+    f.addEventListener('submit', (event) => {
+      event.preventDefault();
+      onSubmit(new FormData(f));
+    });
+    return f;
+  }
+
+  async function act(order: Order, action: string, data: Record<string, unknown> = {}, done?: string) {
+    try {
+      await rpc(
+        'admin_update_order',
+        { p_order_id: order.id, p_action: action, p_data: { expected_status: order.status, ...data } },
+        await token(),
+      );
+      say(done ?? 'Enregistré.');
+    } catch (error) {
+      const code = error instanceof ApiError ? error.code : 'http';
+      say(ERRORS[code] ?? `Erreur : ${error instanceof Error ? error.message : 'inconnue'}`, true);
+    }
+    await Promise.all([openOrder(order.id, false), loadList()]);
+  }
+
+  async function trackingLink(order: Order): Promise<string> {
+    const t = await rpc<string>('admin_order_tracking_token', { p_order_id: order.id }, await token());
+    return `${location.origin}/suivi/#${t}`;
+  }
+
+  async function openOrder(id: string, focus: boolean) {
+    selected = id;
+    for (const item of list.querySelectorAll('.dn-admin__item')) item.setAttribute('aria-current', 'false');
+    const [order] = await select<Order>('orders', {
+      select: DETAIL_COLUMNS,
+      id: `eq.${id}`,
+      'order_items.order': 'position.asc',
+      'order_events.order': 'id.asc',
+    });
+    if (!order) {
+      detail.replaceChildren(h('p', { class: 'is-error' }, 'Commande introuvable.'));
+      return;
+    }
+    const items = order.order_items ?? [];
+    const events = order.order_events ?? [];
+    const editableItems = order.status === 'submitted' || order.status === 'reviewing';
+    const s = order.status;
+
+    const head = h(
+      'div',
+      { class: 'dn-admin__card' },
+      h('h3', {}, order.public_number),
+      h(
+        'div',
+        { class: 'dn-admin__badges' },
+        h('span', { class: 'dn-admin__badge' }, ADMIN_STATUS[s]),
+        h('span', { class: 'dn-admin__badge' }, `Paiement : ${ADMIN_PAYMENT[order.payment_status]}`),
+        order.environment !== 'production'
+          ? h('span', { class: 'dn-admin__badge is-test' }, `TEST (${order.environment})`)
+          : null,
+      ),
+      h('p', { class: 'dn-small dn-muted' }, `Reçue le ${dates.format(new Date(order.created_at))}`),
+    );
+
+    const customer = card(
+      'Client et livraison',
+      rows([
+        ['Nom', `${order.customer_first_name} ${order.customer_last_name}`],
+        ['E-mail', order.customer_email],
+        ['Téléphone', order.customer_phone],
+        ['Adresse', order.ship_address_line1],
+        ['Complément', order.ship_address_line2],
+        ['Ville', [order.ship_postal_code, order.ship_city].filter(Boolean).join(' ')],
+        ['Région', order.ship_region],
+        [
+          'Pays',
+          `${countries.of(order.ship_country_code) ?? order.ship_country_code} (${order.ship_country_code})`,
+        ],
+        ['Instructions', order.delivery_instructions],
+      ]),
+    );
+
+    const lines = card(
+      'Articles et disponibilités',
+      ...items.map((item) => {
+        const choice = (label: string, value: boolean | null) => {
+          const b = h(
+            'button',
+            {
+              type: 'button',
+              'aria-pressed': String(item.availability_confirmed === value),
+              disabled: !editableItems,
+            },
+            label,
+          );
+          b.addEventListener('click', () =>
+            act(
+              order,
+              'set_item_availability',
+              { item_id: item.id, available: value },
+              'Disponibilité enregistrée.',
+            ),
+          );
+          return b;
+        };
+        return h(
+          'div',
+          { class: 'dn-admin__line' },
+          h(
+            'strong',
+            {},
+            `${item.quantity} × ${item.product_name}${item.variant_label ? ` — ${item.variant_label}` : ''}`,
+          ),
+          h(
+            'span',
+            { class: 'dn-muted' },
+            `${formatCents(item.unit_price_cents)} l’unité${item.offer_title ? ` (offre « ${item.offer_title} », prix catalogue ${formatCents(item.list_unit_price_cents)})` : ''} · ${formatCents(item.line_total_cents)} · ${item.availability_at_order === 'on_demand' ? 'sur commande' : 'disponible au catalogue'} · ${item.product_slug}`,
+          ),
+          h(
+            'div',
+            {
+              class: 'dn-admin__choices',
+              role: 'group',
+              'aria-label': `Disponibilité de ${item.product_name}`,
+            },
+            choice('Disponible', true),
+            choice('Indisponible', false),
+            choice('À vérifier', null),
+          ),
+        );
+      }),
+      rows([
+        ['Sous-total', formatCents(order.subtotal_cents)],
+        ['Livraison', order.shipping_cents === null ? 'à fixer' : formatCents(order.shipping_cents)],
+        [
+          'Remise',
+          order.discount_cents
+            ? `− ${formatCents(order.discount_cents)} (${order.discount_reason ?? ''})`
+            : null,
+        ],
+        ['Total', order.total_cents === null ? 'livraison à fixer' : formatCents(order.total_cents)],
+      ]),
+    );
+
+    // Actions selon le statut. La base revérifie TOUT (transitions, paiement avant expédition).
+    const actions: Node[] = [];
+    if (s === 'submitted')
+      actions.push(
+        button(
+          'Commencer la vérification',
+          () => act(order, 'start_review', {}, 'Vérification commencée.'),
+          'is-primary',
+        ),
+      );
+    if (s === 'reviewing') {
+      actions.push(
+        form(
+          [
+            input('Frais de livraison (€)', 'shipping', euros(order.shipping_cents), 'text', {
+              inputmode: 'decimal',
+              required: '',
+            }),
+            input('Transporteur (facultatif)', 'carrier', order.shipping_carrier ?? ''),
+            input('Service (facultatif)', 'service', order.shipping_service ?? ''),
+            input('Délai indicatif (facultatif)', 'estimate', order.shipping_estimate ?? ''),
+          ],
+          'Enregistrer la livraison',
+          (d) => {
+            const amount = cents(String(d.get('shipping')));
+            if (amount === null) return say('Montant de livraison invalide (ex. 12,90).', true);
+            act(
+              order,
+              'set_shipping',
+              {
+                shipping_cents: amount,
+                carrier: d.get('carrier'),
+                service: d.get('service'),
+                estimate: d.get('estimate'),
+              },
+              'Frais de livraison enregistrés.',
+            );
+          },
+          '',
+        ),
+        form(
+          [
+            input('Remise validée (€)', 'discount', euros(order.discount_cents), 'text', {
+              inputmode: 'decimal',
+            }),
+            input('Motif de la remise', 'reason', order.discount_reason ?? ''),
+          ],
+          'Enregistrer la remise',
+          (d) => {
+            const amount = cents(String(d.get('discount')) || '0');
+            if (amount === null) return say('Montant de remise invalide.', true);
+            act(
+              order,
+              'set_discount',
+              { discount_cents: amount, reason: d.get('reason') },
+              'Remise enregistrée.',
+            );
+          },
+          '',
+        ),
+        form(
+          [
+            input('Prestataire de paiement (facultatif)', 'provider', order.payment_provider ?? ''),
+            input('URL de paiement sécurisée https (facultatif)', 'url', order.payment_url ?? '', 'url'),
+            input('Référence (facultatif)', 'reference', order.payment_reference ?? ''),
+          ],
+          'Confirmer le total et demander le paiement',
+          (d) => {
+            if (
+              !confirm(
+                `Demander le paiement de ${order.public_number} ? Le total sera figé et visible par le client.`,
+              )
+            )
+              return;
+            act(
+              order,
+              'request_payment',
+              {
+                payment_provider: d.get('provider'),
+                payment_url: d.get('url'),
+                payment_reference: d.get('reference'),
+              },
+              'Paiement demandé.',
+            );
+          },
+        ),
+      );
+    }
+    if (s === 'awaiting_payment') {
+      actions.push(
+        form(
+          [
+            input('Prestataire de paiement', 'provider', order.payment_provider ?? ''),
+            input('URL de paiement https', 'url', order.payment_url ?? '', 'url'),
+            input('Référence', 'reference', order.payment_reference ?? ''),
+          ],
+          'Mettre à jour le lien de paiement',
+          (d) =>
+            act(
+              order,
+              'set_payment_link',
+              {
+                payment_provider: d.get('provider'),
+                payment_url: d.get('url'),
+                payment_reference: d.get('reference'),
+              },
+              'Lien de paiement enregistré.',
+            ),
+          '',
+        ),
+        form(
+          [input('Référence du paiement reçu (facultatif)', 'reference', '')],
+          'Confirmer le paiement reçu',
+          (d) => {
+            if (
+              !confirm(
+                `Confirmer que le paiement de ${order.public_number} (${formatCents(order.total_cents ?? 0)}) a bien été reçu ?`,
+              )
+            )
+              return;
+            act(order, 'confirm_payment', { payment_reference: d.get('reference') }, 'Paiement confirmé.');
+          },
+        ),
+        button('Repasser en vérification', () =>
+          act(order, 'reopen_review', {}, 'Commande repassée en vérification.'),
+        ),
+      );
+    }
+    if (s === 'paid')
+      actions.push(
+        button(
+          'Passer en préparation d’expédition',
+          () => act(order, 'start_preparation', {}, 'Préparation commencée.'),
+          'is-primary',
+        ),
+      );
+    if (s === 'paid' || s === 'preparing_shipment' || s === 'shipped') {
+      actions.push(
+        form(
+          [
+            input('Transporteur', 'carrier', order.shipping_carrier ?? ''),
+            input('Service', 'service', order.shipping_service ?? ''),
+            input('Numéro de suivi', 'number', order.tracking_number ?? ''),
+            input('URL de suivi https (facultatif)', 'url', order.tracking_url ?? '', 'url'),
+          ],
+          'Enregistrer le suivi',
+          (d) =>
+            act(
+              order,
+              'set_tracking',
+              {
+                carrier: d.get('carrier'),
+                service: d.get('service'),
+                tracking_number: d.get('number'),
+                tracking_url: d.get('url'),
+              },
+              'Suivi enregistré.',
+            ),
+          '',
+        ),
+      );
+    }
+    if (s === 'preparing_shipment' || s === 'awaiting_payment') {
+      // Affiché aussi en « paiement demandé » pour rendre le refus visible : la base l'interdit.
+      actions.push(
+        button(
+          'Marquer expédiée',
+          () => {
+            if (confirm(`Marquer ${order.public_number} comme expédiée ?`))
+              act(order, 'mark_shipped', {}, 'Commande expédiée.');
+          },
+          'is-primary',
+          order.payment_status !== 'paid',
+        ),
+      );
+      if (order.payment_status !== 'paid')
+        actions.push(
+          h(
+            'p',
+            { class: 'dn-small dn-muted' },
+            'Expédition possible seulement après confirmation du paiement.',
+          ),
+        );
+    }
+    if (s === 'shipped')
+      actions.push(button('Marquer livrée', () => act(order, 'mark_completed', {}, 'Commande livrée.')));
+    if (s === 'cancelled' && order.payment_status === 'refund_due') {
+      actions.push(
+        form([input('Référence du remboursement (facultatif)', 'reference', '')], 'Marquer remboursée', (d) =>
+          act(order, 'mark_refunded', { payment_reference: d.get('reference') }, 'Remboursement enregistré.'),
+        ),
+      );
+    }
+    if (['submitted', 'reviewing', 'awaiting_payment', 'paid', 'preparing_shipment'].includes(s)) {
+      actions.push(
+        form(
+          [input('Motif d’annulation (interne)', 'reason', '', 'text', { required: '', minlength: '3' })],
+          order.payment_status === 'paid' ? 'Annuler (remboursement dû)' : 'Annuler la commande',
+          (d) => {
+            if (confirm(`Annuler ${order.public_number} ?`))
+              act(order, 'cancel', { reason: d.get('reason') }, 'Commande annulée.');
+          },
+          'is-danger',
+        ),
+      );
+    }
+
+    // Client à prévenir : aucun e-mail automatique n'existe encore.
+    const pending = events.filter((e) => e.notify_customer && !e.notified_at);
+    const copy = button('Copier le lien de suivi', async () => {
+      try {
+        await navigator.clipboard.writeText(await trackingLink(order));
+        say('Lien de suivi copié.');
+      } catch {
+        say('Copie impossible.', true);
+      }
+    });
+    const mail = button('Préparer un e-mail au client', async () => {
+      const link = await trackingLink(order);
+      const subject = `Votre commande Dar Nūr ${order.public_number}`;
+      const body = `Bonjour ${order.customer_first_name},\n\nVotre commande ${order.public_number} : ${ADMIN_STATUS[s].toLowerCase()}.\nSuivi : ${link}\n\nDar Nūr`;
+      location.href = `mailto:${encodeURIComponent(order.customer_email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    });
+    const notify = card(
+      'Client à prévenir',
+      pending.length
+        ? h(
+            'ul',
+            { class: 'dn-admin__events', role: 'list' },
+            ...pending.map((e) =>
+              h(
+                'li',
+                {},
+                `${dates.format(new Date(e.created_at))} — ${e.type === 'created' ? 'commande reçue' : (ADMIN_STATUS[(e.to_status ?? s) as OrderStatus] ?? e.type)} `,
+                button('Marquer prévenu', () =>
+                  act(order, 'mark_notified', { event_id: e.id }, 'Notification marquée.'),
+                ),
+              ),
+            ),
+          )
+        : h('p', { class: 'dn-small dn-muted' }, 'Rien en attente.'),
+      h(
+        'p',
+        { class: 'dn-small dn-muted' },
+        'Aucun e-mail n’est envoyé automatiquement : prévenez le client puis marquez la notification.',
+      ),
+      h('div', { class: 'dn-admin__actions' }, copy, mail),
+    );
+
+    const note = card(
+      'Note interne',
+      form(
+        [
+          h(
+            'label',
+            {},
+            'Visible seulement par l’administration',
+            h('textarea', { class: 'dn-admin__in', name: 'note', maxlength: '2000' }, order.admin_note ?? ''),
+          ),
+        ],
+        'Enregistrer la note',
+        (d) => act(order, 'set_note', { note: d.get('note') }, 'Note enregistrée.'),
+        '',
+      ),
+    );
+
+    const journal = card(
+      'Journal',
+      h(
+        'ol',
+        { class: 'dn-admin__events', role: 'list' },
+        ...events.map((e) =>
+          h(
+            'li',
+            {},
+            `${dates.format(new Date(e.created_at))} · ${e.type}${e.to_status ? ` → ${ADMIN_STATUS[e.to_status as OrderStatus] ?? e.to_status}` : ''}${e.to_payment_status && e.type === 'payment_status_changed' ? ` → ${ADMIN_PAYMENT[e.to_payment_status as PaymentStatus]}` : ''} · ${e.actor}`,
+          ),
+        ),
+      ),
+    );
+
+    const payment = rows([
+      ['Prestataire', order.payment_provider],
+      ['Lien de paiement', order.payment_url],
+      ['Référence', order.payment_reference],
+      ['Payée le', order.paid_at ? dates.format(new Date(order.paid_at)) : null],
+      ['Transporteur', order.shipping_carrier],
+      ['Suivi', order.tracking_number],
+      ['Expédiée le', order.shipped_at ? dates.format(new Date(order.shipped_at)) : null],
+      ['Motif d’annulation', order.cancel_reason],
+    ]);
+
+    detail.replaceChildren(
+      head,
+      card('Actions', payment, ...actions),
+      lines,
+      customer,
+      notify,
+      note,
+      journal,
+    );
+    for (const item of list.querySelectorAll<HTMLElement>('.dn-admin__item'))
+      if (item.querySelector('strong')?.textContent === order.public_number)
+        item.setAttribute('aria-current', 'true');
+    if (focus) detail.focus();
+  }
+
+  /* ── Démarrage ─────────────────────────────────────────────────────── */
+  async function start() {
+    loginForm.hidden = true;
+    app.hidden = false;
+    try {
+      // Admin ? La fonction refuse tout compte absent de public.admins.
+      await rpc(
+        'admin_order_tracking_token',
+        { p_order_id: '00000000-0000-4000-8000-000000000000' },
+        await token(),
+      ).catch((error) => {
+        if (error instanceof ApiError && error.code === 'order_not_found') return null;
+        throw error;
+      });
+      await loadList();
+    } catch (error) {
+      if (error instanceof ApiError && error.code === 'forbidden') {
+        storeSession(null);
+        showLogin(ERRORS['forbidden']);
+      } else if (!(error instanceof ApiError && error.code === 'session'))
+        say('Chargement impossible.', true);
+    }
+  }
+
+  if (!config) {
+    detail.replaceChildren(h('p', { class: 'is-error' }, 'Configuration Supabase absente du build.'));
+  } else {
+    loginForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const data = new FormData(loginForm);
+      try {
+        storeSession(
+          await auth(
+            { email: String(data.get('email')), password: String(data.get('password')) },
+            'password',
+          ),
+        );
+        loginForm.reset();
+        await start();
+      } catch {
+        showLogin('Connexion refusée : vérifiez l’e-mail et le mot de passe.');
+      }
+    });
+    $('[data-dn-refresh]').addEventListener('click', () =>
+      loadList().then(() => (selected ? openOrder(selected, false) : undefined)),
+    );
+    $('[data-dn-filter-env]').addEventListener('change', () => void loadList());
+    $('[data-dn-filter-status]').addEventListener('change', () => void loadList());
+    $('[data-dn-logout]').addEventListener('click', async () => {
+      const current = session;
+      storeSession(null);
+      if (current)
+        await fetch(`${config.url}/auth/v1/logout`, {
+          method: 'POST',
+          headers: { apikey: config.key, Authorization: `Bearer ${current.access_token}` },
+        }).catch(() => null);
+      detail.replaceChildren();
+      list.replaceChildren();
+      showLogin();
+    });
+    session = loadSession();
+    if (session) void start();
+    else showLogin();
+  }
+</script>

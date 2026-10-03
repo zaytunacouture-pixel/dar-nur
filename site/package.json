@@ -15,10 +15,12 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "verify": "node scripts/verify-build.mjs",
-    "ci": "npm run format:check && npm run check && npm run build && npm run verify && npm run verify:catalog && npm run verify:products && npm run verify:home",
+    "ci": "npm run format:check && npm run check && npm run test:cart && npm run build && npm run verify && npm run verify:catalog && npm run verify:products && npm run verify:home && npm run verify:orders",
     "verify:catalog": "node scripts/verify-catalog.mjs",
     "verify:products": "node scripts/verify-products.mjs",
     "verify:home": "node scripts/verify-home.mjs",
+    "verify:orders": "node scripts/verify-orders.mjs",
+    "test:cart": "node --experimental-strip-types --no-warnings scripts/test-cart.mjs",
     "lab:groupings": "node scripts/lab/export-product-groupings.mjs"
   },
   "dependencies": {

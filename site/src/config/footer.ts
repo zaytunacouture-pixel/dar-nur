@@ -15,8 +15,11 @@ export const footerSections: FooterSection[] = [
   {
     title: 'Aide',
     links: [
-      { label: 'Livraison & paiement', href: cgvUrl, external: true },
-      { label: 'Commander sur WhatsApp', href: contact.whatsappUrl, external: true },
+      // Étape 10 : commande en ligne. « Livraison & paiement » ne pointe plus vers les CGV, qui
+      // décrivent encore l'ancien fonctionnement (elles restent dans « Légal », à réviser).
+      { label: 'Mon panier', href: '/panier/' },
+      { label: 'Suivre une commande', href: '/suivi/' },
+      { label: 'Une question ? WhatsApp', href: contact.whatsappUrl, external: true },
     ],
   },
   {

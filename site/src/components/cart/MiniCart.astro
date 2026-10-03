@@ -1,11 +1,14 @@
 ---
 /**
- * Mini-panier VISUEL (§N.2). La logique panier (js/cart.js) n'est PAS migrée :
- * sans `demo`, le tiroir montre l'état vide ; avec `demo`, un panier fictif étiqueté.
- * Aucune logique de prix ni de commande ici.
+ * Mini-panier (tiroir, §N.2) — RÉEL depuis l'étape 10 : lit le panier local (src/scripts/
+ * cart-store.ts), quantités et retrait, sous-total, livraison « à confirmer », accès au panier et
+ * à la demande de commande. Aucun paiement ici : le total final (livraison comprise) est confirmé
+ * par Dar Nūr après la demande.
+ * `demo` (pages /demo/ et /design-system/ seulement) : panier FICTIF étiqueté, inactif.
  */
 import Button from '@/components/ui/Button.astro';
 import Drawer from '@/components/ui/Drawer.astro';
+import Icon from '@/components/ui/Icon.astro';
 import IconButton from '@/components/ui/IconButton.astro';
 import { currentShipping } from '@/config/commerce';
 import { universes } from '@/config/navigation';
@@ -18,13 +21,47 @@ interface Props {
 }
 
 const { demo = false } = Astro.props;
-const lines = demo ? demoCartLines : [];
-const title = lines.length ? `Panier (${demoCartCount})` : 'Panier';
 ---
 
-<Drawer id="dn-cart" title={title} side="right">
-  {lines.length === 0 ? (
-    <div class="dn-cart__empty">
+{demo ? (
+  <Drawer id="dn-cart" title={`Panier (${demoCartCount})`} side="right">
+    <div class="dn-cart__content">
+      <p class="dn-cart__demo dn-label">Démonstration — panier fictif, aucune commande possible</p>
+      <FreeShippingProgress policy={currentShipping} subtotal={demoCartSubtotal} />
+      <ul class="dn-cart__lines" role="list">
+        {demoCartLines.map((line) => (
+          <li class="dn-cartline">
+            <span class="dn-cartline__thumb" aria-hidden="true" />
+            <div class="dn-cartline__info">
+              <p class="dn-cartline__name">{line.name}</p>
+              {line.variant && <p class="dn-small dn-muted">{line.variant}</p>}
+              <div class="dn-cartline__row">
+                <div class="dn-qty" role="group" aria-label={`Quantité de ${line.name}`}>
+                  <IconButton icon="minus" label="Diminuer la quantité" disabled={line.quantity <= 1} />
+                  <span class="dn-qty__value">{line.quantity}</span>
+                  <IconButton icon="plus" label="Augmenter la quantité" />
+                </div>
+                <span class="dn-cartline__total">{formatPrice(line.quantity * line.unitPrice)}</span>
+              </div>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+    <div slot="footer" class="dn-cart__footer">
+      <p class="dn-cart__subtotal">
+        <span>Sous-total</span>
+        <span>{formatPrice(demoCartSubtotal)}</span>
+      </p>
+      <Button size="lg" fullWidth disabled>
+        Envoyer ma demande de commande
+      </Button>
+      <p class="dn-small dn-muted dn-cart__demo">Bouton inactif : démonstration du composant.</p>
+    </div>
+  </Drawer>
+) : (
+  <Drawer id="dn-cart" title="Panier" side="right">
+    <div class="dn-cart__empty" data-dn-cart-empty>
       <h3>Votre panier est vide.</h3>
       <div class="dn-cart__empty-links">
         {universes.map((u) => (
@@ -34,56 +71,54 @@ const title = lines.length ? `Panier (${demoCartCount})` : 'Panier';
         ))}
       </div>
     </div>
-  ) : (
-    <div class="dn-cart__content">
-      <p class="dn-cart__demo dn-label">Démonstration — panier fictif, aucune commande possible</p>
-      <FreeShippingProgress policy={currentShipping} subtotal={demoCartSubtotal} />
-      <ul class="dn-cart__lines" role="list">
-        {lines.map((line) => (
-          <li class="dn-cart__line">
-            <span class="dn-cart__thumb" aria-hidden="true" />
-            <div class="dn-cart__info">
-              <p class="dn-cart__name">{line.name}</p>
-              {line.variant && <p class="dn-small dn-muted">{line.variant}</p>}
-              <div class="dn-cart__row">
-                <div class="dn-qty" role="group" aria-label={`Quantité de ${line.name}`}>
-                  <IconButton icon="minus" label="Diminuer la quantité" disabled={line.quantity <= 1} />
-                  <span class="dn-qty__value" aria-live="polite">
-                    {line.quantity}
-                  </span>
-                  <IconButton icon="plus" label="Augmenter la quantité" />
-                </div>
-                <span class="dn-cart__price">{formatPrice(line.quantity * line.unitPrice)}</span>
-              </div>
-              <Button variant="tertiary" size="sm">
-                Retirer
-              </Button>
-            </div>
-          </li>
-        ))}
-      </ul>
+    <div class="dn-cart__content" data-dn-cart-filled hidden>
+      <ul
+        class="dn-cart__lines"
+        role="list"
+        data-dn-cart-lines
+        tabindex="-1"
+        aria-label="Articles du panier"
+      />
     </div>
-  )}
-  {lines.length > 0 && (
-    <div slot="footer" class="dn-cart__footer">
+    <p class="dn-visually-hidden" aria-live="polite" data-dn-cart-live />
+    <div slot="footer" class="dn-cart__footer" data-dn-cart-footer hidden>
       <p class="dn-cart__subtotal">
         <span>Sous-total</span>
-        <span>{formatPrice(demoCartSubtotal)}</span>
+        <span data-dn-cart-subtotal />
       </p>
-      <p class="dn-small dn-muted">{currentShipping.summary}.</p>
-      <Button size="lg" fullWidth disabled iconStart="whatsapp">
-        Commander sur WhatsApp
+      <p class="dn-small dn-muted dn-cart__shipping">
+        <Icon name="truck" size={16} />
+        <span>Livraison : frais confirmés par Dar Nūr avant paiement.</span>
+      </p>
+      <Button href="/commande/" size="lg" fullWidth>
+        Envoyer ma demande de commande
       </Button>
-      <p class="dn-small dn-muted dn-cart__note">Bouton inactif : démonstration du composant.</p>
+      <Button href="/panier/" variant="tertiary" fullWidth>
+        Voir le panier
+      </Button>
+      <p class="dn-small dn-muted">Aucun paiement à cette étape.</p>
     </div>
-  )}
-</Drawer>
+  </Drawer>
+)}
+
+{/* Icônes clonées par le rendu JavaScript des lignes (src/scripts/cart-view.ts). */}
+<template id="dn-icon-minus">
+  <Icon name="minus" size={20} />
+</template>
+<template id="dn-icon-plus">
+  <Icon name="plus" size={20} />
+</template>
 
 <style>
   .dn-cart__empty {
     display: grid;
     gap: var(--dn-space-6);
     padding: var(--dn-space-8) var(--dn-space-4);
+  }
+  .dn-cart__empty[hidden],
+  .dn-cart__content[hidden],
+  .dn-cart__footer[hidden] {
+    display: none;
   }
   .dn-cart__empty-links {
     display: grid;
@@ -92,52 +127,16 @@ const title = lines.length ? `Panier (${demoCartCount})` : 'Panier';
   .dn-cart__content {
     display: grid;
     gap: var(--dn-space-4);
-    padding: var(--dn-space-4);
+    padding: var(--dn-space-2) var(--dn-space-4) var(--dn-space-4);
   }
-  .dn-cart__demo,
-  .dn-cart__note {
+  .dn-cart__demo {
     color: var(--dn-warning);
   }
   .dn-cart__lines {
     display: grid;
   }
-  .dn-cart__line {
-    display: grid;
-    grid-template-columns: 64px 1fr;
-    gap: var(--dn-space-3);
-    padding-block: var(--dn-space-4);
-    border-bottom: var(--dn-border-decor);
-  }
-  .dn-cart__thumb {
-    aspect-ratio: var(--dn-ratio-product);
-    border-radius: var(--dn-radius-sm);
-    background: var(--dn-media);
-  }
-  .dn-cart__name {
-    font-size: var(--dn-fs-button);
-    font-weight: var(--dn-fw-medium);
-  }
-  .dn-cart__row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: var(--dn-space-2);
-  }
-  .dn-cart__price,
-  .dn-cart__subtotal {
-    font-variant-numeric: tabular-nums;
-    font-weight: var(--dn-fw-medium);
-  }
-  .dn-qty {
-    display: inline-flex;
-    align-items: center;
-    border: var(--dn-border-ui);
-    border-radius: var(--dn-radius-sm);
-  }
-  .dn-qty__value {
-    min-inline-size: var(--dn-space-6);
-    text-align: center;
-    font-variant-numeric: tabular-nums;
+  .dn-cart__lines:focus {
+    outline: none;
   }
   .dn-cart__footer {
     display: grid;
@@ -146,5 +145,63 @@ const title = lines.length ? `Panier (${demoCartCount})` : 'Panier';
   .dn-cart__subtotal {
     display: flex;
     justify-content: space-between;
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--dn-fw-medium);
+  }
+  .dn-cart__shipping {
+    display: flex;
+    gap: var(--dn-space-2);
+    align-items: center;
   }
 </style>
+
+<script>
+  import { formatCents } from '@/lib/orders/labels';
+  import { cartCount, cartSubtotal, onCartChange, readCart, type CartLine } from '@/scripts/cart-store';
+  import { renderLines } from '@/scripts/cart-view';
+
+  const drawer = document.getElementById('dn-cart');
+  const list = drawer?.querySelector<HTMLElement>('[data-dn-cart-lines]');
+
+  /** Compteur du header (pastille + nom accessible du bouton). */
+  function renderCount(lines: CartLine[]) {
+    const count = cartCount(lines);
+    for (const badge of document.querySelectorAll<HTMLElement>('[data-dn-cart-count]')) {
+      badge.textContent = count > 9 ? '9+' : String(count);
+      badge.hidden = count === 0;
+    }
+    for (const button of document.querySelectorAll<HTMLElement>('[data-dn-cart-button]')) {
+      button.setAttribute(
+        'aria-label',
+        count ? `Ouvrir le panier, ${count} article${count > 1 ? 's' : ''}` : 'Ouvrir le panier, vide',
+      );
+    }
+  }
+
+  function renderDrawer(lines: CartLine[]) {
+    if (!drawer || !list) return;
+    const filled = lines.length > 0;
+    drawer.querySelector<HTMLElement>('[data-dn-cart-empty]')!.hidden = filled;
+    drawer.querySelector<HTMLElement>('[data-dn-cart-filled]')!.hidden = !filled;
+    drawer.querySelector<HTMLElement>('[data-dn-cart-footer]')!.hidden = !filled;
+    const title = drawer.querySelector('.dn-drawer__title');
+    if (title) title.textContent = filled ? `Panier (${cartCount(lines)})` : 'Panier';
+    drawer.querySelector('[data-dn-cart-subtotal]')!.textContent = formatCents(cartSubtotal(lines));
+    renderLines(list, lines, { editable: true });
+  }
+
+  if (list) {
+    let previous = readCart().length;
+    renderCount(readCart());
+    renderDrawer(readCart());
+    onCartChange((lines) => {
+      renderCount(lines);
+      renderDrawer(lines);
+      if (lines.length < previous) {
+        drawer!.querySelector('[data-dn-cart-live]')!.textContent = 'Article retiré du panier.';
+        list.focus();
+      }
+      previous = lines.length;
+    });
+  }
+</script>

@@ -1,6 +1,9 @@
 import type { APIRoute } from 'astro';
 import { isIndexable } from '@/config/site';
 
+/** Étape 10 : parcours de commande et administration, jamais explorés (pages noindex en plus). */
+const PRIVATE = ['/panier/', '/commande/', '/suivi/', '/admin/'];
+
 /**
  * robots.txt selon l'environnement. Hors production : tout est interdit, aucun sitemap annoncé.
  * En production : le sitemap des pages catalogue (écrit par astro.config.mjs, catalogSitemap).
@@ -8,7 +11,7 @@ import { isIndexable } from '@/config/site';
 export const GET: APIRoute = ({ site }) =>
   new Response(
     isIndexable
-      ? `User-agent: *\nAllow: /\n${site ? `Sitemap: ${new URL('/sitemap.xml', site).toString()}\n` : ''}`
+      ? `User-agent: *\nAllow: /\n${PRIVATE.map((p) => `Disallow: ${p}\n`).join('')}${site ? `Sitemap: ${new URL('/sitemap.xml', site).toString()}\n` : ''}`
       : 'User-agent: *\nDisallow: /\n',
     { headers: { 'Content-Type': 'text/plain; charset=utf-8' } },
   );

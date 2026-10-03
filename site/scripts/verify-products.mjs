@@ -19,6 +19,10 @@
  *  6. Disponibilité : NULL → « Bientôt disponible », jamais commandable.
  *  7. Contenu : aucune mention « À compléter », « thérapeutique », « livraison offerte », ni (étape 9)
  *     « paiement à la réception » ou zone Île-de-France, message WhatsApp compris.
+ *  Étape 10 : bouton « Ajouter au panier » seulement si commandable (disponible / sur commande, prix
+ *  existant), identifiants produit / variantes et prix en centimes du panier = base, prix d'une
+ *  promotion produit PROUVÉE (même règle que le serveur de commande), aucun CTA « Commander sur
+ *  WhatsApp » ni message de commande prérempli (WhatsApp = « Une question ? »).
  *  8. Produits similaires : publiés, hors produit courant et hors autres fiches du même
  *     futur modèle sûr ; lastmod = date réelle de modification.
  *  9. Liens produit de TOUTES les pages (cartes de l'étape 7 comprises) → une page générée.
@@ -67,17 +71,44 @@ async function rest(table, params) {
 }
 
 /* ── Données de référence (Supabase) ─────────────────────────────────────── */
-const [products, collections] = await Promise.all([
+const [products, collections, offers] = await Promise.all([
   rest('products', {
     select:
-      'slug,name,status,availability,price_value,brand,brand_slug,images,updated_at,' +
+      'id,slug,name,status,availability,price_value,brand,brand_slug,images,updated_at,' +
       'product_variants(id,price,active,sort_order,updated_at,' +
       'product_variant_options(option_type_id,option_values(code,label,numeric_value,unit))),' +
       'product_collections(role,collections(slug)),product_media(url,variant_id,sort_order)',
     status: 'eq.published',
   }),
   rest('collections', { select: 'id,slug,path,parent_id,name', status: 'eq.published' }),
+  rest('offers', {
+    select: 'id,type,promo_price,normal_price,starts_at,ends_at,offer_products(product_slug)',
+    active: 'eq.true',
+  }),
 ]);
+/**
+ * Promotion produit PROUVÉE (étape 10) : product_promo active et en cours, produit sans variante dont
+ * le prix réel = prix de référence ; la moins chère. Réimplémentée ici indépendamment du site.
+ */
+const cents = (n) => Math.round(Number(n) * 100);
+const promoOf = (p) => {
+  if (p.product_variants.length > 0 || typeof p.price_value !== 'number') return null;
+  const now = new Date();
+  const prices = offers
+    .filter(
+      (o) =>
+        o.type === 'product_promo' &&
+        (!o.starts_at || new Date(o.starts_at) <= now) &&
+        (!o.ends_at || new Date(o.ends_at) > now) &&
+        o.promo_price > 0 &&
+        o.normal_price !== null &&
+        cents(o.promo_price) < cents(o.normal_price) &&
+        cents(o.normal_price) === cents(p.price_value) &&
+        o.offer_products.some((op) => op.product_slug === p.slug),
+    )
+    .map((o) => o.promo_price);
+  return prices.length ? Math.min(...prices) : null;
+};
 const bySlug = new Map(products.map((p) => [p.slug, p]));
 const collectionBySlug = new Map(collections.map((c) => [c.slug, c]));
 const collectionById = new Map(collections.map((c) => [c.id, c]));
@@ -127,8 +158,8 @@ const SCHEMA = {
   coming_soon: 'https://schema.org/OutOfStock',
   out_of_stock: 'https://schema.org/OutOfStock',
 };
-/** Bouton de commande : attribut d un lien (pas le sélecteur du script inliné). */
-const ORDER_RE = /<a [^>]*data-dn-order/;
+/** Bouton d'ajout au panier (étape 10) : attribut d'un <button> (pas le sélecteur du script). */
+const ORDER_RE = /<button [^>]*data-dn-add-to-cart/;
 const availabilityOf = (p) => p.availability ?? 'coming_soon'; // NULL → coming_soon, jamais available
 const AVAILABILITY_TEXT = {
   available: 'Disponible',
@@ -223,12 +254,23 @@ for (const [slug, { html }] of productPages) {
   const variants = [...p.product_variants].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
   const active = variants.filter((v) => v.active);
   const prices = active.map((v) => v.price).filter((x) => typeof x === 'number');
+  const promo = promoOf(p);
   const expectedPrice =
-    prices.length > 1 && new Set(prices).size > 1
-      ? `À partir de ${euro(Math.min(...prices))}`
-      : typeof (prices[0] ?? p.price_value) === 'number'
-        ? euro(prices[0] ?? p.price_value)
-        : 'Prix sur demande';
+    promo !== null
+      ? euro(promo)
+      : prices.length > 1 && new Set(prices).size > 1
+        ? `À partir de ${euro(Math.min(...prices))}`
+        : typeof (prices[0] ?? p.price_value) === 'number'
+          ? euro(prices[0] ?? p.price_value)
+          : 'Prix sur demande';
+  const compare = /data-dn-purchase-price[\s\S]*?class="dn-price__compare"[^>]*>([\s\S]*?)<\/s>/.exec(
+    html.slice(0, html.indexOf('data-dn-purchase-unit')),
+  )?.[1];
+  if (
+    (promo !== null) !== Boolean(compare) ||
+    (compare && norm(decode(compare)) !== norm(`Prix habituel : ${euro(p.price_value)}`))
+  )
+    fail(`${where} : prix barré « ${compare ? decode(compare) : '∅'} » incohérent avec l'offre produit`);
   const purchase =
     /data-dn-purchase-price[^>]*>[\s\S]*?class="dn-price__current"[^>]*>([\s\S]*?)<\/span>/.exec(html)?.[1];
   if (!purchase || norm(decode(purchase)) !== norm(expectedPrice))
@@ -297,9 +339,33 @@ for (const [slug, { html }] of productPages) {
     fail(
       `${where} : disponibilité « ${availabilityText ? decode(availabilityText) : '∅'} », attendu « ${AVAILABILITY_TEXT[availability]} »`,
     );
-  const orderable = availability === 'available' || availability === 'on_demand';
+  const hasPrice = variants.length
+    ? variants.some((v) => Number(v.price ?? p.price_value) > 0)
+    : Number(p.price_value) > 0;
+  const orderable = (availability === 'available' || availability === 'on_demand') && hasPrice;
   if (ORDER_RE.test(html) !== orderable)
-    fail(`${where} : bouton de commande ${orderable ? 'absent' : 'présent à tort'}`);
+    fail(`${where} : bouton « Ajouter au panier » ${orderable ? 'absent' : 'présent à tort'}`);
+  // Panier (étape 10) : identifiants et prix en centimes = base ; le serveur revérifie de toute façon.
+  if (data) {
+    if (orderable) {
+      if (data.cart?.productId !== p.id)
+        fail(`${where} : identifiant produit du panier ${data.cart?.productId}`);
+      if (!variants.length && data.cart?.priceCents !== cents(promo ?? p.price_value))
+        fail(`${where} : prix du panier ${data.cart?.priceCents} ≠ ${cents(promo ?? p.price_value)}`);
+      if (data.cart?.image && !/^\/_astro\/[^"]+\.webp$/.test(data.cart.image))
+        fail(`${where} : vignette du panier « ${data.cart.image} »`);
+      variants.forEach((v, i) => {
+        const r = data.variants[i];
+        const expected = Number(v.price ?? p.price_value) > 0 ? cents(v.price ?? p.price_value) : null;
+        if (r && (r.i !== v.id || r.c !== expected))
+          fail(`${where} : variante ${i + 1}, panier ${r.i}/${r.c} ≠ ${v.id}/${expected}`);
+      });
+    } else if (data.cart) fail(`${where} : données de panier sur un produit non commandable`);
+  }
+  if (/Commander sur WhatsApp|souhaite%20commander|souhaite commander/i.test(html))
+    fail(`${where} : commande WhatsApp encore proposée`);
+  if (!/<a [^>]*href="https:\/\/wa\.me\/[^"]*"[^>]*>[\s\S]{0,400}?Une question/.test(html))
+    fail(`${where} : lien « Une question ? » absent`);
 
   // JSON-LD Product / ProductGroup.
   const product = jsonLd.find((d) => d['@type'] === 'Product' || d['@type'] === 'ProductGroup');
@@ -350,7 +416,7 @@ for (const [slug, { html }] of productPages) {
       });
     } else {
       if (product['@type'] !== 'Product') fail(`${where} : Product attendu`);
-      const amount = variants[0]?.price ?? p.price_value;
+      const amount = promo ?? variants[0]?.price ?? p.price_value;
       if (typeof amount === 'number') {
         if (product.offers?.price !== Number(amount).toFixed(2))
           fail(`${where} : prix JSON-LD ${product.offers?.price} ≠ ${amount}`);

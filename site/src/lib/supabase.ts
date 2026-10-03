@@ -149,6 +149,8 @@ export interface SupabaseApparelDetailsRow {
  * voir docs/REFONTE_ASTRO.md, « Fiches produit ».
  */
 export interface SupabaseCatalogProductRow extends SupabaseProductRow {
+  /** Identifiant (public) : référence des lignes du panier, revérifiée par le serveur de commande. */
+  id: string;
   sort_order: number | null;
   created_at: string;
   updated_at: string;
@@ -325,7 +327,7 @@ export function fetchCollectionPages(): Promise<SupabaseCollectionPageRow[]> {
  */
 /** Colonnes du catalogue complet : celles des cartes + celles des fiches produit (étape 8). */
 const CATALOG_COLUMNS =
-  'slug,name,category_id,tagline,price_value,images,brand,brand_slug,coming_soon,featured,variant_axes,' +
+  'id,slug,name,category_id,tagline,price_value,images,brand,brand_slug,coming_soon,featured,variant_axes,' +
   'status,availability,net_quantity,net_unit,sort_order,created_at,updated_at,' +
   'description,benefits,benefits_label,composition,provenance,usage_advice,precautions,weight,volume,' +
   'seo_title,seo_description,size_guide_id,' +

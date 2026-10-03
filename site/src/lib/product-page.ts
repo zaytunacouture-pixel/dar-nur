@@ -26,7 +26,7 @@ import {
   UNIT_BASES,
   type ProductFamily,
 } from '@/config/product-pages';
-import { cgvUrl, contact, currentShipping } from '@/config/commerce';
+import { cgvUrl, contact, currentShipping, orderingSteps } from '@/config/commerce';
 import { siteName } from '@/config/site';
 import groupingsSnapshot from '@/data/lab/product-groupings.json';
 import type {
@@ -48,6 +48,7 @@ import {
   type CatalogCollection,
   type CatalogOffer,
   type CatalogProduct,
+  type ProductPromo,
 } from './catalog-store';
 import { formatPrice } from './format';
 import type {
@@ -83,6 +84,29 @@ export interface ProductVariantData {
   unitPrice: string | null;
   /** Jeu de médias propre (clé de `mediaSets`) ; absent = galerie du produit. */
   media?: string;
+  /** Étape 10 — identifiant de la variante (panier) ; absent dans un aperçu LAB. */
+  id?: string;
+  /** Prix unitaire facturé en centimes (prix de la variante, sinon du produit) ; null = non commandable. */
+  priceCents?: number | null;
+}
+
+/**
+ * Données du panier d'une fiche (étape 10). Le navigateur les recopie dans le panier local, puis
+ * le serveur de commande relit TOUT en base : un prix modifié ici est refusé, jamais facturé.
+ */
+export interface ProductCartView {
+  productId: string;
+  slug: string;
+  name: string;
+  href: string;
+  /** Commandable : disponible ou sur commande, et un prix existe. */
+  orderable: boolean;
+  onDemand: boolean;
+  /** Produit sans variante : prix facturé en centimes (offre prouvée comprise). */
+  priceCents: number | null;
+  /** Prix catalogue en centimes si une offre produit s'applique. */
+  listPriceCents: number | null;
+  offerTitle: string | null;
 }
 
 export type AccordionBlock =
@@ -101,9 +125,12 @@ export interface ProductAccordion {
 export interface ProductOrder {
   /** Commande possible (available / on_demand) ? Sinon : simple lien de question. */
   orderable: boolean;
-  /** Lien WhatsApp par défaut (sans variante choisie : options « à préciser »). */
+  /**
+   * Lien WhatsApp SECONDAIRE « Une question ? » (étape 10 : la commande passe par le panier).
+   * Message prérempli : nom et lien du produit seulement, aucune donnée client.
+   */
   href: string;
-  /** Lignes fixes du message (le script ajoute la variante choisie). */
+  /** Hérité de l'étape 8 (commande WhatsApp) : vide depuis l'étape 10. */
   messageHead: string;
   messageTail: string;
 }
@@ -135,6 +162,8 @@ export interface ProductPageView {
   hasSizeAxis: boolean;
   accordions: ProductAccordion[];
   order: ProductOrder;
+  /** Étape 10 : ajout au panier ; absent pour un aperçu LAB (aucune commande possible). */
+  cart?: ProductCartView;
   delivery: string;
   similar: ProductSummary[];
   similarTitle: string;
@@ -200,7 +229,12 @@ function buildView(catalog: Catalog, product: CatalogProduct): ProductPageView {
   const { axes, variants, mediaSets } = variantModel(catalog, row);
   const gallery = productGallery(catalog, row);
   const availability = commercialAvailability(row);
-  const price = product.summary.price;
+  // Étape 10 : une promotion produit PROUVÉE fixe le prix affiché ET facturé (même règle que le
+  // serveur de commande) ; le prix catalogue apparaît barré.
+  const promo = catalog.promos.get(product.slug);
+  const price: PriceInfo = promo
+    ? { kind: 'fixed', amount: promo.price, compareAt: promo.compareAt }
+    : product.summary.price;
   const quantity = axes.some((a) => a.id === 'contenance') ? null : netQuantityLabel(row);
   const facts = [concentration, quantity].filter((f): f is string => Boolean(f));
   const tagline = taglineOf(row, concentration);
@@ -235,6 +269,7 @@ function buildView(catalog: Catalog, product: CatalogProduct): ProductPageView {
     hasSizeAxis: axes.some((a) => a.id === 'taille'),
     accordions: accordionsOf(row, family),
     order: orderOf(row.name, path, availability, axes),
+    cart: cartOf(row, path, availability, variants, promo),
     delivery: currentShipping.summary,
     ...similarOf(catalog, product),
     related: relatedOf(catalog, product),
@@ -464,7 +499,10 @@ function variantModel(catalog: Catalog, row: SupabaseCatalogProductRow) {
       media = previous;
     }
     const contenance = options['contenance'];
+    const effective = typeof variant.price === 'number' ? Number(variant.price) : row.price_value;
     return {
+      id: variant.id,
+      priceCents: typeof effective === 'number' && effective > 0 ? Math.round(effective * 100) : null,
       options: Object.fromEntries(
         orderedAxes.flatMap((axis) => (options[axis] ? [[axis, options[axis].code]] : [])),
       ),
@@ -672,43 +710,63 @@ export function accordionsOf(row: SupabaseCatalogProductRow, family: ProductFami
       blocks: [{ kind: 'list', items: precautions }],
     });
 
-  // Livraison & paiement : parcours actif seulement. Étape 9 : plus de « paiement à la réception »
-  // ni de zone de livraison (décisions du 3 octobre 2026, config/commerce.ts).
+  // Livraison & paiement : parcours de l'étape 10 (config/commerce.ts) — demande de commande,
+  // vérification, frais confirmés, paiement, puis expédition. Aucun tarif ni délai inventé.
   accordions.push({
     id: 'livraison',
     title: 'Livraison & paiement',
     blocks: [
-      {
-        kind: 'list',
-        items: ['Commande sur WhatsApp', 'Modalités de livraison et de paiement confirmées sur WhatsApp'],
-      },
+      { kind: 'list', items: [...orderingSteps] },
       { kind: 'links', items: [{ label: 'Conditions générales de vente', href: cgvUrl, external: true }] },
     ],
   });
   return accordions;
 }
 
-/* ── Commande (stratégie actuelle : message WhatsApp prérempli) ────────── */
+/* ── Commande (étape 10 : panier ; WhatsApp = question, en secondaire) ───── */
 
 export function orderOf(
   name: string,
   path: string,
   availability: ProductAvailability,
-  axes: ProductAxisView[],
+  _axes: ProductAxisView[],
 ): ProductOrder {
   const url = new URL(path, 'https://dar-nur.fr').toString();
-  const messageHead = `Salam alaykoum, je souhaite commander :\n\n${name}`;
-  const messageTail = `\n${url}\n\nMes informations :\n• Nom :\n• Ville :\n\nMerci.`;
-  const pending = axes.map((axis) => `\n• ${axis.legend} : à préciser`).join('');
   const orderable = availability === 'available' || availability === 'on_demand';
-  const text = orderable
-    ? `${messageHead}${pending}${messageTail}`
-    : `Salam alaykoum, j’ai une question au sujet de : ${name}\n${url}`;
+  // Aucune donnée client dans l'URL : seulement le produit concerné.
+  const text = `Salam alaykoum, j’ai une question au sujet de : ${name}
+${url}`;
   return {
     orderable,
     href: `${contact.whatsappUrl}?text=${encodeURIComponent(text)}`,
-    messageHead,
-    messageTail,
+    messageHead: '',
+    messageTail: '',
+  };
+}
+
+/** Données d'ajout au panier (étape 10). */
+export function cartOf(
+  row: SupabaseCatalogProductRow,
+  path: string,
+  availability: ProductAvailability,
+  variants: ProductVariantData[],
+  promo: ProductPromo | undefined,
+): ProductCartView {
+  const hasVariants = row.product_variants.length > 0;
+  const cents = (n: number | null) => (typeof n === 'number' && n > 0 ? Math.round(n * 100) : null);
+  const priceCents = hasVariants ? null : promo ? cents(promo.price) : cents(row.price_value);
+  // Un produit à variantes n'est commandable que si ses variantes sont sélectionnables (axes).
+  const purchasable = hasVariants ? variants.some((v) => v.id && v.priceCents) : priceCents !== null;
+  return {
+    productId: row.id,
+    slug: row.slug,
+    name: row.name,
+    href: path,
+    orderable: (availability === 'available' || availability === 'on_demand') && purchasable,
+    onDemand: availability === 'on_demand',
+    priceCents,
+    listPriceCents: promo && !hasVariants ? cents(promo.compareAt) : null,
+    offerTitle: promo && !hasVariants ? promo.title : null,
   };
 }
 

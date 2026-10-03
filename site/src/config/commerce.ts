@@ -3,20 +3,44 @@ import type { AnnouncementMessage, ShippingPolicy } from '@/types/site';
 /**
  * Faits commerciaux. RÈGLE : n'afficher que ce qui est vrai pour le futur site.
  *
- * Décisions du propriétaire (3 octobre 2026) : plus de paiement à la réception — la commande est
- * préparée, le client paie une fois la commande prête, l'expédition suit le paiement ; livraison
- * internationale VISÉE (pays, tarifs et expédition à construire dans l'étape commande/livraison).
- * Tant que ce système n'existe pas, aucun texte public ne décrit de zone, de tarif, de délai ni de
- * moyen de paiement : seulement le parcours réellement actif (commande et conseil sur WhatsApp).
- * Les CGV de https://dar-nur.fr/cgv.html décrivent encore l'ancien fonctionnement (site actuel).
+ * Parcours de l'étape 10 (décisions du propriétaire du 3 octobre 2026) : le client envoie une
+ * DEMANDE de commande depuis le panier ; Dar Nūr vérifie la disponibilité, prépare la commande et
+ * fixe les frais de livraison (France comme international) ; le client reçoit alors le total final
+ * et les instructions de paiement ; l'expédition n'a lieu qu'après paiement confirmé.
+ * Aucun tarif, délai, seuil de gratuité ni pays desservi n'est annoncé : tout est confirmé par
+ * Dar Nūr, commande par commande, avant paiement. Aucun prestataire de paiement n'est branché.
  */
 
-/** Actif dans la refonte : modalités confirmées au cas par cas sur WhatsApp, aucune livraison offerte. */
+/** Actif dans la refonte : frais confirmés pour chaque commande, aucune livraison offerte. */
 export const currentShipping: ShippingPolicy = {
   status: 'active',
-  zoneLabel: 'à confirmer',
+  zoneLabel: 'France et international',
   freeShippingThreshold: null,
-  summary: 'Livraison et paiement : modalités confirmées sur WhatsApp',
+  summary: 'Livraison en France et à l’international : frais confirmés avant paiement',
+};
+
+/** Étapes du parcours, dans l'ordre (fiche, panier, commande, accordéon « Livraison & paiement »). */
+export const orderingSteps = [
+  'Ajoutez vos articles au panier, puis envoyez votre demande de commande : rien n’est payé à ce moment-là.',
+  'Dar Nūr vérifie la disponibilité, prépare votre commande et confirme les frais de livraison.',
+  'Vous recevez le total final et les instructions de paiement.',
+  'Votre commande est expédiée après réception du paiement.',
+] as const;
+
+/**
+ * Commande en ligne et conditions générales (étape 10). Les CGV publiées décrivent encore l'ANCIEN
+ * fonctionnement (paiement à la réception, livraison locale) : tant que `termsReviewed` est faux,
+ * la page de commande affiche ce blocage et un build de PRODUCTION n'ouvre pas la commande en ligne
+ * (le serveur la refuse aussi : orders_private.config.production_ordering_open = false).
+ */
+export const ordering = {
+  termsReviewed: false,
+  termsUrl: 'https://dar-nur.fr/cgv.html',
+  privacyUrl: 'https://dar-nur.fr/confidentialite.html',
+  /** Plafond technique anti-abus par ligne (pas une limite commerciale). */
+  maxQuantity: 99,
+  /** Nombre maximal de lignes par demande (même plafond côté serveur). */
+  maxLines: 30,
 };
 
 /**
@@ -53,7 +77,7 @@ function formatEuroShort(amount: number): string {
  */
 export const announcementMessages: AnnouncementMessage[] = [
   ...(freeShippingMessage(currentShipping) ? [freeShippingMessage(currentShipping)!] : []),
-  { text: 'Commande et conseil sur WhatsApp' },
+  { text: 'Commande en ligne · paiement après confirmation de votre commande' },
 ];
 
 /** Rotation désactivée par défaut (§H.1) ; si activée : 7 s, pause au survol/focus, bouton pause. */
@@ -69,16 +93,20 @@ export const contact = {
 };
 
 /**
- * Réassurance : uniquement le parcours réellement actif (§N.4). Étape 9 : retirés « Paiement à la
- * réception » et « Livraison en Île-de-France » (décisions du 3 octobre 2026), et « Votre panier »
- * (le nouveau site n'a pas de panier). Aucun picto de paiement ni de livraison avant l'étape
- * commande/livraison.
+ * Réassurance : uniquement le parcours réellement actif (§N.4). Étape 10 : commande en ligne
+ * (demande, puis vérification), paiement après confirmation du total. Aucun logo de moyen de
+ * paiement : aucun prestataire n'est branché.
  */
 export const reassurance = [
   {
     icon: 'shopping-bag',
-    title: 'Commande sur WhatsApp',
-    text: 'Depuis la fiche produit, message prérempli',
+    title: 'Commande en ligne',
+    text: 'Dar Nūr vérifie et prépare votre commande',
+  },
+  {
+    icon: 'wallet',
+    title: 'Paiement après confirmation',
+    text: 'Total final, livraison comprise, confirmé avant paiement',
   },
   { icon: 'headset', title: 'Conseil personnalisé', text: 'Une question ? Écrivez-nous sur WhatsApp' },
 ] as const;
