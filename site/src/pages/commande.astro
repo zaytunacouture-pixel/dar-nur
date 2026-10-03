@@ -262,7 +262,6 @@ const countries = [
                 <a href={ordering.termsUrl} target="_blank" rel="noopener">
                   conditions générales de vente
                 </a>
-                .
               </span>
             </label>
             <p class="dn-checkout__check-error" id="dn-terms-error" data-dn-field-error hidden>
@@ -270,11 +269,10 @@ const countries = [
               <span></span>
             </p>
             <p class="dn-small dn-muted">
-              Vos coordonnées servent uniquement à traiter votre commande (
+              Vos coordonnées servent uniquement à traiter votre commande.
               <a href={ordering.privacyUrl} target="_blank" rel="noopener">
-                confidentialité
+                Politique de confidentialité
               </a>
-              ).
             </p>
           </div>
 
@@ -341,6 +339,9 @@ const countries = [
 <style>
   .dn-checkout {
     display: grid;
+    align-content: start;
+    /* Récapitulatif rendu par JavaScript : hauteur réservée, footer hors de l'écran (CLS). */
+    min-block-size: 100svh;
     gap: var(--dn-space-6);
     padding-block: var(--dn-space-8) var(--dn-section-y);
   }
@@ -358,6 +359,7 @@ const countries = [
   }
   .dn-checkout__grid {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--dn-space-8);
     align-items: start;
   }
@@ -538,7 +540,7 @@ const countries = [
   }
   @media (min-width: 1024px) {
     .dn-checkout__grid {
-      grid-template-columns: 7fr 5fr;
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
       gap: var(--dn-space-12);
     }
     .dn-checkout__recap {

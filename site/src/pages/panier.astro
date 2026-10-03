@@ -92,8 +92,14 @@ const seo = {
 <style>
   .dn-cartpage {
     display: grid;
+    align-content: start;
+    /* Contenu rendu par JavaScript : la hauteur réservée garde le footer hors de l'écran (CLS). */
+    min-block-size: 100svh;
     gap: var(--dn-space-6);
     padding-block: var(--dn-space-8) var(--dn-section-y);
+  }
+  :global(html[data-dn-cart-filled]) .dn-cartpage__empty {
+    display: none;
   }
   .dn-cartpage__empty {
     display: grid;
@@ -113,8 +119,14 @@ const seo = {
   }
   .dn-cartpage__grid {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--dn-space-8);
     align-items: start;
+  }
+  /* Libellé long : il passe à la ligne plutôt que d'élargir la page (375 px). */
+  .dn-summary :global(.dn-btn) {
+    white-space: normal;
+    text-align: center;
   }
   .dn-cartpage__lines ul:focus {
     outline: none;
@@ -186,7 +198,7 @@ const seo = {
   }
   @media (min-width: 1024px) {
     .dn-cartpage__grid {
-      grid-template-columns: 7fr 5fr;
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
       gap: var(--dn-space-12);
     }
   }

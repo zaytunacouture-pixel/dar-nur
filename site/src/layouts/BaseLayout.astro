@@ -61,6 +61,14 @@ const ogImage = seo.ogImage ? new URL(seo.ogImage, Astro.site).toString() : unde
     <Font cssVariable="--dn-font-jost" preload />
     <Font cssVariable="--dn-font-cormorant" preload />
     <slot name="head" />
+    {/* Étape 10 : panier non vide connu AVANT le premier affichage (évite d'afficher « vide » puis
+    de décaler la page panier / commande). Lecture seule du localStorage, aucune donnée envoyée. */}
+    <script is:inline>
+      try {
+        var c = JSON.parse(localStorage.getItem('dn-cart-v1') || '[]');
+        if (Array.isArray(c) && c.length) document.documentElement.setAttribute('data-dn-cart-filled', '');
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <a class="dn-skip" href="#contenu">
