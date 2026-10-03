@@ -1,10 +1,11 @@
 # Refonte Dar Nūr — nouveau socle Astro (`site/`)
 
-> Statut au 3 octobre 2026 : **étape 8B terminée — build à froid ramené sous la limite Netlify (6 min 55 s
-> en CI au lieu de 21 min 39 s), rendu inchangé.** Étape 8 : 245 fiches produit et leurs variantes réelles
-> générées depuis le nouveau schéma, page LAB des futurs regroupements Mode. Le panier métier, l'accueil final et
-> les redirections ne sont **pas** migrés ; aucune fusion de fiches n'est publiée. La production reste **dar-nur.fr** (GitHub Pages, racine du dépôt), que rien dans
-> `site/` ne modifie.
+> Statut au 3 octobre 2026 : **étape 9 terminée — page d'accueil finale `/`** (hero sur une vraie photo
+> catalogue, 3 univers et leurs collections, sélection éditoriale de 8 produits, bloc Miels, Idées cadeaux &
+> offres), alimentée par le catalogue réel et contrôlée par `verify-home`. Étapes 8 / 8B : 245 fiches produit,
+> build à froid ≈ 7 min en CI. Le panier métier, la recherche et les redirections ne sont **pas** migrés ;
+> aucune fusion de fiches n'est publiée. La production reste **dar-nur.fr** (GitHub Pages, racine du dépôt),
+> que rien dans `site/` ne modifie.
 
 ## Architecture
 
@@ -28,10 +29,11 @@ site/
     assets/               logo (rogné, pixels identiques), polices, images de démonstration
     config/               navigation, commerce (livraison, annonce, contact), footer, site
     types/                ProductSummary, Collection, Brand, NavigationItem, VariantOption, SeoMeta…
-    lib/                  supabase, catalog, sample, format
-    components/ ui/ layout/ catalog/ cart/ search/ home/
+    config/home.ts        choix éditoriaux de l'accueil (slugs versionnés)
+    lib/                  supabase, catalog, catalog-store, catalog-views, product-page, home-page, …
+    components/ ui/ layout/ catalog/ cart/ search/ home/ product/ templates/
     layouts/BaseLayout.astro
-    pages/                index (préprod), demo, design-system, lab/supabase, 404, robots.txt
+    pages/                index (accueil), [...path] (catalogue + fiches), demo, design-system, lab/, 404, robots.txt
     data/demo/            panier FICTIF (démonstration uniquement)
 ```
 
@@ -48,6 +50,7 @@ site/
 | `npm run verify` | Contrôles de sortie (après build) |
 | `npm run verify:catalog` | Contrôles de données des pages catalogue contre Supabase (après build, réseau) |
 | `npm run verify:products` | Contrôles des fiches produit et du LAB contre Supabase (après build, réseau) |
+| `npm run verify:home` | Contrôles de l'accueil contre Supabase (après build, réseau) |
 | `npm run lab:groupings` | Rafraîchit l'instantané des regroupements Mode (lecture admin, CLI Supabase authentifiée) |
 | `npm run ci` | Tout, dans l'ordre de la CI |
 
@@ -99,8 +102,9 @@ compteur ou « best seller » sans données ; aucune photo générée à la plac
 | Socle, tokens, polices, logo, header, méga-menu, menu mobile 2 niveaux, bandeau, recherche (visuelle), mini-panier (visuel), footer, réassurance, ProductCard, UniverseCard, CollectionCard, VariantSelector, guide des tailles (repli), primitives UI, pages `/demo/`, `/design-system/`, `/lab/supabase/`, Netlify, CI | Puis panier métier, recherche, SEO (301 depuis `redirects`), shooting photo, bascule. |
 | **Étape 6** (2026-10-02) : migration additive Supabase (9 migrations, `docs/SCHEMA_SUPABASE.md`), lecture du nouveau schéma dans `catalog.ts`, `/lab/supabase/` affiche l'arbre des collections, banc `scripts/test/schema` + CI `schema-ci.yml` | |
 | **Étape 7** (2026-10-02) : 3 univers, 15 collections, 2 transverses, 4 pages marque, filtres/tri, fil d'Ariane, JSON-LD, sitemap (production), 404, `verify-catalog` — section ci-dessous | |
-| **Étape 8** (2026-10-02) : 245 fiches `/{slug}/`, galerie, variantes réelles, prix au kg/L, disponibilité, commande WhatsApp, accordéons conditionnels, similaires, offres, JSON-LD Product/ProductGroup, sitemap avec `lastmod`, LAB des regroupements Mode, `verify-products` — section ci-dessous | Étape 9 : accueil final et blocs éditoriaux |
+| **Étape 8** (2026-10-02) : 245 fiches `/{slug}/`, galerie, variantes réelles, prix au kg/L, disponibilité, commande WhatsApp, accordéons conditionnels, similaires, offres, JSON-LD Product/ProductGroup, sitemap avec `lastmod`, LAB des regroupements Mode, `verify-products` — section ci-dessous | |
 | **Étape 8B** (2026-10-03) : build à froid 21 min 39 s → 6 min 55 s (CI), préréglages d'images, mesure reproductible — section « Build et images » | |
+| **Étape 9** (2026-10-03) : accueil final `/`, configuration éditoriale, `verify-home` — section « Accueil (étape 9) » | Panier métier, recherche, redirections, shooting |
 
 ## Pages catalogue (étape 7)
 
@@ -275,3 +279,66 @@ l'hébergement à Netlify, sans nécessité une fois le build à froid sous la l
 après plusieurs builds locaux successifs) : un GET refusé fait échouer le build, un HEAD refusé écarte
 l'image (avertissement `[catalogue]`). Les images sources sont lues sur dar-nur.fr tant que le catalogue y
 pointe.
+
+## Accueil (étape 9)
+
+**Architecture.** `src/pages/index.astro` ne fait que la mise en page ; `src/lib/home-page.ts` construit la
+vue depuis le catalogue déjà lu au build (aucune requête Supabase de plus ; une lecture partielle de la photo
+du hero pour connaître sa taille) ; les choix éditoriaux sont dans `src/config/home.ts`. Composants : `Hero`
+(étendu : `frame`, légende), `HomeUniverse` (nouveau), `ProductCard`, `EntryCard`, `ReassuranceBar`, header
+et footer existants. Aucun univers n'est marqué actif sur `/`.
+
+**Ordre** (hauteur ≈ 4 800 px à 390 px, ≈ 4 450 px à 1 366 px) : hero · « Trois univers » (photo, nom —
+« Mode modeste » = `h1` de `/mode/` — et 4 collections avec leur nombre réel de produits) · « À découvrir »
+(8 cartes, grille 2 / 4 colonnes, sans carrousel) · bloc Miels (faits confirmés : miel de printemps récolté
+en France, base des miels aux fruits) · Idées cadeaux & offres (nombres réels) · réassurance · footer. Seule
+zone sombre : le footer. Ni avis, ni compteur, ni newsletter, ni « meilleures ventes », ni faux panier.
+
+**Configuration éditoriale** (`config/home.ts`) : slugs explicites du hero, des photos d'univers, des
+collections affichées, des 8 produits et du bloc Miels, plus une liste d'exclusion (`miel-myrtille`). Ce
+n'est **pas** un classement commercial. Le build **échoue** si un slug est introuvable, non publié, sans image
+vérifiée, exclu ou en double, ou si une collection est vide ou hors de son univers ; un produit qui n'est plus
+`available` est seulement signalé (`[accueil]`), son état réel restant affiché.
+
+**Hero.** Photo du Bakhur Mukhalat (`dn-bakhour-0`) : vraie photo, sans texte ni filigrane, accordée au vert
+et à l'or ; aucune photo de shooting n'existe encore (§T.3). Source carrée de 1 100 px : `frameForSource`
+(`config/images.ts`) ramène le cadre `HERO` à 1 100 × 825 et ses largeurs à [390, 780, 960, 1100] (sharp
+n'agrandit pas : « 1280w » et « 1600w » auraient été des copies). Un seul recadrage 4:3, montré en 4:3 à
+toutes les largeurs (le 1:1 mobile était prévu pour la photo de shooting). Image LCP : `fetchpriority=high`,
+`loading=eager`, dimensions déclarées. H1 « Miels, parfums et mode modeste » ; CTA « Découvrir Parfums &
+Soins » (univers du produit photographié) ; lien « Voir les trois univers » ; légende « En photo : Bakhur
+Mukhalat » vers la fiche.
+
+**Images.** Aucune image de `assets/produits-ia/` ni affiche promotionnelle d'offre sur l'accueil. Cartes
+produit et bloc Miels : préréglage `PRODUCT_CARD` (fichiers partagés avec les collections) ; univers :
+`UNIVERSE_CARD`. Fichiers propres à l'accueil : 27 (hero 8, univers 18, logo PNG du JSON-LD 1).
+
+**SEO.** Title « Dar Nūr — Miels, parfums, soins et mode modeste » (aucun wording validé n'existait ; l'ancien
+« Produits Naturels & Mode Islamique Premium » / « 100 % purs » n'est pas repris). Meta : les trois univers,
+commande sur WhatsApp, paiement à la réception. Canonical `https://dar-nur.fr/`. JSON-LD `WebSite` +
+`Organization` (logo, Instagram, TikTok, contact WhatsApp) ; ni `Product`, ni avis, ni `SearchAction`
+(recherche non branchée). Sitemap de production : `/` ajouté (268 URL), sans `<lastmod>` (aucune date
+fiable). `/demo/` passe en `noindex` permanent (il aurait été indexable en production) et rejoint les pages
+internes de `verify-build`.
+
+**Réassurance.** « Votre panier, envoyé sur WhatsApp » devient « Sur WhatsApp, depuis la fiche produit » (le
+nouveau site n'a pas de panier). Les trois autres faits restent conformes aux CGV ; le bandeau reste
+« Paiement à la réception · Livraison en Île-de-France ».
+
+**Mesures** (build local, serveur statique gzip, Lighthouse 12.8 mobile simulé) : préprod 96 / 100 / 100 / 69
+(SEO : seul le `noindex`), production 98 / 100 / 100 / 100 ; LCP 2,7 s en préprod (comme `/parfums-soins/` et
+les fiches), 2,4 s en production ; CLS 0 ; desktop 100, LCP 0,6 s. HTML 16,3 Ko gzip, CSS 9,4 Ko, JS 3,7 Ko ;
+photo LCP 66 Ko (AVIF 780 px). Build à froid local 4 min 37 s (8B : 4 min 24 s), 5 168 images (8B : 5 141).
+
+**Tests.** `npm run verify:home` (CI) : `/`, H1 unique, canonical, robots, sitemap ; tous les liens (internes
+dans `dist/`, pages légales absolues présentes dans le site actuel) ; aucune ancre vide, aucun lien LAB ou
+demo ; 3 univers + 2 entrées ; produits mis en avant publiés, hors test, hors `produits-ia/` ; mentions
+interdites (livraison offerte ou nationale, avis, étoiles, compteurs, meilleures ventes, newsletter,
+« Thérapeutiques », « 100 % naturel ») ; JSON-LD limité à WebSite + Organization. Contrôle négatif fait
+(9 anomalies injectées, 9 détectées).
+
+**Limites.** Hero provisoire en attendant le shooting (§T.3) ; textes du hero et du bloc Miels à valider par
+la maison ; l'intro de `/idees-cadeaux/` promet encore « pour elle, pour lui, par budget » (point ouvert de
+l'étape 7, non repris sur l'accueil) ; Miels & Herboristerie n'a qu'un produit dans la sélection (l'affiche du
+Miel Mangue & Fraise, seul produit `featured`) : les deux seules photos de miel hors `produits-ia/` et hors
+affiche servent déjà au bloc Miels (printemps) et à la carte d'univers (lavande, fiche encore inachevée).
