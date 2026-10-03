@@ -26,7 +26,7 @@ import {
   UNIT_BASES,
   type ProductFamily,
 } from '@/config/product-pages';
-import { cgvUrl, contact, currentShipping, reassurance } from '@/config/commerce';
+import { cgvUrl, contact, currentShipping } from '@/config/commerce';
 import { siteName } from '@/config/site';
 import groupingsSnapshot from '@/data/lab/product-groupings.json';
 import type {
@@ -672,19 +672,15 @@ export function accordionsOf(row: SupabaseCatalogProductRow, family: ProductFami
       blocks: [{ kind: 'list', items: precautions }],
     });
 
-  // Livraison & paiement : faits des CGV en vigueur (config/commerce.ts), rien d'autre.
+  // Livraison & paiement : parcours actif seulement. Étape 9 : plus de « paiement à la réception »
+  // ni de zone de livraison (décisions du 3 octobre 2026, config/commerce.ts).
   accordions.push({
     id: 'livraison',
     title: 'Livraison & paiement',
     blocks: [
       {
         kind: 'list',
-        items: [
-          'Commande sur WhatsApp',
-          ...reassurance
-            .filter((r) => r.icon === 'map-pin' || r.icon === 'wallet')
-            .map((r) => `${r.title} : ${r.text.charAt(0).toLowerCase()}${r.text.slice(1)}`),
-        ],
+        items: ['Commande sur WhatsApp', 'Modalités de livraison et de paiement confirmées sur WhatsApp'],
       },
       { kind: 'links', items: [{ label: 'Conditions générales de vente', href: cgvUrl, external: true }] },
     ],
@@ -692,7 +688,7 @@ export function accordionsOf(row: SupabaseCatalogProductRow, family: ProductFami
   return accordions;
 }
 
-/* ── Commande (stratégie actuelle : WhatsApp, paiement à la réception) ─── */
+/* ── Commande (stratégie actuelle : message WhatsApp prérempli) ────────── */
 
 export function orderOf(
   name: string,
@@ -702,7 +698,7 @@ export function orderOf(
 ): ProductOrder {
   const url = new URL(path, 'https://dar-nur.fr').toString();
   const messageHead = `Salam alaykoum, je souhaite commander :\n\n${name}`;
-  const messageTail = `\n${url}\n\nMes informations :\n• Nom :\n• Ville :\n• Paiement à la réception : Revolut / Espèces\n\nMerci.`;
+  const messageTail = `\n${url}\n\nMes informations :\n• Nom :\n• Ville :\n\nMerci.`;
   const pending = axes.map((axis) => `\n• ${axis.legend} : à préciser`).join('');
   const orderable = availability === 'available' || availability === 'on_demand';
   const text = orderable

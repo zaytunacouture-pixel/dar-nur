@@ -70,7 +70,7 @@ const title = lines.length ? `Panier (${demoCartCount})` : 'Panier';
         <span>Sous-total</span>
         <span>{formatPrice(demoCartSubtotal)}</span>
       </p>
-      <p class="dn-small dn-muted">Frais de livraison convenus à la commande · {currentShipping.summary}.</p>
+      <p class="dn-small dn-muted">{currentShipping.summary}.</p>
       <Button size="lg" fullWidth disabled iconStart="whatsapp">
         Commander sur WhatsApp
       </Button>

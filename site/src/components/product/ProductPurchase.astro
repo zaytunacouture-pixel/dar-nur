@@ -9,7 +9,7 @@
  *   une information. Une combinaison inexistante ou épuisée est désactivée et annoncée.
  * - URL : l'option choisie est reportée dans la query string (?contenance=200-g), sans
  *   entrée d'historique ; un lien partagé la présélectionne. Canonical inchangé (/{slug}/).
- * - Commande : stratégie ACTUELLE — message WhatsApp prérempli, paiement à la réception.
+ * - Commande : stratégie ACTUELLE — message WhatsApp prérempli, aucun paiement sur le site.
  *   Aucun panier ni paiement en ligne simulé (le panier n'est pas migré).
  * - Sans JavaScript : prix de base, options visibles, lien de commande générique.
  */
@@ -116,7 +116,7 @@ const icon =
       )}
       <p class="dn-small dn-muted dn-purchase__note">
         {view.order.orderable
-          ? 'Pas de paiement en ligne : la commande se fait sur WhatsApp, vous payez à la réception.'
+          ? 'La commande se fait sur WhatsApp : rien n’est à payer sur le site.'
           : 'Ce produit ne peut pas encore être commandé.'}
       </p>
     </div>

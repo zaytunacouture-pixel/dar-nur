@@ -1,7 +1,8 @@
 ---
 /**
- * Réassurance (§N.4) : 4 faits vérifiés dans les CGV, juste au-dessus du footer,
- * une seule fois par page. Aucune promesse non publiée (retours, livraison France…).
+ * Réassurance (§N.4) : faits réellement vrais (config/commerce.ts), juste au-dessus du footer,
+ * une seule fois par page. Aucune promesse non publiée (retours, zone de livraison, paiement…).
+ * Le nombre de colonnes desktop suit le nombre de faits (2 depuis l'étape 9).
  */
 import Icon from '@/components/ui/Icon.astro';
 import { reassurance } from '@/config/commerce';
@@ -9,7 +10,7 @@ import { reassurance } from '@/config/commerce';
 
 <section class="dn-reassurance" aria-label="Nos engagements">
   <div class="dn-container">
-    <ul class="dn-reassurance__list" role="list">
+    <ul class="dn-reassurance__list" role="list" style={`--dn-reassurance-n: ${reassurance.length}`}>
       {reassurance.map((item) => (
         <li class="dn-reassurance__item">
           <Icon name={item.icon} />
@@ -45,7 +46,7 @@ import { reassurance } from '@/config/commerce';
   }
   @media (min-width: 1024px) {
     .dn-reassurance__list {
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(var(--dn-reassurance-n), 1fr);
     }
     .dn-reassurance__item {
       grid-template-columns: auto 1fr;

@@ -512,7 +512,7 @@ const senteurOptions: VariantOption[] = [
       <h2>Panier et annonce</h2>
       <div class="ds-block dn-measure">
         <p class="dn-small dn-muted ds-caption">
-          Politique en vigueur (Île-de-France, aucun seuil) : rien ne s’affiche
+          Politique active (aucun seuil de livraison offerte) : rien ne s’affiche
         </p>
         <div class="ds-empty-box">
           <FreeShippingProgress policy={currentShipping} subtotal={38} />
@@ -529,8 +529,8 @@ const senteurOptions: VariantOption[] = [
         </p>
         <AnnouncementBar
           messages={[
-            { text: 'Paiement à la réception · Livraison en Île-de-France' },
-            { text: 'Commande simple : votre panier envoyé sur WhatsApp' },
+            { text: 'Commande et conseil sur WhatsApp' },
+            { text: 'Une question ? Écrivez-nous sur WhatsApp' },
           ]}
           rotation={{ enabled: true, intervalMs: 7000 }}
         />
