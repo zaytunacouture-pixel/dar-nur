@@ -74,6 +74,59 @@ export const ADMIN_PAYMENT: Record<PaymentStatus, string> = {
   refunded: 'Remboursé',
 };
 
+/** E-mails transactionnels (étape 11) : libellés du bloc « Notifications » de l'administration. */
+export const ADMIN_EMAIL_TYPE: Record<string, string> = {
+  order_received: 'Commande reçue',
+  payment_requested: 'Paiement demandé',
+  payment_confirmed: 'Paiement confirmé',
+  order_shipped: 'Expédition',
+};
+
+/** Raison d'un e-mail non envoyé ou en erreur (codes de orders_private.order_emails.last_error). */
+export const ADMIN_EMAIL_REASON: Record<string, string> = {
+  recipient_not_allowlisted: 'adresse absente de la liste de test',
+  recipient_not_allowlisted_worker: 'adresse absente de la liste de test (fonction)',
+  production_sending_disabled: 'envoi en production désactivé',
+  production_disabled_worker: 'envoi en production désactivé (fonction)',
+  site_url_missing: 'URL du site non configurée',
+  obsolete: 'sans objet : la commande a évolué avant l’envoi',
+  expired: 'plus de 48 h en file',
+  superseded: 'remplacé par une nouvelle demande de paiement',
+  lease_expired_after_last_attempt: 'dernière tentative interrompue',
+  duplicate_at_provider: 'doublon reconnu par Brevo (déjà envoyé)',
+};
+
+/** Erreur d'envoi : libellé lisible, code technique conservé entre parenthèses. */
+const EMAIL_ERROR_RULES: [RegExp, string][] = [
+  [/^brevo_40[13]/, 'clé API Brevo refusée'],
+  [/^brevo_402/, 'crédits Brevo épuisés'],
+  [/^brevo_429/, 'limite d’envoi Brevo atteinte'],
+  [/^brevo_5\d\d/, 'Brevo momentanément indisponible'],
+  [/^brevo_timeout$/, 'Brevo ne répond pas'],
+  [/^brevo_network_error$/, 'réseau indisponible'],
+  [/^brevo_4\d\d/, 'requête refusée par Brevo'],
+  [/^render_/, 'contenu impossible à générer'],
+];
+export function adminEmailError(code: string | null): string {
+  if (!code) return '';
+  const known = ADMIN_EMAIL_REASON[code];
+  if (known) return known;
+  const label = EMAIL_ERROR_RULES.find(([pattern]) => pattern.test(code))?.[1] ?? 'erreur technique';
+  return `${label} (${code})`;
+}
+
+/** Statut de remise transmis par Brevo. Les incidents définitifs demandent une action. */
+export const ADMIN_EMAIL_DELIVERY: Record<string, { label: string; alert: boolean }> = {
+  delivered: { label: 'remis', alert: false },
+  deferred: { label: 'remise différée', alert: false },
+  soft_bounce: { label: 'rebond temporaire', alert: false },
+  hard_bounce: { label: 'adresse invalide (rebond définitif)', alert: true },
+  invalid_email: { label: 'adresse invalide', alert: true },
+  blocked: { label: 'bloqué par Brevo', alert: true },
+  spam: { label: 'signalé comme indésirable', alert: true },
+  error: { label: 'erreur de remise', alert: true },
+};
+
 /** Problème d'une ligne de panier renvoyé par le serveur (orders_private.resolve_lines). */
 export const LINE_ISSUES: Record<string, string> = {
   invalid_line: 'Article non reconnu : retirez-le du panier.',

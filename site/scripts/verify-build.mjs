@@ -94,6 +94,8 @@ for (const file of textFiles) {
   const content = readFileSync(file, 'utf8');
   if (/sb_secret_|service_role/.test(content))
     fail(`${relative(dist, file)} : clé secrète Supabase détectée`);
+  // Étape 11 : Brevo n'est appelé que par l'Edge Function (clé dans ses secrets).
+  if (/xkeysib-|xsmtpsib-|BREVO_API_KEY/.test(content)) fail(`${relative(dist, file)} : clé Brevo détectée`);
 }
 
 // ── 4. Budgets (par page : la page la plus lourde fait foi) ────────────────

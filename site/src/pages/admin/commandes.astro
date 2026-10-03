@@ -247,6 +247,33 @@ const seo = {
     background: var(--dn-warning-bg);
     color: var(--dn-warning);
   }
+  .dn-admin :global(.dn-admin__badge.is-alert) {
+    background: var(--dn-error-bg);
+    color: var(--dn-error);
+  }
+  .dn-admin :global(.dn-admin__alert) {
+    padding: var(--dn-space-3) var(--dn-space-4);
+    border-radius: var(--dn-radius-sm);
+    background: var(--dn-error-bg);
+    color: var(--dn-error);
+    font-size: var(--dn-fs-body-sm);
+    font-weight: var(--dn-fw-medium);
+  }
+  .dn-admin :global(.dn-admin__mails) {
+    display: grid;
+    gap: var(--dn-space-3);
+    font-size: var(--dn-fs-body-sm);
+  }
+  .dn-admin :global(.dn-admin__mails li) {
+    display: grid;
+    gap: var(--dn-space-1);
+    justify-items: start;
+    padding-block-end: var(--dn-space-3);
+    border-bottom: var(--dn-border-decor);
+  }
+  .dn-admin :global(.dn-admin__mails span) {
+    overflow-wrap: anywhere;
+  }
   .dn-admin :global(.dn-admin__rows) {
     display: grid;
     gap: var(--dn-space-1);
@@ -334,8 +361,11 @@ const seo = {
 
 <script>
   import {
+    ADMIN_EMAIL_DELIVERY,
+    ADMIN_EMAIL_TYPE,
     ADMIN_PAYMENT,
     ADMIN_STATUS,
+    adminEmailError,
     formatCents,
     type OrderStatus,
     type PaymentStatus,
@@ -372,6 +402,26 @@ const seo = {
     notify_customer: boolean;
     notified_at: string | null;
     created_at: string;
+  }
+  /** Bloc « Notifications » (étape 11) : rendu par admin_order_emails, sans adresse e-mail. */
+  interface OrderEmail {
+    id: string;
+    email_type: string;
+    occurrence: number;
+    status: 'pending' | 'sending' | 'sent' | 'failed' | 'skipped';
+    attempts: number;
+    max_attempts: number;
+    next_attempt_at: string | null;
+    sent_at: string | null;
+    delivery_status: string | null;
+    last_error: string | null;
+    created_at: string;
+    can_retry: boolean;
+  }
+  interface OrderEmails {
+    sending_enabled: boolean;
+    environment_enabled: boolean;
+    emails: OrderEmail[];
   }
   interface Order {
     id: string;
@@ -451,6 +501,10 @@ const seo = {
     invalid_amount: 'Montant invalide.',
     invalid_text: 'Texte trop long ou invalide.',
     event_not_found: 'Notification déjà marquée.',
+    email_already_sent: 'Cet e-mail est déjà parti.',
+    email_in_progress: 'Cet e-mail est déjà en file d’envoi.',
+    email_superseded: 'Demande de paiement remplacée : seule la plus récente peut partir.',
+    email_obsolete: 'Cet e-mail est sans objet : la commande a évolué.',
     order_not_found: 'Commande introuvable.',
   };
 
@@ -535,7 +589,7 @@ const seo = {
     if (env) params['environment'] = `eq.${env}`;
     if (status === '') params['status'] = 'not.in.(completed,cancelled)';
     else if (status !== 'all') params['status'] = `eq.${status}`;
-    const orders = await select<Order>('orders', params);
+    const [orders, alerts] = await Promise.all([select<Order>('orders', params), emailAlerts()]);
     list.replaceChildren(
       ...(orders.length
         ? orders.map((o) => {
@@ -554,6 +608,7 @@ const seo = {
                 `${dates.format(new Date(o.created_at))} · ${o.customer_first_name} ${o.customer_last_name} · ${o.ship_country_code} · ${formatCents(o.total_cents ?? o.subtotal_cents)}${o.total_cents === null ? ' + livraison' : ''}`,
               ),
               o.environment !== 'production' ? h('span', { class: 'dn-admin__badge is-test' }, 'TEST') : null,
+              alerts.has(o.id) ? h('span', { class: 'dn-admin__badge is-alert' }, 'E-mail en erreur') : null,
             );
             button.addEventListener('click', () => openOrder(o.id, true));
             return h('li', {}, button);
@@ -626,6 +681,105 @@ const seo = {
     await Promise.all([openOrder(order.id, false), loadList()]);
   }
 
+  /* ── Notifications automatiques (étape 11) ─────────────────────────── */
+  // Fonctions absentes (migration de l'étape 11 non appliquée) : erreur PostgREST → bloc neutre.
+  async function orderEmails(orderId: string): Promise<OrderEmails | null> {
+    try {
+      return await rpc<OrderEmails>('admin_order_emails', { p_order_id: orderId }, await token());
+    } catch {
+      return null;
+    }
+  }
+  async function emailAlerts(): Promise<Set<string>> {
+    try {
+      return new Set(await rpc<string[]>('admin_order_email_alerts', {}, await token()));
+    } catch {
+      return new Set();
+    }
+  }
+  async function retryEmail(order: Order, email: OrderEmail) {
+    try {
+      await rpc('admin_retry_order_email', { p_email_id: email.id }, await token());
+      say('Notification remise en file d’envoi.');
+    } catch (error) {
+      const code = error instanceof ApiError ? error.code : 'http';
+      say(ERRORS[code] ?? 'Relance impossible.', true);
+    }
+    await Promise.all([openOrder(order.id, false), loadList()]);
+  }
+  const isAlert = (e: OrderEmail) =>
+    Boolean(e.delivery_status && ADMIN_EMAIL_DELIVERY[e.delivery_status]?.alert);
+  function emailStatus(e: OrderEmail, data: OrderEmails): string {
+    switch (e.status) {
+      case 'sent': {
+        const delivery = e.delivery_status ? ADMIN_EMAIL_DELIVERY[e.delivery_status] : null;
+        return `Envoyé le ${dates.format(new Date(e.sent_at!))}${delivery ? ` · ${delivery.label}` : ''}`;
+      }
+      case 'sending':
+        return 'Envoi en cours';
+      case 'failed':
+        return `Erreur : ${adminEmailError(e.last_error)} (${e.attempts}/${e.max_attempts} tentatives)`;
+      case 'skipped':
+        return `Non envoyé : ${adminEmailError(e.last_error)}`;
+      default:
+        if (!data.sending_enabled) return 'En attente — envoi automatique désactivé';
+        if (e.attempts > 0 && e.next_attempt_at)
+          return `En attente — nouvelle tentative le ${dates.format(new Date(e.next_attempt_at))} (${e.attempts}/${e.max_attempts}, ${adminEmailError(e.last_error)})`;
+        return 'En attente d’envoi';
+    }
+  }
+  function notificationsCard(order: Order, data: OrderEmails | null): HTMLElement {
+    if (!data)
+      return card(
+        'Notifications',
+        h(
+          'p',
+          { class: 'dn-small dn-muted' },
+          'E-mails automatiques non installés sur cette base de données.',
+        ),
+      );
+    const latest = new Map(data.emails.map((e) => [e.email_type, e]));
+    const scope = !data.sending_enabled
+      ? 'Envoi automatique désactivé : les e-mails restent en attente.'
+      : !data.environment_enabled
+        ? order.environment === 'production'
+          ? 'Envoi désactivé pour les commandes de production.'
+          : 'Commande de test : envoi seulement vers les adresses de test validées.'
+        : null;
+    return card(
+      'Notifications',
+      data.emails.some(isAlert)
+        ? h(
+            'p',
+            { class: 'dn-admin__alert', role: 'status' },
+            'Adresse e-mail en erreur : le client n’a pas reçu un e-mail. Vérifiez l’adresse par téléphone. Aucun statut de commande n’a été modifié.',
+          )
+        : null,
+      scope ? h('p', { class: 'dn-small dn-muted' }, scope) : null,
+      h(
+        'ul',
+        { class: 'dn-admin__mails', role: 'list' },
+        ...Object.entries(ADMIN_EMAIL_TYPE).map(([type, label]) => {
+          const current = latest.get(type);
+          const sends = data.emails.filter((e) => e.email_type === type).length;
+          return h(
+            'li',
+            {},
+            h('strong', {}, label),
+            current
+              ? h(
+                  'span',
+                  { class: current.status === 'failed' || isAlert(current) ? 'is-error' : 'dn-muted' },
+                  `${sends > 1 ? `Demande n° ${current.occurrence} · ` : ''}${emailStatus(current, data)}`,
+                )
+              : h('span', { class: 'dn-muted' }, 'Pas encore déclenché'),
+            current?.can_retry ? button('Réessayer', () => retryEmail(order, current)) : null,
+          );
+        }),
+      ),
+    );
+  }
+
   async function trackingLink(order: Order): Promise<string> {
     const t = await rpc<string>('admin_order_tracking_token', { p_order_id: order.id }, await token());
     return `${location.origin}/suivi/#${t}`;
@@ -634,12 +788,15 @@ const seo = {
   async function openOrder(id: string, focus: boolean) {
     selected = id;
     for (const item of list.querySelectorAll('.dn-admin__item')) item.setAttribute('aria-current', 'false');
-    const [order] = await select<Order>('orders', {
-      select: DETAIL_COLUMNS,
-      id: `eq.${id}`,
-      'order_items.order': 'position.asc',
-      'order_events.order': 'id.asc',
-    });
+    const [[order], mails] = await Promise.all([
+      select<Order>('orders', {
+        select: DETAIL_COLUMNS,
+        id: `eq.${id}`,
+        'order_items.order': 'position.asc',
+        'order_events.order': 'id.asc',
+      }),
+      orderEmails(id),
+    ]);
     if (!order) {
       detail.replaceChildren(h('p', { class: 'is-error' }, 'Commande introuvable.'));
       return;
@@ -952,7 +1109,8 @@ const seo = {
       );
     }
 
-    // Client à prévenir : aucun e-mail automatique n'existe encore.
+    // Client à prévenir : un e-mail automatique parti marque l'événement lui-même (étape 11) ;
+    // le reste (annulation, envoi désactivé, échec) se prévient à la main.
     const pending = events.filter((e) => e.notify_customer && !e.notified_at);
     const copy = button('Copier le lien de suivi', async () => {
       try {
@@ -989,7 +1147,9 @@ const seo = {
       h(
         'p',
         { class: 'dn-small dn-muted' },
-        'Aucun e-mail n’est envoyé automatiquement : prévenez le client puis marquez la notification.',
+        mails?.sending_enabled
+          ? 'Un e-mail automatique parti marque la notification de lui-même. Le reste (annulation, échec) : prévenez le client puis marquez la notification.'
+          : 'Aucun e-mail n’est envoyé automatiquement : prévenez le client puis marquez la notification.',
       ),
       h('div', { class: 'dn-admin__actions' }, copy, mail),
     );
@@ -1042,6 +1202,7 @@ const seo = {
       card('Actions', payment, ...actions),
       lines,
       customer,
+      notificationsCard(order, mails),
       notify,
       note,
       journal,

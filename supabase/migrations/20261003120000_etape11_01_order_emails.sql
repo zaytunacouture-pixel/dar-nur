@@ -459,7 +459,7 @@ begin
         'next_attempt_at', case when e.status = 'pending' then e.next_attempt_at end,
         'sent_at', e.sent_at, 'delivery_status', e.delivery_status, 'delivery_event_at', e.delivery_event_at,
         'last_error', e.last_error, 'created_at', e.created_at,
-        'can_retry', e.status in ('failed', 'skipped') and coalesce(e.last_error, '') not in ('superseded'))
+        'can_retry', e.status in ('failed', 'skipped') and coalesce(e.last_error, '') not in ('superseded', 'obsolete'))
         order by e.created_at, e.occurrence)
       from orders_private.order_emails e where e.order_id = p_order_id), '[]'));
 end $$;
@@ -490,6 +490,8 @@ begin
   if v_row.status = 'sent' then raise exception 'dn:email_already_sent'; end if;
   if v_row.status in ('pending', 'sending') then raise exception 'dn:email_in_progress'; end if;
   if v_row.last_error = 'superseded' then raise exception 'dn:email_superseded'; end if;
+  -- Sans objet (commande annulée, déjà payée…) : un renvoi serait de nouveau abandonné.
+  if v_row.last_error = 'obsolete' then raise exception 'dn:email_obsolete'; end if;
   update orders_private.order_emails
      set status = 'pending', attempts = 0, next_attempt_at = now(), queued_at = now(),
          last_error = null, updated_at = now()

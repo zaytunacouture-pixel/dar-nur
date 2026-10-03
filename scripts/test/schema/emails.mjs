@@ -346,6 +346,8 @@ async function main() {
   check(m.status === 'sent' && [...brevo.delivered.keys()].filter((k) => k === m.id).length === 1, 'renvoi réussi, une seule remise réelle');
   check(/dn:email_already_sent/.test(await error(as(db, 'admin', () => db.query('select public.admin_retry_order_email($1)', [m.id]))) ?? ''), '« Réessayer » sur un e-mail envoyé → refusé');
   const superseded = (await emails(db, o1.id)).find((x) => x.last_error === 'superseded');
+  const obsolete = (await emails(db, o1.id)).find((x) => x.last_error === 'obsolete');
+  check(/dn:email_obsolete/.test(await error(as(db, 'admin', () => db.query('select public.admin_retry_order_email($1)', [obsolete.id]))) ?? ''), '« Réessayer » sur un e-mail devenu sans objet → refusé');
   check(/dn:email_superseded/.test(await error(as(db, 'admin', () => db.query('select public.admin_retry_order_email($1)', [superseded.id]))) ?? ''), '« Réessayer » sur une demande de paiement remplacée → refusé');
 
   const o4 = await create(db);

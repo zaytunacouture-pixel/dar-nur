@@ -12,6 +12,8 @@
  *  4. Configuration API : clé publishable seulement, uniquement sur les pages qui l'utilisent.
  *  5. Aucune page ne propose encore « Commander sur WhatsApp » (hors démonstrations internes) ;
  *     aucune promesse interdite (paiement à la réception, livraison mondiale / gratuite).
+ *  6. Étape 11 : aucune référence à l'API ou à une clé Brevo, aucune fonction du worker d'e-mails
+ *     dans le navigateur ; l'admin contient le bloc « Notifications ».
  */
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
@@ -174,6 +176,22 @@ for (const file of files) {
     if (banned) fail(`${page} : mention interdite « ${banned[0]} »`);
   }
 }
+
+// ── 6. E-mails transactionnels (étape 11) : rien côté navigateur ─────────────
+// Aucun SDK ni appel Brevo, aucune fonction du worker : l'envoi est 100 % serveur
+// (outbox Supabase → Edge Function). L'admin ne lit que admin_order_emails / alertes / relance.
+let notificationsBlock = false;
+for (const file of walk(dist).filter((f) => /\.(html|js)$/.test(f))) {
+  const content = readFileSync(file, 'utf8');
+  const page = posix(relative(dist, file));
+  // (Les codes d'erreur « brevo_503 »… des libellés de l'admin sont attendus : casse respectée.)
+  if (/api\.brevo\.com|sendinblue|sib-api|xkeysib-/i.test(content) || /BREVO_[A-Z]/.test(content))
+    fail(`${page} : référence à l’API Brevo côté navigateur`);
+  if (/order_emails_(claim|report|delivery_event)|ORDER_EMAILS_WORKER_SECRET/.test(content))
+    fail(`${page} : fonction du worker d’e-mails exposée au navigateur`);
+  if (content.includes('admin_order_emails')) notificationsBlock = true;
+}
+if (!notificationsBlock) fail('admin : bloc « Notifications » (admin_order_emails) absent');
 
 if (errors.length) {
   console.error(`✗ ${errors.length} problème(s) sur le parcours de commande :`);
