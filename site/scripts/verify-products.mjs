@@ -17,7 +17,8 @@
  *  5. Images : uniquement des médias du produit lui-même, hébergés sur dar-nur.fr ou le
  *     stockage Supabase ; aucune image distante non transformée dans le HTML.
  *  6. Disponibilité : NULL → « Bientôt disponible », jamais commandable.
- *  7. Contenu : aucune mention « À compléter », « thérapeutique », « livraison offerte ».
+ *  7. Contenu : aucune mention « À compléter », « thérapeutique », « livraison offerte », ni (étape 9)
+ *     « paiement à la réception » ou zone Île-de-France, message WhatsApp compris.
  *  8. Produits similaires : publiés, hors produit courant et hors autres fiches du même
  *     futur modèle sûr ; lastmod = date réelle de modification.
  *  9. Liens produit de TOUTES les pages (cartes de l'étape 7 comprises) → une page générée.
@@ -392,6 +393,16 @@ for (const [slug, { html }] of productPages) {
     [/\bavis\b|★/i, 'avis / étoiles'],
   ])
     if (re.test(text)) fail(`${where} : ${label} présent dans la page`);
+  // Décisions du 3 octobre 2026 : plus de paiement à la réception, aucune zone de livraison fixée.
+  // Tout le HTML, y compris le message WhatsApp prérempli (encodé dans le lien de commande).
+  const raw = html
+    .replace(/%20/g, ' ')
+    .replace(/%C3%A0/gi, 'à')
+    .replace(/%C3%A9/gi, 'é');
+  if (/paiement (?:à|a) la (?:r[ée]ception|livraison)|payez à la r[ée]ception/i.test(raw))
+    fail(`${where} : « paiement à la réception » présent`);
+  if (/[ÎI]le-de-France|%C3%8Ele-de-France|Chelles|Lognes/i.test(raw))
+    fail(`${where} : zone de livraison Île-de-France présente`);
 
   // Produits similaires.
   const similar = /aria-labelledby="dn-similar-title"[\s\S]*?<\/section>/.exec(html)?.[0] ?? '';

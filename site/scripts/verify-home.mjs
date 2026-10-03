@@ -12,7 +12,8 @@
  *  4. Produits mis en avant (cartes, hero) : publiés dans Supabase, aucun brouillon, aucun produit
  *     de test (miel-myrtille, « test » dans le nom), image hors `assets/produits-ia/` ; 6 à 8 cartes.
  *  5. Honnêteté : aucun avis, note, étoile, compteur de clients, « meilleures ventes », promesse
- *     de livraison offerte ou nationale, newsletter, « Thérapeutiques », « 100 % naturel ».
+ *     de livraison offerte ou nationale, newsletter, « Thérapeutiques », « 100 % naturel » ;
+ *     ni « paiement à la réception » ni zone Île-de-France (décisions du 3 octobre 2026).
  *  6. JSON-LD : WebSite + Organization uniquement (ni Product, ni avis, ni note).
  *
  * Réseau : lecture publique Supabase (clé « publishable »), comme le build.
@@ -177,6 +178,20 @@ const FORBIDDEN = [
 ];
 for (const [pattern, label] of FORBIDDEN) {
   const match = pattern.exec(text);
+  if (match) fail(`mention interdite (${label}) : « ${match[0]} »`);
+}
+// Décisions du 3 octobre 2026 : plus de paiement à la réception ; zones de livraison (dont
+// l'international) non définies. Contrôle sur tout le HTML, liens WhatsApp encodés compris.
+const raw = html
+  .replace(/%20/g, ' ')
+  .replace(/%C3%A0/gi, 'à')
+  .replace(/%C3%A9/gi, 'é')
+  .replace(/%C3%8E/gi, 'Î');
+for (const [pattern, label] of [
+  [/paiement (?:à|a) la (?:r[ée]ception|livraison)|payez à la r[ée]ception/i, 'paiement à la réception'],
+  [/[ÎI]le-de-France|\bIDF\b|Chelles|Lognes/i, 'zone de livraison Île-de-France'],
+]) {
+  const match = pattern.exec(raw);
   if (match) fail(`mention interdite (${label}) : « ${match[0]} »`);
 }
 
