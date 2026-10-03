@@ -92,7 +92,8 @@ Référence complète : `DESIGN_SYSTEM_ETAPE_4.md`. Contrôlé automatiquement p
 - aucune clé secrète ; aucun identifiant fournisseur (mot entier, via la configuration locale non versionnée) dans la sortie.
 
 Et par convention : vert = action et sélection ; or = filets uniquement ; footer = seule section sombre ;
-aucune promesse (livraison France, livraison offerte, retours) absente des CGV en vigueur ; aucun avis,
+aucune promesse (livraison France ou internationale, livraison offerte, retours, paiement à la réception) non
+opérationnelle ; aucun avis,
 compteur ou « best seller » sans données ; aucune photo générée à la place d'un vrai produit.
 
 ## Statut de la migration
@@ -194,9 +195,11 @@ prix, prix au kg), taille en boutons texte (2XL et XXL restent distincts). Aucun
 et relu au chargement ; le canonical reste `/{slug}/`. Les anciennes fiches couleur restent des produits
 distincts (aucun sélecteur couleur public).
 
-**Commande.** Stratégie actuelle : lien WhatsApp prérempli (produit, option, prix, lien), paiement à la
-réception. Aucun bouton panier ni paiement en ligne. Produit `coming_soon` / `out_of_stock` : simple lien
-« Une question ? ». Livraison : texte de `config/commerce.ts` (Île-de-France), jamais le seuil de 50 €.
+**Commande.** Stratégie actuelle : lien WhatsApp prérempli (produit, option, prix, lien). Aucun bouton panier
+ni paiement sur le site. Produit `coming_soon` / `out_of_stock` : simple lien « Une question ? ». Livraison :
+texte de `config/commerce.ts`, jamais le seuil de 50 €. Depuis l'étape 9 (décisions du 3 octobre 2026) :
+plus de « paiement à la réception » ni de zone Île-de-France dans la note, l'accordéon ou le message
+prérempli — voir « Accueil (étape 9) », Règles commerciales.
 
 **Recommandations.** « Dans la même collection » : 4 produits de la collection principale, ordre
 « Sélection » en commençant après le produit courant (déterministe), hors autres fiches du même futur modèle
@@ -315,15 +318,32 @@ produit et bloc Miels : préréglage `PRODUCT_CARD` (fichiers partagés avec les
 
 **SEO.** Title « Dar Nūr — Miels, parfums, soins et mode modeste » (aucun wording validé n'existait ; l'ancien
 « Produits Naturels & Mode Islamique Premium » / « 100 % purs » n'est pas repris). Meta : les trois univers,
-commande sur WhatsApp, paiement à la réception. Canonical `https://dar-nur.fr/`. JSON-LD `WebSite` +
+commande et conseil sur WhatsApp. Canonical `https://dar-nur.fr/`. JSON-LD `WebSite` +
 `Organization` (logo, Instagram, TikTok, contact WhatsApp) ; ni `Product`, ni avis, ni `SearchAction`
 (recherche non branchée). Sitemap de production : `/` ajouté (268 URL), sans `<lastmod>` (aucune date
 fiable). `/demo/` passe en `noindex` permanent (il aurait été indexable en production) et rejoint les pages
 internes de `verify-build`.
 
-**Réassurance.** « Votre panier, envoyé sur WhatsApp » devient « Sur WhatsApp, depuis la fiche produit » (le
-nouveau site n'a pas de panier). Les trois autres faits restent conformes aux CGV ; le bandeau reste
-« Paiement à la réception · Livraison en Île-de-France ».
+**Règles commerciales (décisions du propriétaire, 3 octobre 2026).** Plus de paiement à la réception : la
+commande est préparée, le client paie une fois la commande prête, l'expédition suit le paiement. Livraison
+internationale **visée** : exigence de la future étape commande/livraison (pays, tarifs, expédition), rien
+n'est encore implémenté. En attendant, aucun texte public ne décrit de zone, de tarif, de délai ni de moyen de
+paiement (`config/commerce.ts`) :
+
+| Texte | Avant | Après |
+|---|---|---|
+| Bandeau (toutes pages) | Paiement à la réception · Livraison en Île-de-France | Commande et conseil sur WhatsApp |
+| Réassurance (toutes pages) | 4 faits : commande / paiement à la réception / livraison IDF / conseil | 2 faits : Commande sur WhatsApp (depuis la fiche, message prérempli) · Conseil personnalisé ; colonnes desktop = nombre de faits |
+| Meta de l'accueil | … paiement à la réception. | … Commande et conseil sur WhatsApp. |
+| Fiche : ligne livraison | Livraison en Île-de-France · paiement à la réception | Livraison et paiement : modalités confirmées sur WhatsApp |
+| Fiche : note sous le bouton | … vous payez à la réception. | La commande se fait sur WhatsApp : rien n'est à payer sur le site. |
+| Fiche : accordéon Livraison & paiement | paiement à la réception, remise gratuite Chelles / Lognes | Commande sur WhatsApp · Modalités confirmées sur WhatsApp · lien CGV |
+| Message WhatsApp prérempli | « Paiement à la réception : Revolut / Espèces » | ligne retirée |
+
+`verify-home` et `verify-products` refusent désormais « paiement à la réception / à la livraison » et toute
+zone Île-de-France (Chelles, Lognes) dans tout le HTML, message WhatsApp encodé compris (contrôle négatif fait).
+**À faire avant la bascule** : les CGV de dar-nur.fr (liées depuis le footer et les fiches) décrivent encore
+l'ancien fonctionnement.
 
 **Mesures** (build local, serveur statique gzip, Lighthouse 12.8 mobile simulé) : préprod 96 / 100 / 100 / 69
 (SEO : seul le `noindex`), production 98 / 100 / 100 / 100 ; LCP 2,7 s en préprod (comme `/parfums-soins/` et
