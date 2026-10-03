@@ -2,7 +2,7 @@
   "name": "dar-nur-schema-tests",
   "private": true,
   "type": "module",
-  "description": "Banc d'essai hors ligne des migrations Supabase (refonte, étape 6) : PGlite + schéma de production figé (baseline.sql) + données réelles. `npm ci` ici, puis `node run.mjs --live` (catalogue public) ou `node run.mjs --data <dossier de sauvegarde>`.",
+  "description": "Banc d'essai hors ligne des migrations Supabase (refonte, étapes 6 et 10) : PGlite + schéma de production figé (baseline.sql) + données réelles. `npm ci` ici, puis `node run.mjs --live` (catalogue public) ou `node run.mjs --data <dossier de sauvegarde>`.",
   "scripts": {
     "test": "node run.mjs --live"
   },
