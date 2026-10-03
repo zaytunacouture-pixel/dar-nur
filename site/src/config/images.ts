@@ -42,3 +42,16 @@ export const OFFER_CARD: ImageFrame = { width: 800, height: 600, widths: [400, 8
 
 /** Hero 4:3 : 58vw (desktop), 100vw (mobile). */
 export const HERO: ImageFrame = { width: 1600, height: 1200, widths: [390, 780, 960, 1280, 1600] };
+
+/**
+ * Ramène un cadre à la taille réelle d'une source plus petite, ratio conservé (étape 9).
+ * Sans cela, une source de 1 100 px servie dans HERO produirait des fichiers « 1280w » et
+ * « 1600w » identiques au 1100 (sharp n'agrandit pas) et un recadrage incertain.
+ */
+export function frameForSource(frame: ImageFrame, sourceWidth: number, sourceHeight: number): ImageFrame {
+  const scale = Math.min(1, sourceWidth / frame.width, sourceHeight / frame.height);
+  if (scale === 1) return frame;
+  const width = Math.floor(frame.width * scale);
+  const height = Math.round((width * frame.height) / frame.width);
+  return { width, height, widths: [...frame.widths.filter((w) => w < width), width] };
+}
