@@ -2,11 +2,16 @@
   "name": "dar-nur-schema-tests",
   "private": true,
   "type": "module",
-  "description": "Banc d'essai hors ligne des migrations Supabase (refonte, étapes 6 et 10) : PGlite + schéma de production figé (baseline.sql) + données réelles. `npm ci` ici, puis `node run.mjs --live` (catalogue public) ou `node run.mjs --data <dossier de sauvegarde>`.",
+  "description": "Banc d'essai hors ligne des migrations Supabase (refonte, étapes 6, 10 et 11) : PGlite + schéma de production figé (baseline.sql) + données réelles. `npm ci` ici, puis `node run.mjs --live` (catalogue public) ou `node run.mjs --data <dossier de sauvegarde>` ; étape 11 : `npm run test:emails`.",
   "scripts": {
-    "test": "node run.mjs --live"
+    "test": "node run.mjs --live",
+    "typecheck:emails": "tsc --noEmit --strict --noUncheckedIndexedAccess --exactOptionalPropertyTypes --target es2022 --lib es2022,dom --module esnext --moduleResolution bundler --allowImportingTsExtensions --verbatimModuleSyntax --erasableSyntaxOnly ../../../supabase/functions/_shared/order-emails/brevo.ts ../../../supabase/functions/_shared/order-emails/config.ts ../../../supabase/functions/_shared/order-emails/templates.ts ../../../supabase/functions/_shared/order-emails/types.ts ../../../supabase/functions/_shared/order-emails/webhook.ts ../../../supabase/functions/_shared/order-emails/worker.ts ../../../supabase/functions/order-emails/index.ts ../../../supabase/functions/order-emails-webhook/index.ts deno-shim.d.ts",
+    "test:emails": "npm run typecheck:emails && node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON email-templates.mjs && node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON emails.mjs --live"
   },
   "dependencies": {
     "@electric-sql/pglite": "0.5.8"
+  },
+  "devDependencies": {
+    "typescript": "6.0.3"
   }
 }

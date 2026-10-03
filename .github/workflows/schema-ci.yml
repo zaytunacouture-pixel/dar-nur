@@ -1,10 +1,11 @@
-name: Schéma Supabase — banc des migrations (étapes 6 et 10)
+name: Schéma Supabase — banc des migrations (étapes 6, 10 et 11)
 
 # Rejoue les migrations supabase/migrations/*etape6* sur PGlite (Postgres en WASM)
 # chargé avec le schéma de production figé (scripts/test/schema/baseline.sql) et
 # le catalogue PUBLIC lu avec la clé publique : invariants, idempotence, scénarios
 # de l'ancien admin / import / panier, rollback. Étape 10 : commandes (RLS, transitions,
-# paiement avant expédition, sécurité de l'API publique, rollback).
+# paiement avant expédition, sécurité de l'API publique, rollback). Étape 11 : outbox des e-mails
+# transactionnels, gabarits, worker de l'Edge Function contre un faux Brevo (aucune clé, aucun envoi).
 # Aucun secret, aucune écriture : ne touche ni à Supabase ni à la production.
 
 on:
@@ -13,6 +14,8 @@ on:
       - 'supabase/migrations/**'
       - 'supabase/checks/**'
       - 'supabase/rollback/**'
+      - 'supabase/maintenance/**'
+      - 'supabase/functions/**'
       - 'scripts/test/schema/**'
       - 'site/src/config/countries.ts'
       - '.github/workflows/schema-ci.yml'
@@ -23,6 +26,8 @@ on:
       - 'supabase/migrations/**'
       - 'supabase/checks/**'
       - 'supabase/rollback/**'
+      - 'supabase/maintenance/**'
+      - 'supabase/functions/**'
       - 'scripts/test/schema/**'
       - 'site/src/config/countries.ts'
       - '.github/workflows/schema-ci.yml'
@@ -59,3 +64,6 @@ jobs:
 
       - name: Commandes (étape 10)
         run: node orders.mjs --live
+
+      - name: E-mails transactionnels (étape 11) — types, gabarits, outbox, worker, faux Brevo
+        run: npm run test:emails

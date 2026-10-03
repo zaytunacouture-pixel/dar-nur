@@ -66,7 +66,10 @@ select 'subtotal_matches_items', not exists (
           where o.subtotal_cents <> coalesce((select sum(i.line_total_cents) from public.order_items i
                                                where i.order_id = o.id and i.availability_confirmed is distinct from false), 0)), null
 union all
+-- Les 6 triggers de l'étape 10 (l'étape 11 en ajoute un 7ᵉ, trg_order_events_enqueue_email, contrôlé à part).
 select 'triggers_present', (select count(*) = 6 from pg_trigger t join pg_class c on c.oid = t.tgrelid
-                             where c.relname in ('orders', 'order_items', 'order_events') and not t.tgisinternal),
+                             where c.relname in ('orders', 'order_items', 'order_events') and not t.tgisinternal
+                               and t.tgname in ('trg_orders_guard', 'trg_order_items_guard', 'trg_order_items_subtotal',
+                                                'trg_orders_log_events', 'trg_order_items_log_events', 'trg_order_events_guard')),
        (select string_agg(t.tgname, ', ') from pg_trigger t join pg_class c on c.oid = t.tgrelid
          where c.relname in ('orders', 'order_items', 'order_events') and not t.tgisinternal);
