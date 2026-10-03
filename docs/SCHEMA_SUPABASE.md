@@ -1,4 +1,4 @@
-# Schéma Supabase — état après l'étape 6 (migration additive, 2026-10-02)
+# Schéma Supabase — état après les étapes 6 (2026-10-02) et 10 (2026-10-03)
 
 > Référence courte pour reprendre le travail. Le **SQL fait foi** : `supabase/migrations/20261002*_etape6_*.sql`
 > (commentés). Appliqué en production le 2026-10-02 ; l'ancien site, l'admin, les générateurs, le panier,
@@ -90,7 +90,8 @@ tables `*_translations (id, locale, …)` (collections, option_values, produits)
 > (sauvegarde préalable hors dépôt : `C:\Users\youcef\dar-nur-backups\etape10-supabase-2026-10-03\`).
 > Additives : aucune table existante n'est modifiée. Rollback : `supabase/rollback/20261003_etape10_rollback.sql`
 > (⚠ détruit les commandes : les exporter avant). Contrôles : `supabase/checks/etape10_invariants.sql`
-> (14 lignes `ok = true`). Banc : `scripts/test/schema/orders.mjs` (139 contrôles, en CI `schema-ci`).
+> (14 lignes `ok = true`). Banc : `scripts/test/schema/orders.mjs` (142 contrôles, en CI `schema-ci`).
+> Purge explicite des commandes de test (non exécutée) : `supabase/maintenance/20261003_etape10_purger_commandes_test.sql`.
 
 **Parcours.** DEMANDE de commande (aucun paiement) → vérification par Dar Nūr (disponibilités, frais de
 livraison, remise éventuelle) → total confirmé et paiement demandé → paiement confirmé → préparation →

@@ -447,6 +447,20 @@ async function main() {
   check(rerun, 'migrations rejouables (idempotence)');
   check((await one(db, 'select count(*)::int as n from orders_private.config')).n === 1, 'secret conservé au rejeu (singleton)');
 
+  // Purge explicite des commandes de test (supabase/maintenance/…_purger_commandes_test.sql).
+  const PURGE = readFileSync(path.join(ROOT, 'supabase/maintenance/20261003_etape10_purger_commandes_test.sql'), 'utf8');
+  const withNumbers = (numbers) => PURGE.replace(/array\[[^\]]*\]::text\[\]/, `array[${numbers.map((n) => `'${n}'`).join(', ')}]::text[]`);
+  const victims = (await rows(db, `select public_number from public.orders where is_test order by created_at limit 2`)).map((r) => r.public_number);
+  const total = (await one(db, 'select count(*)::int as n from public.orders')).n;
+  const refused = /purge refusée/.test(await error(db.exec(withNumbers([...victims, 'DN-2026-ZZZZZZ']))));
+  await db.exec('rollback'); // la CLI annule à la fin de la connexion ; PGlite garde la transaction avortée
+  check(refused && (await one(db, 'select count(*)::int as n from public.orders')).n === total, 'purge : numéro inconnu → tout est refusé, rien supprimé');
+  await db.exec(withNumbers(victims));
+  const left = (await one(db, 'select count(*)::int as n from public.orders')).n;
+  check(left === total - 2 && (await one(db, 'select count(*)::int as n from public.order_events e left join public.orders o on o.id = e.order_id where o.id is null')).n === 0,
+    'purge : seules les commandes listées disparaissent (lignes et journal compris)', `${total} → ${left}`);
+  check(/dn:order_delete_forbidden/.test(await error(db.query('delete from public.orders where id = $1', [o1.id]))), 'purge : garde-fous réactivés ensuite');
+
   const db2 = await newDb(data);
   const fresh = await newDb(data, { etape10: false });
   await db2.exec(ROLLBACK);

@@ -1,11 +1,13 @@
 # Refonte Dar Nūr — nouveau socle Astro (`site/`)
 
-> Statut au 3 octobre 2026 : **étape 9 terminée — page d'accueil finale `/`** (hero sur une vraie photo
-> catalogue, 3 univers et leurs collections, sélection éditoriale de 8 produits, bloc Miels, Idées cadeaux &
-> offres), alimentée par le catalogue réel et contrôlée par `verify-home`. Étapes 8 / 8B : 245 fiches produit,
-> build à froid ≈ 7 min en CI. Le panier métier, la recherche et les redirections ne sont **pas** migrés ;
-> aucune fusion de fiches n'est publiée. La production reste **dar-nur.fr** (GitHub Pages, racine du dépôt),
-> que rien dans `site/` ne modifie.
+> Statut au 3 octobre 2026 : **étape 10 terminée en préproduction — commande, validation, paiement
+> différé, livraison France + international** : panier réel, demande de commande structurée (aucun paiement à
+> l'envoi), vérification et total confirmés par Dar Nūr, paiement confirmé (manuellement, aucun prestataire
+> branché), expédition seulement après paiement (garanti par la base), suivi client par jeton,
+> administration `/admin/commandes/`. **La commande en ligne reste FERMÉE en production** tant que les CGV
+> et la politique de confidentialité ne sont pas révisées. Étape 9 : accueil final ; étapes 8 / 8B : 245
+> fiches, build à froid ≈ 7 min. La recherche et les redirections ne sont pas migrées. La production reste
+> **dar-nur.fr** (GitHub Pages, racine du dépôt), que rien dans `site/` ne modifie.
 
 ## Architecture
 
@@ -34,7 +36,10 @@ site/
     components/ ui/ layout/ catalog/ cart/ search/ home/ product/ templates/
     layouts/BaseLayout.astro
     pages/                index (accueil), [...path] (catalogue + fiches), demo, design-system, lab/, 404, robots.txt
-    data/demo/            panier FICTIF (démonstration uniquement)
+    data/demo/            panier FICTIF (pages /demo/ et /design-system/ uniquement)
+    scripts/              JS client du panier et de la commande (cart-store, cart-view, cart-sync, order-api)
+    lib/orders/           libellés des statuts (client / administration), erreurs, format des montants
+    pages/                … panier, commande, suivi, admin/commandes (étape 10)
 ```
 
 ## Commandes (depuis `site/`)
@@ -51,6 +56,8 @@ site/
 | `npm run verify:catalog` | Contrôles de données des pages catalogue contre Supabase (après build, réseau) |
 | `npm run verify:products` | Contrôles des fiches produit et du LAB contre Supabase (après build, réseau) |
 | `npm run verify:home` | Contrôles de l'accueil contre Supabase (après build, réseau) |
+| `npm run verify:orders` | Contrôles du parcours de commande sur `dist/` (après build, sans réseau) |
+| `npm run test:cart` | Tests unitaires du panier local (Node, sans navigateur) |
 | `npm run lab:groupings` | Rafraîchit l'instantané des regroupements Mode (lecture admin, CLI Supabase authentifiée) |
 | `npm run ci` | Tout, dans l'ordre de la CI |
 
@@ -105,7 +112,8 @@ compteur ou « best seller » sans données ; aucune photo générée à la plac
 | **Étape 7** (2026-10-02) : 3 univers, 15 collections, 2 transverses, 4 pages marque, filtres/tri, fil d'Ariane, JSON-LD, sitemap (production), 404, `verify-catalog` — section ci-dessous | |
 | **Étape 8** (2026-10-02) : 245 fiches `/{slug}/`, galerie, variantes réelles, prix au kg/L, disponibilité, commande WhatsApp, accordéons conditionnels, similaires, offres, JSON-LD Product/ProductGroup, sitemap avec `lastmod`, LAB des regroupements Mode, `verify-products` — section ci-dessous | |
 | **Étape 8B** (2026-10-03) : build à froid 21 min 39 s → 6 min 55 s (CI), préréglages d'images, mesure reproductible — section « Build et images » | |
-| **Étape 9** (2026-10-03) : accueil final `/`, configuration éditoriale, `verify-home` — section « Accueil (étape 9) » | Panier métier, recherche, redirections, shooting |
+| **Étape 9** (2026-10-03) : accueil final `/`, configuration éditoriale, `verify-home` — section « Accueil (étape 9) » | |
+| **Étape 10** (2026-10-03) : panier, demande de commande, suivi, administration des commandes, tables et fonctions Supabase, `verify-orders`, `test:cart` — section « Commande, paiement, livraison (étape 10) » | Prestataire de paiement, e-mails transactionnels, CGV et confidentialité révisées (bloquant production), recherche, redirections, shooting |
 
 ## Pages catalogue (étape 7)
 
@@ -195,8 +203,8 @@ prix, prix au kg), taille en boutons texte (2XL et XXL restent distincts). Aucun
 et relu au chargement ; le canonical reste `/{slug}/`. Les anciennes fiches couleur restent des produits
 distincts (aucun sélecteur couleur public).
 
-**Commande.** Stratégie actuelle : lien WhatsApp prérempli (produit, option, prix, lien). Aucun bouton panier
-ni paiement sur le site. Produit `coming_soon` / `out_of_stock` : simple lien « Une question ? ». Livraison :
+**Commande.** Depuis l'étape 10 : bouton « Ajouter au panier » (voir « Commande, paiement, livraison »).
+Étape 8 (historique) : lien WhatsApp prérempli, aucun bouton panier ni paiement sur le site. Produit `coming_soon` / `out_of_stock` : simple lien « Une question ? ». Livraison :
 texte de `config/commerce.ts`, jamais le seuil de 50 €. Depuis l'étape 9 (décisions du 3 octobre 2026) :
 plus de « paiement à la réception » ni de zone Île-de-France dans la note, l'accordéon ou le message
 prérempli — voir « Accueil (étape 9) », Règles commerciales.
@@ -362,3 +370,90 @@ la maison ; l'intro de `/idees-cadeaux/` promet encore « pour elle, pour lui, p
 l'étape 7, non repris sur l'accueil) ; Miels & Herboristerie n'a qu'un produit dans la sélection (l'affiche du
 Miel Mangue & Fraise, seul produit `featured`) : les deux seules photos de miel hors `produits-ia/` et hors
 affiche servent déjà au bloc Miels (printemps) et à la carte d'univers (lavande, fiche encore inachevée).
+
+## Commande, paiement, livraison (étape 10)
+
+**Parcours.** 1. Le client ajoute des produits au panier. 2. Il envoie une **demande de commande** (aucun
+paiement). 3. Dar Nūr vérifie la disponibilité et prépare. 4. Dar Nūr fixe la livraison (et une remise
+éventuelle) : le total final est confirmé. 5. Le client voit le total et le lien / les instructions de
+paiement. 6. Il paie. 7. Dar Nūr confirme le paiement. 8. Expédition, **jamais avant le paiement confirmé**.
+9. Le client voit le suivi. Aucun tarif, délai, seuil de gratuité ni pays « desservi » n'est annoncé.
+
+**Architecture.** Le site reste 100 % statique (aucun SSR, aucune Netlify Function) : le navigateur appelle,
+avec la clé PUBLIQUE, quatre fonctions Postgres `SECURITY DEFINER` (même mécanisme que `check_promo_code`,
+déjà en production) : `check_cart`, `create_order_request`, `get_order_tracking`, `order_country_codes`. Les
+tables de commande sont fermées à ce rôle. L'administration se connecte avec le compte Supabase existant et
+n'écrit que par `admin_update_order`. Pourquoi pas Netlify Functions : aucun site Netlify n'existe encore,
+elles exigeraient une clé `service_role` dans l'hébergement, et la validation, la transaction et les invariants
+vivent mieux en base (où ils protègent aussi l'admin et la CLI). Schéma, statuts, fonctions et invariants :
+`docs/SCHEMA_SUPABASE.md`, « Commandes (étape 10) ». Configuration publique injectée par
+`components/order/ApiConfig.astro` (URL + clé `sb_publishable_`, environnement, commande ouverte ou non),
+seulement sur les 4 pages qui l'utilisent.
+
+| Élément | Fichiers | Points clés |
+|---|---|---|
+| Panier | `scripts/cart-store.ts`, `cart-view.ts`, `cart-sync.ts`, `components/cart/MiniCart.astro`, `pages/panier.astro` | `localStorage` (`dn-cart-v1`) : produit, variante, libellé d'option, prix affiché (centimes), image, lien, quantité 1–99, 30 lignes. Lecture défensive (prix, UUID, liens `javascript:`, images `http:` écartés). Rendu DOM sans HTML interprété. Revérification `check_cart` au chargement : prix changé → mis à jour ET signalé ; article indisponible → signalé, envoi bloqué. Pas de compte. |
+| Fiche | `components/product/ProductPurchase.astro`, `lib/product-page.ts` (`cartOf`) | « Ajouter au panier » si `available` / `on_demand` et prix ; option obligatoire (message + focus). `on_demand` : « disponibilité confirmée après votre demande ». `coming_soon` / `out_of_stock` : aucun ajout. WhatsApp = lien secondaire « Une question ? » (produit seul). Vignette WebP 128 × 160 générée au build (+100 fichiers ≈ 2 Ko). |
+| Offres | `lib/catalog-store.ts` (`provenPromos`), SQL `resolve_lines` | Promotion produit **prouvée** (offre `product_promo` en cours, produit sans variante, prix réel = prix de référence) : appliquée à la fiche (prix barré), au panier ET par le serveur — Nissah 59,99 € → 40 €. Les packs (table `offers`) ne sont pas commandables en ligne. Aucune économie douteuse réintroduite. |
+| Demande | `pages/commande.astro` | Récapitulatif, Coordonnées (prénom, nom, e-mail, téléphone international), Livraison (pays ISO 3166-1 alpha-2, France en tête, noms par `Intl.DisplayNames` ; adresse 1/2, code postal obligatoire à 5 chiffres pour la France seulement, ville, région, instructions), explication du parcours, CGV, pot de miel. CTA « Envoyer ma demande de commande ». Validation navigateur = serveur ; erreurs reliées aux champs + résumé focalisé ; saisie jamais vidée. Clé d'idempotence par envoi. Panier vidé seulement après la réponse `ok`. Confirmation : numéro `DN-AAAA-XXXXXX`, articles, « Commande reçue », prochaine étape, lien de suivi (mémorisé sur l'appareil), WhatsApp avec le seul numéro de commande. |
+| Suivi | `pages/suivi.astro` | `/suivi/#<jeton>` : jeton de 256 bits dans le **fragment** (jamais envoyé au serveur web ni dans le Referer). Frise Commande reçue → Vérification → Paiement demandé → Paiement reçu → Expédiée. Total montré seulement une fois confirmé. « Payer ma commande » seulement si une vraie URL `https://` existe, sinon « Les instructions de paiement vous seront transmises par Dar Nūr. » ; « paiement en cours de vérification » si déjà réglé. Transporteur et suivi une fois expédiée. Jamais d'adresse, d'e-mail, de téléphone, de note ou de référence interne. |
+| Administration | `pages/admin/commandes.astro` | Connexion par le compte admin existant (Supabase Auth, session `sessionStorage`). Liste filtrée (environnement, statut), détail (client, adresse, lignes, journal), disponibilités par ligne, livraison (montant, transporteur, service, délai indicatif), remise motivée, demande de paiement (prestataire, URL, référence), confirmation manuelle du paiement, préparation, suivi (transporteur, numéro, URL), expédition, livraison, annulation motivée (remboursement dû si payée), remboursement marqué, note interne, notifications « client à prévenir » (copier le lien de suivi, préparer un e-mail). Chaque action envoie le statut affiché (concurrence). |
+
+**Garde-fous vérifiés en production (2026-10-03, commande de test DN-2026-6R7JG9).** Demande depuis le
+navigateur (adresse belge) → admin : vérification, disponibilités, livraison 12,90 €, demande de paiement
+(URL `http://` refusée, URL `https://` de test acceptée), client : « Paiement demandé », 132,87 €, bouton
+« Payer ma commande » ; expédition avant paiement refusée **à quatre niveaux** : bouton inactif, fonction
+(`payment_not_confirmed`), écriture REST directe (403), écriture superutilisateur via la CLI
+(`invalid_transition awaiting_payment → shipped`) ; puis paiement confirmé manuellement, préparation, suivi,
+expédiée ; client : « Expédiée », frise complète, transporteur, numéro et lien de suivi. Invariants 14/14.
+
+**Paiement.** Aucun prestataire (Stripe, PayPal, SumUp, Revolut…) n'est configuré : aucune intégration
+simulée, aucune page de paiement, aucune donnée de carte. `payment_provider` / `payment_url` /
+`payment_reference` attendent un lien de paiement sécurisé ; `orders_private.config.payment_allowed_hosts`
+peut restreindre les hôtes. Un paiement n'est `paid` que par validation de l'administration
+(`payment_confirmation_source = admin_manual`) — un retour client « ?success=true » ne prouve rien. Pour
+brancher un prestataire : créer la session de paiement à `request_payment` (montant = `total_cents`, devise
+EUR, référence = `public_number`), enregistrer son URL, et confirmer par un **webhook signé** reçu côté
+serveur (Supabase Edge Function avec le secret du prestataire) qui appelle une fonction dédiée posant
+`provider_webhook` ; `failed` et les remboursements suivent le même chemin.
+
+**E-mails.** Aucun service d'e-mail transactionnel n'existe. Les événements à notifier (commande reçue,
+paiement demandé, paiement reçu, expédiée, annulée, remboursée) sont dans `order_events`
+(`notify_customer`, `notified_at`) : l'administration prévient le client à la main puis marque la
+notification. Un futur envoi automatique lira cette file.
+
+**Production fermée.** `config/commerce.ts` (`ordering.termsReviewed = false`) : un build de production
+remplace le formulaire par « La commande en ligne ouvre bientôt » ; le serveur refuse aussi toute commande
+« production » (`production_ordering_open = false`). Préproduction : bandeau « commandes de TEST » et blocage
+CGV affichés ; toutes les commandes y sont `environment = preprod`, `is_test = true`.
+
+**Textes publics.** Bandeau « Commande en ligne · paiement après confirmation de votre commande » ;
+réassurance : Commande en ligne · Paiement après confirmation · Conseil personnalisé ; ligne livraison
+« Livraison en France et à l'international : frais confirmés avant paiement » ; accordéon « Livraison &
+paiement » = les 4 étapes du parcours + lien CGV ; footer Aide : Mon panier · Suivre une commande · Une
+question ? WhatsApp. Hors de France, mention neutre : droits ou taxes d'importation possibles, non calculés
+par Dar Nūr.
+
+**SEO et cache.** `/panier/`, `/commande/`, `/suivi/`, `/admin/commandes/` : `noindex` dans tous les
+environnements, hors sitemap, interdites dans `robots.txt` de production. Pages statiques sans aucune donnée
+client ; réponses des fonctions `Cache-Control: no-store, private`.
+
+**Mesures.** Responsive vérifié à 375 / 390 / 768 / 1366 / 1920 px (fiche, panier, commande, suivi,
+administration) : aucun débordement (le panier débordait à 375 px : corrigé par des colonnes `minmax(0, …)`).
+Lighthouse 12.8 mobile (serveur gzip, panier rempli) : fiche 99 / 100 / 100, panier 100 / 100 / 100, commande
+100 / 100 / 100 (performance / accessibilité / bonnes pratiques), CLS 0 (0,37 et 0,55 avant l'état du panier
+connu dès le `<head>`) ; SEO 69 = le seul `noindex`. JS de la page la plus lourde 6,7 Ko gzip.
+
+**Tests.** `scripts/test/schema/orders.mjs` (142 contrôles, `schema-ci`) : métier, paiement, expédition,
+RLS, sécurité de l'API, purge des tests, rollback. `npm run test:cart` (8 tests) et `npm run verify:orders`
+(`site-ci`). `verify-products` contrôle le bouton panier, les identifiants et prix du panier et l'absence de
+commande WhatsApp ; `verify-home` accepte « France et international » mais refuse livraison mondiale,
+gratuite ou sans frais de douane.
+
+**Commandes de test en production.** 4 commandes `preprod` (`DN-2026-9EKMFK`, `-LLZJXB`, `-F6CLJT`,
+`-6R7JG9`, e-mails `example.com`). La base interdit toute suppression ; une purge explicite, testée,
+**non exécutée**, est prête : `supabase/maintenance/20261003_etape10_purger_commandes_test.sql`.
+
+**Limites.** Aucun prestataire de paiement ni e-mail ; clients prévenus à la main ; CGV et confidentialité
+obsolètes (production fermée) ; pas de compte client ; pas de modification d'adresse par l'admin (figée,
+note interne possible) ; pas de multi-devise, de tarifs transporteur, de droits de douane ni de facture.
