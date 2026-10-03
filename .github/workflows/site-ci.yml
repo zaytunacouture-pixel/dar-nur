@@ -66,16 +66,18 @@ jobs:
 
       # Images optimisées d'Astro (node_modules/.astro, effacé par npm ci) : restaurées APRÈS
       # l'installation. Clé unique par exécution + préfixe de restauration : toujours le
-      # cache le plus récent, réenregistré enrichi en fin de job. Lancement manuel avec
-      # « cold » : aucune restauration, le build est mesuré à froid comme sur Netlify.
+      # cache le plus récent, réenregistré enrichi en fin de job. L'empreinte de
+      # astro.config.mjs est dans la clé : les réglages d'encodeur (effort AVIF…) ne changent
+      # pas les noms de fichiers d'Astro, un ancien cache serait donc réutilisé tel quel.
+      # Lancement manuel avec « cold » : aucune restauration, build mesuré comme sur Netlify.
       - name: Cache des images optimisées
         if: ${{ !inputs.cold }}
         uses: actions/cache@v4
         with:
           path: site/node_modules/.astro
-          key: astro-assets-${{ runner.os }}-${{ github.run_id }}
+          key: astro-assets-${{ runner.os }}-${{ hashFiles('site/astro.config.mjs') }}-${{ github.run_id }}
           restore-keys: |
-            astro-assets-${{ runner.os }}-
+            astro-assets-${{ runner.os }}-${{ hashFiles('site/astro.config.mjs') }}-
 
       - name: Formatage
         run: npm run format:check

@@ -1,7 +1,8 @@
 # Refonte Dar Nūr — nouveau socle Astro (`site/`)
 
-> Statut au 2 octobre 2026 : **étape 8 terminée — 245 fiches produit et leurs variantes réelles générées
-> depuis le nouveau schéma, page LAB des futurs regroupements Mode.** Le panier métier, l'accueil final et
+> Statut au 3 octobre 2026 : **étape 8B terminée — build à froid ramené sous la limite Netlify (6 min 55 s
+> en CI au lieu de 21 min 39 s), rendu inchangé.** Étape 8 : 245 fiches produit et leurs variantes réelles
+> générées depuis le nouveau schéma, page LAB des futurs regroupements Mode. Le panier métier, l'accueil final et
 > les redirections ne sont **pas** migrés ; aucune fusion de fiches n'est publiée. La production reste **dar-nur.fr** (GitHub Pages, racine du dépôt), que rien dans
 > `site/` ne modifie.
 
@@ -14,7 +15,7 @@
 | JavaScript client | Aucun framework. Petits `<script>` par composant (bundlés, dédupliqués par Astro) seulement là où il faut de l'interaction : menu mobile, méga-menu, panneaux, recherche, sélecteur de variantes. Header, footer, cartes : HTML statique. |
 | CSS | Variables CSS (`src/styles/tokens.css`) + base globale (`base.css`) + CSS scopé dans chaque composant. Pas de Tailwind ni de bibliothèque d'UI : aucun bénéfice pour ~40 composants, et du poids en plus. |
 | Données | Supabase **en lecture seule, au build** (`src/lib/supabase.ts`, `fetch` natif, colonnes listées explicitement). Traduction vers les types d'affichage dans `src/lib/catalog.ts`, seul fichier qui connaît le schéma. Depuis l'étape 6 : `status = published`, collection principale, `availability` (NULL = à arbitrer → repli sur `coming_soon`), `product_media`, options normalisées, arbre `collections`, `settings` publics. Schéma : `docs/SCHEMA_SUPABASE.md`. |
-| Images | `src/components/ui/CatalogPicture.astro`, point d'entrée unique : AVIF + WebP, `srcset`/`sizes`, dimensions déclarées, recadrage au ratio, chargement différé sauf l'image prioritaire (LCP). Images distantes autorisées : `dar-nur.fr` et le stockage public Supabase. |
+| Images | `src/components/ui/CatalogPicture.astro`, point d'entrée unique : AVIF + WebP, `srcset`/`sizes`, dimensions déclarées, recadrage au ratio, chargement différé sauf l'image prioritaire (LCP). Cadres partagés dans `src/config/images.ts` (étape 8B). Images distantes autorisées : `dar-nur.fr` et le stockage public Supabase. |
 | Polices | API Fonts d'Astro, fichiers locaux : Cormorant Garamond 500–600 (29 Ko) + Jost 400–500 (17 Ko), sous-ensemble FR + ū. Générés par `site/scripts/fonts/build-fonts.py` (sources épinglées), versionnés. Polices de repli aux métriques ajustées, préchargement. Aucun appel à Google Fonts. |
 | Icônes | Lucide (contour, trait 1,5), inlinées au build depuis `lucide-static` ; jeu fermé dans `src/components/ui/icons.ts`. Logos de réseaux : Simple Icons (CC0), copiés. |
 
@@ -65,6 +66,7 @@ Copier `site/.env.example` en `site/.env` (ignoré par Git).
 `site/netlify.toml` : publication de `dist/`, build `npm ci && npm run build && npm run verify`, Node 22,
 `DAR_NUR_ENV = "preprod"` forcé pour **tous** les contextes Netlify (le contexte « production » de Netlify
 est notre préproduction), `X-Robots-Tag: noindex` sur tout, cache d'un an sur `/_astro/*`.
+Build à froid mesuré ≈ 7 min sur 4 vCPU, sous la limite de 15 min de Netlify : voir « Build et images ».
 
 **Pourquoi dans `site/` et non à la racine** : Netlify lit `netlify.toml` dans le « Base directory » du
 site. Deux sites Netlify existants (`dar-nur`, `creative-beijinho-14efe6`) prévisualisent déjà l'ancien
@@ -98,6 +100,7 @@ compteur ou « best seller » sans données ; aucune photo générée à la plac
 | **Étape 6** (2026-10-02) : migration additive Supabase (9 migrations, `docs/SCHEMA_SUPABASE.md`), lecture du nouveau schéma dans `catalog.ts`, `/lab/supabase/` affiche l'arbre des collections, banc `scripts/test/schema` + CI `schema-ci.yml` | |
 | **Étape 7** (2026-10-02) : 3 univers, 15 collections, 2 transverses, 4 pages marque, filtres/tri, fil d'Ariane, JSON-LD, sitemap (production), 404, `verify-catalog` — section ci-dessous | |
 | **Étape 8** (2026-10-02) : 245 fiches `/{slug}/`, galerie, variantes réelles, prix au kg/L, disponibilité, commande WhatsApp, accordéons conditionnels, similaires, offres, JSON-LD Product/ProductGroup, sitemap avec `lastmod`, LAB des regroupements Mode, `verify-products` — section ci-dessous | Étape 9 : accueil final et blocs éditoriaux |
+| **Étape 8B** (2026-10-03) : build à froid 21 min 39 s → 6 min 55 s (CI), préréglages d'images, mesure reproductible — section « Build et images » | |
 
 ## Pages catalogue (étape 7)
 
@@ -218,6 +221,57 @@ disponibilité, commande, JSON-LD, images, mentions interdites, similaires, `las
 les pages, LAB, produits témoins, sitemap (build de production). Contrôle négatif fait : fiche non publiée,
 faux avis et prix modifié sont détectés.
 
-**Build.** ≈ 5 600 variantes d'images (AVIF + WebP). La CI met en cache `site/node_modules/.astro` (restauré
-après `npm ci`) et passe à 40 min de délai. **Netlify** : `npm ci` efface ce cache à chaque build ; un build à
-froid peut approcher la limite de 15 min de Netlify (non vérifiable sans accès au compte).
+**Build.** Voir « Build et images (étape 8B) » ci-dessous.
+
+## Build et images (étape 8B)
+
+**Cause du build lent (mesurée, CI 4 vCPU, build à froid de l'étape 8 : 21 min 39 s).** 99 % du temps est la
+génération des images (21 min 29 s), et 93 % de celle-ci est l'**encodage AVIF** : 4 780 s CPU pour
+3 228 fichiers (≈ 1,5 s chacun, effort 4 = réglage par défaut de sharp), contre 359 s pour les 3 233 WebP.
+6 461 fichiers pour 372 photos catalogue : chaque photo affichée en galerie + carte + miniature donne
+16 sorties (3 largeurs galerie + 3 largeurs carte + 2 miniatures, × AVIF et WebP).
+
+**Ce qui a été fait.**
+
+| Mesure | Effet |
+|---|---|
+| AVIF `effort: 3` (`astro.config.mjs`, `sharpImageService`) | Encodage 3,6–3,8× plus rapide, poids +1 à +3 %, SSIM −0,001, aucune différence visible agrandie ×2 (banc de 24 vraies sources). Qualités par défaut conservées : AVIF 50, WebP 80. Effort 2 écarté (+10 % de poids). |
+| Préréglages partagés `src/config/images.ts` | `GALLERY` 1200×1500 `inside` [480, 800, 1200] · `PRODUCT_CARD` 600×750 [200, 400, 600] · `THUMBNAIL` 128×160 [64, 128] · `COLLECTION_CARD`, `UNIVERSE_CARD`, `OFFER_CARD`, `HERO`. Une même photo dans un même cadre = un seul fichier. |
+| Miniature unique | Rail de galerie (64 px), sélecteur de couleur (48 px), recherche (48 px) et LAB (96 px) utilisent `THUMBNAIL` : le LAB n'a presque plus de fichiers propres (814 → 250). |
+| Rail de miniatures seulement à partir de 2 images | Le rail était masqué mais rendu (4 fichiers par photo) sur 78 % des fiches. |
+
+Largeurs conservées : la galerie sert 1200 px aux mobiles DPR 2–3 (430 × 2,6) et aux portables Retina ; les
+cartes 600 px au DPR 2 desktop (302 px). AVIF conservé partout (−45 % de poids par rapport au WebP).
+
+**Temps mesurés** (`node scripts/measure-build.mjs --cold | --warm` depuis `site/` : `--cold` supprime
+`dist/`, `node_modules/.astro` et `node_modules/.vite`, ce qu'efface `npm ci`) :
+
+| | Avant | Après |
+|---|---|---|
+| CI à froid, 4 vCPU (étape « Build statique ») | 21 min 39 s | **6 min 55 s** |
+| CI à froid, job complet (install, types, build, 3 contrôles) | 22 min 18 s | **7 min 34 s** |
+| Local à froid (12 threads) | 12 min 39 s | 4 min 24 s |
+| Local à chaud (cache valide) | 23 s | 16 s |
+| Fichiers image | 6 461 | 5 141 |
+| CPU AVIF / WebP (CI) | 4 780 s / 359 s | 1 275 s / 331 s |
+
+**Cache.** Le cache d'Astro (`node_modules/.astro`) n'accélère que tant que les sources n'ont pas bougé :
+les images de `dar-nur.fr` sont servies par GitHub Pages avec `max-age=600` et un `ETag` qui change à
+**chaque déploiement** du site actuel (cron de rattrapage Parfums compris) ; la revalidation reçoit alors
+200 et tout est réencodé. Un build « chaud » redevient donc froid au moins une fois par jour : seul le temps à
+froid compte. La CI garde son cache (clé = OS + empreinte de `astro.config.mjs`, car les réglages
+d'encodeur ne changent pas les noms de fichiers) et peut être lancée à la main avec `cold` pour mesurer le
+pire cas ; délai du job ramené à 20 min.
+
+**Netlify.** Limite par défaut : 15 min (+ 5 min de post-traitement), extensible par l'API seulement.
+Machine Starter annoncée à 4 cœurs / 8 Go, comparable au runner CI : build estimé ≈ 7 min à froid. `npm ci`
+reste dans la commande (installations reproductibles ; il efface le cache Astro, ce qui ne change rien
+puisque le build à froid tient la limite). Netlify Image CDN étudié et **non retenu** : il exige
+l'adaptateur `@astrojs/netlify`, déplace l'encodage vers la première visite (LCP du premier visiteur de
+chaque variante), rend les images invérifiables en CI (`verify-products` contrôle `/_astro/`) et lie
+l'hébergement à Netlify, sans nécessité une fois le build à froid sous la limite.
+
+**Points de vigilance.** dar-nur.fr peut répondre **429** à un build qui l'interroge en rafale (constaté
+après plusieurs builds locaux successifs) : un GET refusé fait échouer le build, un HEAD refusé écarte
+l'image (avertissement `[catalogue]`). Les images sources sont lues sur dar-nur.fr tant que le catalogue y
+pointe.

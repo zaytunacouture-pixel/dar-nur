@@ -10,6 +10,8 @@
 
 [build]
   # Chemins relatifs au Base directory (site/).
+  # Build à froid ≈ 7 min sur 4 vCPU (étape 8B), sous la limite Netlify de 15 min. `npm ci` efface
+  # le cache des images d'Astro (node_modules/.astro) : chaque build Netlify est un build à froid.
   publish = "dist"
   command = "npm ci && npm run build && npm run verify"
 
