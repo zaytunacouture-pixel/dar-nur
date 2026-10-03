@@ -1,0 +1,123 @@
+---
+/**
+ * Univers de l'accueil (étape 9) : photo, nom (lien vers l'univers) et ses collections
+ * principales en liens directs, avec leur nombre réel de produits. Mobile : rangée compacte
+ * (photo 1:1 de 120 px à gauche) pour voir les trois univers dans un écran ; desktop : colonne
+ * à photo 4:5. Texte jamais sur l'image. Mêmes fichiers d'image que UniverseCard (UNIVERSE_CARD).
+ */
+import CatalogPicture from '@/components/ui/CatalogPicture.astro';
+import Icon from '@/components/ui/Icon.astro';
+import { UNIVERSE_CARD } from '@/config/images';
+import type { HomeUniverse } from '@/lib/home-page';
+
+interface Props {
+  universe: HomeUniverse;
+}
+
+const { universe } = Astro.props;
+---
+
+<article class="dn-huniverse">
+  <a class="dn-huniverse__media" href={universe.href} tabindex="-1" aria-hidden="true">
+    <CatalogPicture
+      image={universe.image}
+      {...UNIVERSE_CARD}
+      sizes="(min-width: 768px) 30vw, 120px"
+      decorative
+      class="dn-huniverse__img"
+    />
+  </a>
+  <div class="dn-huniverse__body">
+    <h3 class="dn-huniverse__title">
+      <a href={universe.href}>
+        {universe.title}
+        <Icon name="arrow-right" size={20} />
+      </a>
+    </h3>
+    <ul class="dn-huniverse__links" role="list">
+      {universe.collections.map((c) => (
+        <li>
+          <a href={c.href}>
+            <span>{c.label}</span>
+            <span class="dn-small dn-muted">
+              {c.count}
+              <span class="dn-visually-hidden"> produits</span>
+            </span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</article>
+
+<style>
+  .dn-huniverse {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: var(--dn-space-4);
+    align-items: start;
+    padding-block: var(--dn-space-4);
+    border-bottom: var(--dn-border-decor);
+  }
+  .dn-huniverse__media {
+    display: block;
+    aspect-ratio: var(--dn-ratio-tile);
+    overflow: hidden;
+    border-radius: var(--dn-radius-sm);
+    background: var(--dn-media);
+  }
+  .dn-huniverse__media :global(.dn-huniverse__img) {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+    transition: transform var(--dn-dur-base) var(--dn-ease-out);
+  }
+  .dn-huniverse__body {
+    display: grid;
+    gap: var(--dn-space-1);
+  }
+  .dn-huniverse__title {
+    font-size: var(--dn-fs-h3);
+  }
+  .dn-huniverse__title a {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--dn-space-2);
+    min-block-size: var(--dn-tap-min);
+    text-decoration: none;
+  }
+  .dn-huniverse__title a:hover {
+    text-decoration: underline;
+  }
+  .dn-huniverse__links a {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--dn-space-3);
+    min-block-size: 32px;
+    padding-block: var(--dn-space-1);
+    font-size: var(--dn-fs-body-sm);
+    text-decoration: none;
+  }
+  .dn-huniverse__links a:hover span:first-child {
+    text-decoration: underline;
+  }
+
+  @media (min-width: 768px) {
+    .dn-huniverse {
+      grid-template-columns: 1fr;
+      padding-block: 0;
+      border-bottom: 0;
+    }
+    .dn-huniverse__media {
+      aspect-ratio: var(--dn-ratio-universe-d);
+    }
+    .dn-huniverse:hover .dn-huniverse__media :global(.dn-huniverse__img) {
+      transform: scale(1.02);
+    }
+    .dn-huniverse__links {
+      border-top: var(--dn-border-decor);
+      padding-top: var(--dn-space-2);
+    }
+  }
+</style>

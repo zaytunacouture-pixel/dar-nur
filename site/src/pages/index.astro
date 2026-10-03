@@ -1,80 +1,270 @@
 ---
 /**
- * Accueil de la PRÉPRODUCTION — ce n'est pas la future page d'accueil.
- * Il oriente vers les pages de validation du socle (étape 5).
+ * Accueil (étape 9). Mise en page seulement : données et contrôles dans src/lib/home-page.ts,
+ * choix éditoriaux dans src/config/home.ts.
+ *
+ * Hero · Univers (et leurs collections) · À découvrir · Miels · Idées cadeaux & offres ·
+ * réassurance (composant global) · footer. Aucun avis, compteur de clients, newsletter, faux
+ * panier ni promesse de livraison hors Île-de-France.
  */
+import { getImage } from 'astro:assets';
+import EntryCard from '@/components/catalog/EntryCard.astro';
+import ProductCard from '@/components/catalog/ProductCard.astro';
+import Hero from '@/components/home/Hero.astro';
+import HomeUniverse from '@/components/home/HomeUniverse.astro';
 import Button from '@/components/ui/Button.astro';
+import CatalogPicture from '@/components/ui/CatalogPicture.astro';
 import Ornament from '@/components/ui/Ornament.astro';
-import { siteEnv } from '@/config/site';
+import { contact } from '@/config/commerce';
+import { PRODUCT_CARD } from '@/config/images';
+import { siteName } from '@/config/site';
 import BaseLayout from '@/layouts/BaseLayout.astro';
+import { homeView } from '@/lib/home-page';
+import { serializeJsonLd } from '@/lib/structured-data';
+import logo from '@/assets/brand/logo-dar-nur.png';
 
-const pages = [
-  {
-    href: '/demo/',
-    title: 'Page de démonstration',
-    text: 'Header, hero (emplacement photo), univers, échantillon de produits réels, footer.',
-  },
-  {
-    href: '/design-system/',
-    title: 'Design system',
-    text: 'Palette, typographie, espacements, boutons, champs, cartes, badges, variantes.',
-  },
-  {
-    href: '/lab/supabase/',
-    title: 'Lecture Supabase',
-    text: 'Preuve de la chaîne build → Supabase → HTML statique.',
-  },
-];
+const view = await homeView();
+const site = Astro.site ?? new URL(Astro.url.origin);
+const home = new URL('/', site).toString();
+const logoPng = await getImage({ src: logo, format: 'png' });
+
+// WebSite + Organization : uniquement des données publiques et vérifiées (nom, URL, logo,
+// réseaux, WhatsApp de contact). Ni avis, ni note, ni SearchAction (recherche non branchée).
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      '@id': `${home}#website`,
+      name: siteName,
+      url: home,
+      inLanguage: 'fr-FR',
+      publisher: { '@id': `${home}#organization` },
+    },
+    {
+      '@type': 'Organization',
+      '@id': `${home}#organization`,
+      name: siteName,
+      url: home,
+      logo: new URL(logoPng.src, site).toString(),
+      sameAs: [contact.instagramUrl, contact.tiktokUrl],
+      contactPoint: {
+        '@type': 'ContactPoint',
+        telephone: `+${contact.whatsappNumber}`,
+        contactType: 'customer service',
+        availableLanguage: 'fr',
+      },
+    },
+  ],
+};
 ---
 
 <BaseLayout
   seo={{
-    title: 'Socle technique — préproduction',
-    description: 'Préproduction du nouveau socle Dar Nūr (Astro). Pages de validation, non indexées.',
+    title: `${siteName} — Miels, parfums, soins et mode modeste`,
+    description:
+      'Miels et herboristerie, parfums et soins, mode modeste : les trois univers de Dar Nūr. Commande sur WhatsApp, paiement à la réception.',
+    canonicalPath: '/',
   }}
 >
-  <section class="dn-section dn-container">
-    <Ornament />
-    <h1>Dar Nūr — socle technique</h1>
-    <p class="dn-body-lg dn-muted dn-measure dn-intro">
-      Préproduction du futur site ({siteEnv}). Univers, collections et fiches produit sont générés depuis
-      Supabase ; l’accueil final et le panier ne sont pas encore migrés. La boutique en service reste{' '}
-      <a href="https://dar-nur.fr/">dar-nur.fr</a>.
-    </p>
-    <ul class="dn-entry-list" role="list">
-      {pages.map((page) => (
-        <li class="dn-entry">
-          <h2 class="dn-h3">{page.title}</h2>
-          <p class="dn-body-sm dn-muted">{page.text}</p>
-          <Button variant="secondary" href={page.href} iconEnd="arrow-right">
-            Ouvrir
-          </Button>
-        </li>
-      ))}
-    </ul>
-  </section>
+  <script type="application/ld+json" slot="head" set:html={serializeJsonLd(jsonLd)} />
+  <div data-dn-page="home" data-dn-indexable="true">
+    {view.hero ? (
+      <Hero
+        title="Miels, parfums et mode modeste"
+        subtitle="Trois univers réunis dans une même maison."
+        cta={view.hero.cta}
+        secondary={{ label: 'Voir les trois univers', href: '#univers' }}
+        image={view.hero.image}
+        frame={view.hero.frame}
+        caption={view.hero.product}
+      />
+    ) : (
+      <section class="dn-section dn-container">
+        <h1>Dar Nūr</h1>
+        <p class="dn-body-lg dn-muted">Catalogue non configuré : aucun produit lu (voir .env.example).</p>
+      </section>
+    )}
+
+    {view.universes.length > 0 && (
+      <section class="dn-section dn-home-universes" id="univers" aria-labelledby="univers-title">
+        <div class="dn-container">
+          <Ornament />
+          <h2 id="univers-title" class="dn-section-head">
+            Trois univers
+          </h2>
+          <div class="dn-home-universes__grid">
+            {view.universes.map((universe) => (
+              <HomeUniverse universe={universe} />
+            ))}
+          </div>
+        </div>
+      </section>
+    )}
+
+    {view.featured.length > 0 && (
+      <section class="dn-section dn-section--alt" aria-labelledby="decouvrir-title">
+        <div class="dn-container">
+          <div class="dn-section-head">
+            <div>
+              <Ornament />
+              <h2 id="decouvrir-title">À découvrir</h2>
+            </div>
+            <p class="dn-body-sm dn-muted">Une sélection de la maison, dans chacun des trois univers.</p>
+          </div>
+          <ul class="dn-home-grid" role="list">
+            {view.featured.map((product) => (
+              <li>
+                <ProductCard product={product} allowQuickAdd={false} />
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+    )}
+
+    {view.honey && (
+      <section class="dn-section" aria-labelledby="miels-title">
+        <div class="dn-container dn-home-honey">
+          <div class="dn-home-honey__media">
+            {/* Même cadre que la carte produit du miel de printemps : fichiers déjà générés pour /miels/. */}
+            <CatalogPicture
+              image={view.honey.image}
+              {...PRODUCT_CARD}
+              sizes="(min-width: 1024px) 36vw, (min-width: 768px) 45vw, 92vw"
+              class="dn-home-honey__img"
+            />
+          </div>
+          <div class="dn-home-honey__text">
+            <Ornament />
+            <h2 id="miels-title">Du miel de printemps aux miels aux fruits</h2>
+            <p class="dn-body-lg dn-muted">
+              Notre miel de printemps est récolté en France. Il se déguste nature et sert de base à nos miels
+              aux fruits&nbsp;: mangue, fraise, passion… La collection réunit aussi des miels d’autres
+              provenances et des préparations au miel.
+            </p>
+            <div class="dn-home-honey__actions">
+              <Button variant="secondary" href={view.honey.primary.href} iconEnd="arrow-right">
+                Découvrir les miels
+              </Button>
+              <Button variant="tertiary" href={view.honey.secondary.href}>
+                {view.honey.secondary.label}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+    )}
+
+    {view.gifts && view.offers && (
+      <section class="dn-section dn-home-entries" aria-labelledby="offrir-title">
+        <div class="dn-container">
+          <Ornament />
+          <h2 id="offrir-title" class="dn-section-head">
+            Idées cadeaux & offres
+          </h2>
+          <div class="dn-home-entries__grid">
+            <EntryCard title={view.gifts.label} text={view.gifts.text} href={view.gifts.href} icon="gift" />
+            <EntryCard
+              title={view.offers.label}
+              text={view.offers.text}
+              href={view.offers.href}
+              icon="package"
+            />
+          </div>
+        </div>
+      </section>
+    )}
+  </div>
 </BaseLayout>
 
 <style>
-  .dn-intro {
-    margin-top: var(--dn-space-3);
+  .dn-home-universes {
+    padding-block-end: var(--dn-space-8);
   }
-  .dn-entry-list {
+  .dn-home-universes__grid {
     display: grid;
-    gap: var(--dn-grid-gap);
-    margin-top: var(--dn-space-8);
   }
-  .dn-entry {
+  .dn-home-universes__grid > :global(:first-child) {
+    padding-block-start: 0;
+  }
+
+  /* Sélection : vraie grille (2 colonnes mobile, 4 desktop), aucun carrousel. */
+  .dn-home-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--dn-space-6) var(--dn-grid-gap);
+  }
+
+  .dn-home-honey {
+    display: grid;
+    gap: var(--dn-space-6);
+    align-items: center;
+  }
+  .dn-home-honey__media {
+    aspect-ratio: var(--dn-ratio-editorial-m);
+    overflow: hidden;
+    border-radius: var(--dn-radius-sm);
+    background: var(--dn-media);
+  }
+  .dn-home-honey__media :global(picture) {
+    block-size: 100%;
+  }
+  .dn-home-honey__media :global(.dn-home-honey__img) {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+    /* Recadrage 4:3 (mobile) d'une photo 4:5 : garder le pot, posé dans le bas de l'image. */
+    object-position: 50% 85%;
+  }
+  .dn-home-honey__text {
     display: grid;
     gap: var(--dn-space-3);
     justify-items: start;
-    padding: var(--dn-space-6);
-    border-radius: var(--dn-radius-md);
-    background: var(--dn-bg-alt);
+  }
+  .dn-home-honey__text p {
+    max-inline-size: 34em;
+  }
+  .dn-home-honey__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--dn-space-2) var(--dn-space-4);
+    margin-top: var(--dn-space-2);
+  }
+
+  .dn-home-entries {
+    padding-block-start: 0;
+  }
+  .dn-home-entries__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--dn-grid-gap);
+  }
+
+  @media (min-width: 768px) {
+    .dn-home-universes__grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--dn-grid-gap);
+    }
+    .dn-home-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    .dn-home-honey {
+      grid-template-columns: 5fr 6fr;
+      gap: var(--dn-space-10);
+    }
+    .dn-home-honey__media {
+      aspect-ratio: var(--dn-ratio-editorial-d);
+    }
   }
   @media (min-width: 1024px) {
-    .dn-entry-list {
-      grid-template-columns: repeat(3, 1fr);
+    .dn-home-grid {
+      row-gap: var(--dn-grid-row-gap);
+    }
+    .dn-home-honey {
+      grid-template-columns: 4fr 6fr;
+      gap: var(--dn-space-16);
     }
   }
 </style>

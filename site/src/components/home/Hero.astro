@@ -5,11 +5,13 @@
  *
  * ⚠ PHOTO HERO FINALE À FOURNIR APRÈS SHOOTING. Sans `image`, le composant affiche un
  * emplacement qui décrit la photo attendue — jamais une image générée.
- * Quand la photo existera : passer `image` (recadrages 1:1 mobile et 4:3 desktop) ;
- * elle sera alors l'image LCP, préchargée (`priority`).
+ * Avec `image` (étape 9 : une vraie photo catalogue) : image LCP prioritaire, recadrée UNE fois
+ * en 4:3 (préréglage HERO, ou `frame` ramené à la taille de la source) et montrée en 4:3 à toutes
+ * les largeurs — un second recadrage 1:1 mobile couperait les côtés d'une photo déjà recadrée.
+ * `caption` nomme le produit photographié (lien vers sa fiche), hors de l'image.
  */
 import CatalogPicture from '@/components/ui/CatalogPicture.astro';
-import { HERO } from '@/config/images';
+import { HERO, type ImageFrame } from '@/config/images';
 import Button from '@/components/ui/Button.astro';
 import MediaPlaceholder from '@/components/ui/MediaPlaceholder.astro';
 import type { MediaImage } from '@/types/catalog';
@@ -20,20 +22,23 @@ interface Props {
   cta: { label: string; href: string };
   secondary?: { label: string; href: string };
   image?: MediaImage;
+  /** Cadre de l'image (par défaut HERO) : voir frameForSource pour une source plus petite. */
+  frame?: ImageFrame;
+  caption?: { label: string; href: string };
 }
 
-const { title, subtitle, cta, secondary, image } = Astro.props;
+const { title, subtitle, cta, secondary, image, frame = HERO, caption } = Astro.props;
 const placeholder =
   'Photo hero finale à fournir après shooting — vrais produits Dar Nūr : miel, musc tahara, étoffe, sur lin crème';
 ---
 
 <section class="dn-hero">
-  <div class="dn-hero__media">
+  <div class:list={['dn-hero__media', { 'dn-hero__media--photo': image }]}>
     {image ? (
       <CatalogPicture
         image={image}
-        {...HERO}
-        sizes="(min-width: 1024px) 58vw, 100vw"
+        {...frame}
+        sizes="(min-width: 1600px) 934px, (min-width: 1024px) 58vw, 100vw"
         priority
         class="dn-hero__img"
       />
@@ -54,6 +59,11 @@ const placeholder =
         </Button>
       )}
     </div>
+    {caption && (
+      <p class="dn-hero__caption dn-small dn-muted">
+        En photo&nbsp;: <a href={caption.href}>{caption.label}</a>
+      </p>
+    )}
   </div>
 </section>
 
@@ -65,6 +75,13 @@ const placeholder =
     aspect-ratio: var(--dn-ratio-hero-m);
     background: var(--dn-media);
     overflow: hidden;
+  }
+  .dn-hero__media--photo {
+    aspect-ratio: var(--dn-ratio-hero-d);
+  }
+  /* <picture> est un bloc (base.css) : sans hauteur, l'image ne remplirait pas la colonne desktop. */
+  .dn-hero__media :global(picture) {
+    block-size: 100%;
   }
   .dn-hero__media :global(.dn-hero__img),
   .dn-hero__media :global(.dn-hero__ph) {
@@ -84,6 +101,9 @@ const placeholder =
     justify-items: start;
     gap: var(--dn-space-2);
     margin-top: var(--dn-space-4);
+  }
+  .dn-hero__caption {
+    margin-top: var(--dn-space-2);
   }
 
   @media (min-width: 768px) {
