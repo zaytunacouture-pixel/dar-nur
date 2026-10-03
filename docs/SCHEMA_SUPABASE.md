@@ -1,4 +1,4 @@
-# Schéma Supabase — état après les étapes 6 (2026-10-02) et 10 (2026-10-03)
+# Schéma Supabase — état après les étapes 6 (2026-10-02) et 10 (2026-10-03) ; étape 11 préparée
 
 > Référence courte pour reprendre le travail. Le **SQL fait foi** : `supabase/migrations/20261002*_etape6_*.sql`
 > (commentés). Appliqué en production le 2026-10-02 ; l'ancien site, l'admin, les générateurs, le panier,
@@ -131,3 +131,25 @@ vérification ; coordonnées, adresse, numéro et lignes immuables ; aucune supp
 **Vérifié en production après application** : 14/14 invariants ; `products?select=*,product_variants(*)`
 (ancien site) inchangé ; `orders`/`order_items`/`order_events` → 42501 pour anon ; fonctions d'admin → 42501
 pour anon ; `orders_private` non exposé (PGRST106) ; en-tête `Cache-Control: no-store, private`.
+
+## E-mails transactionnels (étape 11, préparée le 2026-10-03 — NON appliquée)
+
+> Migrations `supabase/migrations/20261003120000_etape11_01_order_emails.sql` (outbox, trigger, fonctions) et
+> `20261003120100_etape11_02_order_emails_cron.sql` (pg_cron, tâche `dar-nur-order-emails` toutes les 5 min).
+> Additives : aucune table existante modifiée ; un trigger AJOUTÉ sur `order_events`. Rollback :
+> `supabase/rollback/20261003_etape11_rollback.sql` (ne touche à aucune commande). Contrôles :
+> `supabase/checks/etape11_invariants.sql`. Banc : `scripts/test/schema/emails.mjs` (124 contrôles, `schema-ci`).
+> En production : `pg_net` et `supabase_vault` déjà installés, `pg_cron` disponible mais pas encore activé
+> (relevé du 2026-10-03).
+
+| Objet | Rôle | Droits |
+|---|---|---|
+| `orders_private.email_config` | Singleton : `sending_enabled` (faux), `production_sending_enabled` (faux), `test_recipients` (vide, minuscules, 10 max), `site_url_production` (`https://dar-nur.fr`), `site_url_test` (NULL), `worker_url` (NULL, projet Supabase seulement). Aucun secret. | aucun (SQL / CLI) |
+| `orders_private.order_emails` | Outbox : `order_id`, `event_id` (unique), `email_type` (4 valeurs), `occurrence` (>1 seulement pour `payment_requested`), `environment`, `status` (`pending`/`sending`/`sent`/`failed`/`skipped`), `attempts` (≤ 4), `next_attempt_at`, `queued_at` (expiration 48 h), `claim_id` + `locked_until` (bail 5 min), `provider_message_id`, `delivery_status`, `last_error` (≤ 300, nettoyé). Ni adresse ni contenu. `on delete cascade` (purge des tests). | aucun |
+| trigger `trg_order_events_enqueue_email` | AFTER INSERT sur `order_events` : crée la ligne (même transaction), remplace une demande de paiement non partie, réveille le worker (pg_net). Exception capturée : n'échoue jamais. | — |
+| `orders_private.kick_order_email_worker(reason, only_if_due)` | `net.http_post` vers `worker_url` avec le jeton Vault `order_emails_worker_secret` ; rien si interrupteur coupé, URL/jeton/pg_net absents, ou (cron) rien de dû. | definer, aucun rôle API |
+| `public.order_emails_claim(limit)` / `order_emails_report(id, claim_id, outcome, message_id, error)` | Worker : réclamation (garde-fous environnement / liste de test / URL / obsolescence / expiration) et compte rendu (tentatives 5 min / 30 min / 2 h puis `failed` ; `sent` → `notified_at` + `customer_notified`). | `service_role` seul |
+| `public.order_emails_delivery_event(message_id, event, at)` | Webhook Brevo → `delivery_status` (incident définitif prioritaire). Aucune commande modifiée. | `service_role` seul |
+| `public.admin_order_emails(order_id)` / `admin_order_email_alerts()` / `admin_retry_order_email(id)` | Bloc admin, alertes de la liste, « Réessayer » (même ligne ; refusé si déjà envoyé, en cours, remplacé ou sans objet). | authenticated (refus si non admin) |
+
+Le contrôle `etape10_invariants.sql` / `triggers_present` vise désormais nommément les 6 triggers de l'étape 10.

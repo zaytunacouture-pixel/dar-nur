@@ -510,3 +510,15 @@ Sujets identifiés, mesurés, et **volontairement laissés en l'état**. Aucun n
 - Site Astro (`site/`) : `/panier/`, `/commande/`, `/suivi/#jeton`, `/admin/commandes/`. L'ancien site
   (`admin.html`, `js/cart.js`, commande WhatsApp) n'est pas modifié.
 - Détails : `docs/REFONTE_ASTRO.md` (« Commande, paiement, livraison ») et `docs/SCHEMA_SUPABASE.md`.
+
+## E-mails transactionnels (refonte, étape 11 — préparée le 2026-10-03, non déployée)
+
+- Outbox `orders_private.order_emails` alimentée par trigger sur `order_events` ; Edge Functions
+  `supabase/functions/order-emails` (worker → Brevo) et `order-emails-webhook` (statut de remise) ; code
+  partagé sans dépendance dans `supabase/functions/_shared/order-emails/` (testé sous Node).
+- Règle : les e-mails ne modifient jamais `orders.status` / `payment_status` ; clé Brevo uniquement dans les
+  secrets Edge ; commandes de test envoyées seulement aux adresses de test validées (base + secret).
+- ⚠ Après fusion dans `main`, `supabase/` est servi publiquement par GitHub Pages (vérifié le 2026-10-03 :
+  `https://dar-nur.fr/supabase/schema.sql` → 200) : `supabase/functions/` ne doit jamais contenir de secret.
+- Détails et mise en service : `docs/REFONTE_ASTRO.md` (« E-mails transactionnels (étape 11) »),
+  `docs/SCHEMA_SUPABASE.md`.

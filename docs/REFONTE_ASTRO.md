@@ -113,7 +113,8 @@ compteur ou « best seller » sans données ; aucune photo générée à la plac
 | **Étape 8** (2026-10-02) : 245 fiches `/{slug}/`, galerie, variantes réelles, prix au kg/L, disponibilité, commande WhatsApp, accordéons conditionnels, similaires, offres, JSON-LD Product/ProductGroup, sitemap avec `lastmod`, LAB des regroupements Mode, `verify-products` — section ci-dessous | |
 | **Étape 8B** (2026-10-03) : build à froid 21 min 39 s → 6 min 55 s (CI), préréglages d'images, mesure reproductible — section « Build et images » | |
 | **Étape 9** (2026-10-03) : accueil final `/`, configuration éditoriale, `verify-home` — section « Accueil (étape 9) » | |
-| **Étape 10** (2026-10-03) : panier, demande de commande, suivi, administration des commandes, tables et fonctions Supabase, `verify-orders`, `test:cart` — section « Commande, paiement, livraison (étape 10) » | Prestataire de paiement, e-mails transactionnels, CGV et confidentialité révisées (bloquant production), recherche, redirections, shooting |
+| **Étape 10** (2026-10-03) : panier, demande de commande, suivi, administration des commandes, tables et fonctions Supabase, `verify-orders`, `test:cart` — section « Commande, paiement, livraison (étape 10) » | Paiement via Shopify (étape dédiée), CGV et confidentialité révisées (bloquant production), recherche, redirections, shooting |
+| **Étape 11, phase 1** (2026-10-03) : e-mails transactionnels Brevo — outbox, Edge Functions, gabarits, bloc admin « Notifications », bancs hors ligne ; **rien de déployé** — section « E-mails transactionnels (étape 11) » | Phase 2 après configuration Brevo par le propriétaire |
 
 ## Pages catalogue (étape 7)
 
@@ -417,10 +418,10 @@ EUR, référence = `public_number`), enregistrer son URL, et confirmer par un **
 serveur (Supabase Edge Function avec le secret du prestataire) qui appelle une fonction dédiée posant
 `provider_webhook` ; `failed` et les remboursements suivent le même chemin.
 
-**E-mails.** Aucun service d'e-mail transactionnel n'existe. Les événements à notifier (commande reçue,
-paiement demandé, paiement reçu, expédiée, annulée, remboursée) sont dans `order_events`
-(`notify_customer`, `notified_at`) : l'administration prévient le client à la main puis marque la
-notification. Un futur envoi automatique lira cette file.
+**E-mails.** Les événements à notifier (commande reçue, paiement demandé, paiement reçu, expédiée, annulée,
+remboursée) sont dans `order_events` (`notify_customer`, `notified_at`) : l'administration prévient le client à
+la main puis marque la notification. L'étape 11 automatise quatre de ces e-mails (Brevo) : voir « E-mails
+transactionnels (étape 11) » ; tant qu'elle n'est pas en service, rien ne change.
 
 **Production fermée.** `config/commerce.ts` (`ordering.termsReviewed = false`) : un build de production
 remplace le formulaire par « La commande en ligne ouvre bientôt » ; le serveur refuse aussi toute commande
@@ -457,3 +458,122 @@ gratuite ou sans frais de douane.
 **Limites.** Aucun prestataire de paiement ni e-mail ; clients prévenus à la main ; CGV et confidentialité
 obsolètes (production fermée) ; pas de compte client ; pas de modification d'adresse par l'admin (figée,
 note interne possible) ; pas de multi-devise, de tarifs transporteur, de droits de douane ni de facture.
+
+
+## E-mails transactionnels (étape 11)
+
+> **Phase 1 (2026-10-03) : préparé et testé hors ligne, RIEN de déployé.** Migrations
+> `supabase/migrations/20261003120*_etape11_*.sql` **non appliquées** ; Edge Functions **non déployées** ;
+> aucun compte, aucune clé, aucun envoi. Paiement : inchangé (aucun prestataire ; Shopify plus tard, étape dédiée).
+
+**Périmètre.** Quatre e-mails, et seulement eux : commande reçue, paiement demandé, paiement confirmé,
+commande expédiée. Brevo est utilisé comme **API transactionnelle seulement** (aucun contact, liste, campagne,
+panier abandonné ni suivi marketing). Français seulement (textes regroupés par langue dans `templates.ts`).
+
+**Architecture (outbox).**
+
+```
+order_events (journal étape 10) ──trigger, même transaction──▶ orders_private.order_emails (outbox)
+                                                                 │ pg_net (après COMMIT) + pg_cron /5 min
+                                                                 ▼
+                                    Edge Function order-emails ──▶ API Brevo /v3/smtp/email
+Brevo ──webhook (jeton bearer)──▶ Edge Function order-emails-webhook ──▶ delivery_status (info admin)
+```
+
+- Déclencheurs : `created` → commande reçue ; passage à `awaiting_payment` → paiement demandé ; passage de
+  `payment_status` à `paid` (admin aujourd'hui, prestataire demain — même événement, même e-mail) → paiement
+  confirmé ; passage à `shipped` → expédiée. Annulation, livraison, remboursement : aucun e-mail (à la main).
+- **Les e-mails ne pilotent jamais la commande** : aucune fonction de l'étape 11 n'écrit `status` ni
+  `payment_status` (testé) ; une panne d'outbox ou de pg_net n'empêche aucune commande (testé) ; un rebond
+  n'annule rien. Seul effet sur l'étape 10 : un envoi réussi renseigne `order_events.notified_at` et ajoute
+  un événement `customer_notified` (canal e-mail), ce qui vide la liste « Client à prévenir ».
+- Le contenu n'est **pas stocké** : rendu à l'envoi depuis la commande (prénom, numéro, articles, montants,
+  transporteur). Jamais d'adresse postale, de téléphone, de note interne, de référence de paiement, d'UUID.
+- Lien de suivi `https://<site>/suivi/#<jeton>` : jeton dérivé en base au moment de l'envoi (jamais stocké),
+  toujours dans le **fragment** (refusé sinon par le gabarit) : le serveur web ne le reçoit jamais. Brevo, qui
+  reçoit le corps de l'e-mail, le voit (comme tout le contenu) ; son suivi des clics réécrit les liens et ne se
+  désactive pas pour le transactionnel sans demande au support — à vérifier sur le premier e-mail de test
+  (le fragment doit survivre à la redirection).
+
+**Idempotence.** `unique (event_id)` + `unique (order_id, email_type, occurrence)`. Une seule occurrence pour
+3 types (les transitions ne se répètent pas). « Paiement demandé » peut se répéter **par choix** : repasser
+en vérification puis redemander le paiement fixe un nouveau total que le client doit recevoir ; l'ancienne
+demande non partie est abandonnée (`superseded`), et un e-mail devenu sans objet au moment de l'envoi
+(commande annulée, déjà payée…) n'est pas envoyé (`obsolete`). Protection secondaire : `idempotencyKey` Brevo
+(= id de la ligne, 30 min) — couvre le cas « Brevo a accepté, le worker est mort avant son compte rendu ».
+
+**Envoi et tentatives.** Le worker réclame par bail de 5 min (`FOR UPDATE SKIP LOCKED`, `claim_id` : un compte
+rendu périmé est refusé). Tentatives : immédiate, +5 min, +30 min, +2 h, puis `failed` (jamais de boucle).
+400 Brevo = échec définitif ; 401/402/403/429/5xx/réseau/délai = nouvelle tentative. En file plus de 48 h →
+`expired`. Statuts : `pending`, `sending`, `sent`, `failed`, `skipped` ; remise séparée (`delivery_status` :
+delivered, deferred, soft/hard bounce, blocked, invalid_email, spam, error). Erreurs réduites à un code court,
+nettoyées en base (clé, JWT, adresse e-mail masqués).
+
+**Garde-fous préproduction (doublés base + fonction).** Interrupteur général `sending_enabled` (faux) ;
+production `production_sending_enabled` (faux) **et** secret `ORDER_EMAILS_ALLOW_PRODUCTION=true` (absent) ;
+commande de test → destinataire présent dans `test_recipients` (base, vide) **et** dans
+`ORDER_EMAILS_TEST_RECIPIENTS` (secret) ; objet préfixé `[TEST]` et bandeau « E-mail de test ». Aucune
+adresse n'est choisie par défaut.
+
+**Sécurité.** `BREVO_API_KEY` n'existe que dans les secrets Edge (jamais Git, site, table). Les fonctions
+`order_emails_claim/report/delivery_event` ne sont exécutables que par `service_role` ; l'outbox est dans
+`orders_private` (non exposé). Edge Functions déployées **sans vérification JWT** mais avec un jeton
+bearer comparé à temps constant (`ORDER_EMAILS_WORKER_SECRET`, lu par pg_net dans Vault ;
+`BREVO_WEBHOOK_TOKEN`) ; le worker **ignore le corps de la requête** : personne ne peut lui imposer un
+destinataire ou un contenu. Brevo ne signe pas ses webhooks (pas de HMAC) : jeton + validation stricte, et
+le webhook ne modifie qu'une colonne d'information.
+
+**Gabarits** (`supabase/functions/_shared/order-emails/templates.ts`) : HTML généré et versionné (aucun
+`templateId` Brevo : un changement manuel dans Brevo ne peut rien casser), version texte équivalente,
+tableaux + styles en ligne, 600 px, bouton ≥ 44 px, logo en texte (aucune image), sans police web ni
+JavaScript, vert #2C4A23, fond crème, filet doré. Aperçus : `node scripts/test/schema/email-templates.mjs
+--preview <dossier>`.
+
+**Administration** (`/admin/commandes/`) : bloc « Notifications » (statut de chaque e-mail, prochaine
+tentative, erreur lisible, « Réessayer » sur la même ligne), alerte « Adresse e-mail en erreur » et badge
+dans la liste. Base sans migration 11 : bloc neutre « non installés ».
+
+**Tests.** `scripts/test/schema/email-templates.mjs` (102 : 4 types, montants, livraison 0, international,
+avec/sans suivi, accents, échappement, client Brevo simulé, configuration, authentification, webhook) ;
+`scripts/test/schema/emails.mjs` (124 : le vrai worker contre PGlite + vraies migrations + faux Brevo —
+mise en file, unicité, ordre, tentatives, limite, « Réessayer », deux workers, bail expiré, doublon Brevo,
+garde-fous, webhook, droits, pg_net simulé, purge, rollback) ; vérification des types (strict) ;
+`npm run test:emails` en `schema-ci`. `verify-orders` : aucune référence Brevo ni fonction du worker dans le
+navigateur. Admin vérifié contre un faux back-end local (4 états, relance, 375 → 1920 px).
+
+**Rollback.** `supabase/rollback/20261003_etape11_rollback.sql` : retire outbox, configuration, trigger,
+fonctions et tâche cron ; ne touche à aucune commande (testé : schéma identique à l'après-étape 10).
+
+### Mise en service (phase 2, après « Brevo configuré »)
+
+**DNS actuel de dar-nur.fr** (OVH, relevé le 2026-10-03) : MX `mx1/2/3.mail.ovh.net` ; TXT
+`v=spf1 include:mx.ovh.com -all` (SPF unique) + `google-site-verification` ; **aucun DMARC** ; aucun DKIM Brevo.
+
+**À faire par le propriétaire** (aucun secret dans la conversation) :
+1. Compte Brevo (offre gratuite suffisante : 300 e-mails/jour).
+2. Brevo → Paramètres → Expéditeurs, domaines, IP dédiées → **Domaines** → ajouter `dar-nur.fr`,
+   configuration manuelle → Brevo affiche ses enregistrements.
+3. OVHcloud → Noms de domaine → dar-nur.fr → **Zone DNS** → ajouter, en recopiant exactement Brevo :
+   TXT (sous-domaine vide) `brevo-code:…` ; CNAME `brevo1._domainkey` → `b1.….dkim.brevo.com.` ;
+   CNAME `brevo2._domainkey` → `b2.….dkim.brevo.com.` ; TXT `_dmarc` →
+   `v=DMARC1; p=none; rua=mailto:rua@dmarc.brevo.com` (aucun DMARC n'existe : pas de fusion).
+   **SPF : ne pas en créer un second.** Brevo n'en exige pas sur IP partagée ; s'il le demande, modifier
+   l'entrée existante en `v=spf1 include:mx.ovh.com include:spf.brevo.com -all`. Puis « Authentifier »
+   dans Brevo (propagation jusqu'à 48 h).
+4. Brevo → SMTP & API → **Clés API** → générer une clé dédiée (« dar-nur-order-emails »). Si Brevo bloque
+   les IP inconnues (Sécurité → IP autorisées), l'autoriser pour cette clé : les Edge Functions n'ont pas
+   d'IP fixe.
+5. Expéditeur `commande@dar-nur.fr`, nom « Dar Nūr » (Brevo → Expéditeurs) ; confirmer que
+   `contact@dar-nur.fr` est une vraie boîte OVH avant d'en faire le Reply-To.
+6. Supabase → Edge Functions → **Secrets** : `BREVO_API_KEY`, `BREVO_SENDER_EMAIL`, `BREVO_SENDER_NAME`,
+   `BREVO_REPLY_TO_EMAIL` (si la boîte existe), `ORDER_EMAILS_TEST_RECIPIENTS` (adresse de test validée).
+7. Facultatif (alertes de rebond) : après déploiement, webhook transactionnel Brevo vers
+   `https://sxlpgcnjerlayitaxxyv.supabase.co/functions/v1/order-emails-webhook`, authentification par jeton,
+   même valeur dans le secret `BREVO_WEBHOOK_TOKEN`.
+
+**Ensuite (session de développement)** : sauvegarde, application des 2 migrations, contrôles
+`etape10_invariants.sql` + `etape11_invariants.sql`, jeton du worker généré et déposé dans Vault
+(`order_emails_worker_secret`) et en secret `ORDER_EMAILS_WORKER_SECRET` sans affichage, déploiement
+`npx supabase functions deploy order-emails --no-verify-jwt` (idem `order-emails-webhook`), configuration
+`email_config` (adresse de test, URL de préproduction, `worker_url`, puis `sending_enabled`), une commande
+de test vers l'adresse validée seulement, vérification du rendu, de l'idempotence et du lien de suivi.
