@@ -8,7 +8,9 @@ name: Nouveau socle Astro — contrôles (site/)
 #   - verify-catalog (étape 7) : contenu des pages univers / collections / marques
 #     recalculé indépendamment depuis Supabase (lecture publique) et comparé à dist/ ;
 #   - verify-products (étape 8) : fiches produit (une par produit publié, aucune pour un
-#     brouillon), variantes, prix, fil d'Ariane, canonical, JSON-LD, images, page LAB.
+#     brouillon), variantes, prix, fil d'Ariane, canonical, JSON-LD, images, page LAB ;
+#   - verify-home (étape 9) : accueil (liens, produits publiés mis en avant, mentions
+#     interdites, JSON-LD WebSite + Organization).
 
 on:
   pull_request:
@@ -96,3 +98,6 @@ jobs:
 
       - name: Contrôles fiches produit (Supabase ↔ HTML, variantes, prix, JSON-LD, LAB)
         run: npm run verify:products
+
+      - name: Contrôles de l'accueil (liens, produits mis en avant, mentions interdites, JSON-LD)
+        run: npm run verify:home
