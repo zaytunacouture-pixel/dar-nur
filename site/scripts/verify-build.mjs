@@ -23,7 +23,7 @@ const dist = join(root, 'dist');
 const src = join(root, 'src');
 const env = process.env.DAR_NUR_ENV ?? 'development';
 const indexable = env === 'production';
-const INTERNAL_PAGES = ['design-system/index.html', 'lab/supabase/index.html', '404.html'];
+const INTERNAL_PAGES = ['demo/index.html', 'design-system/index.html', 'lab/supabase/index.html', '404.html'];
 const BUDGET = { jsGzip: 20_000, cssGzip: 30_000, fonts: 50_000 };
 
 const errors = [];

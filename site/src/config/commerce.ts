@@ -60,9 +60,12 @@ export const contact = {
   tiktokUrl: 'https://www.tiktok.com/@darnur.officiel',
 };
 
-/** Réassurance : 4 faits vérifiés dans les CGV, rien d'autre (§N.4). */
+/**
+ * Réassurance : 4 faits vérifiés dans les CGV, rien d'autre (§N.4). Étape 9 : « Votre panier,
+ * envoyé sur WhatsApp » remplacé — le nouveau site n'a pas de panier (commande depuis la fiche).
+ */
 export const reassurance = [
-  { icon: 'shopping-bag', title: 'Commande simple', text: 'Votre panier, envoyé sur WhatsApp' },
+  { icon: 'shopping-bag', title: 'Commande simple', text: 'Sur WhatsApp, depuis la fiche produit' },
   { icon: 'wallet', title: 'Paiement à la réception', text: 'Revolut ou espèces, rien à l’avance' },
   { icon: 'map-pin', title: 'Livraison en Île-de-France', text: 'Remise gratuite à Chelles et Lognes' },
   { icon: 'headset', title: 'Conseil personnalisé', text: 'Une question ? Écrivez-nous sur WhatsApp' },

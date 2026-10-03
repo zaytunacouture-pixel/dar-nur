@@ -3,6 +3,8 @@
  * Page de DÉMONSTRATION technique et visuelle (étape 5). Ce n'est PAS la future page
  * d'accueil : elle sert à juger le header, le hero (emplacement photo), les cartes
  * d'univers, les cartes produit (échantillon réel Supabase) et le footer.
+ * Depuis l'étape 9, la vraie page d'accueil est `/` ; celle-ci reste une référence interne
+ * (noindex, hors sitemap, aucun lien public).
  */
 import EntryCard from '@/components/catalog/EntryCard.astro';
 import ProductRow from '@/components/catalog/ProductRow.astro';
@@ -33,6 +35,8 @@ const universeContent: Record<string, { description: string; image?: { src: Imag
   seo={{
     title: 'Démonstration du socle',
     description: 'Page de démonstration technique du nouveau socle Dar Nūr — pas la future page d’accueil.',
+    // Page interne de référence : jamais indexée, même en production (étape 9).
+    noindex: true,
   }}
   cartDemo
 >
