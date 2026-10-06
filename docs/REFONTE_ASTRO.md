@@ -479,9 +479,11 @@ note interne possible) ; pas de multi-devise, de tarifs transporteur, de droits 
 > 1 tentative chacun, `provider_message_id` enregistrés, aucun doublon** (2 appels manuels du worker ensuite :
 > `claimed 0`), 4 `customer_notified`, « Client à prévenir » vide, bloc Notifications à jour ; invariants
 > 14/14 + 13/13 ; CI vertes (34feae7). Lien `/suivi/#jeton` de la commande vérifié sur la préproduction.
-> **Non vérifiable par la session** : rendu dans la boîte contact@ et passage du `#jeton` à travers le suivi
-> des clics Brevo (vérification du propriétaire) ; tentatives et rebonds non provoqués en production (testés
-> hors ligne) ; webhook Brevo non configuré (`delivery_status` vide). Paiement : inchangé (Shopify plus tard).
+> **Validé par le propriétaire (2026-10-06)** : rendu correct dans Outlook ; « Suivre ma commande » depuis
+> l'e-mail reçu via Brevo ouvre la préproduction avec le `#jeton` intact (le suivi des clics Brevo ne le
+> supprime pas), DN-2026-GA58EZ reconnue, statut « Expédiée », transporteur et numéro de test affichés.
+> Tentatives et rebonds non provoqués en production (testés hors ligne) ; webhook Brevo non configuré
+> (`delivery_status` vide). Paiement : inchangé (Shopify plus tard).
 
 **Périmètre.** Quatre e-mails, et seulement eux : commande reçue, paiement demandé, paiement confirmé,
 commande expédiée. Brevo est utilisé comme **API transactionnelle seulement** (aucun contact, liste, campagne,
