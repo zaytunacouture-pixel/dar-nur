@@ -462,9 +462,16 @@ note interne possible) ; pas de multi-devise, de tarifs transporteur, de droits 
 
 ## E-mails transactionnels (étape 11)
 
-> **Phase 1 (2026-10-03) : préparé et testé hors ligne, RIEN de déployé.** Migrations
-> `supabase/migrations/20261003120*_etape11_*.sql` **non appliquées** ; Edge Functions **non déployées** ;
-> aucun compte, aucune clé, aucun envoi. Paiement : inchangé (aucun prestataire ; Shopify plus tard, étape dédiée).
+> **Phase 1 (2026-10-03)** : préparé et testé hors ligne. **Phase 2 (2026-10-06, en cours)** : Brevo configuré
+> par le propriétaire (domaine authentifié, expéditeur et Reply-To `contact@dar-nur.fr`, secrets Edge) ;
+> sauvegarde `C:\Users\youcef\dar-nur-backups\etape11-supabase-2026-10-06\` ; **migrations appliquées en
+> production**, pg_cron activé (tâche `dar-nur-order-emails`), invariants 14/14 + 13/13 ; jeton du worker dans
+> Vault et en secret Edge (jamais affiché) ; `order-emails` et `order-emails-webhook` **déployées**
+> (`--no-verify-jwt`) ; `email_config` : liste de test `contact@dar-nur.fr`, `worker_url` renseignée,
+> **envoi coupé** (`sending_enabled = false`), production coupée. Chaîne réelle vérifiée **sans envoi**
+> (commande de test DN-2026-GA58EZ → outbox → pg_net → fonction → abandon `site_url_missing`).
+> **Aucun e-mail envoyé** : `site_url_test` attend l'URL d'une préproduction publique (les liens de suivi ne
+> pointent jamais vers dar-nur.fr pour un test). Paiement : inchangé (Shopify plus tard, étape dédiée).
 
 **Périmètre.** Quatre e-mails, et seulement eux : commande reçue, paiement demandé, paiement confirmé,
 commande expédiée. Brevo est utilisé comme **API transactionnelle seulement** (aucun contact, liste, campagne,

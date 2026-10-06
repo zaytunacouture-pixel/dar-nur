@@ -511,7 +511,7 @@ Sujets identifiés, mesurés, et **volontairement laissés en l'état**. Aucun n
   (`admin.html`, `js/cart.js`, commande WhatsApp) n'est pas modifié.
 - Détails : `docs/REFONTE_ASTRO.md` (« Commande, paiement, livraison ») et `docs/SCHEMA_SUPABASE.md`.
 
-## E-mails transactionnels (refonte, étape 11 — préparée le 2026-10-03, non déployée)
+## E-mails transactionnels (refonte, étape 11 — en production depuis le 2026-10-06, envoi coupé)
 
 - Outbox `orders_private.order_emails` alimentée par trigger sur `order_events` ; Edge Functions
   `supabase/functions/order-emails` (worker → Brevo) et `order-emails-webhook` (statut de remise) ; code

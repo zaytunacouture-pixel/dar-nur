@@ -132,15 +132,17 @@ vérification ; coordonnées, adresse, numéro et lignes immuables ; aucune supp
 (ancien site) inchangé ; `orders`/`order_items`/`order_events` → 42501 pour anon ; fonctions d'admin → 42501
 pour anon ; `orders_private` non exposé (PGRST106) ; en-tête `Cache-Control: no-store, private`.
 
-## E-mails transactionnels (étape 11, préparée le 2026-10-03 — NON appliquée)
+## E-mails transactionnels (étape 11 — appliquée en production le 2026-10-06, envoi coupé)
 
 > Migrations `supabase/migrations/20261003120000_etape11_01_order_emails.sql` (outbox, trigger, fonctions) et
 > `20261003120100_etape11_02_order_emails_cron.sql` (pg_cron, tâche `dar-nur-order-emails` toutes les 5 min).
 > Additives : aucune table existante modifiée ; un trigger AJOUTÉ sur `order_events`. Rollback :
 > `supabase/rollback/20261003_etape11_rollback.sql` (ne touche à aucune commande). Contrôles :
 > `supabase/checks/etape11_invariants.sql`. Banc : `scripts/test/schema/emails.mjs` (124 contrôles, `schema-ci`).
-> En production : `pg_net` et `supabase_vault` déjà installés, `pg_cron` disponible mais pas encore activé
-> (relevé du 2026-10-03).
+> **Appliquée le 2026-10-06** (sauvegarde : `C:\Users\youcef\dar-nur-backups\etape11-supabase-2026-10-06\`) :
+> `pg_cron` activé à cette occasion (`pg_net`, `supabase_vault` déjà présents) ; invariants 13/13 ; étape 10
+> toujours 14/14 ; fonctions et outbox fermées à anon (42501, `orders_private` non exposé). Jeton Vault
+> `order_emails_worker_secret` créé. `sending_enabled = false` tant que la préproduction publique n'existe pas.
 
 | Objet | Rôle | Droits |
 |---|---|---|
