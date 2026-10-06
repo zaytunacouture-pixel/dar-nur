@@ -33,6 +33,7 @@ const ROLLBACK11 = read('supabase/rollback/20261003_etape11_rollback.sql');
 const INVARIANTS11 = read('supabase/checks/etape11_invariants.sql');
 const INVARIANTS10 = read('supabase/checks/etape10_invariants.sql');
 const PURGE = read('supabase/maintenance/20261003_etape10_purger_commandes_test.sql');
+const PURGE11 = read('supabase/maintenance/20261006_etape11_purger_commandes_test.sql');
 const BASELINE = readFileSync(path.join(HERE, 'baseline.sql'), 'utf8');
 const SHARED = path.join(ROOT, 'supabase/functions/_shared/order-emails');
 const { runOrderEmails } = await import(pathToFileURL(path.join(SHARED, 'worker.ts')).href);
@@ -546,6 +547,29 @@ async function main() {
   check(after2 === before2 - 2 && (await one(db, `select count(*)::int n from orders_private.order_emails m left join public.orders o on o.id = m.order_id where o.id is null`)).n === 0,
     'purge des commandes de test : leurs e-mails disparaissent avec elles', `${before2} → ${after2}`);
 
+  // Purge de l'étape 11B : commandes listées + outbox + journal Brevo de LEURS messages, rien d'autre.
+  const with11 = (numbers) => PURGE11.replace(/array\[[^\]]*\]::text\[\]/, `array[${numbers.map((x) => `'${x}'`).join(', ')}]::text[]`);
+  const count = async (sql) => (await one(db, `select count(*)::int as n from ${sql}`)).n;
+  const target11 = [o1.number, o5.number];
+  const ids11 = (await rows(db, `select id from public.orders where public_number = any($1)`, [target11])).map((r) => r.id);
+  const msgIds = (await rows(db, `select provider_message_id from orders_private.order_emails where order_id = any($1) and provider_message_id is not null`, [ids11])).map((r) => r.provider_message_id);
+  const linkedJournal = await count(`orders_private.email_delivery_events where message_id = any('{${msgIds.map((m) => `"${m}"`).join(',')}}')`);
+  const before11 = { orders: await count('public.orders'), emails: await count('orders_private.order_emails'), journal: await count('orders_private.email_delivery_events') };
+  const ownEmails = await count(`orders_private.order_emails where order_id = any('{${ids11.join(',')}}')`);
+  const refused11 = /purge refusée/.test(await error(db.exec(with11([...target11, 'DN-2026-ZZZZZZ']))) ?? '');
+  await db.exec('rollback');
+  check(refused11 && (await count('public.orders')) === before11.orders, 'purge 11 : numéro inconnu → tout refusé, rien supprimé');
+  await db.exec(with11(target11));
+  check((await count(`public.orders where public_number = any('{${target11.join(',')}}')`)) === 0
+    && (await count('public.orders')) === before11.orders - 2
+    && (await count('orders_private.order_emails')) === before11.emails - ownEmails
+    && (await count('orders_private.email_delivery_events')) === before11.journal - linkedJournal
+    && (await count(`orders_private.email_delivery_events where message_id = '<inconnu@x>'`)) === 1,
+    'purge 11 : commandes listées, leur outbox et leur journal Brevo seulement (le reste intact)',
+    `${before11.orders} → ${await count('public.orders')} commandes, ${linkedJournal} événement(s) Brevo lié(s)`);
+  check(linkedJournal > 0 && ownEmails > 0, 'purge 11 : le scénario couvre bien outbox et journal liés');
+  const survivor = (await one(db, 'select id from public.orders order by created_at limit 1')).id;
+  check(/dn:order_delete_forbidden/.test(await error(db.query('delete from public.orders where id = $1', [survivor])) ?? ''), 'purge 11 : garde-fous réactivés ensuite');
   const db2 = await newDb(data);
   const fresh = await newDb(data, { etape11: false });
   await db2.exec(ROLLBACK11);

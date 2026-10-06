@@ -498,6 +498,10 @@ note interne possible) ; pas de multi-devise, de tarifs transporteur, de droits 
 > (refusé avant la correction) n'a pas été renvoyé par Brevo : remise inconnue pour cet e-mail.
 > **Fin de l'étape 11B** : `sending_enabled = false` (envoi des commandes de test recoupé), production coupée,
 > `ORDER_EMAILS_ALLOW_PRODUCTION` non défini. Rebonds réels non provoqués (testés hors ligne). Paiement : inchangé.
+> **Nettoyage (2026-10-06)** : les 3 commandes de test de l'étape 11B (DN-2026-GA58EZ, -LB2P84, -VBBHLT, seules
+> commandes en base, toutes `is_test`) purgées par `supabase/maintenance/20261006_etape11_purger_commandes_test.sql`
+> (testé dans `emails.mjs` ; sauvegarde `C:\Users\youcef\dar-nur-backups\etape11-purge-tests-2026-10-06\`) :
+> commandes, lignes, journal, outbox et l'événement Brevo lié. Base sans commande ; invariants 14/14 + 14/14.
 
 **Périmètre.** Quatre e-mails, et seulement eux : commande reçue, paiement demandé, paiement confirmé,
 commande expédiée. Brevo est utilisé comme **API transactionnelle seulement** (aucun contact, liste, campagne,
