@@ -40,6 +40,7 @@ drop function if exists orders_private.email_expiry();
 drop function if exists orders_private.email_max_attempts();
 drop function if exists orders_private.email_retry_delay(int);
 
+drop table if exists orders_private.email_delivery_events;
 drop table if exists orders_private.order_emails;
 drop table if exists orders_private.email_config;
 

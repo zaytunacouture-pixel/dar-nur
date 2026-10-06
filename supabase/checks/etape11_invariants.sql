@@ -34,6 +34,12 @@ union all
 select 'outbox_private', not has_table_privilege('anon', 'orders_private.order_emails', 'select')
        and not has_table_privilege('authenticated', 'orders_private.order_emails', 'select'), null
 union all
+-- Migration 03 : journal des événements de remise, privé, un seul enregistrement par événement.
+select 'delivery_journal_private', not has_table_privilege('anon', 'orders_private.email_delivery_events', 'select')
+       and not has_table_privilege('authenticated', 'orders_private.email_delivery_events', 'select')
+       and not exists (select 1 from orders_private.email_delivery_events group by message_id, event, event_at having count(*) > 1),
+       (select count(*)::text || ' événement(s) journalisé(s)' from orders_private.email_delivery_events)
+union all
 select 'trigger_present', exists (select 1 from pg_trigger where tgname = 'trg_order_events_enqueue_email' and tgenabled <> 'D'), null
 union all
 select 'every_event_enqueued', not exists (select 1 from notifiable n where not exists (

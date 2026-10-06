@@ -236,8 +236,51 @@ res = await hook('x'.repeat(70_000));
 check(res.status === 413, 'charge > 64 Ko → 413');
 res = await hook([{ event: 'delivered', 'message-id': '<a@x>' }, { event: 'blocked', 'message-id': '<b@x>' }]);
 check(res.status === 200 && stored.length === 3, 'lot d’événements accepté');
-res = await handleBrevoWebhook(new Request('https://x', { method: 'POST', headers: { authorization: 'Bearer ' }, body: '{}' }), env({ ...WH, BREVO_WEBHOOK_TOKEN: '' }), { rpc: fakeRpc });
+res = await handleBrevoWebhook(new Request('https://x', { method: 'POST', headers: { authorization: 'Bearer ' }, body: '{}' }), env({ ...WH, BREVO_WEBHOOK_TOKEN: '' }), { rpc: fakeRpc, log: () => {} });
 check(res.status === 401, 'webhook sans jeton configuré → personne ne passe');
+const logs = [];
+const hookWith = (authorization, body = { event: 'delivered', 'message-id': '<basic@x>', ts_event: 1791000000, ts_epoch: 1791000000123 }) => handleBrevoWebhook(
+  new Request('https://x/functions/v1/order-emails-webhook', { method: 'POST', headers: authorization ? { authorization } : {}, body: JSON.stringify(body) }),
+  env(WH), { rpc: fakeRpc, log: (l) => logs.push(l) });
+const basic = (user, pass) => `Basic ${Buffer.from(`${user}:${pass}`).toString('base64')}`;
+let before = stored.length;
+res = await hookWith(basic('brevo', WH.BREVO_WEBHOOK_TOKEN));
+check(res.status === 200 && stored.length === before + 1, 'authentification « Basic » (mot de passe = jeton) acceptée');
+check(stored.at(-1).args.p_at === '2026-10-03T04:00:00.123Z', 'horodatage ts_epoch (ms) préféré à ts_event', stored.at(-1).args.p_at);
+before = stored.length;
+for (const [label, auth] of [['Basic, mauvais mot de passe', basic('brevo', 'u'.repeat(40))], ['Basic, jeton en identifiant', basic(WH.BREVO_WEBHOOK_TOKEN, '')],
+  ['Basic mal formé', 'Basic !!!'], ['jeton brut sans schéma', WH.BREVO_WEBHOOK_TOKEN], ['aucun en-tête', '']]) {
+  res = await hookWith(auth);
+  check(res.status === 401 && stored.length === before, `${label} → 401, rien enregistré`);
+}
+check(logs.some((l) => /refusé \(authentification basic\)/.test(l)) && logs.some((l) => /refusé \(authentification none\)/.test(l))
+  && !logs.join(' ').includes(WH.BREVO_WEBHOOK_TOKEN) && !logs.join(' ').includes('@'), 'journal de la fonction : schéma refusé indiqué, jamais le jeton ni une adresse');
+// Diagnostic d'un jeton refusé : forme de l'écart, jamais le jeton ni la valeur reçue.
+const T = WH.BREVO_WEBHOOK_TOKEN.slice(0, 20) + 'abcdefghijklmnopqrst';
+const WH2 = { ...WH, BREVO_WEBHOOK_TOKEN: T };
+const diag = async (authorization) => {
+  const lines = [];
+  const r = await handleBrevoWebhook(new Request('https://x', { method: 'POST', headers: { authorization }, body: '{}' }), env(WH2), { rpc: fakeRpc, log: (l) => lines.push(l) });
+  return { status: r.status, line: lines.join(' ') };
+};
+let dg = await diag(`Bearer ${T.slice(0, 32)}`);
+check(dg.status === 401 && /longueur reçue 32, attendue 40, début tronqué du jeton/.test(dg.line) && !dg.line.includes(T.slice(0, 8)), 'refus : jeton tronqué signalé (longueurs), sans le révéler', dg.line);
+dg = await diag(`Bearer "${T}"`);
+check(dg.status === 401 && /jeton entouré de caractères en plus, guillemets/.test(dg.line) && !dg.line.includes(T.slice(0, 8)), 'refus : jeton entre guillemets signalé', dg.line);
+dg = await diag(`Bearer ${T.slice(0, 20)} ${T.slice(20)}`);
+check(dg.status === 401 && /espace dans la valeur/.test(dg.line), 'refus : espace dans la valeur signalé', dg.line);
+dg = await diag(`Bearer ${'z'.repeat(40)}`);
+check(dg.status === 401 && /longueur reçue 40, attendue 40\)$/.test(dg.line), 'refus : valeur différente de même longueur (aucun autre indice)', dg.line);
+dg = await diag(basic('brevo', T.slice(0, 10)));
+check(dg.status === 401 && /authentification basic, longueur reçue 10, attendue 40, début tronqué du jeton/.test(dg.line), 'refus Basic : diagnostic identique', dg.line);
+dg = await diag(`Bearer ${T}`);
+check(dg.status === 200, 'jeton exact (40 caractères alphanumériques) accepté');
+const dupRpc = async () => ({ ok: true, matched: 0, duplicate: true });
+res = await handleBrevoWebhook(new Request('https://x', { method: 'POST', headers: { authorization: `Bearer ${WH.BREVO_WEBHOOK_TOKEN}` },
+  body: JSON.stringify({ event: 'delivered', 'message-id': '<d@x>', ts_epoch: 1791000000123 }) }), env(WH), { rpc: dupRpc, log: () => {} });
+check(res.status === 200 && (await res.json()).duplicates === 1, 'événement déjà reçu → 200 (Brevo n’insiste pas), compté en doublon');
+res = await hookWith(`Bearer ${WH.BREVO_WEBHOOK_TOKEN}`, { event: 'request', 'message-id': '<s@x>', email: 'client@example.com' });
+check(res.status === 200 && (await res.json()).ignored === 1 && !logs.join(' ').includes('client@example.com'), 'événement « request » (envoi) ignoré sans journaliser l’adresse');
 
 // Aperçus pour relecture visuelle (non versionnés).
 const pi = process.argv.indexOf('--preview');

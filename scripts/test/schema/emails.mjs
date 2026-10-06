@@ -424,6 +424,27 @@ async function main() {
   check(d.ok && d.matched === 0, 'message-id inconnu → sans effet');
   d = await rpc('order_emails_delivery_event', { p_message_id: target.provider_message_id, p_event: 'opened', p_at: null });
   check(d.ok === false && d.error === 'event_ignored', 'événement de suivi marketing (ouverture) ignoré');
+  // Même événement renvoyé par Brevo (nouvelle tentative) : traité une seule fois.
+  const confirmedMail = (await emails(db, o1.id)).find((x) => x.email_type === 'payment_confirmed');
+  const at = '2026-10-06T10:00:00.123Z';
+  const first = await rpc('order_emails_delivery_event', { p_message_id: confirmedMail.provider_message_id, p_event: 'delivered', p_at: at });
+  const afterFirst = (await emails(db, o1.id)).find((x) => x.id === confirmedMail.id);
+  const again = await rpc('order_emails_delivery_event', { p_message_id: confirmedMail.provider_message_id, p_event: 'delivered', p_at: at });
+  const third = await rpc('order_emails_delivery_event', { p_message_id: confirmedMail.provider_message_id, p_event: 'delivered', p_at: at });
+  const afterDup = (await emails(db, o1.id)).find((x) => x.id === confirmedMail.id);
+  check(first.matched === 1 && first.duplicate === false && again.duplicate === true && third.duplicate === true && again.matched === 0
+    && afterDup.updated_at.getTime() === afterFirst.updated_at.getTime(),
+    'même événement reçu 3 fois → traité une fois (doublon reconnu, ligne inchangée)');
+  const journal = await rows(db, `select * from orders_private.email_delivery_events where message_id = $1`, [confirmedMail.provider_message_id]);
+  check(journal.length === 1 && journal[0].matched === true && journal[0].event === 'delivered'
+    && new Date(journal[0].event_at).toISOString() === at, 'journal : une ligne, rapprochée, horodatage Brevo à la milliseconde');
+  const unknown = (await rows(db, `select matched from orders_private.email_delivery_events where message_id = '<inconnu@x>'`))[0];
+  check(unknown?.matched === false, 'journal : événement d’un message inconnu gardé, non rapproché');
+  const cols = (await rows(db, `select column_name from information_schema.columns where table_schema = 'orders_private' and table_name = 'email_delivery_events'`)).map((r) => r.column_name).sort();
+  check(cols.join() === 'event,event_at,id,matched,message_id,received_at', 'journal : ni adresse, ni objet, ni motif (colonnes minimales)', cols.join(', '));
+  await db.exec(`insert into orders_private.email_delivery_events (message_id, event, event_at, matched, received_at) values ('<vieux@x>', 'delivered', now() - interval '100 days', false, now() - interval '100 days')`);
+  await rpc('order_emails_delivery_event', { p_message_id: '<recent@x>', p_event: 'deferred', p_at: null });
+  check((await one(db, `select count(*)::int as n from orders_private.email_delivery_events where message_id = '<vieux@x>'`)).n === 0, 'journal : purge au-delà de 90 jours');
   const statusAfter = await one(db, 'select status, payment_status, updated_at from public.orders where id = $1', [o1.id]);
   check(JSON.stringify(statusBefore) === JSON.stringify(statusAfter), 'le webhook ne modifie JAMAIS la commande (statut, paiement, updated_at)');
   const alerts = await as(db, 'admin', async () => (await one(db, 'select public.admin_order_email_alerts() as r')).r);
@@ -440,6 +461,7 @@ async function main() {
   }
   await as(db, 'anon', async () => {
     check(/permission denied/.test(await error(db.query('select * from orders_private.order_emails')) ?? ''), 'anon : outbox illisible');
+    check(/permission denied/.test(await error(db.query('select * from orders_private.email_delivery_events')) ?? ''), 'anon : journal de remise illisible');
     check(/permission denied/.test(await error(db.query(`select public.admin_order_emails('${o1.id}')`)) ?? ''), 'anon : bloc admin refusé');
     check(/permission denied/.test(await error(db.query(`select public.admin_retry_order_email('${m.id}')`)) ?? ''), 'anon : « Réessayer » refusé');
   });
