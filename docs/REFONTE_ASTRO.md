@@ -482,8 +482,22 @@ note interne possible) ; pas de multi-devise, de tarifs transporteur, de droits 
 > **Validé par le propriétaire (2026-10-06)** : rendu correct dans Outlook ; « Suivre ma commande » depuis
 > l'e-mail reçu via Brevo ouvre la préproduction avec le `#jeton` intact (le suivi des clics Brevo ne le
 > supprime pas), DN-2026-GA58EZ reconnue, statut « Expédiée », transporteur et numéro de test affichés.
-> Tentatives et rebonds non provoqués en production (testés hors ligne) ; webhook Brevo non configuré
-> (`delivery_status` vide). Paiement : inchangé (Shopify plus tard).
+> **Webhook Brevo (2026-10-06)** : migration `20261006100000_etape11_03_delivery_events.sql` appliquée
+> (sauvegarde `C:\Users\youcef\dar-nur-backups\etape11-03-supabase-2026-10-06\`) — journal
+> `orders_private.email_delivery_events` + dédoublonnage ; `BREVO_WEBHOOK_TOKEN` (32 caractères
+> alphanumériques, généré et déposé sans affichage, remis au propriétaire par le presse-papiers, aucune copie
+> conservée) ; webhook « Dar-Nur-Emails-transactionnels » créé par le propriétaire (type transactionnel,
+> authentification **Token** = `Authorization: Bearer`, événements Délivré, Différé, Soft/Hard bounce, Invalid,
+> Bloqué, Plainte, Erreur). Premier essai refusé (401) : Brevo envoyait bien `Bearer`, mais une valeur
+> différente du secret (le premier jeton, 48 caractères avec `-`/`_`, n'avait pas été correctement transmis via
+> le presse-papiers) → jeton régénéré, presse-papiers vérifié par empreinte dans un processus séparé.
+> Vérifié en réel : commande de test **DN-2026-VBBHLT** → « Commande reçue » envoyé → événement `delivered`
+> reçu ~30 s après, authentifié, rapproché, `delivery_status = delivered` (affiché « remis ») ; rejeu
+> identique ×2 → `duplicate`, rien modifié ; commandes jamais modifiées (`updated_at = created_at`) ; requêtes
+> sans jeton / faux jeton / faux Basic → 401 ; invariants 14/14 + 14/14. L'événement de DN-2026-LB2P84
+> (refusé avant la correction) n'a pas été renvoyé par Brevo : remise inconnue pour cet e-mail.
+> **Fin de l'étape 11B** : `sending_enabled = false` (envoi des commandes de test recoupé), production coupée,
+> `ORDER_EMAILS_ALLOW_PRODUCTION` non défini. Rebonds réels non provoqués (testés hors ligne). Paiement : inchangé.
 
 **Périmètre.** Quatre e-mails, et seulement eux : commande reçue, paiement demandé, paiement confirmé,
 commande expédiée. Brevo est utilisé comme **API transactionnelle seulement** (aucun contact, liste, campagne,
@@ -539,8 +553,12 @@ adresse n'est choisie par défaut.
 `orders_private` (non exposé). Edge Functions déployées **sans vérification JWT** mais avec un jeton
 bearer comparé à temps constant (`ORDER_EMAILS_WORKER_SECRET`, lu par pg_net dans Vault ;
 `BREVO_WEBHOOK_TOKEN`) ; le worker **ignore le corps de la requête** : personne ne peut lui imposer un
-destinataire ou un contenu. Brevo ne signe pas ses webhooks (pas de HMAC) : jeton + validation stricte, et
-le webhook ne modifie qu'une colonne d'information.
+destinataire ou un contenu. Brevo ne signe pas ses webhooks (pas de HMAC) : jeton (`Authorization: Bearer`,
+option « Token » de Brevo ; `Basic` avec le jeton en mot de passe également accepté) comparé à temps constant,
+validation stricte ; un refus est journalisé avec un diagnostic sans secret (schéma, longueurs, jeton tronqué,
+caractères en plus, espaces, guillemets). Chaque événement authentifié est journalisé une fois
+(`email_delivery_events`, sans adresse ni objet, 90 jours) ; un renvoi identique est ignoré. Le webhook ne
+modifie qu'une colonne d'information.
 
 **Gabarits** (`supabase/functions/_shared/order-emails/templates.ts`) : HTML généré et versionné (aucun
 `templateId` Brevo : un changement manuel dans Brevo ne peut rien casser), version texte équivalente,
@@ -552,9 +570,9 @@ JavaScript, vert #2C4A23, fond crème, filet doré. Aperçus : `node scripts/tes
 tentative, erreur lisible, « Réessayer » sur la même ligne), alerte « Adresse e-mail en erreur » et badge
 dans la liste. Base sans migration 11 : bloc neutre « non installés ».
 
-**Tests.** `scripts/test/schema/email-templates.mjs` (102 : 4 types, montants, livraison 0, international,
+**Tests.** `scripts/test/schema/email-templates.mjs` (118 : 4 types, montants, livraison 0, international,
 avec/sans suivi, accents, échappement, client Brevo simulé, configuration, authentification, webhook) ;
-`scripts/test/schema/emails.mjs` (124 : le vrai worker contre PGlite + vraies migrations + faux Brevo —
+`scripts/test/schema/emails.mjs` (131 : le vrai worker contre PGlite + vraies migrations + faux Brevo —
 mise en file, unicité, ordre, tentatives, limite, « Réessayer », deux workers, bail expiré, doublon Brevo,
 garde-fous, webhook, droits, pg_net simulé, purge, rollback) ; vérification des types (strict) ;
 `npm run test:emails` en `schema-ci`. `verify-orders` : aucune référence Brevo ni fonction du worker dans le
@@ -586,9 +604,10 @@ fonctions et tâche cron ; ne touche à aucune commande (testé : schéma identi
    `contact@dar-nur.fr` est une vraie boîte OVH avant d'en faire le Reply-To.
 6. Supabase → Edge Functions → **Secrets** : `BREVO_API_KEY`, `BREVO_SENDER_EMAIL`, `BREVO_SENDER_NAME`,
    `BREVO_REPLY_TO_EMAIL` (si la boîte existe), `ORDER_EMAILS_TEST_RECIPIENTS` (adresse de test validée).
-7. Facultatif (alertes de rebond) : après déploiement, webhook transactionnel Brevo vers
-   `https://sxlpgcnjerlayitaxxyv.supabase.co/functions/v1/order-emails-webhook`, authentification par jeton,
-   même valeur dans le secret `BREVO_WEBHOOK_TOKEN`.
+7. (Fait le 2026-10-06) Webhook transactionnel Brevo vers
+   `https://sxlpgcnjerlayitaxxyv.supabase.co/functions/v1/order-emails-webhook`, authentification « Token »,
+   même valeur que le secret `BREVO_WEBHOOK_TOKEN` ; événements de remise seulement (pas Envoyé, Ouvert, Cliqué,
+   Désinscrit, proxy). Rotation : générer un jeton alphanumérique, le déposer en secret, le remplacer dans Brevo.
 
 **Ensuite (session de développement)** : sauvegarde, application des 2 migrations, contrôles
 `etape10_invariants.sql` + `etape11_invariants.sql`, jeton du worker généré et déposé dans Vault

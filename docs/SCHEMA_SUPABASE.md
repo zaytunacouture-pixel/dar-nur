@@ -138,7 +138,7 @@ pour anon ; `orders_private` non exposé (PGRST106) ; en-tête `Cache-Control: n
 > `20261003120100_etape11_02_order_emails_cron.sql` (pg_cron, tâche `dar-nur-order-emails` toutes les 5 min).
 > Additives : aucune table existante modifiée ; un trigger AJOUTÉ sur `order_events`. Rollback :
 > `supabase/rollback/20261003_etape11_rollback.sql` (ne touche à aucune commande). Contrôles :
-> `supabase/checks/etape11_invariants.sql`. Banc : `scripts/test/schema/emails.mjs` (124 contrôles, `schema-ci`).
+> `supabase/checks/etape11_invariants.sql`. Banc : `scripts/test/schema/emails.mjs` (131 contrôles, `schema-ci`).
 > **Appliquée le 2026-10-06** (sauvegarde : `C:\Users\youcef\dar-nur-backups\etape11-supabase-2026-10-06\`) :
 > `pg_cron` activé à cette occasion (`pg_net`, `supabase_vault` déjà présents) ; invariants 13/13 ; étape 10
 > toujours 14/14 ; fonctions et outbox fermées à anon (42501, `orders_private` non exposé). Jeton Vault
@@ -151,7 +151,11 @@ pour anon ; `orders_private` non exposé (PGRST106) ; en-tête `Cache-Control: n
 | trigger `trg_order_events_enqueue_email` | AFTER INSERT sur `order_events` : crée la ligne (même transaction), remplace une demande de paiement non partie, réveille le worker (pg_net). Exception capturée : n'échoue jamais. | — |
 | `orders_private.kick_order_email_worker(reason, only_if_due)` | `net.http_post` vers `worker_url` avec le jeton Vault `order_emails_worker_secret` ; rien si interrupteur coupé, URL/jeton/pg_net absents, ou (cron) rien de dû. | definer, aucun rôle API |
 | `public.order_emails_claim(limit)` / `order_emails_report(id, claim_id, outcome, message_id, error)` | Worker : réclamation (garde-fous environnement / liste de test / URL / obsolescence / expiration) et compte rendu (tentatives 5 min / 30 min / 2 h puis `failed` ; `sent` → `notified_at` + `customer_notified`). | `service_role` seul |
-| `public.order_emails_delivery_event(message_id, event, at)` | Webhook Brevo → `delivery_status` (incident définitif prioritaire). Aucune commande modifiée. | `service_role` seul |
+| `public.order_emails_delivery_event(message_id, event, at)` | Webhook Brevo → `delivery_status` (incident définitif prioritaire) ; migration 03 : journalise l'événement et ignore un renvoi identique (`duplicate`). Aucune commande modifiée. | `service_role` seul |
+| `orders_private.email_delivery_events` (migration 03, 2026-10-06) | Journal des événements de remise authentifiés : `message_id`, `event`, `event_at` (horodatage Brevo, `ts_epoch` à la ms sinon `ts_event`), `received_at`, `matched` ; unique `(message_id, event, event_at)` ; ni adresse, ni objet, ni motif ; purgé après 90 jours. | aucun |
 | `public.admin_order_emails(order_id)` / `admin_order_email_alerts()` / `admin_retry_order_email(id)` | Bloc admin, alertes de la liste, « Réessayer » (même ligne ; refusé si déjà envoyé, en cours, remplacé ou sans objet). | authenticated (refus si non admin) |
 
 Le contrôle `etape10_invariants.sql` / `triggers_present` vise désormais nommément les 6 triggers de l'étape 10.
+Migration `20261006100000_etape11_03_delivery_events.sql` appliquée le 2026-10-06 (sauvegarde
+`C:\Users\youcef\dar-nur-backups\etape11-03-supabase-2026-10-06\`) ; contrôle `delivery_journal_private` ajouté
+(14 lignes `ok` au total pour l'étape 11).
