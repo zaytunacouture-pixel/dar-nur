@@ -470,8 +470,18 @@ note interne possible) ; pas de multi-devise, de tarifs transporteur, de droits 
 > (`--no-verify-jwt`) ; `email_config` : liste de test `contact@dar-nur.fr`, `worker_url` renseignée,
 > **envoi coupé** (`sending_enabled = false`), production coupée. Chaîne réelle vérifiée **sans envoi**
 > (commande de test DN-2026-GA58EZ → outbox → pg_net → fonction → abandon `site_url_missing`).
-> **Aucun e-mail envoyé** : `site_url_test` attend l'URL d'une préproduction publique (les liens de suivi ne
-> pointent jamais vers dar-nur.fr pour un test). Paiement : inchangé (Shopify plus tard, étape dédiée).
+> **Préproduction publique** (créée par le propriétaire le 2026-10-06, branche `refonte/etape-11-paiement-emails`,
+> base `site/`) : `https://wondrous-rolypoly-c99592.netlify.app` (noindex, `env: preprod`) = `site_url_test` ;
+> `sending_enabled = true`, production toujours coupée. **Parcours réel vers `contact@dar-nur.fr` seulement**
+> (DN-2026-GA58EZ, depuis `/admin/commandes/` connecté par le propriétaire) : « Réessayer » → commande reçue,
+> vérification + livraison 6,90 € → paiement demandé (sans URL de paiement), paiement confirmé à la main
+> (`admin_manual`), préparation, suivi fictif `TEST-ETAPE11-0001`, expédiée → **4 e-mails acceptés par Brevo,
+> 1 tentative chacun, `provider_message_id` enregistrés, aucun doublon** (2 appels manuels du worker ensuite :
+> `claimed 0`), 4 `customer_notified`, « Client à prévenir » vide, bloc Notifications à jour ; invariants
+> 14/14 + 13/13 ; CI vertes (34feae7). Lien `/suivi/#jeton` de la commande vérifié sur la préproduction.
+> **Non vérifiable par la session** : rendu dans la boîte contact@ et passage du `#jeton` à travers le suivi
+> des clics Brevo (vérification du propriétaire) ; tentatives et rebonds non provoqués en production (testés
+> hors ligne) ; webhook Brevo non configuré (`delivery_status` vide). Paiement : inchangé (Shopify plus tard).
 
 **Périmètre.** Quatre e-mails, et seulement eux : commande reçue, paiement demandé, paiement confirmé,
 commande expédiée. Brevo est utilisé comme **API transactionnelle seulement** (aucun contact, liste, campagne,
