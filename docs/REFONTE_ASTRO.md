@@ -115,6 +115,7 @@ compteur ou « best seller » sans données ; aucune photo générée à la plac
 | **Étape 9** (2026-10-03) : accueil final `/`, configuration éditoriale, `verify-home` — section « Accueil (étape 9) » | |
 | **Étape 10** (2026-10-03) : panier, demande de commande, suivi, administration des commandes, tables et fonctions Supabase, `verify-orders`, `test:cart` — section « Commande, paiement, livraison (étape 10) » | Paiement via Shopify (étape dédiée), CGV et confidentialité révisées (bloquant production), recherche, redirections, shooting |
 | **Étape 11, phase 1** (2026-10-03) : e-mails transactionnels Brevo — outbox, Edge Functions, gabarits, bloc admin « Notifications », bancs hors ligne ; **rien de déployé** — section « E-mails transactionnels (étape 11) » | Phase 2 après configuration Brevo par le propriétaire |
+| **Étape 12** (2026-10-09) : pages internes `/cgv/`, `/confidentialite/`, `/mentions-legales/`, faits juridiques centralisés (`config/legal.ts`), liens repointés, `verify-legal` — section « Pages juridiques (étape 12) » | Informations obligatoires manquantes (SIREN/SIRET, médiateur, téléphones, suivi Brevo) : production fermée |
 
 ## Pages catalogue (étape 7)
 
@@ -619,3 +620,33 @@ fonctions et tâche cron ; ne touche à aucune commande (testé : schéma identi
 `npx supabase functions deploy order-emails --no-verify-jwt` (idem `order-emails-webhook`), configuration
 `email_config` (adresse de test, URL de préproduction, `worker_url`, puis `sending_enabled`), une commande
 de test vers l'adresse validée seulement, vérification du rendu, de l'idempotence et du lien de suivi.
+
+## Pages juridiques (étape 12)
+
+Pages internes de la refonte (l'ancien dar-nur.fr n'est pas modifié ; ses `*.html` et leurs redirections
+relèvent de la bascule) :
+
+| Page | Fichier | Contenu |
+|---|---|---|
+| `/cgv/` | `pages/cgv.astro` | Parcours réel : demande sans obligation de payer → vérification → total final → demande de paiement (48 h) → contrat conclu au paiement → expédition sous 3 à 5 jours ; France + international sans pays ni tarif ; douanes ; rétractation 14 jours (frais de retour client, sauf erreur/défaut/non-conformité ; exceptions L. 221-28 seulement si réellement applicables, signalées avant paiement) ; encadré officiel des garanties (annexe D. 211-2, JO du 30 juin 2022, **ne pas reformuler**) ; médiation ; formulaire de rétractation |
+| `/confidentialite/` | `pages/confidentialite.astro` | Uniquement les traitements réels : commande (téléphone obligatoire), statuts de remise Brevo (ouvertures/clics jamais enregistrés), empreinte d'IP 48 h, `localStorage` (panier, 10 dernières commandes), lien de suivi ; Supabase (Paris), Brevo (Paris), Netlify (États-Unis, DPF + CCT) ; fidélité future non active ; 3 ans / jusqu'à 10 ans ; droits, CNIL |
+| `/mentions-legales/` | `pages/mentions-legales.astro` | Éditeur (EI, micro-entreprise), adresse, e-mail, TVA 293 B, directeur de la publication, hébergeur Netlify |
+
+- **Source unique** : `site/src/config/legal.ts`. Toute information inconnue vaut `null` et s'affiche
+  « information en attente » ; `legalBlockers()` liste ce qui manque.
+- **Garde-fous** : tant que `legalBlockers()` n'est pas vide → bandeau « Document non finalisé » sur les
+  3 pages, bandeau de blocage sur `/commande/` (préproduction), `orderingOpen` faux en production
+  (`productionOrderingReady` = `termsReviewed` **et** aucun blocage), et `verify-legal` refuse un build de
+  production. `termsReviewed`, `production_ordering_open`, `terms_version` (`cgv-dar-nur-fr-ancienne-version-a-reviser`)
+  et l'envoi d'e-mails ne sont **pas modifiés**.
+- **`verify-legal`** (CI) : anciennes mentions interdites sur toutes les pages publiques (commande/WhatsApp
+  obligatoire, paiement à la réception, espèces, Revolut, Île-de-France, Lognes, « Chelles » hors adresse
+  légale, GitHub Pages, adresse Outlook, liens `dar-nur.fr/*.html` légaux), contenus obligatoires, aucun
+  prestataire de paiement nommé, aucun numéro de téléphone, aucune conservation indéfinie, footer et liens
+  « Conditions générales de vente » internes.
+- **Blocages ouverts (2026-10-09)** : SIREN/SIRET et immatriculation ; médiateur ; téléphone du vendeur
+  (R. 111-1 et LCEN, en contradiction avec la décision « aucun numéro affiché ») ; téléphone de l'hébergeur
+  (absent des pages officielles de Netlify) ; désactivation du suivi des ouvertures/clics Brevo (pas de
+  réglage en libre-service : demande au support) ; vérification finale (graphie « Dar Nûr » / « Dar Nūr »,
+  textes en vigueur sur Légifrance). À la finalisation : `legalVersion.final`, nouvel identifiant de version,
+  puis `orders_private.config.terms_version` (sauvegarde préalable).
