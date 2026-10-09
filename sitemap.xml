@@ -275,12 +275,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://dar-nur.fr/dn-lecode-vanille-bomb/</loc>
-    <lastmod>2026-10-09</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://dar-nur.fr/dn-lecode-blue-addict/</loc>
     <lastmod>2026-10-09</lastmod>
     <changefreq>monthly</changefreq>
@@ -306,18 +300,6 @@
   </url>
   <url>
     <loc>https://dar-nur.fr/miel-printemps/</loc>
-    <lastmod>2026-10-09</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://dar-nur.fr/dn-lecode-eclipse/</loc>
-    <lastmod>2026-10-09</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://dar-nur.fr/dn-khair-fusion/</loc>
     <lastmod>2026-10-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -383,19 +365,7 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://dar-nur.fr/vanille-voyage/</loc>
-    <lastmod>2026-10-09</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://dar-nur.fr/santal-elixir/</loc>
-    <lastmod>2026-10-09</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://dar-nur.fr/cocktail-marakuja/</loc>
     <lastmod>2026-10-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -449,12 +419,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://dar-nur.fr/vulcania/</loc>
-    <lastmod>2026-10-09</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://dar-nur.fr/dn-lecode-galion/</loc>
     <lastmod>2026-10-09</lastmod>
     <changefreq>monthly</changefreq>
@@ -462,12 +426,6 @@
   </url>
   <url>
     <loc>https://dar-nur.fr/dn-lecode-esprit-purple/</loc>
-    <lastmod>2026-10-09</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://dar-nur.fr/dn-lecode-reve-folie/</loc>
     <lastmod>2026-10-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -486,6 +444,48 @@
   </url>
   <url>
     <loc>https://dar-nur.fr/dn-lecode-la-cavale/</loc>
+    <lastmod>2026-10-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://dar-nur.fr/dn-lecode-vanille-bomb/</loc>
+    <lastmod>2026-10-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://dar-nur.fr/dn-lecode-eclipse/</loc>
+    <lastmod>2026-10-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://dar-nur.fr/dn-khair-fusion/</loc>
+    <lastmod>2026-10-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://dar-nur.fr/cocktail-marakuja/</loc>
+    <lastmod>2026-10-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://dar-nur.fr/vanille-voyage/</loc>
+    <lastmod>2026-10-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://dar-nur.fr/vulcania/</loc>
+    <lastmod>2026-10-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://dar-nur.fr/dn-lecode-reve-folie/</loc>
     <lastmod>2026-10-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
