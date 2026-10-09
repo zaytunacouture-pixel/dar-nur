@@ -9,10 +9,11 @@
  *   seulement ; ouvertures et clics jamais enregistrés (refusés par order_emails_delivery_event) ;
  * - navigateur : localStorage dn-cart-v1 (panier) et dn-orders-v1 (10 dernières commandes :
  *   numéro + jeton de suivi) ; aucun cookie de mesure d'audience ni publicitaire, polices locales.
- * Le suivi des ouvertures/clics côté Brevo dépend de config/legal.ts (emailTrackingDisabledConfirmed).
+ * Le texte sur le suivi côté Brevo dépend de config/legal.ts (brevoAnonymousTrackingConfirmed) : ne jamais
+ * annoncer le suivi anonyme tant que l'exploitant ne l'a pas activé et constaté.
  */
 import LegalPage from '@/components/legal/LegalPage.astro';
-import { emailTrackingDisabledConfirmed, host, legalAddressLine, legalEntity } from '@/config/legal';
+import { brevoAnonymousTrackingConfirmed, host, legalAddressLine, legalEntity } from '@/config/legal';
 
 const email = legalEntity.email;
 const toc = [
@@ -31,14 +32,14 @@ const toc = [
 
 <LegalPage
   title="Politique de confidentialité"
-  description="Comment Dar Nūr traite les données personnelles transmises lors d’une demande de commande : données, finalités, prestataires, durées et droits."
+  description="Comment Dar Nûr traite les données personnelles transmises lors d’une demande de commande : données, finalités, prestataires, durées et droits."
   canonicalPath="/confidentialite/"
   toc={toc}
 >
   <h2 id="responsable">1. Responsable du traitement</h2>
   <p>
     Le responsable du traitement est {legalEntity.operator}, {legalEntity.legalForm}, exerçant sous le nom
-    commercial {legalEntity.tradeName} (ci-après « Dar Nūr »), {legalAddressLine}. Pour toute question
+    commercial {legalEntity.tradeName} (ci-après « Dar Nûr »), {legalAddressLine}. Pour toute question
     relative à vos données : <a href={`mailto:${email}`}>{email}</a>.
   </p>
 
@@ -67,17 +68,23 @@ const toc = [
   </ul>
   <h3>E-mails de commande</h3>
   <p>
-    Dar Nūr envoie uniquement des e-mails liés à votre commande (commande reçue, paiement demandé, paiement
+    Dar Nûr envoie uniquement des e-mails liés à votre commande (commande reçue, paiement demandé, paiement
     reçu, commande expédiée). Pour chacun, sont conservés l’identifiant technique attribué par le prestataire
     d’envoi et son statut de remise : remis, différé, rejet temporaire ou définitif, bloqué, adresse invalide,
-    erreur ou signalement comme indésirable. Dar Nūr n’enregistre ni l’ouverture des e-mails ni les clics sur
+    erreur ou signalement comme indésirable. Dar Nûr n’enregistre ni l’ouverture des e-mails ni les clics sur
     leurs liens.
   </p>
-  {!emailTrackingDisabledConfirmed && (
+  {brevoAnonymousTrackingConfirmed ? (
+    <p>
+      Chez le prestataire d’envoi Brevo, le suivi des e-mails de commande est configuré en mode « suivi
+      anonyme » : les ouvertures et les clics ne sont pas rattachés individuellement aux destinataires. Ces
+      mesures ne sont ni exploitées ni conservées par Dar Nûr à des fins de suivi comportemental.
+    </p>
+  ) : (
     <p>
       À ce jour, le prestataire d’envoi Brevo peut mesurer techniquement l’ouverture des e-mails et les clics,
-      notamment en faisant transiter les liens par son propre domaine. Dar Nūr n’utilise pas ces mesures :
-      elles ne sont ni exploitées ni conservées par Dar Nūr.
+      notamment en faisant transiter les liens par son propre domaine. Dar Nûr n’utilise pas ces mesures :
+      elles ne sont ni exploitées ni conservées par Dar Nûr.
     </p>
   )}
   <h3>Prévention des abus</h3>
@@ -92,7 +99,7 @@ const toc = [
   </p>
   <p>
     Le site n’utilise ni cookie de mesure d’audience, ni cookie publicitaire, ni outil de suivi de navigation.
-    Dar Nūr n’envoie ni newsletter ni e-mail promotionnel et ne vend ni ne loue vos données.
+    Dar Nûr n’envoie ni newsletter ni e-mail promotionnel et ne vend ni ne loue vos données.
   </p>
 
   <h2 id="finalites">3. Finalités et bases légales</h2>
@@ -102,7 +109,7 @@ const toc = [
       paiement, expédition, suivi, e-mails de commande) : mesures précontractuelles et exécution du contrat.
     </li>
     <li>
-      <strong>Vérifier la bonne remise des e-mails de commande</strong> : intérêt légitime de Dar Nūr à
+      <strong>Vérifier la bonne remise des e-mails de commande</strong> : intérêt légitime de Dar Nûr à
       s’assurer que vous recevez les informations sur votre commande.
     </li>
     <li>
@@ -120,7 +127,7 @@ const toc = [
   </ul>
   <h3>Programme de fidélité (non proposé à ce jour)</h3>
   <p>
-    Dar Nūr envisage de proposer à l’avenir un programme de fidélité. Il n’existe pas aujourd’hui et vos
+    Dar Nûr envisage de proposer à l’avenir un programme de fidélité. Il n’existe pas aujourd’hui et vos
     données ne sont pas utilisées à cette fin. S’il est mis en place, cette politique sera mise à jour avant
     son lancement pour en préciser le fonctionnement, la base légale et les données concernées, et vous en
     serez informé.
@@ -128,7 +135,7 @@ const toc = [
 
   <h2 id="destinataires">4. Destinataires et prestataires</h2>
   <p>
-    Vos données sont accessibles uniquement à Dar Nūr. Elles sont traitées, pour son compte et selon ses
+    Vos données sont accessibles uniquement à Dar Nûr. Elles sont traitées, pour son compte et selon ses
     instructions, par les prestataires techniques suivants :
   </p>
   <ul>
@@ -151,7 +158,7 @@ const toc = [
     paiement sont indiqués au moment de la demande de paiement.
   </p>
   <p>
-    Si vous choisissez de contacter Dar Nūr sur WhatsApp (lien proposé sur le site pour poser une question),
+    Si vous choisissez de contacter Dar Nûr sur WhatsApp (lien proposé sur le site pour poser une question),
     vos messages transitent par ce service, édité par WhatsApp (groupe Meta), selon ses propres conditions et
     sa propre politique de confidentialité. Ce canal est facultatif : la commande n’en dépend pas.
   </p>
@@ -170,8 +177,11 @@ const toc = [
   <ul>
     <li>
       <strong>Données de commande et de relation client</strong> : pendant la relation commerciale, puis
-      jusqu’à trois ans après le dernier achat lorsqu’elles restent nécessaires à cette relation (ou, sans
-      achat, trois ans après la dernière demande de commande).
+      jusqu’à trois ans après le dernier achat lorsqu’elles restent nécessaires à cette relation.
+    </li>
+    <li>
+      <strong>Demandes de commande non abouties</strong> : jusqu’à trois ans après la dernière demande de
+      commande non aboutie, lorsque cette conservation reste nécessaire à cette finalité.
     </li>
     <li>
       <strong>Pièces comptables, factures et justificatifs</strong> : conservés selon les obligations légales
@@ -248,7 +258,7 @@ const toc = [
   <h2 id="securite">10. Sécurité</h2>
   <p>
     Les échanges avec le site sont chiffrés (HTTPS). Les données de commande ne sont lisibles que par
-    l’administrateur de Dar Nūr après authentification ; les liens de suivi sont vérifiés sous forme
+    l’administrateur de Dar Nûr après authentification ; les liens de suivi sont vérifiés sous forme
     d’empreinte et l’adresse IP n’est jamais enregistrée en clair.
   </p>
 </LegalPage>

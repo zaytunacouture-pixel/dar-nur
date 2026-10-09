@@ -11,7 +11,7 @@ const pending = 'information en attente';
 
 <LegalPage
   title="Mentions légales"
-  description="Mentions légales du site Dar Nūr : éditeur, contact, directeur de la publication et hébergeur."
+  description="Mentions légales du site Dar Nûr : éditeur, contact, directeur de la publication et hébergeur."
   canonicalPath="/mentions-legales/"
 >
   <h2 id="editeur">Éditeur du site</h2>
@@ -28,10 +28,25 @@ const pending = 'information en attente';
     <dd>
       <a href={`mailto:${legalEntity.email}`}>{legalEntity.email}</a>
     </dd>
+    <dt>Téléphone</dt>
+    <dd>
+      {legalEntity.phone ? (
+        <>
+          <a href={legalEntity.phoneHref}>{legalEntity.phone}</a> (depuis l’étranger :{' '}
+          {legalEntity.phoneInternational})
+        </>
+      ) : (
+        <span class="dn-legal__missing">{pending}</span>
+      )}
+    </dd>
     <dt>SIREN</dt>
     <dd>{legalEntity.siren ?? <span class="dn-legal__missing">{pending}</span>}</dd>
     <dt>SIRET</dt>
     <dd>{legalEntity.siret ?? <span class="dn-legal__missing">{pending}</span>}</dd>
+    <dt>Immatriculation</dt>
+    <dd>
+      {legalEntity.registry}, depuis le {legalEntity.registeredSince}
+    </dd>
     <dt>TVA</dt>
     <dd>{legalEntity.vatMention}</dd>
     <dt>Directeur de la publication</dt>
@@ -45,7 +60,11 @@ const pending = 'information en attente';
     <dt>Adresse</dt>
     <dd>{host.address}</dd>
     <dt>Téléphone</dt>
-    <dd>{host.phone ?? <span class="dn-legal__missing">{pending}</span>}</dd>
+    <dd>
+      {host.phone ?? (
+        <span class="dn-legal__missing">aucun numéro public officiel identifié — en attente</span>
+      )}
+    </dd>
     <dt>Site</dt>
     <dd>
       <a href={host.website} rel="noopener">
@@ -61,7 +80,8 @@ const pending = 'information en attente';
   <h2 id="contact">Contact</h2>
   <p>
     Pour toute question sur le site, une commande ou vos données personnelles, écrivez à
-    <a href={`mailto:${legalEntity.email}`}>{legalEntity.email}</a> ou par courrier à l’adresse ci-dessus.
+    <a href={`mailto:${legalEntity.email}`}>{legalEntity.email}</a>, appelez le
+    <a href={legalEntity.phoneHref}>{legalEntity.phone}</a> ou écrivez par courrier à l’adresse ci-dessus.
   </p>
 
   <h2 id="documents">Documents associés</h2>

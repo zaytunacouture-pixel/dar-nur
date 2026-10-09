@@ -1,15 +1,17 @@
 /**
- * Faits juridiques de Dar Nūr (étape 12), source unique des pages /cgv/, /confidentialite/ et
+ * Faits juridiques de Dar Nûr (étape 12), source unique des pages /cgv/, /confidentialite/ et
  * /mentions-legales/. RÈGLE : uniquement des faits fournis par l'exploitant ou vérifiés ; une
  * information inconnue vaut `null` et n'est JAMAIS remplacée par une valeur plausible.
  *
- * Faits communiqués par l'exploitant le 9 octobre 2026 (synthèse de dépôt INPI) :
- * entrepreneur individuel, micro-entreprise, activité commerciale, début d'activité déclaré le
- * 1er octobre 2026, franchise en base de TVA. SIREN/SIRET non encore connus : l'immatriculation
- * n'est pas considérée comme prouvée.
+ * Faits communiqués par l'exploitant : entrepreneur individuel, micro-entreprise, activité
+ * commerciale, franchise en base de TVA (9 octobre 2026) ; immatriculation au RNE depuis le
+ * 2 octobre 2026, SIREN et SIRET (document officiel RNE, communiqué le 9 octobre 2026).
+ *
+ * Graphie : « Dar Nûr » dans les pages juridiques et les informations officielles ; « Dar Nūr »
+ * reste la graphie du branding (logo, identité visuelle, titres du site).
  *
  * Activité : Mode (vêtements) et Soins restent vendus (catalogue et pages juridiques inchangés).
- * L'intitulé d'activité sera vérifié au RNE après réception du SIREN/SIRET ; si nécessaire, une
+ * L'intitulé d'activité sera vérifié au RNE (SIREN/SIRET reçus le 9 octobre 2026) ; si nécessaire, une
  * adjonction d'activité sera effectuée via le Guichet unique (décision de l'exploitant, 9 octobre 2026).
  *
  * Tant que `legalBlockers()` n'est pas vide : bandeau « non finalisé » sur les pages juridiques,
@@ -21,12 +23,12 @@ export const legalVersion = {
   /** Identifiant affiché sur les pages ; à enregistrer comme terms_version une fois finalisé. */
   id: 'cgv-2026-10-09-preprod',
   date: '9 octobre 2026',
-  /** Vrai seulement quand la version est juridiquement finalisée (aucun blocage). */
+  /** Vrai seulement quand la version est juridiquement finalisée (aucun autre blocage). */
   final: false,
 };
 
 export const legalEntity = {
-  /** Graphie telle que communiquée par l'exploitant (« Dar Nûr ») : à confirmer sur le document INPI. */
+  /** Graphie officielle (pages juridiques) ; le branding du site reste « Dar Nūr ». */
   tradeName: 'Dar Nûr',
   operator: 'Youcef ZAHI',
   /** La loi impose la mention « entrepreneur individuel » ou « EI » à côté du nom. */
@@ -40,13 +42,16 @@ export const legalEntity = {
   },
   email: 'contact@dar-nur.fr',
   /**
-   * Décision de l'exploitant (9 octobre 2026) : aucun numéro affiché. Le Code de la consommation
-   * (art. R. 111-1, 1°) et la LCEN demandent pourtant un numéro de téléphone : point bloquant.
+   * Numéro professionnel public (décision du 9 octobre 2026) : utilisé principalement sur
+   * WhatsApp, il peut aussi être appelé. Ne jamais écrire « WhatsApp uniquement ».
    */
-  phone: null as string | null,
-  /** Inconnus à ce jour : ne jamais inventer. */
-  siren: null as string | null,
-  siret: null as string | null,
+  phone: '07 69 25 33 75' as string | null,
+  phoneInternational: '+33 7 69 25 33 75',
+  phoneHref: 'tel:+33769253375',
+  siren: '130 776 743' as string | null,
+  siret: '130 776 743 00010' as string | null,
+  registry: 'Registre national des entreprises (RNE)',
+  registeredSince: '2 octobre 2026',
   vatMention: 'TVA non applicable, article 293 B du code général des impôts',
   publicationDirector: 'Youcef ZAHI',
 };
@@ -62,8 +67,8 @@ export const mediator = null as null | { name: string; address: string; website:
 
 /**
  * Hébergeur du site (refonte Astro, Netlify). Raison sociale et adresse : politique de
- * confidentialité de Netlify (mise à jour du 10 avril 2026). Aucun numéro de téléphone publié
- * par Netlify sur ses pages officielles consultées : point bloquant (LCEN).
+ * confidentialité de Netlify (mise à jour du 10 avril 2026). Aucun numéro de téléphone public
+ * officiel identifiable : laissé EN ATTENTE, jamais déduit d'une source non officielle.
  */
 export const host = {
   name: 'Netlify, Inc.',
@@ -73,28 +78,36 @@ export const host = {
 };
 
 /**
- * Suivi des ouvertures et des clics des e-mails Brevo. Constaté ACTIF pour les clics à l'étape 11
- * (liens réécrits par Brevo). Aucun réglage en libre-service ni paramètre d'API connu : la
- * désactivation se demande au support Brevo. Passer à `true` uniquement après confirmation écrite.
+ * Suivi anonyme des e-mails transactionnels Brevo : Paramètres → Automatisations → Emails
+ * transactionnels → Suivi → « Suivi anonyme des emails » = Oui (réglage manuel de l'exploitant).
+ * Passer à `true` uniquement après configuration constatée. Le webhook de délivrabilité (étape 11)
+ * n'est pas concerné.
  */
-export const emailTrackingDisabledConfirmed = false;
+export const brevoAnonymousTrackingConfirmed = false;
 
-/** Informations obligatoires manquantes : tant qu'il en reste, rien n'ouvre en production. */
+/**
+ * Fonctionnalité de rétractation en ligne (« renoncer au contrat ici ») : obligatoire pour les
+ * contrats conclus au moyen d'une interface en ligne depuis le 19 juin 2026 (art. L. 221-21 du code
+ * de la consommation, ordonnance n° 2026-2 ; modalités : décret n° 2026-3). Absente du site.
+ */
+export const onlineWithdrawalFunction = false;
+
+/** Informations ou dispositifs obligatoires manquants : tant qu'il en reste, rien n'ouvre en production. */
 export function legalBlockers(): string[] {
   const blockers: string[] = [];
   if (!legalEntity.siren || !legalEntity.siret)
     blockers.push('SIREN/SIRET et confirmation de l’immatriculation non encore obtenus');
+  if (!legalEntity.phone) blockers.push('numéro de téléphone du vendeur non publié');
   if (!mediator) blockers.push('médiateur de la consommation non désigné');
-  if (!legalEntity.phone)
+  if (!host.phone)
+    blockers.push('numéro de téléphone de l’hébergeur : aucun numéro public officiel identifié (en attente)');
+  if (!brevoAnonymousTrackingConfirmed)
+    blockers.push('suivi anonyme des e-mails transactionnels Brevo non encore activé et constaté');
+  if (!onlineWithdrawalFunction)
     blockers.push(
-      'numéro de téléphone du vendeur non publié (exigé par le Code de la consommation et la LCEN)',
+      'fonctionnalité de rétractation en ligne « renoncer au contrat ici » absente (art. L. 221-21, depuis le 19 juin 2026)',
     );
-  if (!host.phone) blockers.push('numéro de téléphone de l’hébergeur à vérifier (LCEN)');
-  if (!emailTrackingDisabledConfirmed)
-    blockers.push('désactivation du suivi des ouvertures et des clics Brevo non confirmée');
   if (!legalVersion.final)
-    blockers.push(
-      'vérification finale des informations légales (graphie du nom commercial, textes en vigueur)',
-    );
+    blockers.push('version juridique à finaliser une fois les points ci-dessus réglés');
   return blockers;
 }

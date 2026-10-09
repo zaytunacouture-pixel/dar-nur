@@ -1,7 +1,7 @@
 ---
 /**
  * Conditions générales de vente (étape 12). Parcours réel (étape 10) : demande de commande sans
- * paiement → vérification par Dar Nūr → total final → demande de paiement (48 h) → paiement, qui
+ * paiement → vérification par Dar Nûr → total final → demande de paiement (48 h) → paiement, qui
  * conclut le contrat → expédition. Aucun prestataire de paiement nommé, aucun pays ni tarif publié.
  * L'encadré « garanties légales » reproduit le modèle officiel (annexe à l'art. D. 211-2 du code
  * de la consommation, décret n° 2022-946, JO du 30 juin 2022) : ne pas le reformuler.
@@ -30,22 +30,24 @@ const toc = [
 
 <LegalPage
   title="Conditions générales de vente"
-  description="Conditions générales de vente de Dar Nūr : demande de commande, paiement après confirmation du total, expédition, rétractation et garanties."
+  description="Conditions générales de vente de Dar Nûr : demande de commande, paiement après confirmation du total, expédition, rétractation et garanties."
   canonicalPath="/cgv/"
   toc={toc}
 >
   <h2 id="vendeur">1. Vendeur</h2>
   <p>
     Les produits présentés sur ce site sont vendus par {legalEntity.operator}, {legalEntity.legalForm},
-    exerçant sous le nom commercial {legalEntity.tradeName} (ci-après « Dar Nūr »), {legalAddressLine}.
-    Contact : <a href={`mailto:${email}`}>{email}</a>. Les autres informations légales figurent dans les
+    exerçant sous le nom commercial {legalEntity.tradeName} (ci-après « Dar Nûr »), {legalAddressLine},
+    immatriculé au {legalEntity.registry} sous le numéro SIREN {legalEntity.siren}. Contact :{' '}
+    <a href={`mailto:${email}`}>{email}</a>, téléphone <a href={legalEntity.phoneHref}>{legalEntity.phone}</a>
+    (depuis l’étranger : {legalEntity.phoneInternational}). Les autres informations légales figurent dans les
     <a href="/mentions-legales/">mentions légales</a>.
   </p>
 
   <h2 id="champ">2. Champ d’application</h2>
   <p>
     Les présentes conditions s’appliquent aux ventes conclues à distance par l’intermédiaire du site entre Dar
-    Nūr et un client agissant en qualité de consommateur. Le client les accepte en cochant la case prévue à
+    Nûr et un client agissant en qualité de consommateur. Le client les accepte en cochant la case prévue à
     cet effet avant d’envoyer sa demande de commande. La version applicable est celle acceptée à cette date ;
     elle reste consultable sur cette page.
   </p>
@@ -53,19 +55,19 @@ const toc = [
   <h2 id="produits">3. Produits et disponibilité</h2>
   <p>
     Les caractéristiques essentielles de chaque produit sont présentées sur sa fiche. Certains produits sont
-    indiqués « sur demande » : leur disponibilité est confirmée par Dar Nūr après réception de la demande de
+    indiqués « sur demande » : leur disponibilité est confirmée par Dar Nûr après réception de la demande de
     commande. Aucune disponibilité n’est garantie avant cette confirmation.
   </p>
 
   <h2 id="prix">4. Prix</h2>
   <p>
     Les prix sont indiqués en euros. {legalEntity.vatMention}. Les frais de livraison ne sont pas compris dans
-    le prix des produits : ils sont fixés par Dar Nūr pour chaque commande, selon la destination et le contenu
+    le prix des produits : ils sont fixés par Dar Nûr pour chaque commande, selon la destination et le contenu
     du colis, et communiqués au client avec le total final, avant tout paiement.
   </p>
   <p>
     Le prix des produits retenu est celui affiché au moment de l’envoi de la demande de commande. Le total
-    final communiqué par Dar Nūr (produits, frais de livraison et, le cas échéant, remise) est le seul montant
+    final communiqué par Dar Nûr (produits, frais de livraison et, le cas échéant, remise) est le seul montant
     à payer.
   </p>
 
@@ -78,18 +80,18 @@ const toc = [
     reçoit un numéro de commande, un lien de suivi personnel et un e-mail confirmant la réception de sa
     demande.
   </p>
-  <h3>5.2 Vérification par Dar Nūr</h3>
+  <h3>5.2 Vérification par Dar Nûr</h3>
   <p>
-    Dar Nūr vérifie la disponibilité des produits et la possibilité de livrer à l’adresse indiquée, puis fixe
+    Dar Nûr vérifie la disponibilité des produits et la possibilité de livrer à l’adresse indiquée, puis fixe
     les frais de livraison. Si un produit est indisponible, ou si la livraison d’un produit vers la
-    destination demandée n’est pas possible, Dar Nūr en informe le client ; la demande peut alors être ajustée
+    destination demandée n’est pas possible, Dar Nûr en informe le client ; la demande peut alors être ajustée
     avec son accord ou annulée, sans aucun frais pour lui.
   </p>
   <h3>5.3 Total final et demande de paiement</h3>
   <p>
-    Dar Nūr communique ensuite au client, par e-mail et sur son lien de suivi, le total final de la commande,
+    Dar Nûr communique ensuite au client, par e-mail et sur son lien de suivi, le total final de la commande,
     le délai de livraison indicatif et les instructions de paiement. Si l’une des exceptions au droit de
-    rétractation (article 8) s’applique à un produit de la commande, Dar Nūr l’indique à ce moment, avant tout
+    rétractation (article 8) s’applique à un produit de la commande, Dar Nûr l’indique à ce moment, avant tout
     paiement.
   </p>
   <h3>5.4 Conclusion du contrat</h3>
@@ -108,12 +110,12 @@ const toc = [
   <p>
     Les moyens de paiement disponibles sont indiqués au client au moment de la demande de paiement. Le
     paiement porte sur l’intégralité du total final. Aucune commande n’est préparée pour l’expédition ni
-    expédiée avant la réception du paiement. Dar Nūr confirme la réception du paiement par e-mail.
+    expédiée avant la réception du paiement. Dar Nûr confirme la réception du paiement par e-mail.
   </p>
 
   <h2 id="livraison">7. Expédition et livraison</h2>
   <p>
-    Dar Nūr livre en France et à l’international. Les destinations possibles, les frais et les conditions de
+    Dar Nûr livre en France et à l’international. Les destinations possibles, les frais et les conditions de
     livraison applicables à une commande sont confirmés au client avant le paiement ; aucune livraison n’est
     promise avant cette confirmation.
   </p>
@@ -132,9 +134,9 @@ const toc = [
   <h3>Livraison hors de France</h3>
   <p>
     Selon le pays de destination, des droits de douane, taxes d’importation ou frais de dédouanement peuvent
-    être demandés à la livraison par les autorités ou le transporteur. Ils ne sont pas calculés par Dar Nūr,
+    être demandés à la livraison par les autorités ou le transporteur. Ils ne sont pas calculés par Dar Nûr,
     ne sont pas compris dans le total final et restent à la charge du destinataire. Certains produits peuvent
-    faire l’objet de restrictions d’importation ou de transport : Dar Nūr en informe le client avant le
+    faire l’objet de restrictions d’importation ou de transport : Dar Nûr en informe le client avant le
     paiement lorsqu’elles empêchent la livraison.
   </p>
 
@@ -148,7 +150,7 @@ const toc = [
   </p>
   <h3>8.2 Exercice</h3>
   <p>
-    Pour exercer ce droit, le client informe Dar Nūr de sa décision avant l’expiration du délai, par une
+    Pour exercer ce droit, le client informe Dar Nûr de sa décision avant l’expiration du délai, par une
     déclaration dénuée d’ambiguïté envoyée à <a href={`mailto:${email}`}>{email}</a> ou par courrier à{' '}
     {legalAddressLine}. Il peut utiliser le <a href="#formulaire">formulaire de rétractation</a> figurant en
     annexe, sans que cela soit obligatoire.
@@ -162,13 +164,13 @@ const toc = [
     fonctionnement.
   </p>
   <p>
-    Lorsque le retour fait suite à une erreur de Dar Nūr (produit qui ne correspond pas à la commande) ou à un
+    Lorsque le retour fait suite à une erreur de Dar Nûr (produit qui ne correspond pas à la commande) ou à un
     produit défectueux ou non conforme, les frais de retour ne sont pas à la charge du client (voir aussi
     l’article 9).
   </p>
   <h3>8.4 Remboursement</h3>
   <p>
-    Dar Nūr rembourse la totalité des sommes versées, y compris les frais de livraison initiaux (dans la
+    Dar Nûr rembourse la totalité des sommes versées, y compris les frais de livraison initiaux (dans la
     limite du mode de livraison standard le moins coûteux proposé), au plus tard quatorze jours à compter du
     jour où il est informé de la décision de rétractation. Le remboursement peut être différé jusqu’à la
     récupération des produits ou jusqu’à ce que le client ait fourni une preuve de leur expédition, la date
@@ -191,16 +193,16 @@ const toc = [
     Ces exceptions ne s’appliquent qu’aux produits qui remplissent réellement ces conditions : la seule nature
     d’un produit (parfum, soin, produit alimentaire…) ne suffit pas à exclure le droit de rétractation. Un
     produit resté scellé peut être retourné dans les conditions ci-dessus. Lorsqu’une exception s’applique à
-    un produit, Dar Nūr l’indique au client avant le paiement (article 5.3).
+    un produit, Dar Nûr l’indique au client avant le paiement (article 5.3).
   </p>
 
   <h2 id="garanties">9. Garanties légales</h2>
   <p>
-    Dar Nūr répond des défauts de conformité et des vices cachés des produits vendus. Pour mettre en œuvre une
-    garantie légale, le client contacte Dar Nūr à <a href={`mailto:${email}`}>{email}</a> ou par courrier à{' '}
-    {legalAddressLine}, en indiquant son numéro de commande et le défaut constaté. Si un renvoi est
-    nécessaire, Dar Nūr indique les modalités pratiques ; les frais de renvoi d’un produit non conforme ou
-    défectueux ne sont pas à la charge du client.
+    Dar Nûr répond des défauts de conformité et des vices cachés des produits vendus. Pour mettre en œuvre une
+    garantie légale, le client contacte Dar Nûr à <a href={`mailto:${email}`}>{email}</a>, par téléphone au{' '}
+    <a href={legalEntity.phoneHref}>{legalEntity.phone}</a> ou par courrier à {legalAddressLine}, en indiquant
+    son numéro de commande et le défaut constaté. Si un renvoi est nécessaire, Dar Nûr indique les modalités
+    pratiques ; les frais de renvoi d’un produit non conforme ou défectueux ne sont pas à la charge du client.
   </p>
   <div class="dn-legal__box" role="note" aria-label="Garanties légales">
     <p>
@@ -278,16 +280,16 @@ const toc = [
 
   <h2 id="reclamations">10. Service client et réclamations</h2>
   <p>
-    Pour toute question ou réclamation, le client écrit à <a href={`mailto:${email}`}>{email}</a> ou par
-    courrier à {legalAddressLine}, en précisant son numéro de commande. Dar Nūr s’efforce d’y répondre dans
-    les meilleurs délais.
+    Pour toute question ou réclamation, le client écrit à <a href={`mailto:${email}`}>{email}</a>, appelle le{' '}
+    <a href={legalEntity.phoneHref}>{legalEntity.phone}</a> ou écrit par courrier à {legalAddressLine}, en
+    précisant son numéro de commande. Dar Nûr s’efforce d’y répondre dans les meilleurs délais.
   </p>
 
   <h2 id="mediation">11. Médiation de la consommation</h2>
   <p>
     Conformément aux articles L. 611-1 et suivants du code de la consommation, le client peut recourir
     gratuitement à un médiateur de la consommation en vue de la résolution amiable d’un litige, après avoir
-    tenté de le résoudre directement auprès de Dar Nūr par une réclamation écrite.
+    tenté de le résoudre directement auprès de Dar Nûr par une réclamation écrite.
   </p>
   {mediator ? (
     <p>

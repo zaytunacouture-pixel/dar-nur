@@ -12,8 +12,9 @@
  *  4. Contenus obligatoires : parcours et conclusion du contrat, délai de paiement de 48 h,
  *     expédition sous 3 à 5 jours, rétractation + formulaire, encadré officiel des garanties,
  *     médiation, prestataires réels, durées de conservation, droits, hébergeur.
- *  5. Pages juridiques : aucun prestataire de paiement nommé (aucun n'est intégré), aucun numéro
- *     de téléphone, jamais « conservation indéfinie ».
+ *  5. Pages juridiques : aucun prestataire de paiement nommé (aucun n'est intégré), aucun numéro de
+ *     téléphone autre que le numéro professionnel officiel (lien tel:), jamais « WhatsApp uniquement »,
+ *     jamais « conservation indéfinie », graphie officielle « Dar Nûr » (le branding reste « Dar Nūr »).
  *  6. Liens : footer → trois pages internes ; tout lien « Conditions générales de vente » → /cgv/.
  */
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
@@ -96,6 +97,7 @@ const OBSOLETE = [
     'commande sur WhatsApp',
   ],
   [/WhatsApp[^.]{0,30}obligatoire|obligatoire[^.]{0,30}WhatsApp/i, 'WhatsApp obligatoire'],
+  [/WhatsApp uniquement|uniquement (?:sur|via|par) WhatsApp/i, 'WhatsApp uniquement'],
   [
     /paiement (?:à|a) (?:la )?r[ée]ception|(?:payer|pay[ée]e?|r[éè]gl(?:er|ée?|ement)) (?:à|a) la (?:r[ée]ception|livraison)/i,
     'paiement à la réception',
@@ -156,7 +158,8 @@ const REQUIRED = {
       /expédiées sous 3 à 5 jours après réception du paiement, sauf délai différent indiqué au client avant paiement/,
       'délai d’expédition',
     ],
-    [/Dar Nūr livre en France et à l’international/, 'livraison France et international'],
+    [/Dar Nûr livre en France et à l’international/, 'livraison France et international'],
+    [/SIREN \d{3} \d{3} \d{3}/, 'SIREN du vendeur'],
     [/droits de douane/, 'droits et taxes à l’international'],
     [/délai de quatorze jours pour se rétracter/, 'droit de rétractation'],
     [/les frais directs de renvoi sont à la charge du client/, 'frais de retour (rétractation)'],
@@ -191,6 +194,7 @@ const REQUIRED = {
     [/n’enregistre ni l’ouverture des e-mails ni les clics/, 'aucun suivi comportemental enregistré'],
     [/48 heures/, 'empreinte IP 48 h'],
     [/trois ans après le dernier achat/, 'conservation relation client'],
+    [/trois ans après la dernière demande de commande non aboutie/, 'conservation des demandes non abouties'],
     [/jusqu’à dix ans/, 'conservation comptable'],
     [/Programme de fidélité \(non proposé à ce jour\)/, 'fidélité future, non active'],
     [/stockage local/, 'stockage navigateur'],
@@ -202,6 +206,10 @@ const REQUIRED = {
     [/Directeur de la publication/, 'directeur de la publication'],
     [/Netlify, Inc\./, 'hébergeur'],
     [/contact@dar-nur\.fr/, 'e-mail public'],
+    [/SIREN \d{3} \d{3} \d{3}/, 'SIREN'],
+    [/SIRET \d{3} \d{3} \d{3} \d{5}/, 'SIRET'],
+    [/Registre national des entreprises \(RNE\)/, 'immatriculation RNE'],
+    [/Téléphone 0\d(?: \d{2}){4}/, 'téléphone du vendeur'],
     [/TVA non applicable, article 293 B/, 'mention TVA'],
   ],
 };
@@ -219,8 +227,19 @@ for (const [name, doc] of Object.entries(html)) {
   const provider = /shopify|stripe|paypal|mollie|sumup/i.exec(t);
   if (provider)
     fail(`${name} : prestataire de paiement nommé (« ${provider[0]} ») alors qu’aucun n’est intégré`);
-  const phone = /(?:\+33\s?|\b0)[1-9](?:[\s.-]?\d{2}){4}\b/.exec(t);
-  if (phone) fail(`${name} : numéro de téléphone affiché (« ${phone[0]} »)`);
+  // Seul le numéro professionnel officiel (celui des liens tel:) est admis, formats national et international.
+  const tels = [...new Set([...doc.matchAll(/href="tel:\+33(\d{9})"/g)].map((m) => m[1]))];
+  if (tels.length > 1) fail(`${name} : plusieurs numéros de téléphone (${tels.length})`);
+  let rest = t;
+  for (const d of tels) {
+    const pairs = d.slice(1).match(/\d{2}/g).join(' ');
+    rest = rest.split(`0${d[0]} ${pairs}`).join(' ').split(`+33 ${d[0]} ${pairs}`).join(' ');
+  }
+  const phone = /(?:\+33\s?|\b0)[1-9](?:[\s.-]?\d{2}){4}\b/.exec(rest);
+  if (phone) fail(`${name} : numéro de téléphone non officiel affiché (« ${phone[0]} »)`);
+  if (/Dar Nūr/.test(t))
+    fail(`${name} : graphie « Dar Nūr » dans le texte juridique (officielle : « Dar Nûr »)`);
+  if (!/Dar Nûr/.test(t)) fail(`${name} : graphie officielle « Dar Nûr » absente`);
   if (/ind[ée]finiment|ind[ée]finie|sans limitation de durée/i.test(t))
     fail(`${name} : conservation indéfinie`);
   if (/\[[^\]]*(?:compléter|TODO|XXX)[^\]]*\]|lorem ipsum/i.test(t)) fail(`${name} : texte à compléter`);

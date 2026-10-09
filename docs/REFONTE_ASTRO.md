@@ -630,7 +630,7 @@ relèvent de la bascule) :
 |---|---|---|
 | `/cgv/` | `pages/cgv.astro` | Parcours réel : demande sans obligation de payer → vérification → total final → demande de paiement (48 h) → contrat conclu au paiement → expédition sous 3 à 5 jours ; France + international sans pays ni tarif ; douanes ; rétractation 14 jours (frais de retour client, sauf erreur/défaut/non-conformité ; exceptions L. 221-28 seulement si réellement applicables, signalées avant paiement) ; encadré officiel des garanties (annexe D. 211-2, JO du 30 juin 2022, **ne pas reformuler**) ; médiation ; formulaire de rétractation |
 | `/confidentialite/` | `pages/confidentialite.astro` | Uniquement les traitements réels : commande (téléphone obligatoire), statuts de remise Brevo (ouvertures/clics jamais enregistrés), empreinte d'IP 48 h, `localStorage` (panier, 10 dernières commandes), lien de suivi ; Supabase (Paris), Brevo (Paris), Netlify (États-Unis, DPF + CCT) ; fidélité future non active ; 3 ans / jusqu'à 10 ans ; droits, CNIL |
-| `/mentions-legales/` | `pages/mentions-legales.astro` | Éditeur (EI, micro-entreprise), adresse, e-mail, TVA 293 B, directeur de la publication, hébergeur Netlify |
+| `/mentions-legales/` | `pages/mentions-legales.astro` | Éditeur (EI, micro-entreprise), adresse, e-mail, téléphone professionnel, SIREN/SIRET, immatriculation RNE (2 octobre 2026), TVA 293 B, directeur de la publication, hébergeur Netlify (téléphone en attente) |
 
 - **Source unique** : `site/src/config/legal.ts`. Toute information inconnue vaut `null` et s'affiche
   « information en attente » ; `legalBlockers()` liste ce qui manque.
@@ -642,15 +642,27 @@ relèvent de la bascule) :
 - **`verify-legal`** (CI) : anciennes mentions interdites sur toutes les pages publiques (commande/WhatsApp
   obligatoire, paiement à la réception, espèces, Revolut, Île-de-France, Lognes, « Chelles » hors adresse
   légale, GitHub Pages, adresse Outlook, liens `dar-nur.fr/*.html` légaux), contenus obligatoires, aucun
-  prestataire de paiement nommé, aucun numéro de téléphone, aucune conservation indéfinie, footer et liens
-  « Conditions générales de vente » internes.
-- **Blocages ouverts (2026-10-09)** : SIREN/SIRET et immatriculation ; médiateur ; téléphone du vendeur
-  (R. 111-1 et LCEN, en contradiction avec la décision « aucun numéro affiché ») ; téléphone de l'hébergeur
-  (absent des pages officielles de Netlify) ; désactivation du suivi des ouvertures/clics Brevo (pas de
-  réglage en libre-service : demande au support) ; vérification finale (graphie « Dar Nûr » / « Dar Nūr »,
-  textes en vigueur sur Légifrance). À la finalisation : `legalVersion.final`, nouvel identifiant de version,
-  puis `orders_private.config.terms_version` (sauvegarde préalable).
+  prestataire de paiement nommé, aucun numéro de téléphone autre que le numéro professionnel officiel (lien
+  `tel:`), jamais « WhatsApp uniquement », aucune conservation indéfinie, graphie « Dar Nûr » dans le texte
+  juridique, footer et liens « Conditions générales de vente » internes.
+- **Graphie** : « Dar Nûr » dans les pages juridiques et les informations officielles ; « Dar Nūr » pour le
+  branding (logo, en-tête, footer, titres), inchangé.
+- **Résolus (2026-10-09)** : SIREN 130 776 743 / SIRET 130 776 743 00010, RNE depuis le 2 octobre 2026
+  (document officiel) ; téléphone professionnel 07 69 25 33 75 (principalement WhatsApp, appelable) ;
+  graphie ; conservation des demandes non abouties (3 ans après la dernière) ; textes vérifiés sur Légifrance :
+  encadré D. 211-2 (version du 1er octobre 2022) et formulaire R. 221-1 (version du 28 mai 2022) inchangés.
+- **Brevo (correction)** : le suivi se règle en libre-service en mode anonyme — Paramètres → Automatisations →
+  Emails transactionnels → Suivi → « Suivi anonyme des emails » = Oui (réglage manuel de l'exploitant ;
+  `brevoAnonymousTrackingConfirmed` passe à `true` seulement une fois constaté). Brevo propose aussi un
+  consentement au suivi par contact (non utilisé). Le webhook de délivrabilité n'est pas concerné.
+- **Blocages restants** : médiateur de la consommation ; téléphone de l'hébergeur (aucun numéro public
+  officiel Netlify identifié, en attente) ; suivi anonyme Brevo à activer et constater ; **fonctionnalité de
+  rétractation en ligne** « renoncer au contrat ici » (art. L. 221-21 en vigueur depuis le 19 juin 2026,
+  ordonnance n° 2026-2, décret n° 2026-3 : obligatoire pour les contrats conclus via une interface en ligne,
+  absente du site, à développer dans une étape dédiée, avec accusé de réception sur support durable et mention
+  dans les CGV) ; finalisation de la version juridique. À la finalisation : `legalVersion.final`, nouvel
+  identifiant de version, puis `orders_private.config.terms_version` (sauvegarde préalable).
 - **Activité déclarée** : l'intitulé déclaré ne cite pas explicitement les vêtements (univers Mode) ni les
   soins. Ces produits **restent** au catalogue et dans les pages juridiques. L'intitulé sera vérifié au RNE
-  après réception du SIREN/SIRET ; si nécessaire, adjonction d'activité via le Guichet unique (décision de
+  (SIREN/SIRET reçus le 2026-10-09) ; si nécessaire, adjonction d'activité via le Guichet unique (décision de
   l'exploitant du 2026-10-09).
