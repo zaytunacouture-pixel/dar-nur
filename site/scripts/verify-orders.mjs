@@ -7,7 +7,8 @@
  *  2. /commande/ : CTA « Envoyer ma demande de commande », aucun bouton « Payer », explication du
  *     parcours (vérification, frais confirmés, paiement, expédition après paiement), case CGV,
  *     pot de miel, chaque champ a un libellé et l'autocomplete attendu, pays ISO (France en tête),
- *     aucun indicatif imposé, code postal non obligatoire en dur, blocage CGV affiché hors production.
+ *     aucun indicatif imposé, code postal non obligatoire en dur, blocage d'ouverture (CGV non validées,
+ *     informations juridiques manquantes — étape 12) affiché hors production.
  *  3. /suivi/ : aucun lien de paiement statique ; message d'instructions manuelles présent.
  *  4. Configuration API : clé publishable seulement, uniquement sur les pages qui l'utilisent.
  *  5. Aucune page ne propose encore « Commander sur WhatsApp » (hors démonstrations internes) ;
@@ -129,11 +130,12 @@ if (orderingOpen) {
     fail(`commande : liste des pays (${options.length}, premier ${options[0]})`);
   if (env !== 'production' && !/Préproduction/.test(orderText))
     fail('commande : bandeau de préproduction absent');
-  if (
-    !/conditions générales de vente publiées décrivent encore l’ancien/.test(orderText) &&
-    env !== 'production'
-  )
-    fail('commande : blocage CGV non signalé en préproduction');
+  if (env !== 'production' && !/Blocage avant ouverture en production/.test(orderText))
+    fail('commande : blocage d’ouverture non signalé en préproduction');
+  if (/décrivent encore l’ancien/.test(orderText))
+    fail('commande : ancienne mention « CGV décrivant l’ancien fonctionnement » (étape 12 : CGV internes)');
+  if (!/href="\/cgv\/"/.test(order) || !/href="\/confidentialite\/"/.test(order))
+    fail('commande : liens CGV / confidentialité non internes');
 } else if (!/La commande en ligne ouvre bientôt/.test(order)) {
   fail('commande : production sans CGV révisées mais formulaire actif');
 }

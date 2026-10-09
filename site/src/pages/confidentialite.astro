@@ -1,0 +1,254 @@
+---
+/**
+ * Politique de confidentialité (étape 12). Décrit UNIQUEMENT ce que le code fait réellement :
+ * - commande : public.orders (coordonnées, adresse, téléphone obligatoire, CGV acceptées), order_items,
+ *   order_events (migrations étape 10) ;
+ * - anti-abus : orders_private.submissions = empreinte salée de l'IP, effacée après 48 h
+ *   (à chaque nouvelle demande) ;
+ * - e-mails : orders_private.order_emails + email_delivery_events (étape 11) — statuts de remise
+ *   seulement ; ouvertures et clics jamais enregistrés (refusés par order_emails_delivery_event) ;
+ * - navigateur : localStorage dn-cart-v1 (panier) et dn-orders-v1 (10 dernières commandes :
+ *   numéro + jeton de suivi) ; aucun cookie de mesure d'audience ni publicitaire, polices locales.
+ * Le suivi des ouvertures/clics côté Brevo dépend de config/legal.ts (emailTrackingDisabledConfirmed).
+ */
+import LegalPage from '@/components/legal/LegalPage.astro';
+import { emailTrackingDisabledConfirmed, host, legalAddressLine, legalEntity } from '@/config/legal';
+
+const email = legalEntity.email;
+const toc = [
+  { id: 'responsable', label: 'Responsable du traitement' },
+  { id: 'donnees', label: 'Données traitées' },
+  { id: 'finalites', label: 'Finalités et bases légales' },
+  { id: 'destinataires', label: 'Destinataires et prestataires' },
+  { id: 'transferts', label: 'Transferts hors de l’Union européenne' },
+  { id: 'conservation', label: 'Durées de conservation' },
+  { id: 'navigateur', label: 'Stockage dans votre navigateur' },
+  { id: 'suivi', label: 'Lien de suivi de commande' },
+  { id: 'droits', label: 'Vos droits' },
+  { id: 'securite', label: 'Sécurité' },
+];
+---
+
+<LegalPage
+  title="Politique de confidentialité"
+  description="Comment Dar Nūr traite les données personnelles transmises lors d’une demande de commande : données, finalités, prestataires, durées et droits."
+  canonicalPath="/confidentialite/"
+  toc={toc}
+>
+  <h2 id="responsable">1. Responsable du traitement</h2>
+  <p>
+    Le responsable du traitement est {legalEntity.operator}, {legalEntity.legalForm}, exerçant sous le nom
+    commercial {legalEntity.tradeName} (ci-après « Dar Nūr »), {legalAddressLine}. Pour toute question
+    relative à vos données : <a href={`mailto:${email}`}>{email}</a>.
+  </p>
+
+  <h2 id="donnees">2. Données traitées</h2>
+  <h3>Lors d’une demande de commande</h3>
+  <ul>
+    <li>prénom, nom, adresse e-mail et numéro de téléphone (obligatoires) ;</li>
+    <li>
+      adresse de livraison : pays, adresse, complément d’adresse, code postal, ville, région, et vos
+      éventuelles instructions de livraison ;
+    </li>
+    <li>produits demandés, quantités, prix et montants de la commande ;</li>
+    <li>date d’acceptation et version des conditions générales de vente acceptées.</li>
+  </ul>
+  <h3>Au cours du traitement de la commande</h3>
+  <ul>
+    <li>
+      statuts et historique de la commande (vérification, demande de paiement, paiement, préparation,
+      expédition), frais de livraison, total final, délai indicatif ;
+    </li>
+    <li>
+      paiement : statut, date et, le cas échéant, référence du paiement. Le site ne collecte aucune donnée de
+      carte bancaire ;
+    </li>
+    <li>expédition : transporteur et, lorsqu’il existe, numéro et lien de suivi du colis.</li>
+  </ul>
+  <h3>E-mails de commande</h3>
+  <p>
+    Dar Nūr envoie uniquement des e-mails liés à votre commande (commande reçue, paiement demandé, paiement
+    reçu, commande expédiée). Pour chacun, sont conservés l’identifiant technique attribué par le prestataire
+    d’envoi et son statut de remise : remis, différé, rejet temporaire ou définitif, bloqué, adresse invalide,
+    erreur ou signalement comme indésirable. Dar Nūr n’enregistre ni l’ouverture des e-mails ni les clics sur
+    leurs liens.
+  </p>
+  {!emailTrackingDisabledConfirmed && (
+    <p>
+      À ce jour, le prestataire d’envoi Brevo peut mesurer techniquement l’ouverture des e-mails et les clics,
+      notamment en faisant transiter les liens par son propre domaine. Dar Nūr n’utilise pas ces mesures :
+      elles ne sont ni exploitées ni conservées par Dar Nūr.
+    </p>
+  )}
+  <h3>Prévention des abus</h3>
+  <p>
+    Pour limiter les envois automatisés de demandes, une empreinte de votre adresse IP, calculée de manière
+    irréversible (l’adresse IP n’est jamais enregistrée en clair), est conservée 48 heures.
+  </p>
+  <h3>Données techniques de connexion</h3>
+  <p>
+    Comme tout site, l’hébergeur et le prestataire de base de données traitent les données techniques
+    nécessaires à l’acheminement des pages et des requêtes (notamment l’adresse IP et la date de connexion).
+  </p>
+  <p>
+    Le site n’utilise ni cookie de mesure d’audience, ni cookie publicitaire, ni outil de suivi de navigation.
+    Dar Nūr n’envoie ni newsletter ni e-mail promotionnel et ne vend ni ne loue vos données.
+  </p>
+
+  <h2 id="finalites">3. Finalités et bases légales</h2>
+  <ul>
+    <li>
+      <strong>Traiter votre demande de commande puis votre commande</strong> (vérification, total final,
+      paiement, expédition, suivi, e-mails de commande) : mesures précontractuelles et exécution du contrat.
+    </li>
+    <li>
+      <strong>Vérifier la bonne remise des e-mails de commande</strong> : intérêt légitime de Dar Nūr à
+      s’assurer que vous recevez les informations sur votre commande.
+    </li>
+    <li>
+      <strong>Prévenir les abus et sécuriser le service</strong> : intérêt légitime.
+    </li>
+    <li>
+      <strong>Respecter les obligations comptables et fiscales</strong> : obligation légale.
+    </li>
+    <li>
+      <strong>
+        Gérer le service client, les réclamations, la rétractation, les garanties et les éventuels litiges
+      </strong>{' '}
+      : exécution du contrat, obligations légales et intérêt légitime.
+    </li>
+  </ul>
+  <h3>Programme de fidélité (non proposé à ce jour)</h3>
+  <p>
+    Dar Nūr envisage de proposer à l’avenir un programme de fidélité. Il n’existe pas aujourd’hui et vos
+    données ne sont pas utilisées à cette fin. S’il est mis en place, cette politique sera mise à jour avant
+    son lancement pour en préciser le fonctionnement, la base légale et les données concernées, et vous en
+    serez informé.
+  </p>
+
+  <h2 id="destinataires">4. Destinataires et prestataires</h2>
+  <p>
+    Vos données sont accessibles uniquement à Dar Nūr. Elles sont traitées, pour son compte et selon ses
+    instructions, par les prestataires techniques suivants :
+  </p>
+  <ul>
+    <li>
+      <strong>Supabase</strong> : base de données et fonctions serveur du site (commandes, suivi, file d’envoi
+      des e-mails). Données hébergées dans la région de Paris (Union européenne).
+    </li>
+    <li>
+      <strong>Brevo</strong> (société établie à Paris, France) : envoi des e-mails de commande et retour de
+      leur statut de remise.
+    </li>
+    <li>
+      <strong>{host.name}</strong> (États-Unis) : hébergement et diffusion des pages du site.
+    </li>
+  </ul>
+  <p>
+    Lors de l’expédition, les informations nécessaires à la livraison (nom, adresse, téléphone) sont
+    transmises au transporteur chargé du colis. Lors du paiement, le prestataire du moyen de paiement que vous
+    utilisez traite les données nécessaires à l’opération, selon ses propres conditions ; les moyens de
+    paiement sont indiqués au moment de la demande de paiement.
+  </p>
+  <p>
+    Si vous choisissez de contacter Dar Nūr sur WhatsApp (lien proposé sur le site pour poser une question),
+    vos messages transitent par ce service, édité par WhatsApp (groupe Meta), selon ses propres conditions et
+    sa propre politique de confidentialité. Ce canal est facultatif : la commande n’en dépend pas.
+  </p>
+
+  <h2 id="transferts">5. Transferts hors de l’Union européenne</h2>
+  <p>
+    Les données de commande sont hébergées dans l’Union européenne. {host.name} étant établie aux États-Unis,
+    les données techniques de connexion traitées pour diffuser le site peuvent l’être hors de l’Union
+    européenne : ces transferts sont encadrés par le cadre de protection des données UE–États-Unis, auquel
+    Netlify déclare adhérer, et par les clauses contractuelles types de la Commission européenne. Lorsqu’un
+    autre prestataire est amené à traiter des données hors de l’Union européenne, le transfert est encadré par
+    les garanties prévues par le RGPD.
+  </p>
+
+  <h2 id="conservation">6. Durées de conservation</h2>
+  <ul>
+    <li>
+      <strong>Données de commande et de relation client</strong> : pendant la relation commerciale, puis
+      jusqu’à trois ans après le dernier achat lorsqu’elles restent nécessaires à cette relation (ou, sans
+      achat, trois ans après la dernière demande de commande).
+    </li>
+    <li>
+      <strong>Pièces comptables, factures et justificatifs</strong> : conservés selon les obligations légales
+      applicables, pouvant aller jusqu’à dix ans.
+    </li>
+    <li>
+      <strong>Statuts de remise des e-mails</strong> : conservés avec la commande à laquelle ils se
+      rapportent.
+    </li>
+    <li>
+      <strong>Empreinte d’adresse IP (prévention des abus)</strong> : 48 heures ; les empreintes plus
+      anciennes sont effacées automatiquement lors du traitement des demandes suivantes.
+    </li>
+    <li>
+      <strong>Données stockées dans votre navigateur</strong> : jusqu’à ce que vous les effaciez (voir
+      l’article 7).
+    </li>
+  </ul>
+  <p>
+    À l’issue de ces durées, les données sont supprimées ou anonymisées, à l’exception de celles dont la
+    conservation est imposée par la loi.
+  </p>
+
+  <h2 id="navigateur">7. Stockage dans votre navigateur</h2>
+  <p>
+    Le site enregistre dans le stockage local de votre navigateur, sur votre seul appareil, les informations
+    strictement nécessaires au service que vous demandez :
+  </p>
+  <ul>
+    <li>le contenu de votre panier ;</li>
+    <li>
+      les numéros et liens de suivi de vos dix dernières demandes de commande passées depuis cet appareil,
+      pour les retrouver facilement.
+    </li>
+  </ul>
+  <p>
+    Ces informations ne sont pas transmises à des tiers ; le lien de suivi n’est envoyé au serveur que lorsque
+    vous consultez le suivi d’une commande. Étant strictement nécessaires au service, elles ne nécessitent pas
+    votre consentement. Vous pouvez les effacer à tout moment depuis les réglages de votre navigateur (données
+    du site).
+  </p>
+
+  <h2 id="suivi">8. Lien de suivi de commande</h2>
+  <p>
+    Chaque demande de commande dispose d’un lien de suivi personnel, envoyé par e-mail et affiché après
+    l’envoi de la demande. Toute personne disposant de ce lien peut consulter le statut de la commande, les
+    produits, les montants, le pays de livraison et les informations d’expédition ; vos nom, adresse, e-mail
+    et téléphone n’y figurent pas. Ne partagez ce lien qu’avec des personnes de confiance.
+  </p>
+
+  <h2 id="droits">9. Vos droits</h2>
+  <p>
+    Vous disposez d’un droit d’accès, de rectification, d’effacement, de limitation du traitement,
+    d’opposition (pour les traitements fondés sur l’intérêt légitime) et de portabilité de vos données, ainsi
+    que du droit de définir des directives relatives au sort de vos données après votre décès. Certaines
+    données ne peuvent être effacées tant que leur conservation est imposée par la loi (par exemple les pièces
+    comptables).
+  </p>
+  <p>
+    Pour exercer ces droits, écrivez à <a href={`mailto:${email}`}>{email}</a> ou par courrier à{' '}
+    {legalAddressLine}. Une réponse vous est apportée dans un délai d’un mois, qui peut être prolongé dans les
+    conditions prévues par le RGPD. En cas de doute raisonnable sur votre identité, un justificatif peut vous
+    être demandé.
+  </p>
+  <p>
+    Si vous estimez que vos droits ne sont pas respectés, vous pouvez introduire une réclamation auprès de la
+    Commission nationale de l’informatique et des libertés (CNIL) :
+    <a href="https://www.cnil.fr" rel="noopener">
+      www.cnil.fr
+    </a>
+    .
+  </p>
+
+  <h2 id="securite">10. Sécurité</h2>
+  <p>
+    Les échanges avec le site sont chiffrés (HTTPS). Les données de commande ne sont lisibles que par
+    l’administrateur de Dar Nūr après authentification ; les liens de suivi sont vérifiés sous forme
+    d’empreinte et l’adresse IP n’est jamais enregistrée en clair.
+  </p>
+</LegalPage>

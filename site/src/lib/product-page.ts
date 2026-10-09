@@ -717,7 +717,7 @@ export function accordionsOf(row: SupabaseCatalogProductRow, family: ProductFami
     title: 'Livraison & paiement',
     blocks: [
       { kind: 'list', items: [...orderingSteps] },
-      { kind: 'links', items: [{ label: 'Conditions générales de vente', href: cgvUrl, external: true }] },
+      { kind: 'links', items: [{ label: 'Conditions générales de vente', href: cgvUrl }] },
     ],
   });
   return accordions;

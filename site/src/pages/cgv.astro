@@ -1,0 +1,346 @@
+---
+/**
+ * Conditions générales de vente (étape 12). Parcours réel (étape 10) : demande de commande sans
+ * paiement → vérification par Dar Nūr → total final → demande de paiement (48 h) → paiement, qui
+ * conclut le contrat → expédition. Aucun prestataire de paiement nommé, aucun pays ni tarif publié.
+ * L'encadré « garanties légales » reproduit le modèle officiel (annexe à l'art. D. 211-2 du code
+ * de la consommation, décret n° 2022-946, JO du 30 juin 2022) : ne pas le reformuler.
+ */
+import LegalPage from '@/components/legal/LegalPage.astro';
+import { legalAddressLine, legalEntity, mediator, returnAddressLine } from '@/config/legal';
+
+const email = legalEntity.email;
+const toc = [
+  { id: 'vendeur', label: 'Vendeur' },
+  { id: 'champ', label: 'Champ d’application' },
+  { id: 'produits', label: 'Produits et disponibilité' },
+  { id: 'prix', label: 'Prix' },
+  { id: 'commande', label: 'Demande de commande et conclusion du contrat' },
+  { id: 'paiement', label: 'Paiement' },
+  { id: 'livraison', label: 'Expédition et livraison' },
+  { id: 'retractation', label: 'Droit de rétractation' },
+  { id: 'garanties', label: 'Garanties légales' },
+  { id: 'reclamations', label: 'Service client et réclamations' },
+  { id: 'mediation', label: 'Médiation de la consommation' },
+  { id: 'donnees', label: 'Données personnelles' },
+  { id: 'droit', label: 'Droit applicable' },
+  { id: 'formulaire', label: 'Annexe : formulaire de rétractation' },
+];
+---
+
+<LegalPage
+  title="Conditions générales de vente"
+  description="Conditions générales de vente de Dar Nūr : demande de commande, paiement après confirmation du total, expédition, rétractation et garanties."
+  canonicalPath="/cgv/"
+  toc={toc}
+>
+  <h2 id="vendeur">1. Vendeur</h2>
+  <p>
+    Les produits présentés sur ce site sont vendus par {legalEntity.operator}, {legalEntity.legalForm},
+    exerçant sous le nom commercial {legalEntity.tradeName} (ci-après « Dar Nūr »), {legalAddressLine}.
+    Contact : <a href={`mailto:${email}`}>{email}</a>. Les autres informations légales figurent dans les
+    <a href="/mentions-legales/">mentions légales</a>.
+  </p>
+
+  <h2 id="champ">2. Champ d’application</h2>
+  <p>
+    Les présentes conditions s’appliquent aux ventes conclues à distance par l’intermédiaire du site entre Dar
+    Nūr et un client agissant en qualité de consommateur. Le client les accepte en cochant la case prévue à
+    cet effet avant d’envoyer sa demande de commande. La version applicable est celle acceptée à cette date ;
+    elle reste consultable sur cette page.
+  </p>
+
+  <h2 id="produits">3. Produits et disponibilité</h2>
+  <p>
+    Les caractéristiques essentielles de chaque produit sont présentées sur sa fiche. Certains produits sont
+    indiqués « sur demande » : leur disponibilité est confirmée par Dar Nūr après réception de la demande de
+    commande. Aucune disponibilité n’est garantie avant cette confirmation.
+  </p>
+
+  <h2 id="prix">4. Prix</h2>
+  <p>
+    Les prix sont indiqués en euros. {legalEntity.vatMention}. Les frais de livraison ne sont pas compris dans
+    le prix des produits : ils sont fixés par Dar Nūr pour chaque commande, selon la destination et le contenu
+    du colis, et communiqués au client avec le total final, avant tout paiement.
+  </p>
+  <p>
+    Le prix des produits retenu est celui affiché au moment de l’envoi de la demande de commande. Le total
+    final communiqué par Dar Nūr (produits, frais de livraison et, le cas échéant, remise) est le seul montant
+    à payer.
+  </p>
+
+  <h2 id="commande">5. Demande de commande et conclusion du contrat</h2>
+  <h3>5.1 Demande de commande</h3>
+  <p>
+    Le client ajoute des produits à son panier, renseigne ses coordonnées et son adresse de livraison, accepte
+    les présentes conditions, puis envoie sa demande de commande.{' '}
+    <strong>Cet envoi n’est pas un paiement et n’entraîne aucune obligation de payer.</strong> Le client
+    reçoit un numéro de commande, un lien de suivi personnel et un e-mail confirmant la réception de sa
+    demande.
+  </p>
+  <h3>5.2 Vérification par Dar Nūr</h3>
+  <p>
+    Dar Nūr vérifie la disponibilité des produits et la possibilité de livrer à l’adresse indiquée, puis fixe
+    les frais de livraison. Si un produit est indisponible, ou si la livraison d’un produit vers la
+    destination demandée n’est pas possible, Dar Nūr en informe le client ; la demande peut alors être ajustée
+    avec son accord ou annulée, sans aucun frais pour lui.
+  </p>
+  <h3>5.3 Total final et demande de paiement</h3>
+  <p>
+    Dar Nūr communique ensuite au client, par e-mail et sur son lien de suivi, le total final de la commande,
+    le délai de livraison indicatif et les instructions de paiement. Si l’une des exceptions au droit de
+    rétractation (article 8) s’applique à un produit de la commande, Dar Nūr l’indique à ce moment, avant tout
+    paiement.
+  </p>
+  <h3>5.4 Conclusion du contrat</h3>
+  <p>
+    Le contrat de vente est conclu lorsque le client paie le total final qui lui a été communiqué. Jusqu’à ce
+    paiement, le client reste libre de ne pas donner suite à sa demande.
+  </p>
+  <h3>5.5 Délai de paiement</h3>
+  <p>
+    Le client dispose de 48 heures après l’envoi de la demande de paiement pour régler sa commande. Sans
+    paiement dans ce délai, la demande de commande peut être annulée et les produits ne sont plus réservés. Le
+    client peut alors envoyer une nouvelle demande de commande s’il souhaite toujours acheter.
+  </p>
+
+  <h2 id="paiement">6. Paiement</h2>
+  <p>
+    Les moyens de paiement disponibles sont indiqués au client au moment de la demande de paiement. Le
+    paiement porte sur l’intégralité du total final. Aucune commande n’est préparée pour l’expédition ni
+    expédiée avant la réception du paiement. Dar Nūr confirme la réception du paiement par e-mail.
+  </p>
+
+  <h2 id="livraison">7. Expédition et livraison</h2>
+  <p>
+    Dar Nūr livre en France et à l’international. Les destinations possibles, les frais et les conditions de
+    livraison applicables à une commande sont confirmés au client avant le paiement ; aucune livraison n’est
+    promise avant cette confirmation.
+  </p>
+  <p>
+    Les commandes sont expédiées sous 3 à 5 jours après réception du paiement, sauf délai différent indiqué au
+    client avant paiement. Le délai de livraison indicatif est communiqué avec le total final. À défaut
+    d’indication, le produit est livré au plus tard trente jours après la conclusion du contrat. Une fois le
+    colis expédié, le client reçoit un e-mail et, lorsque le transporteur en fournit, les informations de
+    suivi.
+  </p>
+  <p>
+    Le client veille à l’exactitude de l’adresse indiquée. Les risques de perte ou d’endommagement des
+    produits sont transférés au client lorsqu’il prend, ou qu’un tiers désigné par lui prend, physiquement
+    possession des produits.
+  </p>
+  <h3>Livraison hors de France</h3>
+  <p>
+    Selon le pays de destination, des droits de douane, taxes d’importation ou frais de dédouanement peuvent
+    être demandés à la livraison par les autorités ou le transporteur. Ils ne sont pas calculés par Dar Nūr,
+    ne sont pas compris dans le total final et restent à la charge du destinataire. Certains produits peuvent
+    faire l’objet de restrictions d’importation ou de transport : Dar Nūr en informe le client avant le
+    paiement lorsqu’elles empêchent la livraison.
+  </p>
+
+  <h2 id="retractation">8. Droit de rétractation</h2>
+  <h3>8.1 Délai</h3>
+  <p>
+    Le client dispose d’un délai de quatorze jours pour se rétracter, sans avoir à motiver sa décision. Ce
+    délai court à compter du jour où le client, ou un tiers désigné par lui autre que le transporteur, prend
+    physiquement possession du produit. Lorsque la commande est livrée en plusieurs colis, il court à compter
+    de la réception du dernier.
+  </p>
+  <h3>8.2 Exercice</h3>
+  <p>
+    Pour exercer ce droit, le client informe Dar Nūr de sa décision avant l’expiration du délai, par une
+    déclaration dénuée d’ambiguïté envoyée à <a href={`mailto:${email}`}>{email}</a> ou par courrier à{' '}
+    {legalAddressLine}. Il peut utiliser le <a href="#formulaire">formulaire de rétractation</a> figurant en
+    annexe, sans que cela soit obligatoire.
+  </p>
+  <h3>8.3 Retour des produits</h3>
+  <p>
+    Le client renvoie les produits au plus tard quatorze jours après avoir communiqué sa décision, à l’adresse
+    suivante : {returnAddressLine}. En cas de rétractation, les frais directs de renvoi sont à la charge du
+    client. La responsabilité du client peut être engagée en cas de dépréciation des produits résultant de
+    manipulations autres que celles nécessaires pour établir leur nature, leurs caractéristiques et leur bon
+    fonctionnement.
+  </p>
+  <p>
+    Lorsque le retour fait suite à une erreur de Dar Nūr (produit qui ne correspond pas à la commande) ou à un
+    produit défectueux ou non conforme, les frais de retour ne sont pas à la charge du client (voir aussi
+    l’article 9).
+  </p>
+  <h3>8.4 Remboursement</h3>
+  <p>
+    Dar Nūr rembourse la totalité des sommes versées, y compris les frais de livraison initiaux (dans la
+    limite du mode de livraison standard le moins coûteux proposé), au plus tard quatorze jours à compter du
+    jour où il est informé de la décision de rétractation. Le remboursement peut être différé jusqu’à la
+    récupération des produits ou jusqu’à ce que le client ait fourni une preuve de leur expédition, la date
+    retenue étant celle du premier de ces faits. Il est effectué par le même moyen de paiement que celui
+    utilisé pour la commande, sauf accord exprès du client pour un autre moyen, et sans frais pour lui.
+  </p>
+  <h3>8.5 Exceptions</h3>
+  <p>
+    Conformément à l’article L. 221-28 du code de la consommation, le droit de rétractation ne peut pas être
+    exercé, notamment, pour :
+  </p>
+  <ul>
+    <li>
+      les biens qui ont été descellés par le client après la livraison et qui ne peuvent être renvoyés pour
+      des raisons d’hygiène ou de protection de la santé ;
+    </li>
+    <li>les biens susceptibles de se détériorer ou de se périmer rapidement.</li>
+  </ul>
+  <p>
+    Ces exceptions ne s’appliquent qu’aux produits qui remplissent réellement ces conditions : la seule nature
+    d’un produit (parfum, soin, produit alimentaire…) ne suffit pas à exclure le droit de rétractation. Un
+    produit resté scellé peut être retourné dans les conditions ci-dessus. Lorsqu’une exception s’applique à
+    un produit, Dar Nūr l’indique au client avant le paiement (article 5.3).
+  </p>
+
+  <h2 id="garanties">9. Garanties légales</h2>
+  <p>
+    Dar Nūr répond des défauts de conformité et des vices cachés des produits vendus. Pour mettre en œuvre une
+    garantie légale, le client contacte Dar Nūr à <a href={`mailto:${email}`}>{email}</a> ou par courrier à{' '}
+    {legalAddressLine}, en indiquant son numéro de commande et le défaut constaté. Si un renvoi est
+    nécessaire, Dar Nūr indique les modalités pratiques ; les frais de renvoi d’un produit non conforme ou
+    défectueux ne sont pas à la charge du client.
+  </p>
+  <div class="dn-legal__box" role="note" aria-label="Garanties légales">
+    <p>
+      Le consommateur dispose d’un délai de deux ans à compter de la délivrance du bien pour obtenir la mise
+      en œuvre de la garantie légale de conformité en cas d’apparition d’un défaut de conformité. Durant ce
+      délai, le consommateur n’est tenu d’établir que l’existence du défaut de conformité et non la date
+      d’apparition de celui-ci.
+    </p>
+    <p>
+      Lorsque le contrat de vente du bien prévoit la fourniture d’un contenu numérique ou d’un service
+      numérique de manière continue pendant une durée supérieure à deux ans, la garantie légale est applicable
+      à ce contenu numérique ou ce service numérique tout au long de la période de fourniture prévue. Durant
+      ce délai, le consommateur n’est tenu d’établir que l’existence du défaut de conformité affectant le
+      contenu numérique ou le service numérique et non la date d’apparition de celui-ci.
+    </p>
+    <p>
+      La garantie légale de conformité emporte obligation pour le professionnel, le cas échéant, de fournir
+      toutes les mises à jour nécessaires au maintien de la conformité du bien.
+    </p>
+    <p>
+      La garantie légale de conformité donne au consommateur droit à la réparation ou au remplacement du bien
+      dans un délai de trente jours suivant sa demande, sans frais et sans inconvénient majeur pour lui.
+    </p>
+    <p>
+      Si le bien est réparé dans le cadre de la garantie légale de conformité, le consommateur bénéficie d’une
+      extension de six mois de la garantie initiale.
+    </p>
+    <p>
+      Si le consommateur demande la réparation du bien, mais que le vendeur impose le remplacement, la
+      garantie légale de conformité est renouvelée pour une période de deux ans à compter de la date de
+      remplacement du bien.
+    </p>
+    <p>
+      Le consommateur peut obtenir une réduction du prix d’achat en conservant le bien ou mettre fin au
+      contrat en se faisant rembourser intégralement contre restitution du bien, si :
+    </p>
+    <p>1° Le professionnel refuse de réparer ou de remplacer le bien ;</p>
+    <p>2° La réparation ou le remplacement du bien intervient après un délai de trente jours ;</p>
+    <p>
+      3° La réparation ou le remplacement du bien occasionne un inconvénient majeur pour le consommateur,
+      notamment lorsque le consommateur supporte définitivement les frais de reprise ou d’enlèvement du bien
+      non conforme, ou s’il supporte les frais d’installation du bien réparé ou de remplacement ;
+    </p>
+    <p>
+      4° La non-conformité du bien persiste en dépit de la tentative de mise en conformité du vendeur restée
+      infructueuse.
+    </p>
+    <p>
+      Le consommateur a également droit à une réduction du prix du bien ou à la résolution du contrat lorsque
+      le défaut de conformité est si grave qu’il justifie que la réduction du prix ou la résolution du contrat
+      soit immédiate. Le consommateur n’est alors pas tenu de demander la réparation ou le remplacement du
+      bien au préalable.
+    </p>
+    <p>Le consommateur n’a pas droit à la résolution de la vente si le défaut de conformité est mineur.</p>
+    <p>
+      Toute période d’immobilisation du bien en vue de sa réparation ou de son remplacement suspend la
+      garantie qui restait à courir jusqu’à la délivrance du bien remis en état.
+    </p>
+    <p>
+      Les droits mentionnés ci-dessus résultent de l’application des articles L. 217-1 à L. 217-32 du code de
+      la consommation.
+    </p>
+    <p>
+      Le vendeur qui fait obstacle de mauvaise foi à la mise en œuvre de la garantie légale de conformité
+      encourt une amende civile d’un montant maximal de 300 000 euros, qui peut être porté jusqu’à 10 % du
+      chiffre d’affaires moyen annuel (article L. 241-5 du code de la consommation).
+    </p>
+    <p>
+      Le consommateur bénéficie également de la garantie légale des vices cachés en application des articles
+      1641 à 1649 du code civil, pendant une durée de deux ans à compter de la découverte du défaut. Cette
+      garantie donne droit à une réduction de prix si le bien est conservé ou à un remboursement intégral
+      contre restitution du bien.
+    </p>
+  </div>
+
+  <h2 id="reclamations">10. Service client et réclamations</h2>
+  <p>
+    Pour toute question ou réclamation, le client écrit à <a href={`mailto:${email}`}>{email}</a> ou par
+    courrier à {legalAddressLine}, en précisant son numéro de commande. Dar Nūr s’efforce d’y répondre dans
+    les meilleurs délais.
+  </p>
+
+  <h2 id="mediation">11. Médiation de la consommation</h2>
+  <p>
+    Conformément aux articles L. 611-1 et suivants du code de la consommation, le client peut recourir
+    gratuitement à un médiateur de la consommation en vue de la résolution amiable d’un litige, après avoir
+    tenté de le résoudre directement auprès de Dar Nūr par une réclamation écrite.
+  </p>
+  {mediator ? (
+    <p>
+      Médiateur compétent : {mediator.name}, {mediator.address},{' '}
+      <a href={mediator.website} rel="noopener">
+        {mediator.website}
+      </a>
+      .
+    </p>
+  ) : (
+    <p class="dn-legal__missing">
+      Médiateur de la consommation : en cours de désignation. Ses coordonnées seront indiquées ici avant
+      l’ouverture de la commande en ligne.
+    </p>
+  )}
+
+  <h2 id="donnees">12. Données personnelles</h2>
+  <p>
+    Les données transmises lors d’une demande de commande sont traitées conformément à la
+    <a href="/confidentialite/">politique de confidentialité</a>.
+  </p>
+
+  <h2 id="droit">13. Droit applicable</h2>
+  <p>
+    Les présentes conditions sont soumises au droit français. Le client qui réside dans un autre pays conserve
+    la protection que lui assurent les dispositions impératives de la loi de son pays de résidence. En cas de
+    litige, le client peut saisir, à son choix, la juridiction du lieu où il demeurait au moment de la
+    conclusion du contrat ou de la survenance du fait dommageable, ou toute autre juridiction compétente selon
+    la loi.
+  </p>
+
+  <h2 id="formulaire">Annexe : formulaire de rétractation</h2>
+  <p>
+    Veuillez compléter et renvoyer le présent formulaire uniquement si vous souhaitez vous rétracter du
+    contrat.
+  </p>
+  <div class="dn-legal__box">
+    <p>
+      À l’attention de {legalEntity.operator} ({legalEntity.tradeName}), {legalAddressLine}, {email} :
+    </p>
+    <p>
+      Je/Nous (*) vous notifie/notifions (*) par la présente ma/notre (*) rétractation du contrat portant sur
+      la vente du bien (*) ci-dessous :
+    </p>
+    <p>Numéro de commande :</p>
+    <p>Commandé le (*)/reçu le (*) :</p>
+    <p>Nom du (des) consommateur(s) :</p>
+    <p>Adresse du (des) consommateur(s) :</p>
+    <p>
+      Signature du (des) consommateur(s) (uniquement en cas de notification du présent formulaire sur papier)
+      :
+    </p>
+    <p>Date :</p>
+    <p>(*) Rayez la mention inutile.</p>
+  </div>
+</LegalPage>

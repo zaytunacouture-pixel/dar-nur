@@ -1,4 +1,5 @@
 import type { AnnouncementMessage, ShippingPolicy } from '@/types/site';
+import { legalBlockers } from './legal';
 
 /**
  * Faits commerciaux. RÈGLE : n'afficher que ce qui est vrai pour le futur site.
@@ -28,20 +29,23 @@ export const orderingSteps = [
 ] as const;
 
 /**
- * Commande en ligne et conditions générales (étape 10). Les CGV publiées décrivent encore l'ANCIEN
- * fonctionnement (paiement à la réception, livraison locale) : tant que `termsReviewed` est faux,
- * la page de commande affiche ce blocage et un build de PRODUCTION n'ouvre pas la commande en ligne
- * (le serveur la refuse aussi : orders_private.config.production_ordering_open = false).
+ * Commande en ligne et conditions générales. Étape 12 : CGV, confidentialité et mentions légales
+ * sont des pages internes de la refonte (faits dans config/legal.ts). Tant que `termsReviewed` est
+ * faux OU que legalBlockers() n'est pas vide, un build de PRODUCTION n'ouvre pas la commande en
+ * ligne (le serveur la refuse aussi : orders_private.config.production_ordering_open = false).
  */
 export const ordering = {
   termsReviewed: false,
-  termsUrl: 'https://dar-nur.fr/cgv.html',
-  privacyUrl: 'https://dar-nur.fr/confidentialite.html',
+  termsUrl: '/cgv/',
+  privacyUrl: '/confidentialite/',
   /** Plafond technique anti-abus par ligne (pas une limite commerciale). */
   maxQuantity: 99,
   /** Nombre maximal de lignes par demande (même plafond côté serveur). */
   maxLines: 30,
 };
+
+/** Production : commande en ligne seulement si les CGV sont révisées ET aucun blocage juridique. */
+export const productionOrderingReady = ordering.termsReviewed && legalBlockers().length === 0;
 
 /**
  * PRÉVUE, NON ACTIVE — À CONFIRMER. Seuil de gratuité envisagé autour de 50 € ; zones (dont
@@ -54,7 +58,7 @@ export const plannedShipping: ShippingPolicy = {
   summary: 'Livraison en France (prévue, non active)',
 };
 
-export const cgvUrl = 'https://dar-nur.fr/cgv.html';
+export const cgvUrl = '/cgv/';
 
 /**
  * Message de livraison offerte, construit depuis la politique (jamais écrit en dur).

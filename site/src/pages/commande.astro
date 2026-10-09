@@ -10,8 +10,15 @@ import ApiConfig from '@/components/order/ApiConfig.astro';
 import Button from '@/components/ui/Button.astro';
 import Field from '@/components/ui/Field.astro';
 import Icon from '@/components/ui/Icon.astro';
-import { contact, currentShipping, ordering, orderingSteps } from '@/config/commerce';
+import {
+  contact,
+  currentShipping,
+  ordering,
+  orderingSteps,
+  productionOrderingReady,
+} from '@/config/commerce';
 import { countryOptions } from '@/config/countries';
+import { legalBlockers } from '@/config/legal';
 import { siteEnv } from '@/config/site';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 
@@ -22,7 +29,8 @@ const seo = {
   canonicalPath: '/commande/',
   noindex: true,
 };
-const orderingOpen = siteEnv !== 'production' || ordering.termsReviewed;
+const orderingOpen = siteEnv !== 'production' || productionOrderingReady;
+const blockers = legalBlockers();
 const countries = [
   { value: '', label: 'Choisir un pays' },
   ...countryOptions().map((c) => ({ value: c.code, label: c.name })),
@@ -40,11 +48,22 @@ const countries = [
           <strong>Préproduction :</strong> les demandes envoyées ici sont des commandes de TEST. Elles ne sont
           ni traitées ni livrées.
         </p>
-        {!ordering.termsReviewed && (
-          <p>
-            Blocage avant ouverture : les conditions générales de vente publiées décrivent encore l’ancien
-            fonctionnement et doivent être révisées.
-          </p>
+        {!productionOrderingReady && (
+          <>
+            <p>
+              Blocage avant ouverture en production :
+              {!ordering.termsReviewed && ' conditions générales de vente non validées pour la production'}
+              {!ordering.termsReviewed && blockers.length > 0 && ' ;'}
+              {blockers.length > 0 && ' informations juridiques manquantes :'}
+            </p>
+            {blockers.length > 0 && (
+              <ul>
+                {blockers.map((b) => (
+                  <li>{b}</li>
+                ))}
+              </ul>
+            )}
+          </>
         )}
       </div>
     )}
@@ -350,6 +369,11 @@ const countries = [
   }
   .dn-preprod-note p + p {
     margin-block-start: var(--dn-space-2);
+  }
+  .dn-preprod-note ul {
+    margin-block-start: var(--dn-space-1);
+    padding-inline-start: var(--dn-space-5);
+    list-style: disc;
   }
   .dn-checkout__empty,
   .dn-checkout__closed {

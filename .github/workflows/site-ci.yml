@@ -107,3 +107,6 @@ jobs:
 
       - name: Contrôles du parcours de commande (noindex, formulaire, suivi, aucun faux paiement)
         run: npm run verify:orders
+
+      - name: Contrôles juridiques (CGV, confidentialité, mentions légales, anciennes mentions)
+        run: npm run verify:legal

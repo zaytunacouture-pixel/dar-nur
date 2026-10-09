@@ -1,0 +1,76 @@
+---
+/**
+ * Mentions légales (étape 12). Faits : config/legal.ts. Une information inconnue est affichée
+ * « en attente », jamais remplacée par une valeur plausible.
+ */
+import LegalPage from '@/components/legal/LegalPage.astro';
+import { host, legalAddressLine, legalEntity } from '@/config/legal';
+
+const pending = 'information en attente';
+---
+
+<LegalPage
+  title="Mentions légales"
+  description="Mentions légales du site Dar Nūr : éditeur, contact, directeur de la publication et hébergeur."
+  canonicalPath="/mentions-legales/"
+>
+  <h2 id="editeur">Éditeur du site</h2>
+  <dl>
+    <dt>Exploitant</dt>
+    <dd>
+      {legalEntity.operator}, {legalEntity.legalForm}, {legalEntity.regime}
+    </dd>
+    <dt>Nom commercial</dt>
+    <dd>{legalEntity.tradeName}</dd>
+    <dt>Adresse</dt>
+    <dd>{legalAddressLine}</dd>
+    <dt>E-mail</dt>
+    <dd>
+      <a href={`mailto:${legalEntity.email}`}>{legalEntity.email}</a>
+    </dd>
+    <dt>SIREN</dt>
+    <dd>{legalEntity.siren ?? <span class="dn-legal__missing">{pending}</span>}</dd>
+    <dt>SIRET</dt>
+    <dd>{legalEntity.siret ?? <span class="dn-legal__missing">{pending}</span>}</dd>
+    <dt>TVA</dt>
+    <dd>{legalEntity.vatMention}</dd>
+    <dt>Directeur de la publication</dt>
+    <dd>{legalEntity.publicationDirector}</dd>
+  </dl>
+
+  <h2 id="hebergeur">Hébergeur</h2>
+  <dl>
+    <dt>Hébergement du site</dt>
+    <dd>{host.name}</dd>
+    <dt>Adresse</dt>
+    <dd>{host.address}</dd>
+    <dt>Téléphone</dt>
+    <dd>{host.phone ?? <span class="dn-legal__missing">{pending}</span>}</dd>
+    <dt>Site</dt>
+    <dd>
+      <a href={host.website} rel="noopener">
+        {host.website.replace('https://', '')}
+      </a>
+    </dd>
+  </dl>
+  <p>
+    Les données des commandes sont hébergées séparément par Supabase, dans la région de Paris (Union
+    européenne). Le détail figure dans la <a href="/confidentialite/">politique de confidentialité</a>.
+  </p>
+
+  <h2 id="contact">Contact</h2>
+  <p>
+    Pour toute question sur le site, une commande ou vos données personnelles, écrivez à
+    <a href={`mailto:${legalEntity.email}`}>{legalEntity.email}</a> ou par courrier à l’adresse ci-dessus.
+  </p>
+
+  <h2 id="documents">Documents associés</h2>
+  <ul>
+    <li>
+      <a href="/cgv/">Conditions générales de vente</a>
+    </li>
+    <li>
+      <a href="/confidentialite/">Politique de confidentialité</a>
+    </li>
+  </ul>
+</LegalPage>

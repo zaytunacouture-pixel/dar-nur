@@ -3,9 +3,8 @@ import { cgvUrl, contact } from './commerce';
 import { navigation } from './navigation';
 
 /**
- * Footer : uniquement des liens réels. Les pages légales vivent encore sur le site
- * actuel (liens absolus vers dar-nur.fr) ; « Notre histoire » n'existe pas encore
- * et apparaît comme « bientôt », sans lien.
+ * Footer : uniquement des liens réels. Pages légales internes depuis l'étape 12 ;
+ * « Notre histoire » n'existe pas encore et apparaît comme « bientôt », sans lien.
  */
 export const footerSections: FooterSection[] = [
   {
@@ -15,8 +14,6 @@ export const footerSections: FooterSection[] = [
   {
     title: 'Aide',
     links: [
-      // Étape 10 : commande en ligne. « Livraison & paiement » ne pointe plus vers les CGV, qui
-      // décrivent encore l'ancien fonctionnement (elles restent dans « Légal », à réviser).
       { label: 'Mon panier', href: '/panier/' },
       { label: 'Suivre une commande', href: '/suivi/' },
       { label: 'Une question ? WhatsApp', href: contact.whatsappUrl, external: true },
@@ -32,9 +29,9 @@ export const footerSections: FooterSection[] = [
   {
     title: 'Légal',
     links: [
-      { label: 'Conditions générales de vente', href: cgvUrl, external: true },
-      { label: 'Mentions légales', href: 'https://dar-nur.fr/mentions-legales.html', external: true },
-      { label: 'Confidentialité', href: 'https://dar-nur.fr/confidentialite.html', external: true },
+      { label: 'Conditions générales de vente', href: cgvUrl },
+      { label: 'Mentions légales', href: '/mentions-legales/' },
+      { label: 'Confidentialité', href: '/confidentialite/' },
     ],
   },
 ];
