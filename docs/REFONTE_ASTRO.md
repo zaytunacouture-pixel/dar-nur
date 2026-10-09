@@ -650,3 +650,7 @@ relèvent de la bascule) :
   réglage en libre-service : demande au support) ; vérification finale (graphie « Dar Nûr » / « Dar Nūr »,
   textes en vigueur sur Légifrance). À la finalisation : `legalVersion.final`, nouvel identifiant de version,
   puis `orders_private.config.terms_version` (sauvegarde préalable).
+- **Activité déclarée** : l'intitulé déclaré ne cite pas explicitement les vêtements (univers Mode) ni les
+  soins. Ces produits **restent** au catalogue et dans les pages juridiques. L'intitulé sera vérifié au RNE
+  après réception du SIREN/SIRET ; si nécessaire, adjonction d'activité via le Guichet unique (décision de
+  l'exploitant du 2026-10-09).

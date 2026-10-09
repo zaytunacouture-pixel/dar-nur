@@ -8,6 +8,10 @@
  * 1er octobre 2026, franchise en base de TVA. SIREN/SIRET non encore connus : l'immatriculation
  * n'est pas considérée comme prouvée.
  *
+ * Activité : Mode (vêtements) et Soins restent vendus (catalogue et pages juridiques inchangés).
+ * L'intitulé d'activité sera vérifié au RNE après réception du SIREN/SIRET ; si nécessaire, une
+ * adjonction d'activité sera effectuée via le Guichet unique (décision de l'exploitant, 9 octobre 2026).
+ *
  * Tant que `legalBlockers()` n'est pas vide : bandeau « non finalisé » sur les pages juridiques,
  * commande en ligne impossible à ouvrir en production (commande.astro, ApiConfig.astro) et
  * build de production refusé (scripts/verify-legal.mjs).
