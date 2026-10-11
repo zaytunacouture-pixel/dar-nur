@@ -2004,12 +2004,6 @@ const PRODUCTS = [
    compo:"Miel naturel & mélange de plantes vivifiantes",prov:"Préparation artisanale",
    uso:"Une cuillère par jour, idéalement le matin.",price:honeyPrice("19,99","44,99","59,99")},
 
-  {id:"miel-rose-siberie",cat:"miels",name:"Miel Rose de Sibérie",tagline:"La douceur d'une rose venue du grand froid.",
-   desc:["Un miel délicat aux notes florales, inspiré des roses qui fleurissent dans les terres rudes de Sibérie. Sa texture fine et son parfum subtil en font un véritable plaisir.","Parfait pour adoucir une journée ou accompagner un thé."],
-   benefits:["Notes florales raffinées","Réconfort et douceur","Texture fine et soyeuse","Parfait pour le thé"],
-   compo:"Miel naturel aromatisé à la rose",prov:"Préparation artisanale",
-   uso:"À déguster pure ou dans une boisson chaude.",price:honeyPrice("14,99","34,99","44,99")},
-
   {id:"miel-spiruline",cat:"miels",name:"Miel Spiruline",tagline:"La force verte de la mer rencontre la douceur du miel.",
    desc:["Un mariage surprenant entre le miel et la spiruline, cette micro-algue d'un vert profond reconnue pour sa richesse nutritionnelle.","Une cuillère qui réveille, idéale pour bien commencer la journée."],
    benefits:["Riche en nutriments","Soutient l'énergie au quotidien","Allié des sportifs","Coup de fouet naturel"],
@@ -2057,12 +2051,6 @@ const PRODUCTS = [
    benefits:["Miel rare et prestigieux","Texture épaisse et riche","Goût profond et caractéristique","Très recherché"],
    compo:"Miel de Sidr (fleurs de jujubier)",prov:"Préparation artisanale",
    uso:"À déguster pure pour apprécier sa noblesse.",price:honeyPrice("9,99","24,99","34,99")},
-
-  {id:"miel-fraise-russie",cat:"miels",name:"Miel de Fraise de Russie",tagline:"La gourmandise d'un fruit d'été, capturée à jamais.",
-   desc:["Un miel délicieusement fruité aux arômes de fraise, qui ravira petits et grands. Sa douceur naturelle évoque les vergers gorgés de soleil.","Le plaisir simple d'une cuillère réconfortante."],
-   benefits:["Arômes fruités gourmands","Apprécié des enfants","Douceur naturelle","Parfait sur les tartines"],
-   compo:"Miel naturel aromatisé à la fraise",prov:"Préparation artisanale",
-   uso:"Sur du pain, dans un yaourt ou pure.",price:honeyPrice("9,99","24,99","34,99")},
 
   {id:"miel-shilajit",cat:"miels",name:"Miel Noir de Shilajit",tagline:"La résine des montagnes, scellée dans le miel.",
    desc:["Le shilajit, cette résine minérale précieuse récoltée en haute montagne, enrichit ce miel noir au caractère intense et minéral.","Une préparation rare pour ceux qui recherchent le plus concentré."],
@@ -2787,6 +2775,27 @@ PRODUCTS.forEach(p=>{
   Object.assign(p, defaults, SUPPLIER_PATCHES[p.id] || {});
 });
 
+/* Produits retirés de la vente (2026-10-11) — exclus du catalogue de secours.
+   PRODUCTS ci-dessus n'est affiché que si Supabase est injoignable (voir
+   loadFromSupabase) : il ne doit jamais présenter un produit que Supabase ne
+   publie plus. Les 3 miels archivés définitivement ont été retirés du tableau ;
+   les 6 miels retirés temporairement y restent (historique, retour éventuel)
+   mais sont écartés ici, avant tout rendu. Les 9 restent listés : la liste
+   protège aussi contre une réintroduction accidentelle d'un archivé.
+   Liste en dur, volontairement : elle doit tenir même si js/config.js ne se
+   charge pas. Même liste dans js/cart.js (RETIRED_SLUGS) : les garder identiques.
+   N'agit pas sur le catalogue Supabase, seule source de vérité en temps normal. */
+const FALLBACK_EXCLUDED_IDS = [
+  /* archivés définitivement */
+  "miel-lavande", "miel-fraise-russie", "miel-rose-siberie",
+  /* retirés temporairement — à retirer de la liste s'ils reviennent à la vente */
+  "miel-cactus", "miel-sidr-jujubier", "miel-aubepine",
+  "miel-shilajit", "miel-costus-nigelle", "miel-aphrodisiaque"
+];
+for(let i=PRODUCTS.length-1;i>=0;i--){
+  if(FALLBACK_EXCLUDED_IDS.includes(PRODUCTS[i].id)) PRODUCTS.splice(i,1);
+}
+
 /* ============ STATE ============ */
 let currentFilter = "all";
 let activeProduct = null;
@@ -2881,7 +2890,9 @@ Je souhaite connaître le prix de ce produit :
 Lien fiche : https://dar-nur.fr/${p.id}/
 
 BarakAllahu fik.`;
-  return "https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent(t);
+  // js/config.js peut ne pas être chargé (mode secours) : même numéro que les liens wa.me de cette page.
+  const waNumber = (typeof WHATSAPP_NUMBER !== "undefined") ? WHATSAPP_NUMBER : "33769253375";
+  return "https://wa.me/" + waNumber + "?text=" + encodeURIComponent(t);
 }
 
 // Ajoute au panier le produit affiché, avec la variante réellement choisie.
@@ -3370,7 +3381,7 @@ function showProduct(id){
       <div class="pp-content">
         ${infoBannerHTML(p)}
         ${mielPrintempsOriginBannerHTML(p)}
-        ${p.description.map(d=>`<p>${richInline(d)}</p>`).join("")}
+        ${(p.description||p.desc||[]).map(d=>`<p>${richInline(d)}</p>`).join("")}
         ${(()=>{const ip=(p.accordions||[]).find(a=>a.title==='Idéal pour');return ip?`<div class="pp-ideal"><span class="ideal-lbl">Idéal pour</span>${ip.html}</div>`:''})()}
         ${(()=>{const auds=giftAudiences(p);return auds.length?`<div class="pp-ideal"><span class="ideal-lbl">Pour qui est-ce idéal&nbsp;?</span><ul>${auds.map(a=>`<li>${a}</li>`).join("")}</ul></div>`:''})()}
         ${(p.benefits&&p.benefits.length)?`<h2>${escHtml(p.benefitsLabel || (isWear ? 'Points forts' : 'Bienfaits'))}</h2>
