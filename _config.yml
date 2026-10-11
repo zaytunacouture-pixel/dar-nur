@@ -1,0 +1,37 @@
+# Configuration GitHub Pages (Jekyll) de dar-nur.fr.
+#
+# Seul rôle de ce fichier : empêcher la publication des fichiers internes
+# (documentation, scripts, SQL, exports, maquettes, journaux). Ils restent
+# dans le dépôt et les workflows de régénération continuent de les utiliser.
+#
+# Jekyll remplace sa liste d'exclusion par défaut par celle-ci : les valeurs
+# par défaut (CNAME, Gemfile, node_modules, vendor…) sont donc recopiées.
+# Les fichiers et dossiers commençant par « . » ou « _ » restent exclus
+# d'office.
+exclude:
+  # Valeurs par défaut de GitHub Pages et de Jekyll
+  - CNAME
+  - Gemfile
+  - Gemfile.lock
+  - gemfiles/
+  - node_modules/
+  - vendor/
+  # Documentation interne (tous les fichiers Markdown du dépôt)
+  - "*.md"
+  - docs/
+  # Scripts de génération, d'import et de synchronisation
+  - scripts/
+  - audit_packs.js
+  # Schéma, migrations SQL et exports Supabase
+  - supabase/
+  # Maquettes et gabarits de génération
+  - mockups/
+  - partials/
+  - data/nav.config.json
+  # Journaux de travail
+  - server.log
+  # Garde-fous : aucun fichier de ces types n'est utilisé par le site public
+  - "*.sql"
+  - "*.log"
+  - "*.py"
+  - "*.mjs"
