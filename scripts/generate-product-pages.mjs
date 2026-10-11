@@ -24,6 +24,12 @@ const INDEX_PATH = new URL('index.html', ROOT);
 const CONFIG_PATH = new URL('js/config.js', ROOT);
 const MANIFEST_PATH = new URL('scripts/.generated-product-slugs.json', ROOT);
 const SITEMAP_PATH = new URL('sitemap.xml', ROOT);
+// Redirections d'anciennes URL produit (voir le champ _doc du fichier) et
+// manifeste des pages de redirection écrites au run précédent — tenu à part
+// du manifeste produit, que lisent verify-product-pages.mjs et
+// verify-page-titles.mjs : une page de redirection n'est pas une fiche.
+const REDIRECTS_PATH = new URL('scripts/product-redirects.json', ROOT);
+const REDIRECT_MANIFEST_PATH = new URL('scripts/.generated-redirect-slugs.json', ROOT);
 
 function log(msg) { console.log(msg); }
 function fail(msg) {
@@ -37,6 +43,18 @@ function esc(str) {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
+}
+
+// Texte rédactionnel d'une fiche : échappé, puis **gras**, *italique* et
+// retours à la ligne (<br>) — même règle, mêmes expressions que richInline()
+// dans index.html, pour que ce HTML statique et le rendu JS (showProduct)
+// affichent exactement la même chose. L'apostrophe est échappée comme côté JS.
+function richInline(str) {
+  return esc(str)
+    .replace(/'/g, '&#39;')
+    .replace(/\*\*(?=\S)([^*\n]*?\S)\*\*/g, '<strong>$1</strong>')
+    .replace(/(^|[^*\w])\*(?=\S)([^*\n]*?\S)\*(?![*\w])/g, '$1<em>$2</em>')
+    .replace(/\r?\n/g, '<br>');
 }
 
 async function loadSupabaseCreds() {
@@ -169,7 +187,7 @@ function replaceLine(html, oldLine, newLine, label) {
 // et les visiteurs avant que le JS/Supabase n'ait fini de charger.
 function buildProductSSR(product, catLabel, meta, price) {
   const name = esc(product.name);
-  const tagline = esc(product.tagline || '');
+  const tagline = richInline(product.tagline || '');
   const label = esc(catLabel || product.category_id);
   const catSlug = CAT_SLUG_OVERRIDES[product.category_id] || product.category_id;
   // Marque (parfums uniquement) : brand/brand_slug sont NULL hors category_id='parfums'
@@ -179,7 +197,7 @@ function buildProductSSR(product, catLabel, meta, price) {
   const brandHref = (product.brand && product.brand_slug) ? `/parfums/${esc(product.brand_slug)}/` : null;
   const brandName = brandHref ? esc(product.brand) : '';
   const description = Array.isArray(product.description) ? product.description : [];
-  const descHtml = description.map(d => `<p>${esc(d)}</p>`).join('\n        ');
+  const descHtml = description.map(d => `<p>${richInline(d)}</p>`).join('\n        ');
 
   let priceHtml = '';
   if ((price.type === 'format' || price.type === 'size') && price.options && price.options.length) {
@@ -423,13 +441,71 @@ async function updateSitemap(products) {
   return first.legacyCount;
 }
 
-async function loadManifest() {
+async function loadManifest(path = MANIFEST_PATH) {
   try {
-    const raw = await readFile(MANIFEST_PATH, 'utf8');
+    const raw = await readFile(path, 'utf8');
     return new Set(JSON.parse(raw));
   } catch {
     return new Set();
   }
+}
+
+// Lit et valide scripts/product-redirects.json. Fichier absent = aucune
+// redirection. Fichier présent mais invalide = échec AVANT toute écriture :
+// une redirection mal saisie ne doit jamais publier une page cassée en silence.
+async function loadRedirects() {
+  let raw;
+  try {
+    raw = await readFile(REDIRECTS_PATH, 'utf8');
+  } catch {
+    return [];
+  }
+  const entries = JSON.parse(raw).redirects;
+  if (!Array.isArray(entries)) throw new Error('product-redirects.json : la clé "redirects" doit être un tableau.');
+  const pathRe = /^\/([a-z0-9-]+)\/$/;
+  const list = entries.map((r, i) => {
+    const from = (pathRe.exec(r.source_path || '') || [])[1];
+    const to = (pathRe.exec(r.target_path || '') || [])[1];
+    if (!from || !to) throw new Error(`product-redirects.json, entrée ${i} : source_path et target_path doivent être de la forme "/slug/".`);
+    if (from === to) throw new Error(`product-redirects.json, entrée ${i} : source et cible identiques (${from}).`);
+    if (r.status_code !== 301 && r.status_code !== 302) throw new Error(`product-redirects.json, entrée ${i} : status_code doit valoir 301 ou 302.`);
+    return { from, to };
+  });
+  const sources = new Set();
+  for (const r of list) {
+    if (sources.has(r.from)) throw new Error(`product-redirects.json : source en double (/${r.from}/).`);
+    sources.add(r.from);
+  }
+  for (const r of list) {
+    if (sources.has(r.to)) throw new Error(`product-redirects.json : chaîne de redirections interdite (/${r.to}/ est à la fois cible et source).`);
+  }
+  return list;
+}
+
+// Page de redirection pour GitHub Pages, qui ne sait pas servir de vraie 301 :
+// meta refresh immédiat (fonctionne sans JS), location.replace (n'ajoute pas
+// l'ancienne URL à l'historique), canonical vers la cible (consolide le
+// référencement sur la nouvelle URL), noindex (l'ancienne URL sort de l'index),
+// et un lien visible en dernier recours.
+function buildRedirectHtml(from, to, targetName) {
+  const path = `/${to}/`;
+  const abs = `https://dar-nur.fr${path}`;
+  return `<!DOCTYPE html>
+<!-- GENERATED:PRODUCT-REDIRECT:${from} -> ${path} — généré par scripts/generate-product-pages.mjs depuis scripts/product-redirects.json, ne pas éditer à la main -->
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<title>${esc(targetName)} | Dar Nūr</title>
+<meta name="robots" content="noindex, follow" />
+<link rel="canonical" href="${abs}" />
+<meta http-equiv="refresh" content="0; url=${path}" />
+<script>location.replace(${JSON.stringify(path)} + location.search + location.hash);</script>
+</head>
+<body>
+<p>Cette page a changé d'adresse : <a href="${path}">${esc(targetName)}</a>.</p>
+</body>
+</html>
+`;
 }
 
 async function getReservedNames(manifestSlugs) {
@@ -460,9 +536,21 @@ async function main() {
     return;
   }
 
+  let redirects;
+  try {
+    redirects = await loadRedirects();
+  } catch (e) {
+    fail(`Redirections invalides : ${e.message}`);
+    return;
+  }
+
   const indexTemplate = await readFile(INDEX_PATH, 'utf8');
   const manifestSlugs = await loadManifest();
-  const reserved = await getReservedNames(manifestSlugs);
+  const redirectManifest = await loadManifest(REDIRECT_MANIFEST_PATH);
+  // Les dossiers écrits par ce script (fiches ET pages de redirection) ne
+  // comptent pas comme « réservés » : une fiche réactivée sous un slug qui
+  // portait une redirection reprend donc normalement sa place.
+  const reserved = await getReservedNames(new Set([...manifestSlugs, ...redirectManifest]));
 
   // Regroupe les produits actifs par (catégorie, nom) pour repérer les
   // doublons de <title> avant génération — voir buildProductTitle().
@@ -507,16 +595,55 @@ async function main() {
   // Nettoyage : supprime les dossiers générés lors d'un run précédent pour un
   // produit qui n'est plus actif/existant — jamais un dossier hors manifeste.
   const currentSet = new Set(written);
+
+  // Redirections actives pour ce run : la cible doit être une fiche générée à
+  // l'instant ET la source ne plus en être une. Avant la migration en base,
+  // l'ancienne fiche existe encore : rien n'est redirigé, elle reste servie.
+  const activeRedirects = [];
+  for (const r of redirects) {
+    if (currentSet.has(r.from)) {
+      log(`  Redirection en attente : /${r.from}/ est encore une fiche active.`);
+    } else if (!currentSet.has(r.to)) {
+      log(`  Redirection en attente : la cible /${r.to}/ n'est pas (encore) une fiche active.`);
+    } else if (reserved.has(r.from)) {
+      skipped.push({ slug: r.from, reason: `redirection vers /${r.to}/ impossible : collision avec un fichier/dossier existant du repo` });
+    } else {
+      activeRedirects.push(r);
+    }
+  }
+  const redirectSet = new Set(activeRedirects.map(r => r.from));
+
+  // Nettoyage : supprime les dossiers générés lors d'un run précédent pour un
+  // produit qui n'est plus actif/existant — jamais un dossier hors manifeste.
+  // Un ancien slug devenu source de redirection est remplacé juste après.
   let removed = 0;
   for (const oldSlug of manifestSlugs) {
-    if (!currentSet.has(oldSlug)) {
+    if (!currentSet.has(oldSlug) && !redirectSet.has(oldSlug)) {
       await rm(new URL(`${oldSlug}/`, ROOT), { recursive: true, force: true });
       log(`  Dossier obsolète supprimé : ${oldSlug}/ (produit désactivé/renommé/supprimé)`);
       removed++;
     }
   }
+  // Même règle pour les pages de redirection d'un run précédent qui ne sont
+  // plus actives (entrée retirée du fichier) — sauf si une fiche a repris le slug.
+  for (const oldSlug of redirectManifest) {
+    if (!redirectSet.has(oldSlug) && !currentSet.has(oldSlug)) {
+      await rm(new URL(`${oldSlug}/`, ROOT), { recursive: true, force: true });
+      log(`  Redirection retirée : ${oldSlug}/`);
+      removed++;
+    }
+  }
+
+  for (const r of activeRedirects) {
+    const target = products.find(p => p.slug === r.to);
+    await rm(new URL(`${r.from}/`, ROOT), { recursive: true, force: true });
+    await mkdir(new URL(`${r.from}/`, ROOT), { recursive: true });
+    await writeFile(new URL(`${r.from}/index.html`, ROOT), buildRedirectHtml(r.from, r.to, target.name), 'utf8');
+    log(`  Redirection écrite : /${r.from}/ → /${r.to}/`);
+  }
 
   await writeFile(MANIFEST_PATH, JSON.stringify(written.sort(), null, 2) + '\n', 'utf8');
+  await writeFile(REDIRECT_MANIFEST_PATH, JSON.stringify([...redirectSet].sort(), null, 2) + '\n', 'utf8');
 
   const writtenProducts = products.filter(p => currentSet.has(p.slug));
   const legacyRemoved = await updateSitemap(writtenProducts);
@@ -528,7 +655,7 @@ async function main() {
   }
 
   const durationMs = Date.now() - start;
-  log(`✔ ${written.length} page(s) produit générée(s), ${removed} supprimée(s), ${skipped.length} ignorée(s) en ${durationMs} ms.`);
+  log(`✔ ${written.length} page(s) produit générée(s), ${activeRedirects.length} redirection(s), ${removed} supprimée(s), ${skipped.length} ignorée(s) en ${durationMs} ms.`);
 
   if (skipped.length) process.exitCode = 1;
 }
