@@ -1,0 +1,23 @@
+{
+  "_doc": [
+    "Redirections d'anciennes URL de fiches produit, appliquées par scripts/generate-product-pages.mjs.",
+    "GitHub Pages ne sait pas servir de vraie 301 : le générateur écrit à la place, dans /<source>/index.html, une page de redirection (meta refresh 0 s, location.replace, lien canonical vers la cible, robots noindex).",
+    "Activation automatique et conditionnelle : la page n'est écrite que si la cible est une fiche produit active ET que la source n'en est plus une. Avant la migration, l'ancienne fiche reste donc servie normalement.",
+    "Champs alignés sur la table Supabase public.redirects (source_path, target_path, status_code, reason) : la même liste pourra alimenter cette table ou un fichier _redirects Netlify lors de la migration vers le nouveau site.",
+    "Une source ne doit jamais être la cible d'une autre entrée (pas de chaîne de redirections)."
+  ],
+  "redirects": [
+    {
+      "source_path": "/miel-hibiscus-zamzam/",
+      "target_path": "/miel-hibiscus-nigelle/",
+      "status_code": 301,
+      "reason": "Renommage décidé le 8 septembre 2026 : Miel Hibiscus Nigelle Zamzam → Miel Hibiscus & Nigelle (même produit, ab2a1fff)."
+    },
+    {
+      "source_path": "/dn-miel-nigelle-hibiscus/",
+      "target_path": "/miel-hibiscus-nigelle/",
+      "status_code": 301,
+      "reason": "Doublon confirmé de la fiche Hibiscus (c2152e8f), désactivé lors de l'intégration des 27 fiches miels."
+    }
+  ]
+}

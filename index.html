@@ -1582,6 +1582,8 @@ const MAILLAGE = {
   "miel-gingembre-citron":{b1:["hl-citron","gel-gingembre-curcuma"],b2:["miel-gingembre-curcuma","miel-gingembre-fenugrec"],l:TM},
   "miel-costus-nigelle":{b1:["gel-costus","hl-costus","pdr-costus"],b2:["miel-nigelle","miel-moringa-nigelle"],l:TM},
   "miel-hibiscus-zamzam":{b1:["gommage-hibiscus-nigelle","savon-noir-hibiscus-nigelle"],b2:["miel-nigelle","miel-moringa-nigelle"],l:TM},
+  // miel-hibiscus-nigelle : nouveau slug de miel-hibiscus-zamzam (renommage du 8/09/2026), mêmes valeurs — les deux restent valides pendant la transition.
+  "miel-hibiscus-nigelle":{b1:["gommage-hibiscus-nigelle","savon-noir-hibiscus-nigelle"],b2:["miel-nigelle","miel-moringa-nigelle"],l:TM},
   "miel-spiruline":{b1:["gel-spiruline"],b2:["miel-nigelle","miel-gingembre-curcuma"],l:TM},
   "miel-aphrodisiaque":{b1:["gel-aphrodisiaque"],b2:["miel-sidr-jujubier","miel-blanc-kirghizistan"],l:TE},
   "miel-lavande":{b1:["hl-lavande","grn-lavande"],b2:["miel-rose-siberie","miel-fraise-russie"],l:TR},
@@ -1719,6 +1721,8 @@ const PRODUCT_IMAGES = {
   "miel-spiruline": ["assets/produits-ia/miel-spiruline/miel-spiruline-1.webp"],
   "miel-gingembre-curcuma": ["assets/produits-ia/miel-gingembre-curcuma/miel-gingembre-curcuma-1.webp","assets/produits-ia/miel-gingembre-curcuma/miel-gingembre-curcuma-2.webp"],
   "miel-hibiscus-zamzam": ["assets/produits-ia/miel-hibiscus-zamzam/miel-hibiscus-zamzam-2.webp","assets/produits-ia/miel-hibiscus-zamzam/miel-hibiscus-zamzam-1.webp"],
+  // miel-hibiscus-nigelle : nouveau slug de miel-hibiscus-zamzam (renommage du 8/09/2026), mêmes valeurs — les deux restent valides pendant la transition.
+  "miel-hibiscus-nigelle": ["assets/produits-ia/miel-hibiscus-zamzam/miel-hibiscus-zamzam-2.webp","assets/produits-ia/miel-hibiscus-zamzam/miel-hibiscus-zamzam-1.webp"],
   "miel-moringa-nigelle": ["assets/produits-ia/miel-moringa-nigelle/miel-moringa-nigelle-2.webp","assets/produits-ia/miel-moringa-nigelle/miel-moringa-nigelle-1.webp"],
   "miel-gingembre-fenugrec": ["assets/produits-ia/miel-gingembre-fenugrec/miel-gingembre-fenugrec-2.webp"],
   "miel-aubepine": ["assets/produits-ia/miel-aubepine/miel-aubepine-2.webp","assets/produits-ia/miel-aubepine/miel-aubepine-1.webp"],
@@ -1921,6 +1925,8 @@ const PRODUCT_FORMAT_IMAGES = {
   "miel-spiruline": {"50 g":"assets/produits-ia/miel-spiruline/miel-spiruline-1.webp","200 g":"assets/produits-ia/miel-spiruline/miel-spiruline-2.webp"},
   "miel-gingembre-curcuma": {"50 g":"assets/produits-ia/miel-gingembre-curcuma/miel-gingembre-curcuma-1.webp","200 g":"assets/produits-ia/miel-gingembre-curcuma/miel-gingembre-curcuma-2.webp"},
   "miel-hibiscus-zamzam": {"50 g":"assets/produits-ia/miel-hibiscus-zamzam/miel-hibiscus-zamzam-2.webp","200 g":"assets/produits-ia/miel-hibiscus-zamzam/miel-hibiscus-zamzam-1.webp"},
+  // miel-hibiscus-nigelle : nouveau slug de miel-hibiscus-zamzam (renommage du 8/09/2026), mêmes valeurs — les deux restent valides pendant la transition.
+  "miel-hibiscus-nigelle": {"50 g":"assets/produits-ia/miel-hibiscus-zamzam/miel-hibiscus-zamzam-2.webp","200 g":"assets/produits-ia/miel-hibiscus-zamzam/miel-hibiscus-zamzam-1.webp"},
   "miel-moringa-nigelle": {"50 g":"assets/produits-ia/miel-moringa-nigelle/miel-moringa-nigelle-2.webp","200 g":"assets/produits-ia/miel-moringa-nigelle/miel-moringa-nigelle-1.webp"},
   "miel-gingembre-fenugrec": {"50 g":"assets/produits-ia/miel-gingembre-fenugrec/miel-gingembre-fenugrec-2.webp","200 g":"assets/produits-ia/miel-gingembre-fenugrec/miel-gingembre-fenugrec-1.webp"},
   "miel-aubepine": {"50 g":"assets/produits-ia/miel-aubepine/miel-aubepine-2.webp","200 g":"assets/produits-ia/miel-aubepine/miel-aubepine-1.webp"},
@@ -2758,6 +2764,28 @@ let activeProduct = null;
 let activeOption = null;   /* null = aucune variante choisie par le client */
 
 /* ============ HELPERS ============ */
+/* Texte rédactionnel des fiches produit (description, atouts, composition,
+   provenance, conseils, précautions) : texte brut en base, TOUJOURS échappé
+   ici avant insertion dans le HTML. Seule une syntaxe minimale est ensuite
+   interprétée : **gras**, *italique*, et les retours à la ligne — une ligne
+   vide sépare deux paragraphes (richParagraphs), un retour simple devient
+   <br> (richInline). Règle répliquée à l'identique dans
+   scripts/generate-product-pages.mjs, pour que le HTML statique et le rendu
+   JS affichent la même chose. */
+function escHtml(s){
+  return String(s ?? '')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function richInline(s){
+  return escHtml(s)
+    .replace(/\*\*(?=\S)([^*\n]*?\S)\*\*/g,'<strong>$1</strong>')
+    .replace(/(^|[^*\w])\*(?=\S)([^*\n]*?\S)\*(?![*\w])/g,'$1<em>$2</em>')
+    .replace(/\r?\n/g,'<br>');
+}
+function richParagraphs(s){
+  return String(s ?? '').split(/\r?\n[ \t]*\r?\n/).map(t=>t.trim()).filter(Boolean);
+}
 function startPrice(p){
   if(p.price.type==="fixed") return p.price.value;
   return p.price.options[0][1];
@@ -3227,7 +3255,7 @@ function showProduct(id){
         "Pour les qamis : basez-vous surtout sur votre hauteur.",
         "Pour les abayas et ensembles : basez-vous sur votre taille vestimentaire habituelle."
       ]
-    : (p.uso ? [p.uso] : []);
+    : (p.uso ? richParagraphs(p.uso) : []);
   const usageNote = isWear
     ? { heading: "Comment choisir ?", text: "En cas de doute entre deux tailles, prenez la taille supérieure. Les coupes sont pensées pour rester confortables et pudiques, sans être trop ajustées." }
     : null;
@@ -3235,13 +3263,14 @@ function showProduct(id){
   // de cœur : … Notes de fond : … ») : un retour à la ligne devant chaque
   // étage, purement à l'affichage — la donnée en base n'est pas touchée.
   const compoHtml = p.compo
-    ? p.compo.split(/\s+(?=Notes? de (?:tête|cœur|coeur|fond)\s*:)/i).join("<br>")
+    ? p.compo.split(/\s+(?=Notes? de (?:tête|cœur|coeur|fond)\s*:)/i).map(richInline).join("<br>")
     : "";
+  // Valeurs déjà converties en HTML sûr (échappé) : insérées telles quelles plus bas.
   const productMeta = [
     p.compo ? ["Composition", compoHtml] : null,
-    p.poids ? ["Poids", p.poids] : null,
-    p.contenance ? ["Contenance", p.contenance] : null,
-    (p.cat === 'miels' && p.prov) ? ["Provenance", p.prov] : null
+    p.poids ? ["Poids", escHtml(p.poids)] : null,
+    p.contenance ? ["Contenance", escHtml(p.contenance)] : null,
+    (p.cat === 'miels' && p.prov) ? ["Provenance", richInline(p.prov)] : null
   ].filter(Boolean);
 
   document.getElementById("productView").innerHTML = `
@@ -3259,7 +3288,7 @@ function showProduct(id){
         <div class="pp-badge">${CAT_LABELS[p.cat] || p.cat}</div>
         <h1>${p.name}</h1>
         ${brandHref ? `<a class="pp-brand" href="${brandHref}">${p.brand}</a>` : ''}
-        <div class="tagline">${p.tagline}</div>
+        <div class="tagline">${richInline(p.tagline)}</div>
       </div>
     </section>
 
@@ -3312,17 +3341,17 @@ function showProduct(id){
       <div class="pp-content">
         ${infoBannerHTML(p)}
         ${mielPrintempsOriginBannerHTML(p)}
-        ${p.description.map(d=>`<p>${d}</p>`).join("")}
+        ${p.description.map(d=>`<p>${richInline(d)}</p>`).join("")}
         ${(()=>{const ip=(p.accordions||[]).find(a=>a.title==='Idéal pour');return ip?`<div class="pp-ideal"><span class="ideal-lbl">Idéal pour</span>${ip.html}</div>`:''})()}
         ${(()=>{const auds=giftAudiences(p);return auds.length?`<div class="pp-ideal"><span class="ideal-lbl">Pour qui est-ce idéal&nbsp;?</span><ul>${auds.map(a=>`<li>${a}</li>`).join("")}</ul></div>`:''})()}
-        ${(p.benefits&&p.benefits.length)?`<h2>${p.benefitsLabel || (isWear ? 'Points forts' : 'Bienfaits')}</h2>
-        <ul class="pp-benefits">${p.benefits.map(b=>`<li>${b}</li>`).join("")}</ul>`:""}
+        ${(p.benefits&&p.benefits.length)?`<h2>${escHtml(p.benefitsLabel || (isWear ? 'Points forts' : 'Bienfaits'))}</h2>
+        <ul class="pp-benefits">${p.benefits.map(b=>`<li>${richInline(b)}</li>`).join("")}</ul>`:""}
         <h2>Le produit</h2>
         <div class="pp-meta">
           ${productMeta.map(([k,v])=>`<div><div class="k">${k}</div><div class="v">${v}</div></div>`).join("")}
         </div>
         ${usageParagraphs.length?`<h2>${usageTitle}</h2>
-        ${usageParagraphs.map(t=>`<p>${t}</p>`).join("")}
+        ${usageParagraphs.map(t=>`<p>${richInline(t)}</p>`).join("")}
         ${usageNote?`<div class="usage-note"><div class="usage-note-head">${usageNote.heading}</div><div class="usage-note-text">${usageNote.text}</div></div>`:""}`:""}
 
         ${(()=>{const visAcc=(p.accordions||[]).filter(a=>a.title!=='Produits complémentaires'&&a.title!=='Idéal pour');return visAcc.length?`<div class="pp-accordions"><h2>En savoir plus</h2>${visAcc.map(a=>`<div class="acc-item"><button class="acc-head" type="button" aria-expanded="false" onclick="toggleAccordion(this)"><span>${a.title}</span><svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="acc-panel"><div class="acc-inner">${a.html}</div></div></div>`).join("")}</div>`:"";})()}
@@ -3334,7 +3363,7 @@ function showProduct(id){
           </div>
           <div class="panel warn">
             <div class="panel-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3l9 16H3z"/><path d="M12 10v4M12 17h.01" stroke-linecap="round"/></svg>${rightTitle}</div>
-            <ul>${rightItems.map(r=>`<li>${r}</li>`).join("")}</ul>
+            <ul>${rightItems.map(r=>`<li>${richInline(r)}</li>`).join("")}</ul>
           </div>
         </div>
       </div>
@@ -3814,6 +3843,7 @@ const PACK_VARIANT_CONFIG = {
     'miel-rose-siberie':       '200 g',
     'miel-blanc-kirghizistan': '200 g',
     'miel-hibiscus-zamzam':    '200 g',
+    'miel-hibiscus-nigelle':   '200 g',  // nouveau slug (renommage du 8/09/2026) — l'ancien reste valide pendant la transition
     'miel-fraise-russie':      '200 g',
     'miel-lavande':            '200 g',  // images temporaires → fallback logo
   },
