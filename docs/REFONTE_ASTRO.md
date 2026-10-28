@@ -975,3 +975,152 @@ Corrections de relecture : échappement `\\u003c` du JSON de `StorefrontPurchase
 configurée legacy), puis redéployer la sortie statique. Les garde-fous juridiques legacy restent actifs
 et le panier local conservé redevient lisible. `disabled` est l’option de suspension des achats depuis
 l’interface ; aucune de ces options ne ferme les RPC serveur.
+
+## Sécurisation des commandes historiques (étape 16)
+
+**1. Points d’entrée audités.** Audit local du 2026-10-28, rapproché du relevé de production
+fourni par Claude ; aucun appel distant. Les modes Astro ne décident jamais de l’ouverture SQL.
+
+| Chemin | Rôles, protection existante, exposition | Risque et traitement étape 16 |
+| --- | --- | --- |
+| `LegacyOrderPage` → `order-api` → `create_order_request` ; RPC PostgREST directe | Public : clé publishable, anon/authenticated ; SECURITY DEFINER, validation, panier recalculé, quotas, idempotence | Formulaire contournable ; contrôle global avant validation/idempotence, tous environnements |
+| Lignes insérées par `create_order_request` | Propriétaire de la fonction ; transaction commande, lignes, événement, submission | Deux triggers BEFORE INSERT protègent commandes et lignes en CLOSED |
+| INSERT REST direct `orders` / `order_items` / `order_events` | Anon : aucun droit ; authenticated : SELECT seul, politiques admin via `is_admin()` | Déjà interdit au public ; ACL et RLS inchangées |
+| SQL / clé privilégiée | Propriétaire, ou service_role avec les ACL de table nécessaires (BYPASSRLS seul ne les donne pas) | INSERT commandes/lignes bloqué aussi ; UPDATE historiques conservés ; un propriétaire peut toujours changer le schéma |
+| `admin_update_order` : disponibilité, montants, notes, statuts, paiement, expédition | RPC authenticated + `is_admin()` ; transitions/contraintes SQL | Maintenue pour l’historique ; ne crée ni commande ni ligne, ignore les champs de bascule injectés |
+| `get_order_tracking` / `admin_order_tracking_token` | Suivi public par jeton 256 bits ; restitution du jeton réservée à l’admin | Maintenus ; le jeton reste une capacité de lecture à protéger |
+| `LegacyCartPage`, `check_cart`, `check_promo_code`, `order_country_codes`, `is_admin` | Fonctions exécutables avec clé publique ; lecture/calcul | Maintenues ; aucune création de commande par ces fonctions |
+| `orders_log_events` → `order_events_enqueue_email` → outbox | Triggers de création/transition, outbox privée | Refus : aucun événement ni `order_received` ; transitions historiques toujours notifiables |
+| `admin_order_emails`, `admin_order_email_alerts`, `admin_retry_order_email` | Authenticated + contrôle admin ; lecture ou remise en file d’un e-mail existant | Maintenues ; CLOSED n’est pas un interrupteur des e-mails historiques |
+| `order_emails_claim`, `order_emails_report`, `order_emails_delivery_event` | RPC service_role seulement ; clé privilégiée côté Edge | Outbox, compte rendu et journal de remise ; ne créent aucune commande |
+| Réveil immédiat / cron `dar-nur-order-emails` toutes les 5 min | `kick_order_email_worker`, pg_net/Vault ; envoi activé, URL et secret requis | Aucun réveil causé par un refus ; cron et backlog historique conservés |
+| HTTP `order-emails` / `order-emails-webhook` | Secrets worker/webhook : Bearer, ou Basic pour webhook | Worker : outbox → Brevo → compte rendu ; webhook : remise. Aucun des deux ne crée de commande |
+| `notify_github_regenerate` et autres fonctions trigger exécutables du relevé | PostgreSQL interdit leur appel comme fonction ordinaire ; exécutées via leurs tables | Pas de chemin de création de commande identifié ; régénération catalogue distincte, hors verrou |
+| `orders_private.config` / scripts administratifs | Aucun accès anon/authenticated au schéma, config ou fonctions du verrou ; propriétaire SQL pour les scripts | Aucune RPC de bascule ; aucun état client ne fait autorité |
+
+`ApiConfig` contient une configuration publique ; masquer le formulaire ou changer le mode ne révoque
+pas une clé publique. `/suivi/` et `/admin/commandes/` gardent leurs accès existants. Le front traite déjà
+`ordering_closed` via `ORDER_ERRORS` (« La commande en ligne n’est pas encore ouverte. »).
+Aucun fichier `site/` ni aucune Edge Function modifié.
+
+**2. Risques identifiés.** Avant 16, `production_ordering_open = false` ne ferme que la production
+reconnue ; environnement absent, preprod ou development → commandes de test dans la même base de
+production. Confirmé par appel anon fictif sans formulaire. Origin et environnement sont falsifiables
+par un client HTTP ; les quotas dépendent aussi des en-têtes IP. Ces faiblesses voisines restent hors
+périmètre. Un rôle privilégié peut encore modifier l’historique ou insérer un événement notifiable,
+voire écrire l’outbox s’il en a les droits : CLOSED ferme les nouvelles commandes/lignes, pas tous
+les effets d’une clé privilégiée compromise. Les droits des fonctions trigger du relevé, le worker
+et les tâches historiques ne sont pas modifiés. Hors commandes (relevé Claude, non corrigé) : anon
+et authenticated détiennent encore INSERT/UPDATE/DELETE/TRUNCATE sur `products`, `product_variants`,
+`brands`, `categories`, `offers`, `offer_products` ; la RLS bloque les écritures REST, et PostgREST
+n’expose pas TRUNCATE, mais ces droits hérités sont à révoquer dans une mission catalogue dédiée.
+
+**3. Protections préparées.** `20261028100000_etape16_01_legacy_ordering_gate.sql` ajoute
+`legacy_ordering_state` NOT NULL, défaut `open`, contrainte `open|closed`, motif et horodatage.
+LEGACY_OPEN conserve les règles existantes, dont le blocage juridique production indépendant.
+LEGACY_CLOSED renvoie `{ok:false,error:'ordering_closed'}` avant toute écriture, même pour un rejeu :
+réponse de création uniforme, historique consultable par la RPC de suivi dédiée. Le corps de
+`create_order_request` est repris exactement, avec ce seul contrôle ajouté.
+Deux triggers BEFORE INSERT ALWAYS refusent aussi service_role/propriétaire, sans toucher UPDATE/DELETE.
+La lecture privée verrouille config en partage jusqu’à la fin de la transaction : une fermeture attend
+les créations déjà admises ; les suivantes lisent closed. Config absente → refus. Rejouer 16 conserve
+l’état et ses métadonnées. Aucun grant ajouté aux rôles publics.
+
+**4. Protections réellement testées.** `scripts/test/schema/legacy-gate.mjs` charge baseline puis toutes
+les migrations triées sur base vide, avant cinq produits fictifs. Vrais `SET ROLE` anon, authenticated
+admin/non admin, service_role et propriétaire. La capacité privilégiée d’INSERT est accordée uniquement
+dans le banc, avant comparaison, pour prouver le trigger indépendamment de la RLS.
+Comparaison des ACL explicites/effectives (tables, colonnes, schémas, fonctions, séquences), RLS et politiques.
+Scripts réels de fermeture/réouverture (seul le motif vide est remplacé), motif obligatoire,
+environnements et champs/en-têtes pirates, aucun ajout commandes/lignes/événements/submissions/outbox,
+aucun réveil pg_net, aucun nouvel e-mail reçu après refus, rejeu refusé, triggers même en mode replica.
+Suivi, administration jusqu’à l’expédition, quatre types d’e-mails et vrai worker avec RPC service_role
+et transport fictif ; purges 10 et 11 réelles en CLOSED sur victimes fictives uniquement.
+Rollback 16 sans modification de données, schéma et empreinte d’origine restaurés, réapplication,
+double rejeu et chaîne des rollbacks 16 → 11 → 10 sur une autre base fictive.
+`supabase/checks/etape16_invariants.sql` fournit sept contrôles lisibles sans afficher de secret.
+
+Les suites commandes/e-mails chargeaient explicitement leurs seules étapes : ajout explicite de 16,
+et retrait de 16 avant le rollback 10 dans son banc. La base témoin du rollback 11 conserve aussi 16.
+CI : `test:legacy-gate` après « Commandes (étape 10) » ; filtre `scripts/test/schema/**` déjà suffisant.
+Commandes locales reproductibles :
+
+```powershell
+cd scripts/test/schema
+npm run test:legacy-gate
+node legacy-gate.mjs --fixtures "$env:TEMP/dar-nur-etape16-fixtures"
+node orders.mjs --data "$env:TEMP/dar-nur-etape16-fixtures"
+npm run test:emails -- --data "$env:TEMP/dar-nur-etape16-fixtures"
+```
+
+Les JSON temporaires contiennent des produits fictifs et les identifiants nécessaires aux assertions
+de regroupement de l’étape 6, aucun catalogue réel ni restauration commerciale. `emails.mjs` donne
+priorité à `--data` sur le `--live` du script npm : aucun fetch. Les scénarios facultatifs d’offre
+produit ne sont pas exercés par ces fixtures sans offres. Résultats : verrou **104**, commandes **140**,
+gabarits/handlers **118**, outbox/worker **135** contrôles réussis, **0 échec**, typage e-mails réussi
+(497 contrôles au total, commandes ci-dessus terminées avec le code 0).
+
+Empreintes `md5(prosrc)` avant 16 dans PGlite, identiques aux huit valeurs du relevé fourni :
+
+| Fonction | MD5 local = relevé production |
+| --- | --- |
+| `create_order_request` | `6da0b45e5c85d0af26686b45e3e4d74c` |
+| `check_cart` | `29335123f01554e5d94b2de74c4f70ab` |
+| `get_order_tracking` | `a78185112ca3a914ecae85a5814c3fa9` |
+| `admin_update_order` | `d1977f1f98963d068b56073692ad3ccd` |
+| `orders_guard` | `45828e584b26badd4ce1a9361efcf6f2` |
+| `order_items_guard` | `ea16144af0dba601058827afbe062dbf` |
+| `order_events_enqueue_email` | `28b88047713361c4c716568efcfac92a` |
+| `is_admin` | `f56ccd71d257c73f4ea8d9e2f01e50f5` |
+
+Les empreintes brutes dépendent des fins de ligne (CRLF des sources locales étapes 10/baseline) ; le
+banc affiche aussi la variante LF. Le rollback compare au corps chargé avant 16 dans le même environnement.
+Aucun écart de source constaté sur ces huit fonctions ; ce n’est pas un nouvel audit distant.
+
+**5. Tests restant à faire.** Rien n’est appliqué en production : relu en lecture seule par Claude le
+2026-10-28 (aucune colonne `legacy_ordering_*`, aucun trigger `trg_00_legacy_ordering_gate`, 0 commande,
+0 événement, `production_ordering_open = false`, `sending_enabled = false` ; propriétaire de
+`orders_private.config` et rôle de l’éditeur SQL = `postgres`, condition des scripts de bascule).
+Revue Claude : `run.mjs --live` (81), `orders.mjs --live` (142), `npm run test:emails` (118 + 135) et
+`test:legacy-gate` (104) relancés verts avec le catalogue public réel (lecture seule). PostgREST réel,
+ACL/default privileges Supabase, pg_cron, pg_net/Vault et concurrence sur plusieurs connexions restent
+à vérifier dans une mission dédiée. Extensions réseau simulées localement ; Edge Functions déployées
+et Brevo non retestés. Aucun build Astro, ses fichiers étant inchangés.
+
+**6. Fermeture future.** Mission dédiée : vérifier le projet ciblé et l’état réel, sauvegarder la
+configuration utile hors dépôt, appliquer 16 comme propriétaire (reste OPEN), lire les invariants.
+Remplir un motif explicite dans `20261028_etape16_fermer_commandes_historiques.sql`, exécuter dans une
+connexion propriétaire authentifiée au tableau de bord. Lire les contrôles avant/après, vérifier CLOSED,
+les invariants et une RPC publique refusée sans nouvelles lignes/outbox. Préserver suivi et traitement
+des éventuelles commandes historiques.
+
+**7. Réouverture.** Revalider parcours legacy et conditions juridiques, coordonner le retour Astro.
+Remplir le motif de `20261028_etape16_rouvrir_commandes_historiques.sql`, exécuter comme propriétaire,
+contrôler OPEN avant/après et les invariants. `production_ordering_open`, CGV et interrupteurs e-mails
+restent indépendants : rouvrir 16 ne les ouvre pas. Tester le parcours autorisé dans la mission dédiée.
+Le rollback 16 retire la protection et restaure exactement la fonction 10 ; ce n’est pas la réouverture
+habituelle. Pour retirer les anciennes étapes, ordre 16 → 11 → 10 ; les rollbacks 10/11 restent
+destructifs selon leur documentation. Rejouer une ancienne migration de fonction peut remplacer le
+contrôle RPC : toujours réappliquer 16 en dernier et vérifier ses invariants.
+
+**8. Désynchronisation Astro/Supabase.** Cible : `legacy` = OPEN (sous réserve juridique production),
+`shopify` = CLOSED, `disabled` = CLOSED. La compilation Astro ne ferme JAMAIS le serveur ; bascule SQL
+distincte. Legacy + CLOSED affiche un formulaire refusé ; Shopify/disabled + OPEN laisse la RPC de
+création accessible avec la clé publique. Installer 16 ne change aucun mode et ne ferme rien.
+
+**9. Prérequis Shopify.** Résoudre les sept brouillons bloquants, examiner les douze avertissements,
+régénérer/valider instantanés et correspondances ; contrôler variantes, prix, stock, taxes, livraison,
+conditions commerciales/juridiques et parcours panier/paiement réel. Conserver les garde-fous
+d’approbation existants jusqu’à validation explicite ; coordonner fermeture SQL et mode Astro.
+
+**Checklist de bascule — à ne pas exécuter sans mission dédiée.**
+
+- [ ] Lire le catalogue Shopify en direct et régénérer les instantanés.
+- [ ] Résoudre les 7 brouillons bloquants et examiner les avertissements.
+- [ ] Vérifier les liens, variantes, disponibilités et prix réels.
+- [ ] Tester le panier et le paiement Shopify, taxes et livraison comprises.
+- [ ] Appliquer 16 puis fermer de façon contrôlée les nouvelles commandes historiques, motif consigné.
+- [ ] Vérifier le refus serveur tous environnements, l’absence d’écriture/outbox et le suivi historique.
+- [ ] Approuver/configurer le mode shopify dans Astro après validation des prérequis.
+- [ ] Contrôler le site public et les destinations Shopify après déploiement autorisé.
+- [ ] Préparer le retour arrière coordonné Astro/SQL ; réouverture après revalidation legacy.

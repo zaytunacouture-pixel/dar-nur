@@ -65,5 +65,8 @@ jobs:
       - name: Commandes (étape 10)
         run: node orders.mjs --live
 
+      - name: Fermeture serveur historique (étape 16, hors ligne)
+        run: npm run test:legacy-gate
+
       - name: E-mails transactionnels (étape 11) — types, gabarits, outbox, worker, faux Brevo
         run: npm run test:emails

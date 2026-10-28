@@ -81,6 +81,8 @@ async function newDb(data, { etape10 = true } = {}) {
   await db.query(`insert into public.admins (user_id, note) values ($1, 'banc étape 10')`, [ADMIN]);
   for (const f of ETAPE6) await db.exec(readFileSync(path.join(MIGRATIONS_DIR, f), 'utf8'));
   if (etape10) for (const f of ETAPE10) await db.exec(readFileSync(path.join(MIGRATIONS_DIR, f), 'utf8'));
+  // L'étape 16 reste ouverte par défaut ; vérifier la compatibilité du parcours historique.
+  if (etape10) await db.exec(readFileSync(path.join(MIGRATIONS_DIR, '20261028100000_etape16_01_legacy_ordering_gate.sql'), 'utf8'));
   return db;
 }
 
@@ -463,6 +465,7 @@ async function main() {
 
   const db2 = await newDb(data);
   const fresh = await newDb(data, { etape10: false });
+  await db2.exec(readFileSync(path.join(ROOT, 'supabase/rollback/20261028_etape16_rollback.sql'), 'utf8'));
   await db2.exec(ROLLBACK);
   const shape = async (d) => JSON.stringify(await rows(d, `select table_schema, table_name, column_name from information_schema.columns
     where table_schema not in ('pg_catalog', 'information_schema') order by 1, 2, 3`)) +

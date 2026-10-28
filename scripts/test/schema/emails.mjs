@@ -94,6 +94,8 @@ async function newDb(data, { etape11 = true } = {}) {
   }
   await db.query(`insert into public.admins (user_id, note) values ($1, 'banc étape 11')`, [ADMIN]);
   for (const f of [...ETAPE6, ...ETAPE10, ...(etape11 ? ETAPE11 : [])]) await db.exec(readFileSync(path.join(MIGRATIONS_DIR, f), 'utf8'));
+  // Ouvert par défaut, présent aussi dans la base de comparaison du rollback 11.
+  await db.exec(read('supabase/migrations/20261028100000_etape16_01_legacy_ordering_gate.sql'));
   return db;
 }
 
