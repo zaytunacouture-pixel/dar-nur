@@ -116,6 +116,7 @@ compteur ou « best seller » sans données ; aucune photo générée à la plac
 | **Étape 10** (2026-10-03) : panier, demande de commande, suivi, administration des commandes, tables et fonctions Supabase, `verify-orders`, `test:cart` — section « Commande, paiement, livraison (étape 10) » | Paiement via Shopify (étape dédiée), CGV et confidentialité révisées (bloquant production), recherche, redirections, shooting |
 | **Étape 11, phase 1** (2026-10-03) : e-mails transactionnels Brevo — outbox, Edge Functions, gabarits, bloc admin « Notifications », bancs hors ligne ; **rien de déployé** — section « E-mails transactionnels (étape 11) » | Phase 2 après configuration Brevo par le propriétaire |
 | **Étape 12** (2026-10-09) : pages internes `/cgv/`, `/confidentialite/`, `/mentions-legales/`, faits juridiques centralisés (`config/legal.ts`), liens repointés, `verify-legal` — section « Pages juridiques (étape 12) » | Informations obligatoires manquantes (SIREN/SIRET, médiateur, téléphones, suivi Brevo) : production fermée |
+| **Étape 13** (2026-10-28) : synchronisation avec `main` (PR #41–#43), réparation du build (miel archivé sur l'accueil), préproduction mise à jour — section « Synchronisation (étape 13) » | Raccordement des achats à Shopify (mission dédiée) |
 
 ## Pages catalogue (étape 7)
 
@@ -666,3 +667,28 @@ relèvent de la bascule) :
   soins. Ces produits **restent** au catalogue et dans les pages juridiques. L'intitulé sera vérifié au RNE
   (SIREN/SIRET reçus le 2026-10-09) ; si nécessaire, adjonction d'activité via le Guichet unique (décision de
   l'exploitant du 2026-10-09).
+
+## Synchronisation (étape 13)
+
+Branche `refonte/etape-13-synchronisation`, créée depuis `refonte/etape-12-juridique` (`285de08`).
+
+- **Fusion de `origin/main`** (`6f01d3f`, sans conflit) : `main` ne modifie que l'ancien site à la racine
+  (`index.html`, `js/cart.js`, fiches générées, `scripts/generate-product-pages.mjs`,
+  `scripts/product-redirects.json`, `_config.yml`) et la refonte ne touche que `site/`, `docs/`, `supabase/`,
+  `.github/`, `scripts/test/` : ensembles disjoints, `site/` inchangé par la fusion, racine identique à `main`.
+  La refonte n'a pas d'équivalent à porter pour PR #42 (catalogue de secours : Astro lit Supabase au build,
+  produits `published` seulement) ni PR #43 (GitHub Pages). Les deux redirections Hibiscus de PR #41
+  (`/miel-hibiscus-zamzam/`, `/dn-miel-nigelle-hibiscus/` → `/miel-hibiscus-nigelle/`) ne sont **pas**
+  actives côté Astro : elles relèvent de la migration SEO (`_redirects`), et la cible n'est pas publiée à ce jour.
+- **Build réparé** : `miel-lavande` (archivé le 2026-10-11) était l'image de l'univers Miels & Herboristerie
+  dans `config/home.ts` → `npm run build` échouait. Remplacé par `miel-printemps` (seule vraie photo publiée
+  de l'univers ; même visuel que le bloc Miels, à remplacer).
+- **CI locale** (`DAR_NUR_ENV=preprod`, `SITE_URL=https://dar-nur.fr`, comme Netlify) : `npm run ci` vert ;
+  235 fiches pour 235 produits publiés. Avertissement : `dn-lecode-blue-addict` (« À découvrir ») est
+  `coming_soon`.
+- **Préproduction** : site Netlify `wondrous-rolypoly-c99592` (aucun domaine personnalisé, branche Git
+  configurée : `refonte/etape-11-paiement-emails`). Déploiement manuel par la CLI (`netlify deploy` du `dist/`
+  vérifié, brouillon `6ae1b1bcdfba655efa16f7cd` contrôlé puis publié, le 2026-10-28). Un futur push sur
+  `refonte/etape-11-paiement-emails` écraserait ce déploiement : changer la branche du site Netlify
+  (réglage du propriétaire) pour suivre la branche à jour. Retour arrière : republier le déploiement
+  précédent `6ac4c05e6037fabece39779c` (étape 11) depuis Netlify → Deploys.
