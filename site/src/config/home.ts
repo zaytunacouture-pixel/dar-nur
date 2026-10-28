@@ -30,7 +30,10 @@ export const HOME_HERO = {
 export const HOME_UNIVERSES = [
   {
     slug: 'miels-herboristerie',
-    imageProduct: 'miel-lavande',
+    // miel-lavande, archivé le 11/10/2026, faisait échouer le build. Seule vraie photo publiée de
+    // l'univers (les mg-* sont des affiches, le reste est en produits-ia/) : même visuel que le
+    // bloc Miels, à remplacer dès qu'une autre photo est disponible.
+    imageProduct: 'miel-printemps',
     collections: ['miels', 'miels-gourmands', 'poudres', 'gelules'],
   },
   {
