@@ -4,6 +4,7 @@
  * une ligne utile, prix — et 1 badge maximum. Pas d'étoiles, pas de favoris.
  * Statique : seul l'ajout rapide et la 2ᵉ image (survol desktop) ont un petit script.
  */
+import { storefront } from '@/config/commerce';
 import Badge from '@/components/ui/Badge.astro';
 import CatalogPicture from '@/components/ui/CatalogPicture.astro';
 import { PRODUCT_CARD } from '@/config/images';
@@ -13,6 +14,7 @@ import Price from '@/components/ui/Price.astro';
 import type { ProductSummary } from '@/types/catalog';
 
 interface Props {
+  commerce?: import('@/lib/commerce/storefront').StorefrontFlags;
   product: ProductSummary;
   headingLevel?: 'h2' | 'h3';
   /** Première rangée d'une grille : image prioritaire (LCP probable). */
@@ -24,8 +26,15 @@ interface Props {
   allowQuickAdd?: boolean;
 }
 
-const { product, headingLevel: Heading = 'h3', priority = false, allowQuickAdd = true } = Astro.props;
+const {
+  product,
+  headingLevel: Heading = 'h3',
+  priority = false,
+  allowQuickAdd = true,
+  commerce = storefront,
+} = Astro.props;
 const quickAdd =
+  commerce.cartEnabled &&
   allowQuickAdd &&
   product.variantCount <= 1 &&
   product.price.kind !== 'on-request' &&
@@ -71,7 +80,15 @@ const frame = { ...PRODUCT_CARD, sizes };
       </a>
     </Heading>
     {product.metaLine && <p class="dn-card__meta dn-body-sm dn-muted">{product.metaLine}</p>}
-    <Price price={product.price} />
+    {product.commerce ? (
+      product.commerce.price ? (
+        <Price price={product.commerce.price} />
+      ) : (
+        <p class="dn-body-sm dn-muted">{product.commerce.message}</p>
+      )
+    ) : (
+      <Price price={product.price} />
+    )}
   </div>
 </article>
 

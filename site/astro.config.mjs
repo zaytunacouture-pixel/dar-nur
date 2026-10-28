@@ -9,6 +9,7 @@ import {
   resolveCommerceMode,
   shopifyProductionApproved,
 } from './src/lib/commerce/mode.ts';
+import { storefrontEntries } from './src/lib/commerce/storefront.ts';
 import { validateProductMap } from './src/lib/commerce/product-map.ts';
 
 /**
@@ -143,6 +144,18 @@ function catalogSitemap() {
 
 export default defineConfig({
   site: SITE_URL,
+  vite: {
+    resolve: {
+      alias: Object.fromEntries(
+        Object.entries(storefrontEntries(resolveCommerceMode(process.env.DAR_NUR_COMMERCE_MODE))).map(
+          ([name, path]) => [
+            `@commerce/${name}`,
+            fileURLToPath(new URL(`./src/components/${path}`, import.meta.url)),
+          ],
+        ),
+      ),
+    },
+  },
   output: 'static',
   trailingSlash: 'always',
   build: { format: 'directory' },

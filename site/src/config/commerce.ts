@@ -1,3 +1,6 @@
+import { storefrontFlags, storefrontProductPage, storefrontSummary } from '../lib/commerce/storefront.ts';
+import type { ProductPageView } from '../lib/product-page';
+import type { ProductSummary } from '../types/catalog';
 import type { AnnouncementMessage, ShippingPolicy } from '@/types/site';
 import { legalBlockers } from './legal';
 import { DAR_NUR_COMMERCE_MODE } from 'astro:env/server';
@@ -5,9 +8,9 @@ import { siteEnv } from './site';
 import productMap from '../data/shopify/product-map.json';
 import shopifyCatalog from '../data/shopify/shopify-catalog.json';
 import { assertCommerceBuild, resolveCommerceMode, shopifyProductionApproved } from '../lib/commerce/mode.ts';
-import { validateProductMap } from '../lib/commerce/product-map.ts';
+import { type ProductMap, type ShopifyCatalog, validateProductMap } from '../lib/commerce/product-map.ts';
 
-/** Préparation seulement : aucune interface ne consomme encore ces décisions. */
+/** Mode résolu au build ; garde-fous de l’étape 14 conservés. */
 export const commerceMode = resolveCommerceMode(DAR_NUR_COMMERCE_MODE);
 assertCommerceBuild(
   commerceMode,
@@ -28,7 +31,7 @@ assertCommerceBuild(
  */
 
 /** Actif dans la refonte : frais confirmés pour chaque commande, aucune livraison offerte. */
-export const currentShipping: ShippingPolicy = {
+const legacyShipping: ShippingPolicy = {
   status: 'active',
   zoneLabel: 'France et international',
   freeShippingThreshold: null,
@@ -36,7 +39,7 @@ export const currentShipping: ShippingPolicy = {
 };
 
 /** Étapes du parcours, dans l'ordre (fiche, panier, commande, accordéon « Livraison & paiement »). */
-export const orderingSteps = [
+const legacyOrderingSteps = [
   'Ajoutez vos articles au panier, puis envoyez votre demande de commande : rien n’est payé à ce moment-là.',
   'Dar Nūr vérifie la disponibilité, prépare votre commande et confirme les frais de livraison.',
   'Vous recevez le total final et les instructions de paiement.',
@@ -61,6 +64,40 @@ export const ordering = {
 
 /** Production : commande en ligne seulement si les CGV sont révisées ET aucun blocage juridique. */
 export const productionOrderingReady = ordering.termsReviewed && legalBlockers().length === 0;
+
+export const storefront = storefrontFlags(commerceMode, siteEnv, productionOrderingReady);
+export const commercialSummary = (summary: ProductSummary) =>
+  storefrontSummary(
+    commerceMode,
+    productMap as unknown as ProductMap,
+    shopifyCatalog as ShopifyCatalog,
+    summary,
+  );
+export const commercialProductPage = (view: ProductPageView) =>
+  storefrontProductPage(
+    commerceMode,
+    productMap as unknown as ProductMap,
+    shopifyCatalog as ShopifyCatalog,
+    view,
+  );
+export const currentShipping: ShippingPolicy = storefront.legacyInterface
+  ? legacyShipping
+  : {
+      status: 'active',
+      zoneLabel: '',
+      freeShippingThreshold: null,
+      summary: storefront.shopHref
+        ? 'Les conditions de livraison et de paiement sont précisées sur la boutique'
+        : 'Les achats en ligne sont momentanément indisponibles',
+    };
+export const orderingSteps = storefront.legacyInterface
+  ? legacyOrderingSteps
+  : storefront.shopHref
+    ? [
+        'Choisissez vos articles sur la boutique Dar Nūr.',
+        'Consultez les conditions de livraison et de paiement sur la boutique avant de valider votre achat.',
+      ]
+    : ['Le catalogue reste consultable.', 'Le suivi des commandes existantes reste disponible.'];
 
 /**
  * PRÉVUE, NON ACTIVE — À CONFIRMER. Seuil de gratuité envisagé autour de 50 € ; zones (dont
@@ -94,7 +131,7 @@ function formatEuroShort(amount: number): string {
  * Messages du bandeau d'annonce, dans l'ordre. Le premier est le seul affiché sans rotation.
  * Message neutre et vrai : ni zone de livraison ni mode de paiement tant qu'ils ne sont pas définis.
  */
-export const announcementMessages: AnnouncementMessage[] = [
+const legacyAnnouncementMessages: AnnouncementMessage[] = [
   ...(freeShippingMessage(currentShipping) ? [freeShippingMessage(currentShipping)!] : []),
   { text: 'Commande en ligne · paiement après confirmation de votre commande' },
 ];
@@ -116,7 +153,7 @@ export const contact = {
  * (demande, puis vérification), paiement après confirmation du total. Aucun logo de moyen de
  * paiement : aucun prestataire n'est branché.
  */
-export const reassurance = [
+const legacyReassurance = [
   {
     icon: 'shopping-bag',
     title: 'Commande en ligne',
@@ -132,3 +169,24 @@ export const reassurance = [
 
 /** Recherches fréquentes : termes réels du catalogue, configurés (pas de « tendances » inventées). */
 export const frequentSearches = ['nigelle', 'sidr', 'tahara', 'musc', 'qamis'];
+
+export const announcementMessages: AnnouncementMessage[] = storefront.legacyInterface
+  ? legacyAnnouncementMessages
+  : [
+      {
+        text: storefront.shopHref
+          ? 'Retrouvez les achats en ligne sur la boutique Dar Nūr'
+          : 'Découvrez le catalogue Dar Nūr',
+      },
+    ];
+export const reassurance = storefront.legacyInterface
+  ? legacyReassurance
+  : ([
+      {
+        icon: 'shopping-bag',
+        title: 'Catalogue Dar Nūr',
+        text: 'Découvrez nos produits et leurs caractéristiques',
+      },
+      { icon: 'wallet', title: 'Suivi de commande', text: 'Retrouvez le suivi de vos commandes existantes' },
+      { icon: 'headset', title: 'Conseil personnalisé', text: 'Une question ? Écrivez-nous sur WhatsApp' },
+    ] as const);

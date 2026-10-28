@@ -6,7 +6,7 @@
  * qu'il reste une information juridique obligatoire manquante (config/legal.ts).
  */
 import { DAR_NUR_ENV, SUPABASE_ANON_KEY, SUPABASE_URL } from 'astro:env/server';
-import { productionOrderingReady } from '@/config/commerce';
+import { storefront } from '@/config/commerce';
 
 const publishable = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY?.startsWith('sb_publishable_'));
 const config = publishable
@@ -14,7 +14,7 @@ const config = publishable
       url: SUPABASE_URL,
       key: SUPABASE_ANON_KEY,
       env: DAR_NUR_ENV,
-      orderingOpen: DAR_NUR_ENV !== 'production' || productionOrderingReady,
+      orderingOpen: storefront.orderSubmissionEnabled,
     }
   : null;
 ---

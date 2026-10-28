@@ -1,0 +1,161 @@
+---
+import StorefrontLink from './StorefrontLink.astro';
+import Price from '@/components/ui/Price.astro';
+import VariantSelector from '@/components/catalog/VariantSelector.astro';
+import SizeGuide from '@/components/catalog/SizeGuide.astro';
+import type { ProductPageView } from '@/lib/product-page';
+import { previewCommerce } from '@/lib/commerce/storefront';
+import { priceLabel } from '@/lib/format';
+interface Props {
+  view: ProductPageView;
+}
+const { view } = Astro.props;
+const commerce = view.commerce ?? previewCommerce;
+const data = {
+  unavailableSelectionMessage: commerce.unavailableSelectionMessage,
+  axes: view.axes.map((a) => ({
+    id: a.id,
+    param: a.param,
+    single: a.options.length === 1 ? a.options[0]!.id : null,
+  })),
+  variants: view.variants.map((v) => ({
+    options: v.options,
+    media: v.media ?? '',
+    price: v.id && commerce.variants[v.id]?.price ? priceLabel(commerce.variants[v.id]!.price!) : null,
+    unit: v.unitPrice,
+    commerce: v.id ? commerce.variants[v.id] : undefined,
+  })),
+};
+---
+
+<div class="dn-storefront-purchase" data-dn-storefront-purchase>
+  <div aria-live="polite" data-dn-storefront-price>
+    {commerce.price && <Price price={commerce.price} size="lg" />}
+  </div>
+  <p class="dn-small dn-muted" data-dn-storefront-unit hidden={!view.unitPrice}>
+    {view.unitPrice ? `Soit ${view.unitPrice}` : ''}
+  </p>
+  {view.axes.map((axis) => (
+    <div>
+      <VariantSelector
+        name={axis.id}
+        axis={axis.id as 'contenance'}
+        legend={axis.legend}
+        presentation={axis.presentation}
+        options={axis.options}
+      />
+      {axis.id === 'taille' && <SizeGuide id="dn-size-guide" guide={view.sizeGuide} />}
+    </div>
+  ))}
+  {view.availabilityLabel && <p class="dn-body-sm">{view.availabilityLabel}</p>}
+  <p class="dn-body-sm" role="status" data-dn-storefront-status>
+    {commerce.message}
+  </p>
+  {commerce.url && <StorefrontLink choice={commerce} />}
+  {view.variants.map((v, index) => {
+    const choice = v.id ? commerce.variants[v.id] : undefined;
+    return (
+      choice?.url && (
+        <div data-dn-storefront-choice={index} hidden>
+          <StorefrontLink choice={choice} />
+        </div>
+      )
+    );
+  })}
+  <a class="dn-body-sm" href={view.order.href} target="_blank" rel="noopener">
+    Une question ? Écrivez-nous sur WhatsApp (nouvel onglet)
+  </a>
+  {/* Pas de doublon : en disabled, la ligne livraison répète le message d'état. */}
+  {view.delivery && view.delivery.replace(/\.$/, '') !== commerce.message.replace(/\.$/, '') && (
+    <p class="dn-body-sm dn-muted">{view.delivery}</p>
+  )}
+  <script
+    is:inline
+    type="application/json"
+    data-dn-storefront-data
+    set:html={JSON.stringify(data).replace(/</g, '\\u003c')}
+  />
+</div>
+<style>
+  .dn-storefront-purchase {
+    display: grid;
+    gap: var(--dn-space-4);
+  }
+  [hidden] {
+    display: none;
+  }
+</style>
+<script>
+  for (const root of document.querySelectorAll<HTMLElement>('[data-dn-storefront-purchase]')) {
+    const raw = root.querySelector('[data-dn-storefront-data]')?.textContent;
+    if (!raw) continue;
+    type Choice = { url: string | null; message: string; availability: string };
+    const data = JSON.parse(raw) as {
+      unavailableSelectionMessage: string;
+      axes: { id: string; param: string; single: string | null }[];
+      variants: {
+        options: Record<string, string>;
+        media: string;
+        price: string | null;
+        unit: string | null;
+        commerce?: Choice;
+      }[];
+    };
+    const selected: Record<string, string> = {};
+    for (const axis of data.axes) if (axis.single) selected[axis.id] = axis.single;
+    const status = root.querySelector<HTMLElement>('[data-dn-storefront-status]')!;
+    const baseMessage = status.textContent;
+    const price = root.querySelector<HTMLElement>('[data-dn-storefront-price]')!;
+    const basePrice = price.textContent;
+    const unit = root.querySelector<HTMLElement>('[data-dn-storefront-unit]')!;
+    const baseUnit = unit.textContent;
+    const choices = root.querySelectorAll<HTMLElement>('[data-dn-storefront-choice]');
+    const matching = (partial: Record<string, string>) =>
+      data.variants.filter((v) =>
+        Object.entries(partial).every(([axis, value]) => v.options[axis] === value),
+      );
+    const refresh = () => {
+      const variant = data.axes.every((a) => selected[a.id]) ? matching(selected)[0] : undefined;
+      if (data.axes.length) {
+        // Les URL sont complètes et validées au build : aucun identifiant ni URL calculé ici.
+        for (const choice of choices)
+          choice.hidden = data.variants[Number(choice.dataset.dnStorefrontChoice)] !== variant;
+        status.textContent =
+          variant?.commerce?.message ??
+          (data.axes.every((a) => selected[a.id]) ? data.unavailableSelectionMessage : baseMessage);
+        const currentPrice = price.querySelector('.dn-price__current');
+        if (currentPrice) currentPrice.textContent = variant ? variant.price : basePrice;
+        else price.textContent = variant ? variant.price : basePrice;
+        unit.textContent = variant ? (variant.unit ? `Soit ${variant.unit}` : '') : baseUnit;
+        unit.hidden = !unit.textContent;
+      }
+      const keys = new Set(matching(selected).map((v) => v.media));
+      document.dispatchEvent(
+        new CustomEvent('dn:gallery-set', { detail: { key: keys.size === 1 ? [...keys][0] : '' } }),
+      );
+    };
+    root.addEventListener('dn:variant-change', (event) => {
+      const { axis, value } = (event as CustomEvent<{ axis: string; value: string }>).detail;
+      selected[axis] = value;
+      const url = new URL(location.href);
+      for (const a of data.axes)
+        if (!a.single && selected[a.id]) url.searchParams.set(a.param, selected[a.id]!);
+      history.replaceState(history.state, '', url);
+      refresh();
+    });
+    const params = new URLSearchParams(location.search);
+    for (const axis of data.axes) {
+      const value = params.get(axis.param);
+      const input = value
+        ? root.querySelector<HTMLInputElement>(
+            `[data-axis="${axis.id}"] input[value="${CSS.escape(value)}"]:not(:disabled)`,
+          )
+        : null;
+      if (input) {
+        input.checked = true;
+        selected[axis.id] = value!;
+      }
+    }
+    refresh();
+  }
+</script>

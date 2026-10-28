@@ -7,7 +7,12 @@
 import Drawer from '@/components/ui/Drawer.astro';
 import Icon from '@/components/ui/Icon.astro';
 import { cgvUrl, contact } from '@/config/commerce';
+import type { StorefrontFlags } from '@/lib/commerce/storefront';
 import { navigation } from '@/config/navigation';
+interface Props {
+  commerce: StorefrontFlags;
+}
+const { commerce } = Astro.props;
 ---
 
 <Drawer id="dn-mobile-menu" title="Menu" side="left" class="dn-mobile-menu">
@@ -59,6 +64,13 @@ import { navigation } from '@/config/navigation';
         </ul>
       </nav>
       <ul class="dn-mm__list dn-mm__list--secondary" role="list">
+        {commerce.headerCart === 'shopify-link' && (
+          <li>
+            <a class="dn-mm__row dn-mm__row--sub" href={commerce.cartHref!}>
+              {commerce.cartLabel}
+            </a>
+          </li>
+        )}
         <li>
           <a class="dn-mm__row dn-mm__row--sub" href={`${cgvUrl}#livraison`}>
             Livraison & paiement

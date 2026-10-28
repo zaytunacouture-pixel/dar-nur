@@ -4,14 +4,14 @@
  * lien d'évitement, repères (header / main / footer) et panneaux globaux.
  */
 import { Font } from 'astro:assets';
-import MiniCart from '@/components/cart/MiniCart.astro';
+import MiniCart from '@commerce/MiniCart';
 import AnnouncementBar from '@/components/layout/AnnouncementBar.astro';
 import Footer from '@/components/layout/Footer.astro';
 import Header from '@/components/layout/Header.astro';
 import MobileMenu from '@/components/layout/MobileMenu.astro';
 import ReassuranceBar from '@/components/layout/ReassuranceBar.astro';
 import SearchOverlay from '@/components/search/SearchOverlay.astro';
-import { announcementMessages, announcementRotation } from '@/config/commerce';
+import { announcementMessages, announcementRotation, storefront } from '@/config/commerce';
 import { defaultDescription, isIndexable, siteName, themeColor } from '@/config/site';
 import { demoCartCount } from '@/data/demo/cart';
 import type { SeoMeta } from '@/types/site';
@@ -63,28 +63,33 @@ const ogImage = seo.ogImage ? new URL(seo.ogImage, Astro.site).toString() : unde
     <slot name="head" />
     {/* Étape 10 : panier non vide connu AVANT le premier affichage (évite d'afficher « vide » puis
     de décaler la page panier / commande). Lecture seule du localStorage, aucune donnée envoyée. */}
-    <script is:inline>
+    {storefront.cartEnabled && <script is:inline>
       try {
         var c = JSON.parse(localStorage.getItem('dn-cart-v1') || '[]');
         if (Array.isArray(c) && c.length) document.documentElement.setAttribute('data-dn-cart-filled', '');
       } catch (e) {}
-    </script>
+    </script>}
   </head>
   <body>
     <a class="dn-skip" href="#contenu">
       Aller au contenu
     </a>
     <AnnouncementBar messages={announcementMessages} rotation={announcementRotation} />
-    <Header currentPath={Astro.url.pathname} section={section} cartCount={cartDemo ? demoCartCount : 0} />
+    <Header
+      commerce={storefront}
+      currentPath={Astro.url.pathname}
+      section={section}
+      cartCount={cartDemo ? demoCartCount : 0}
+    />
     <main id="contenu" tabindex="-1">
       <slot />
     </main>
     {showReassurance && <ReassuranceBar />}
     <Footer />
 
-    <MobileMenu />
+    <MobileMenu commerce={storefront} />
     <SearchOverlay />
-    <MiniCart demo={cartDemo} />
+    {storefront.cartEnabled && <MiniCart demo={cartDemo} />}
   </body>
 </html>
 

@@ -1,5 +1,5 @@
 import type { FooterSection } from '@/types/site';
-import { cgvUrl, contact } from './commerce';
+import { cgvUrl, contact, storefront } from './commerce';
 import { navigation } from './navigation';
 
 /**
@@ -14,7 +14,15 @@ export const footerSections: FooterSection[] = [
   {
     title: 'Aide',
     links: [
-      { label: 'Mon panier', href: '/panier/' },
+      ...(storefront.cartHref
+        ? [
+            {
+              label: storefront.cartLabel,
+              href: storefront.cartHref,
+              ...(storefront.shopHref ? { external: true } : {}),
+            },
+          ]
+        : []),
       { label: 'Suivre une commande', href: '/suivi/' },
       { label: 'Une question ? WhatsApp', href: contact.whatsappUrl, external: true },
     ],

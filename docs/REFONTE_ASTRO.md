@@ -118,6 +118,7 @@ compteur ou « best seller » sans données ; aucune photo générée à la plac
 | **Étape 12** (2026-10-09) : pages internes `/cgv/`, `/confidentialite/`, `/mentions-legales/`, faits juridiques centralisés (`config/legal.ts`), liens repointés, `verify-legal` — section « Pages juridiques (étape 12) »                                                                                               | Informations obligatoires manquantes (SIREN/SIRET, médiateur, téléphones, suivi Brevo) : production fermée                    |
 | **Étape 13** (2026-10-28) : synchronisation avec `main` (PR #41–#43), réparation du build (miel archivé sur l'accueil), préproduction mise à jour — section « Synchronisation (étape 13) »                                                                                                                               | Raccordement des achats à Shopify (mission dédiée)                                                                            |
 | **Étape 14** (2026-10-28) : préparation technique du raccordement Shopify, modes, correspondance et liens purs, scripts de lecture et tests hors ligne — section « Raccordement Shopify (étape 14) »                                                                                                                     | Générer les données actuelles, résoudre les anomalies, brancher l'interface puis approuver explicitement la production        |
+| **Étape 15** (2026-10-28) : interface des modes legacy / shopify / disabled, modèle commercial pur, scripts sélectionnés au build, tests fictifs et rendu Container — section « Interface commerciale (étape 15) »                                                                                                       | Builds, comparaison HTML legacy et captures à exécuter ; activation Shopify toujours bloquée                                  |
 
 ## Pages catalogue (étape 7)
 
@@ -825,3 +826,152 @@ refusés par le hook avant génération. À cette étape, revenir à `DAR_NUR_CO
 décisions initiales ; les fonctions et données de commande existantes restent intactes. Après le futur
 branchement de l'interface, revalider les garde-fous juridiques et serveur de l'étape 10 avant toute
 réouverture legacy ; `disabled` constituera le mode de fermeture des nouveaux achats.
+
+## Interface commerciale (étape 15)
+
+**Audit ciblé.** À l’étape 14, les modes et `purchase.ts` n’étaient consommés par aucun composant.
+`product-page.ts` construisait prix, disponibilité, variantes, panier et données structurées depuis Supabase ;
+`ProductPurchase.astro` sérialisait le panier et importait `cart-store`. `VariantSelector.astro` rend les
+options reçues et émet `dn:variant-change` ; il n’effectue aucun rapprochement. `ProductCard`, `OfferCard`,
+`ProductRow`, l’accueil et `CatalogBrowser` utilisaient les résumés de `catalog.ts` / `catalog-store.ts`
+(prix minimum pour le tri). `MiniCart` utilise `Drawer`, `cart-store` et `cart-view` ; `Header` ouvrait
+`dn-cart` avec compteur local. Le menu mobile n’avait pas de lien panier propre. `BaseLayout` lisait le
+panier dans le head. `/panier/` et `/commande/` chargeaient `ApiConfig`, `cart-store`, `cart-sync`
+(`check_cart`), `cart-view` et `order-api` (`create_order_request`). `/suivi/` utilise `get_order_tracking`
+et le stockage distinct `dn-orders-v1`. Les textes publics proviennent de `config/commerce.ts` ;
+`structured-data.ts` transforme les prix/disponibilités de la vue en Product/Offer ou ProductGroup.
+
+**Décision centralisée.** `lib/commerce/storefront.ts` est pur, sans environnement, réseau ou chargement
+de données réelles. `storefrontFlags`, `productCommerceView`, `storefrontSummary`,
+`storefrontProductPage` et `storefrontEntries` fournissent les modèles et la sélection des composants.
+`config/commerce.ts` lie ces fonctions aux données validées et à l’environnement au build.
+Aucun composant n’appelle `product-map` ni `purchase`. Les URL d’achat sont exclusivement celles de
+`shopifyPurchaseLink`, pré-calculées pour chaque variante. Le client choisit une correspondance déjà
+calculée ; il ne construit ni ID Shopify ni URL d’achat. Les prix, disponibilités, unités et options
+sont projetés avant rendu, ainsi que les Offer JSON-LD.
+
+Les alias Vite `@commerce/Purchase`, `CartPage`, `OrderPage`, `MiniCart` sont choisis par
+`storefrontEntries` dans `astro.config.mjs`. Les chemins TypeScript pointent vers les contrats legacy ;
+Vite choisit l’implémentation selon le mode du build. Ceci évite d’importer les scripts de soumission
+legacy en Shopify/disabled et le script de sélection Shopify en legacy. Ne pas remplacer cette sélection
+par deux imports statiques conditionnés seulement dans le template : Astro peut collecter leurs scripts.
+Les sources historiques ont été déplacées intactes vers `LegacyProductPurchase`, `LegacyCartPage` et
+`LegacyOrderPage` ; aucune fonction panier, commande ou suivi n’a été supprimée.
+
+| Mode              | Fiche et cartes                                                                                                                                                                 | Panier et commande                                                                                                                                                    | Suivi                             |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
+| `legacy` (défaut) | Composants et données historiques, mêmes prix, variantes, textes et actions                                                                                                     | Mini-panier, compteur et formulaires historiques ; production toujours soumise aux blocages juridiques                                                                | Inchangé                          |
+| `shopify`         | Liens externes « Acheter sur la boutique (site externe) » ; sélection obligatoire ; correspondance absente, exclue, ambiguë ou indisponible : aucun lien actif, texte explicite | En-tête et menu mobile vers `https://shop.dar-nur.fr/cart`, sans compteur ; aucun tiroir Astro ; pages d’information sans formulaire ni configuration/API de commande | Commandes historiques accessibles |
+| `disabled`        | Prix legacy conservés, sans aucune action d’achat ; variantes consultables                                                                                                      | Ni icône panier ni tiroir ; pages d’information neutres, aucun lien boutique ni formulaire                                                                            | Commandes historiques accessibles |
+
+**Autorité commerciale Shopify.** `shopifyPrice` et `available` de l’instantané validé sont les seules
+sources affichées en Shopify. Supabase reste la source descriptive. Une entrée non rapprochée n’affiche
+aucun prix commercial ; son Offer est retiré (y compris au niveau d’une variante). Aucun repli vers un
+prix Supabase ou une promotion Supabase n’est affiché. Les cartes et leur prix de tri suivent cette règle.
+Les prix barrés et prix d’offres/packs Supabase ne sont pas présentés en Shopify : aucune correspondance
+commerciale de ces offres n’est certifiée. Les liens descriptifs vers leurs produits restent disponibles.
+Les prix au kg/L sont retirés en Shopify, pour éviter de conserver un calcul Supabase sans validation de
+la quantité commerciale Shopify. En disabled, prix, prix unitaires et JSON-LD historiques sont conservés :
+ce mode suspend les actions de l’interface, sans réécrire le catalogue commercial.
+Le résolveur de liens conserve sa double exigence de disponibilité Supabase/Shopify de l’étape 14. Une
+variante n’est affichée « disponible » que si un lien d’achat validé existe : en cas de divergence, elle
+est présentée comme non achetable (jamais « disponible » sans bouton). Aucun cas réel au 2026-10-28.
+
+**UX et textes.** Sans variante, le lien Shopify est utilisable sans JavaScript. Avec variantes, les
+liens exacts sont pré-rendus et restent cachés jusqu’à un choix valide ; un état explicite explique
+la sélection ou l’indisponibilité. Les options épuisées sont désactivées et annoncées par le sélecteur.
+Les états de sélection sont annoncés par `role=status`, les liens conservent les focus du design system,
+les destinations externes sont signalées. Aucun nouveau token de couleur. Le bandeau Shopify renvoie
+sobrement aux achats sur la boutique ; livraison et paiement sont précisés sur celle-ci, sans promesse
+de tarif, délai ou prestataire. La réassurance reste descriptive (catalogue, suivi, conseil). Disabled
+présente le catalogue et la suspension des achats. Les étapes de « demande de commande » ne sont
+conservées qu’en legacy. Une rédaction commerciale plus détaillée attend la validation des conditions
+réelles de Shopify ; aucune promesse de paiement ou livraison n’a été supposée.
+
+**Protection de l’interface, pas fermeture du serveur.** En Shopify/disabled, les pages d’information
+n’importent pas les composants historiques de commande, `ApiConfig`, `cart-sync` ou `order-api` ; elles
+ne lisent pas le panier local et ne le suppriment pas. `BaseLayout` omet sa lecture anticipée du panier.
+Le mini-panier n’est pas dans le graphe choisi. `ApiConfig` utilise aussi
+`storefront.orderSubmissionEnabled` (faux hors legacy), mais reste rendu sur `/suivi/` et l’administration
+pour leurs fonctions existantes. Le stockage `dn-cart-v1` est conservé ; aucun transfert vers Shopify
+n’est effectué. Shopify est l’unique panier de l’interface en mode Shopify.
+
+**Points d’entrée serveur encore actifs, d’après les sources versionnées (aucune inspection du serveur).**
+Aucun fichier de `supabase/`, fonction, migration, RLS ou paramètre distant n’est modifié par cette étape.
+
+- Migration `20261003100100_etape10_02_order_functions.sql` : EXECUTE accordé à **anon et authenticated**
+  sur `order_country_codes()`, `check_cart(jsonb)`, `create_order_request(jsonb)` et
+  `get_order_tracking(text)`. Les appels directs restent possibles indépendamment du mode du site.
+  `create_order_request` contrôle `orders_private.config.production_ordering_open` pour les commandes
+  déclarées production ; la valeur initiale est **false** dans
+  `20261003100000_etape10_01_orders_schema.sql`. Ce contrôle ne ferme pas les demandes preprod.
+- **authenticated** : `admin_update_order(uuid,text,jsonb)`, `admin_order_tracking_token(uuid)` ;
+  vérifications internes d’administration conservées. Les droits des tables et la RLS existants restent
+  applicables. Migration `20261003120000_etape11_01_order_emails.sql` :
+  `admin_order_emails(uuid)`, `admin_order_email_alerts()`, `admin_retry_order_email(uuid)` sont accordées
+  à authenticated et contrôlées par l’autorisation admin.
+- **service_role** : `order_emails_claim(int)`, `order_emails_report(uuid,uuid,text,text,text)` et
+  `order_emails_delivery_event(text,text,timestamptz)` (signature actualisée par
+  `20261006100000_etape11_03_delivery_events.sql`). Ces fonctions ne sont pas ouvertes à anon/authenticated.
+- Edge Functions `order-emails` et `order-emails-webhook` : points d’entrée HTTP toujours présents,
+  documentés pour un déploiement `--no-verify-jwt`, protégés respectivement par le Bearer du worker
+  et le Bearer du webhook Brevo. Le worker utilise l’outbox existante ; le webhook enregistre les
+  événements de livraison. Leur disponibilité réelle, leurs secrets et la configuration distante n’ont
+  pas été contrôlés ici. La planification pg_cron/pg_net décrite à l’étape 11 n’est pas désactivée.
+
+Une mission serveur dédiée devra fermer **la création de nouvelles demandes legacy dans tous les
+environnements**, revoir les droits EXECUTE de `create_order_request` et le besoin de `check_cart` /
+`order_country_codes`, puis auditer config, tâches/outbox et fonctions e-mail. Elle devra préserver le
+suivi et les opérations nécessaires aux commandes historiques, ainsi que les contrôles admin. La fermeture
+commerciale serveur n’est donc **pas complète**, et le mode statique n’est pas une autorisation serveur.
+
+**Tests et CI.** `test:commerce` utilise uniquement des fixtures fictives (les anciens sous-tests CLI
+sur les données réelles sont remplacés par les assertions pures ; la vérification réelle reste une
+commande/étape CI séparée). Couverture : legacy, disabled, URL produit/variantes et IDs exacts,
+absence/exclusion/ambiguïté, stock, prix, Offer, panier cible, absence de soumission hors legacy, suivi
+pour les trois modes, mode invalide, approbation production et anomalies bloquantes. Le Container Astro
+est disponible : `test-commerce-render.mjs` compile les composants ciblés avec le compilateur déjà installé
+et vérifie le HTML réel de `StorefrontLink` et `CommerceNotice`, avec fixtures. Aucun Vite, `.env`, réseau
+ou dépendance ajoutée ; les imports CSS sont omis pour ce test HTML. Le rendu complet des fiches/en-têtes,
+les images optimisées, scripts navigateur et le CSS final restent à vérifier par build et captures.
+Validation hors ligne : `test:cart` (8 tests), `test:commerce` (18 tests et rendu Container),
+`verify:shopify-map` (code 0, 0 erreur structurelle, 7 blocages connus et 12 avertissements),
+`format:check` et `check` (0 erreur, 0 avertissement, 0 indication). Les échecs intermédiaires de typage et
+d’adaptation du compilateur Container ont été corrigés. Les trois sources legacy déplacées ont aussi été
+comparées à leurs sources Git d’origine : contenu identique après normalisation des fins de ligne.
+La CI ajoute « Tests commerce » avant le build et « Correspondance Shopify (non stricte) » après les
+contrôles existants, dans le même environnement. Aucun contrôle strict sur les données réelles.
+
+`verify:products`, `verify:catalog`, `verify:orders` et certaines attentes de `verify:home` sont des
+références **legacy** (prix Supabase, CTA/formulaire, textes). La CI reste en legacy. Ne pas interpréter
+leur échec hors legacy comme une permission d’affaiblir les règles ; une vérification des sorties propre
+à chaque mode sera nécessaire avant une CI multi-mode. `verify` conserve ses budgets JS ≤ 20 Ko gzip,
+CSS ≤ 30 Ko gzip ; aucune hausse autorisée. `verify:shopify-map` est déjà dépendant du mode.
+
+**Anomalies et activation.** Les fichiers réels sont inchangés : 228 produits rapprochés, 7 blocages
+`supabase-only` (brouillons Shopify détaillés à l’étape 14), 12 avertissements `shopify-only`.
+Un build Shopify complet reste volontairement impossible. Les deux garde-fous (`astro:build:start`
+et assertion dans `config/commerce.ts`), le refus des modes inconnus et
+`shopifyProductionApproved = false` sont conservés. Avant activation publique : résoudre les 7 blocages,
+examiner les 12 avertissements, régénérer/valider les instantanés, faire les contrôles stricts, valider
+les conditions commerciales et juridiques, réaliser la mission serveur ci-dessus, puis seulement
+approuver explicitement la production et vérifier le parcours Shopify réel.
+
+**Validation effectuée (2026-10-28).** `npm run ci` complet vert en legacy (preprod) ; budgets inchangés
+(page la plus lourde : JS 6,8 Ko, CSS 15,1 Ko gzip). HTML legacy comparé à l’étape 14 : 287 pages au
+contenu identique après neutralisation des empreintes Astro, des noms `/_astro/*` et des espaces entre
+balises (une espace de plus après le bouton panier de l’en-tête, sans effet visuel) ; seule
+`/design-system/` (page interne) a ses blocs `<style>` dans un autre ordre, avec les 131 mêmes règles.
+Build disabled : 287 pages, `verify` vert ; aucun bouton panier, tiroir, ajout rapide ni lien boutique ;
+aucun script contenant `create_order_request` ou `check_cart` ; `/suivi/` garde `get_order_tracking`.
+Captures disabled à 1440 px et à 390 px réels (pages en `<iframe>` de 390 px : Edge sans interface impose
+≈ 500 px de largeur minimale et rogne la capture). Builds `shopify`+`production`, `shopify`+`preprod`
+et mode inconnu refusés ; `verify:shopify-map --strict` = 1 sur les données réelles. Le rendu complet en
+mode shopify n’est vérifiable que par les tests Container (build volontairement bloqué).
+Corrections de relecture : échappement `\\u003c` du JSON de `StorefrontPurchase` (la forme `'\u003c'`
+était sans effet), disponibilité alignée sur l’existence du lien, message en double supprimé en disabled.
+
+**Retour arrière.** reconstruire avec `DAR_NUR_COMMERCE_MODE=legacy` (ou retirer l’override, valeur
+configurée legacy), puis redéployer la sortie statique. Les garde-fous juridiques legacy restent actifs
+et le panier local conservé redevient lisible. `disabled` est l’option de suspension des achats depuis
+l’interface ; aucune de ces options ne ferme les RPC serveur.

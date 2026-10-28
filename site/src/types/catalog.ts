@@ -1,3 +1,4 @@
+import type { ProductCommerceView } from '../lib/commerce/storefront';
 /**
  * Types d'affichage du catalogue. Ils décrivent ce dont les composants ont besoin,
  * indépendamment du schéma Supabase (qui évoluera à l'étape 6) : seul
@@ -69,6 +70,7 @@ export type PriceInfo =
   | { kind: 'on-request' };
 
 export interface ProductSummary {
+  commerce?: ProductCommerceView;
   slug: string;
   name: string;
   href: string;

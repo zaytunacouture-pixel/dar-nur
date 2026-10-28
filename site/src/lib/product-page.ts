@@ -26,7 +26,8 @@ import {
   UNIT_BASES,
   type ProductFamily,
 } from '@/config/product-pages';
-import { cgvUrl, contact, currentShipping, orderingSteps } from '@/config/commerce';
+import { cgvUrl, contact, currentShipping, orderingSteps, commercialProductPage } from '@/config/commerce';
+import type { ProductCommerceView } from './commerce/storefront';
 import { siteName } from '@/config/site';
 import groupingsSnapshot from '@/data/lab/product-groupings.json';
 import type {
@@ -136,6 +137,7 @@ export interface ProductOrder {
 }
 
 export interface ProductPageView {
+  commerce?: ProductCommerceView;
   kind: 'product' | 'preview';
   slug: string;
   path: string;
@@ -242,7 +244,7 @@ function buildView(catalog: Catalog, product: CatalogProduct): ProductPageView {
   const path = `/${product.slug}/`;
   const sizeGuide = sizeGuideOf(catalog.sizeGuides, row.size_guide_id);
   const description = metaDescription(row, tagline);
-  return {
+  return commercialProductPage({
     kind: 'product',
     slug: product.slug,
     path,
@@ -277,7 +279,7 @@ function buildView(catalog: Catalog, product: CatalogProduct): ProductPageView {
     lastmod: lastmodOf(row),
     indexable: true,
     structured: structuredOf(row, gallery, brand?.name, price, availability, axes, variants, description),
-  };
+  });
 }
 
 /* ── SEO ────────────────────────────────────────────────────────────────── */

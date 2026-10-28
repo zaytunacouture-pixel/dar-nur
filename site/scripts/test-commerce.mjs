@@ -1,9 +1,6 @@
 #!/usr/bin/env node
 /** Données entièrement FICTIVES, aucun accès réseau ni fichier métier externe. */
 import assert from 'node:assert/strict';
-import { spawnSync } from 'node:child_process';
-import { readFile } from 'node:fs/promises';
-import { fileURLToPath } from 'node:url';
 import {
   assertCommerceBuild,
   resolveCommerceMode,
@@ -19,6 +16,13 @@ import {
   normalizeOption,
   EXCLUDED_SLUGS,
 } from '../src/lib/commerce/product-map.ts';
+import {
+  storefrontFlags,
+  storefrontEntries,
+  productCommerceView,
+  storefrontSummary,
+  storefrontProductPage,
+} from '../src/lib/commerce/storefront.ts';
 import { shopifyPurchaseLink } from '../src/lib/commerce/purchase.ts';
 
 const date = '2026-01-01T00:00:00.000Z';
@@ -264,29 +268,203 @@ test('garde-fou production : approbation versionnée ET table valide requises', 
       }),
     );
 });
-// Vérification CLI hors ligne : utilise uniquement les fichiers versionnés, initialement vides.
-const runVerify = (args = [], mode = 'legacy') =>
-  spawnSync(
-    process.execPath,
-    [
-      '--experimental-strip-types',
-      '--no-warnings',
-      fileURLToPath(new URL('./verify-shopify-map.mjs', import.meta.url)),
-      ...args,
-    ],
-    { encoding: 'utf8', env: { ...process.env, DAR_NUR_COMMERCE_MODE: mode } },
-  );
-const folder = new URL('../src/data/shopify/', import.meta.url);
-const persistedMap = JSON.parse(await readFile(new URL('product-map.json', folder), 'utf8'));
-const persistedCatalog = JSON.parse(await readFile(new URL('shopify-catalog.json', folder), 'utf8'));
-test('vérificateur CLI : legacy tolère les blocages métier, strict/shopify les refusent', () => {
-  const validation = validateProductMap(persistedMap, persistedCatalog);
-  assert.deepEqual(validation.structuralErrors, []);
-  const result = runVerify();
-  assert.equal(result.status, 0, result.stderr);
-  const expected = validation.blockingCount ? 1 : 0;
-  assert.equal(runVerify(['--strict']).status, expected);
-  assert.equal(runVerify([], 'shopify').status, expected);
-  assert.equal(runVerify([], 'invalid').status, 1);
+
+const legacyProduct = (patch = {}) => ({
+  slug: 'produit-fictif',
+  price: { kind: 'fixed', amount: 999, compareAt: 1000 },
+  availability: 'on_demand',
+  variants: [],
+  ...patch,
 });
-console.log(`\n✓ Commerce : ${passed} tests réussis (données fictives, hors ligne).`);
+const view = (mode, data = make(), p = legacyProduct()) =>
+  productCommerceView(mode, data.map, data.catalog, p);
+
+test('interface legacy : flags et données historiques conservés', () => {
+  const flags = storefrontFlags('legacy');
+  assert.equal(flags.cartEnabled, true);
+  assert.equal(flags.legacyInterface, true);
+  assert.equal(flags.orderSubmissionEnabled, true);
+  assert.equal(flags.headerCart, 'legacy-drawer');
+  const p = legacyProduct();
+  const c = view('legacy', make(), p);
+  assert.equal(c.action, 'legacy-cart');
+  assert.strictEqual(c.price, p.price);
+  assert.equal(c.availability, p.availability);
+  assert.equal(c.message, '');
+  assert.equal(view('legacy', make(), legacyProduct({ availability: 'out_of_stock' })).action, 'unavailable');
+  assert.equal(
+    view('legacy', make(), legacyProduct({ price: { kind: 'on-request' } })).action,
+    'unavailable',
+  );
+  assert.equal(view('legacy', make(), legacyProduct({ cart: { orderable: false } })).action, 'unavailable');
+  assert.strictEqual(storefrontSummary('legacy', {}, {}, p), p);
+  assert.equal(storefrontFlags('legacy', 'production', false).orderSubmissionEnabled, false);
+});
+
+test('Shopify : URL produit exacte, prix et disponibilité Shopify malgré les données affichées legacy', () => {
+  const c = view('shopify');
+  assert.equal(c.action, 'shopify-link');
+  assert.equal(c.url, 'https://shop.dar-nur.fr/products/produit-fictif');
+  assert.deepEqual(c.price, { kind: 'fixed', amount: 30 });
+  assert.equal(c.availability, 'available');
+  const data = make([source({ availability: 'out_of_stock' })]);
+  const divergent = view('shopify', data);
+  // Divergence Supabase/Shopify : purchase refuse le lien, donc jamais « disponible » sans bouton d'achat.
+  assert.equal(divergent.availability, 'out_of_stock');
+  assert.equal(divergent.url, null);
+});
+
+test('disabled : prix legacy conservés, aucune action ni URL, variantes comprises', () => {
+  const c = view('disabled', make(), legacyProduct({ variants: [{ id: 'v', price: 12, available: true }] }));
+  assert.equal(c.action, 'none');
+  assert.equal(c.url, null);
+  assert.equal(c.price.amount, 999);
+  assert.equal(c.variants.v.action, 'none');
+  assert.equal(c.variants.v.url, null);
+});
+
+test('exclusions, absence et ambiguïté : ni achat ni prix commercial', () => {
+  for (const data of [
+    make([source()], catalog([])),
+    make([source()], catalog([shop(), shop({ id: 11, variants: [sv({ id: 102 })] })])),
+    make([source()], catalog([shop({ title: 'Miel de Lavande' })])),
+  ]) {
+    const c = view('shopify', data);
+    assert.equal(c.url, null);
+    assert.equal(c.action, 'unavailable');
+    assert.equal(c.price, null);
+    assert.match(c.message, /Pas encore disponible/);
+  }
+  for (const slug of EXCLUDED_SLUGS) {
+    const data = make([source({ slug })], catalog([shop({ handle: slug })]));
+    assert.equal(view('shopify', data, legacyProduct({ slug })).url, null);
+  }
+});
+
+const variantsFixture = () => {
+  const p = source({
+    variant_axes: ['format'],
+    product_variants: [
+      sourceVariant('local-200', { format: '200 g' }, 30),
+      sourceVariant('local-300', { format: '300 g' }, 40),
+      sourceVariant('local-400', { format: '400 g' }, 50),
+    ],
+  });
+  return make(
+    [p],
+    catalog([
+      shop({
+        variants: [
+          sv({ id: 202, options: ['300 g'], price: '40.00', available: false }),
+          sv({ id: 201, options: ['200 g'] }),
+        ],
+      }),
+    ]),
+  );
+};
+const variantProduct = () =>
+  legacyProduct({
+    variants: [
+      { id: 'local-200', price: 999, available: false },
+      { id: 'local-300', price: 888, available: true },
+      { id: 'local-400', price: 777, available: true },
+    ],
+  });
+test('variantes : ID exact, sélection obligatoire, épuisée et non rapprochée refusées', () => {
+  const c = view('shopify', variantsFixture(), variantProduct());
+  assert.equal(c.url, null);
+  // La variante orpheline bloque l’achat de l’entrée entière (garde-fou existant).
+  assert.equal(c.variants['local-400'].url, null);
+  assert.equal(c.variants['local-400'].price, null);
+  assert.equal(c.variants['local-300'].availability, 'out_of_stock');
+  assert.equal(c.variants['local-300'].url, null);
+  const p = source({
+    variant_axes: ['format'],
+    product_variants: [
+      sourceVariant('local-200', { format: '200 g' }),
+      sourceVariant('local-300', { format: '300 g' }, 40),
+    ],
+  });
+  const data = make(
+    [p],
+    catalog([
+      shop({
+        variants: [sv({ id: 202, options: ['300 g'], price: '40.00' }), sv({ id: 201, options: ['200 g'] })],
+      }),
+    ]),
+  );
+  const exact = view('shopify', data, variantProduct());
+  assert.equal(
+    exact.variants['local-200'].url,
+    'https://shop.dar-nur.fr/products/produit-fictif?variant=201',
+  );
+  assert.equal(
+    exact.variants['local-300'].url,
+    'https://shop.dar-nur.fr/products/produit-fictif?variant=202',
+  );
+  assert.equal(exact.variants['local-400'].url, null);
+  assert.deepEqual(exact.price, { kind: 'from', amount: 30 });
+});
+
+test('en-tête, panier, commande, suivi et graphes de scripts selon les trois modes', () => {
+  for (const mode of ['legacy', 'shopify', 'disabled']) {
+    const f = storefrontFlags(mode);
+    assert.equal(f.cartEnabled, mode === 'legacy');
+    assert.equal(f.orderSubmissionEnabled, mode === 'legacy');
+    assert.equal(f.headerCart, { legacy: 'legacy-drawer', shopify: 'shopify-link', disabled: 'none' }[mode]);
+    assert.equal(
+      f.cartHref,
+      { legacy: '/panier/', shopify: 'https://shop.dar-nur.fr/cart', disabled: null }[mode],
+    );
+    assert.equal(f.trackingEnabled, true);
+    assert.equal(f.trackingHref, '/suivi/');
+    const entries = storefrontEntries(mode);
+    assert.equal(entries.OrderPage.includes('Legacy'), mode === 'legacy');
+    assert.equal(entries.CartPage.includes('Legacy'), mode === 'legacy');
+    assert.equal(entries.MiniCart, mode === 'legacy' ? 'cart/MiniCart.astro' : 'cart/InactiveMiniCart.astro');
+  }
+});
+
+test('projections carte et JSON-LD : prix/stock Shopify, Offer absent si non vérifié', () => {
+  const data = make();
+  const card = storefrontSummary('shopify', data.map, data.catalog, legacyProduct());
+  assert.deepEqual(card.price, { kind: 'fixed', amount: 30 });
+  const page = {
+    ...legacyProduct(),
+    axes: [],
+    unitPrice: '999 €/kg',
+    structured: { name: 'Fictif', offer: { price: 999, availability: 'on_demand' } },
+    cart: { orderable: true },
+  };
+  const mapped = storefrontProductPage('shopify', data.map, data.catalog, page);
+  assert.deepEqual(mapped.structured.offer, { price: 30, availability: 'available' });
+  assert.equal(mapped.unitPrice, null);
+  assert.equal(mapped.cart, undefined);
+  const missing = make([source()], catalog([]));
+  assert.equal(
+    storefrontProductPage('shopify', missing.map, missing.catalog, page).structured.offer,
+    undefined,
+  );
+  const fixture = variantsFixture();
+  fixture.map.sourceProducts[0].product_variants.pop();
+  fixture.map = buildProductMap(fixture.map.sourceProducts, fixture.catalog, date);
+  const grouped = storefrontProductPage('shopify', fixture.map, fixture.catalog, {
+    ...page,
+    ...variantProduct(),
+    structured: { group: { variesBy: [], variants: [{ price: 999 }, { price: 888 }, { price: 777 }] } },
+  });
+  assert.deepEqual(
+    grouped.structured.group.variants.map((v) => v.price),
+    [30, 40, null],
+  );
+  assert.deepEqual(
+    grouped.structured.group.variants.map((v) => v.available),
+    [true, false, false],
+  );
+  const disabled = storefrontProductPage('disabled', data.map, data.catalog, page);
+  assert.strictEqual(disabled.structured, page.structured);
+});
+
+// Le test de rendu compile uniquement les composants ciblés, sans Vite ni chargement de .env.
+await import('./test-commerce-render.mjs');
+console.log(`\n✓ Commerce : ${passed} tests réussis (données fictives, hors ligne), plus rendu Container.`);

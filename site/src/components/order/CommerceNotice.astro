@@ -1,0 +1,14 @@
+---
+import Button from '@/components/ui/Button.astro';
+import type { StorefrontFlags } from '@/lib/commerce/storefront';
+interface Props {
+  view: StorefrontFlags;
+}
+const { view } = Astro.props;
+---
+
+<p>{view.closedMessage}</p>
+{view.shopHref && <Button href={view.shopHref}>Accéder à la boutique (site externe)</Button>}
+<p>
+  <a href={view.trackingHref}>Suivre une commande existante</a>
+</p>

@@ -1,0 +1,18 @@
+---
+import Button from '@/components/ui/Button.astro';
+import type { CommercialChoice } from '@/lib/commerce/storefront';
+interface Props {
+  choice: CommercialChoice;
+}
+const { choice } = Astro.props;
+---
+
+{choice.url ? (
+  <Button href={choice.url} size="lg" fullWidth>
+    Acheter sur la boutique (site externe)
+  </Button>
+) : (
+  <p class="dn-body-sm dn-muted" aria-disabled="true">
+    {choice.message}
+  </p>
+)}

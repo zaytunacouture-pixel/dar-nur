@@ -4,6 +4,12 @@
   "exclude": ["dist", "node_modules"],
   "compilerOptions": {
     "baseUrl": ".",
-    "paths": { "@/*": ["src/*"] }
+    "paths": {
+      "@/*": ["src/*"],
+      "@commerce/Purchase": ["src/components/product/LegacyProductPurchase.astro"],
+      "@commerce/CartPage": ["src/components/order/LegacyCartPage.astro"],
+      "@commerce/OrderPage": ["src/components/order/LegacyOrderPage.astro"],
+      "@commerce/MiniCart": ["src/components/cart/MiniCart.astro"]
+    }
   }
 }

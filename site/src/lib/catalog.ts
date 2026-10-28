@@ -1,3 +1,4 @@
+import { commercialSummary } from '@/config/commerce';
 /**
  * Traduction lignes Supabase → types d'affichage. C'est le SEUL endroit qui connaît
  * le schéma de la base.
@@ -137,7 +138,7 @@ export function toProductSummary(row: SupabaseProductRow, context: SummaryContex
   const price = priceOf(row, variants);
   const images = productImages(row);
   const primaryCollection = primaryCollectionOf(row);
-  return {
+  return commercialSummary({
     slug: row.slug,
     name: row.name,
     // URL provisoire = slug actuel ; le nommage définitif est appliqué à la migration SEO.
@@ -151,7 +152,7 @@ export function toProductSummary(row: SupabaseProductRow, context: SummaryContex
     availability: availabilityOf(row),
     ...(primaryCollection ? { primaryCollection } : {}),
     variantCount: variants.length,
-  };
+  });
 }
 
 /** Images du produit dans l'ordre (product_media d'abord, images[] à défaut), URL absolues. */

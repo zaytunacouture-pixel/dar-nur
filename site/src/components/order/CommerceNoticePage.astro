@@ -1,0 +1,29 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import CommerceNotice from './CommerceNotice.astro';
+import type { StorefrontFlags } from '@/lib/commerce/storefront';
+interface Props {
+  title: string;
+  path: string;
+  view: StorefrontFlags;
+}
+const { title, path, view } = Astro.props;
+---
+
+<BaseLayout
+  seo={{ title, description: view.closedMessage, canonicalPath: path, noindex: true }}
+  showReassurance={false}
+>
+  <section class="dn-container dn-commerce-notice">
+    <h1 class="dn-h1">{title}</h1>
+    <CommerceNotice view={view} />
+  </section>
+</BaseLayout>
+<style>
+  .dn-commerce-notice {
+    display: grid;
+    gap: var(--dn-space-6);
+    justify-items: start;
+    padding-block: var(--dn-section-y);
+  }
+</style>

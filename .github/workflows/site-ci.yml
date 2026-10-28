@@ -90,6 +90,9 @@ jobs:
       - name: Tests du panier local (étape 10)
         run: npm run test:cart
 
+      - name: Tests commerce
+        run: npm run test:commerce
+
       - name: Build statique
         run: npm run build
 
@@ -110,3 +113,6 @@ jobs:
 
       - name: Contrôles juridiques (CGV, confidentialité, mentions légales, anciennes mentions)
         run: npm run verify:legal
+
+      - name: Correspondance Shopify (non stricte)
+        run: npm run verify:shopify-map

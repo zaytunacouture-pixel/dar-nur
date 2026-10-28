@@ -339,7 +339,11 @@ function toCatalogProduct(
     brand: row.brand && row.brand_slug ? { slug: row.brand_slug, name: row.brand } : undefined,
     contenance: facets.contenance,
     taille: facets.taille,
-    minPrice: facets.minPrice,
+    minPrice: summary.commerce
+      ? summary.commerce.price && summary.commerce.price.kind !== 'on-request'
+        ? summary.commerce.price.amount
+        : null
+      : facets.minPrice,
     order,
     added: row.created_at.slice(0, 10).replaceAll('-', ''),
     featured: row.featured,

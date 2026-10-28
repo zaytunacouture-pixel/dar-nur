@@ -8,16 +8,18 @@
 import IconButton from '@/components/ui/IconButton.astro';
 import Icon from '@/components/ui/Icon.astro';
 import { navigation } from '@/config/navigation';
+import type { StorefrontFlags } from '@/lib/commerce/storefront';
 import Logo from './Logo.astro';
 
 interface Props {
+  commerce: StorefrontFlags;
   currentPath: string;
   /** Entrée de premier niveau de la page (univers d'une collection), pour la marquer courante. */
   section?: string | undefined;
   cartCount?: number;
 }
 
-const { currentPath, section, cartCount = 0 } = Astro.props;
+const { currentPath, section, cartCount = 0, commerce } = Astro.props;
 const isCurrent = (href: string) => currentPath === href || currentPath.startsWith(href) || section === href;
 const cartLabel =
   cartCount > 0
@@ -131,19 +133,24 @@ const cartLabel =
         aria-expanded="false"
         aria-controls="dn-search"
       />
-      <IconButton
-        icon="shopping-bag"
-        label={cartLabel}
-        data-dn-open="dn-cart"
-        aria-haspopup="dialog"
-        aria-expanded="false"
-        aria-controls="dn-cart"
-        data-dn-cart-button
-      >
-        <span class="dn-header__count" data-dn-cart-count hidden={cartCount === 0} aria-hidden="true">
-          {cartCount > 9 ? '9+' : cartCount}
-        </span>
-      </IconButton>
+      {commerce.headerCart === 'legacy-drawer' && (
+        <IconButton
+          icon="shopping-bag"
+          label={cartLabel}
+          data-dn-open="dn-cart"
+          aria-haspopup="dialog"
+          aria-expanded="false"
+          aria-controls="dn-cart"
+          data-dn-cart-button
+        >
+          <span class="dn-header__count" data-dn-cart-count hidden={cartCount === 0} aria-hidden="true">
+            {cartCount > 9 ? '9+' : cartCount}
+          </span>
+        </IconButton>
+      )}
+      {commerce.headerCart === 'shopify-link' && (
+        <IconButton icon="shopping-bag" label={commerce.cartLabel} href={commerce.cartHref!} />
+      )}
     </div>
   </div>
   <div class="dn-mega-scrim" data-dn-mega-scrim hidden></div>
