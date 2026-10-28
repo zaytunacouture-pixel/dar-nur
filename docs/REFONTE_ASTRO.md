@@ -686,9 +686,12 @@ Branche `refonte/etape-13-synchronisation`, créée depuis `refonte/etape-12-jur
 - **CI locale** (`DAR_NUR_ENV=preprod`, `SITE_URL=https://dar-nur.fr`, comme Netlify) : `npm run ci` vert ;
   235 fiches pour 235 produits publiés. Avertissement : `dn-lecode-blue-addict` (« À découvrir ») est
   `coming_soon`.
-- **Préproduction** : site Netlify `wondrous-rolypoly-c99592` (aucun domaine personnalisé, branche Git
-  configurée : `refonte/etape-11-paiement-emails`). Déploiement manuel par la CLI (`netlify deploy` du `dist/`
-  vérifié, brouillon `6ae1b1bcdfba655efa16f7cd` contrôlé puis publié, le 2026-10-28). Un futur push sur
-  `refonte/etape-11-paiement-emails` écraserait ce déploiement : changer la branche du site Netlify
-  (réglage du propriétaire) pour suivre la branche à jour. Retour arrière : republier le déploiement
-  précédent `6ac4c05e6037fabece39779c` (étape 11) depuis Netlify → Deploys.
+- **Préproduction** : site Netlify `wondrous-rolypoly-c99592` (id `14b3108c-…`, aucun domaine personnalisé
+  ni alias, aucune variable dans l'interface : tout vient de `site/netlify.toml`). Depuis le 2026-10-28, sa
+  branche de production **et** sa seule branche autorisée sont `refonte/etape-13-synchronisation` (avant :
+  `refonte/etape-11-paiement-emails`). Premier build Git de cette branche : déploiement
+  `6ae1b624c814c151400233e8` (commit `2529385`). Un commit qui ne touche pas `site/` n'est pas reconstruit
+  (« Canceled build due to no content change » : normal, pas une panne).
+- **Retour arrière** : Netlify → Deploys → republier un déploiement antérieur (`6ae1b1bcdfba655efa16f7cd` :
+  même contenu, envoyé par la CLI ; `6ac4c05e6037fabece39779c` : étape 11) ; pour la branche, Site
+  configuration → Build & deploy → Branches → remettre `refonte/etape-11-paiement-emails`.
