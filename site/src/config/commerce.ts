@@ -1,5 +1,20 @@
 import type { AnnouncementMessage, ShippingPolicy } from '@/types/site';
 import { legalBlockers } from './legal';
+import { DAR_NUR_COMMERCE_MODE } from 'astro:env/server';
+import { siteEnv } from './site';
+import productMap from '../data/shopify/product-map.json';
+import shopifyCatalog from '../data/shopify/shopify-catalog.json';
+import { assertCommerceBuild, resolveCommerceMode, shopifyProductionApproved } from '../lib/commerce/mode.ts';
+import { validateProductMap } from '../lib/commerce/product-map.ts';
+
+/** Préparation seulement : aucune interface ne consomme encore ces décisions. */
+export const commerceMode = resolveCommerceMode(DAR_NUR_COMMERCE_MODE);
+assertCommerceBuild(
+  commerceMode,
+  siteEnv,
+  shopifyProductionApproved,
+  validateProductMap(productMap, shopifyCatalog),
+);
 
 /**
  * Faits commerciaux. RÈGLE : n'afficher que ce qui est vrai pour le futur site.

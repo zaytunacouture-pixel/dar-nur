@@ -3,6 +3,13 @@ import { readdir, readFile, writeFile } from 'node:fs/promises';
 import { join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defineConfig, envField, fontProviders, sharpImageService } from 'astro/config';
+import {
+  assertCommerceBuild,
+  configuredCommerceMode,
+  resolveCommerceMode,
+  shopifyProductionApproved,
+} from './src/lib/commerce/mode.ts';
+import { validateProductMap } from './src/lib/commerce/product-map.ts';
 
 /**
  * Environnement Dar Nūr. Seule la valeur "production" autorise l'indexation.
@@ -11,6 +18,26 @@ import { defineConfig, envField, fontProviders, sharpImageService } from 'astro/
  */
 const DAR_NUR_ENV = process.env.DAR_NUR_ENV ?? 'development';
 const INDEXABLE = DAR_NUR_ENV === 'production';
+
+/** Échec avant génération des pages, même si aucun gabarit n'importe commerce.ts. */
+function commerceGuard() {
+  return {
+    name: 'dar-nur-commerce-guard',
+    hooks: {
+      'astro:build:start': async () => {
+        const folder = new URL('./src/data/shopify/', import.meta.url);
+        const map = JSON.parse(await readFile(new URL('product-map.json', folder), 'utf8'));
+        const catalog = JSON.parse(await readFile(new URL('shopify-catalog.json', folder), 'utf8'));
+        assertCommerceBuild(
+          resolveCommerceMode(process.env.DAR_NUR_COMMERCE_MODE),
+          DAR_NUR_ENV,
+          shopifyProductionApproved,
+          validateProductMap(map, catalog),
+        );
+      },
+    },
+  };
+}
 
 /** URL absolue du site (canonical, Open Graph). Netlify fournit DEPLOY_PRIME_URL / URL. */
 const SITE_URL =
@@ -121,10 +148,16 @@ export default defineConfig({
   build: { format: 'directory' },
   compressHTML: true,
   devToolbar: { enabled: false },
-  integrations: [robotsHeaders(), catalogSitemap()],
+  integrations: [robotsHeaders(), catalogSitemap(), commerceGuard()],
 
   env: {
     schema: {
+      DAR_NUR_COMMERCE_MODE: envField.enum({
+        context: 'server',
+        access: 'public',
+        values: ['legacy', 'shopify', 'disabled'],
+        default: configuredCommerceMode,
+      }),
       DAR_NUR_ENV: envField.enum({
         context: 'server',
         access: 'public',

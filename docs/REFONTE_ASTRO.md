@@ -11,16 +11,16 @@
 
 ## Architecture
 
-| Élément | Choix |
-|---|---|
-| Emplacement | Sous-dossier autonome `site/` (son `package.json`, sa sortie `site/dist/`). L'ancien site, l'admin, les générateurs et leurs workflows restent à la racine, inchangés. |
-| Framework | Astro 7, sortie **statique** (aucun SSR à l'exécution), TypeScript `strictest`. |
-| JavaScript client | Aucun framework. Petits `<script>` par composant (bundlés, dédupliqués par Astro) seulement là où il faut de l'interaction : menu mobile, méga-menu, panneaux, recherche, sélecteur de variantes. Header, footer, cartes : HTML statique. |
-| CSS | Variables CSS (`src/styles/tokens.css`) + base globale (`base.css`) + CSS scopé dans chaque composant. Pas de Tailwind ni de bibliothèque d'UI : aucun bénéfice pour ~40 composants, et du poids en plus. |
-| Données | Supabase **en lecture seule, au build** (`src/lib/supabase.ts`, `fetch` natif, colonnes listées explicitement). Traduction vers les types d'affichage dans `src/lib/catalog.ts`, seul fichier qui connaît le schéma. Depuis l'étape 6 : `status = published`, collection principale, `availability` (NULL = à arbitrer → repli sur `coming_soon`), `product_media`, options normalisées, arbre `collections`, `settings` publics. Schéma : `docs/SCHEMA_SUPABASE.md`. |
-| Images | `src/components/ui/CatalogPicture.astro`, point d'entrée unique : AVIF + WebP, `srcset`/`sizes`, dimensions déclarées, recadrage au ratio, chargement différé sauf l'image prioritaire (LCP). Cadres partagés dans `src/config/images.ts` (étape 8B). Images distantes autorisées : `dar-nur.fr` et le stockage public Supabase. |
-| Polices | API Fonts d'Astro, fichiers locaux : Cormorant Garamond 500–600 (29 Ko) + Jost 400–500 (17 Ko), sous-ensemble FR + ū. Générés par `site/scripts/fonts/build-fonts.py` (sources épinglées), versionnés. Polices de repli aux métriques ajustées, préchargement. Aucun appel à Google Fonts. |
-| Icônes | Lucide (contour, trait 1,5), inlinées au build depuis `lucide-static` ; jeu fermé dans `src/components/ui/icons.ts`. Logos de réseaux : Simple Icons (CC0), copiés. |
+| Élément           | Choix                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Emplacement       | Sous-dossier autonome `site/` (son `package.json`, sa sortie `site/dist/`). L'ancien site, l'admin, les générateurs et leurs workflows restent à la racine, inchangés.                                                                                                                                                                                                                                                                                                |
+| Framework         | Astro 7, sortie **statique** (aucun SSR à l'exécution), TypeScript `strictest`.                                                                                                                                                                                                                                                                                                                                                                                       |
+| JavaScript client | Aucun framework. Petits `<script>` par composant (bundlés, dédupliqués par Astro) seulement là où il faut de l'interaction : menu mobile, méga-menu, panneaux, recherche, sélecteur de variantes. Header, footer, cartes : HTML statique.                                                                                                                                                                                                                             |
+| CSS               | Variables CSS (`src/styles/tokens.css`) + base globale (`base.css`) + CSS scopé dans chaque composant. Pas de Tailwind ni de bibliothèque d'UI : aucun bénéfice pour ~40 composants, et du poids en plus.                                                                                                                                                                                                                                                             |
+| Données           | Supabase **en lecture seule, au build** (`src/lib/supabase.ts`, `fetch` natif, colonnes listées explicitement). Traduction vers les types d'affichage dans `src/lib/catalog.ts`, seul fichier qui connaît le schéma. Depuis l'étape 6 : `status = published`, collection principale, `availability` (NULL = à arbitrer → repli sur `coming_soon`), `product_media`, options normalisées, arbre `collections`, `settings` publics. Schéma : `docs/SCHEMA_SUPABASE.md`. |
+| Images            | `src/components/ui/CatalogPicture.astro`, point d'entrée unique : AVIF + WebP, `srcset`/`sizes`, dimensions déclarées, recadrage au ratio, chargement différé sauf l'image prioritaire (LCP). Cadres partagés dans `src/config/images.ts` (étape 8B). Images distantes autorisées : `dar-nur.fr` et le stockage public Supabase.                                                                                                                                      |
+| Polices           | API Fonts d'Astro, fichiers locaux : Cormorant Garamond 500–600 (29 Ko) + Jost 400–500 (17 Ko), sous-ensemble FR + ū. Générés par `site/scripts/fonts/build-fonts.py` (sources épinglées), versionnés. Polices de repli aux métriques ajustées, préchargement. Aucun appel à Google Fonts.                                                                                                                                                                            |
+| Icônes            | Lucide (contour, trait 1,5), inlinées au build depuis `lucide-static` ; jeu fermé dans `src/components/ui/icons.ts`. Logos de réseaux : Simple Icons (CC0), copiés.                                                                                                                                                                                                                                                                                                   |
 
 ```
 site/
@@ -44,32 +44,32 @@ site/
 
 ## Commandes (depuis `site/`)
 
-| Commande | Rôle |
-|---|---|
-| `npm ci` | Installation (Node ≥ 22.12) |
-| `npm run dev` | Serveur de développement (http://localhost:4321) |
-| `npm run build` | Build statique dans `dist/` |
-| `npm run preview` | Sert `dist/` localement |
-| `npm run check` | Types (`astro check`) |
-| `npm run format` / `format:check` | Prettier |
-| `npm run verify` | Contrôles de sortie (après build) |
-| `npm run verify:catalog` | Contrôles de données des pages catalogue contre Supabase (après build, réseau) |
-| `npm run verify:products` | Contrôles des fiches produit et du LAB contre Supabase (après build, réseau) |
-| `npm run verify:home` | Contrôles de l'accueil contre Supabase (après build, réseau) |
-| `npm run verify:orders` | Contrôles du parcours de commande sur `dist/` (après build, sans réseau) |
-| `npm run test:cart` | Tests unitaires du panier local (Node, sans navigateur) |
-| `npm run lab:groupings` | Rafraîchit l'instantané des regroupements Mode (lecture admin, CLI Supabase authentifiée) |
-| `npm run ci` | Tout, dans l'ordre de la CI |
+| Commande                          | Rôle                                                                                      |
+| --------------------------------- | ----------------------------------------------------------------------------------------- |
+| `npm ci`                          | Installation (Node ≥ 22.12)                                                               |
+| `npm run dev`                     | Serveur de développement (http://localhost:4321)                                          |
+| `npm run build`                   | Build statique dans `dist/`                                                               |
+| `npm run preview`                 | Sert `dist/` localement                                                                   |
+| `npm run check`                   | Types (`astro check`)                                                                     |
+| `npm run format` / `format:check` | Prettier                                                                                  |
+| `npm run verify`                  | Contrôles de sortie (après build)                                                         |
+| `npm run verify:catalog`          | Contrôles de données des pages catalogue contre Supabase (après build, réseau)            |
+| `npm run verify:products`         | Contrôles des fiches produit et du LAB contre Supabase (après build, réseau)              |
+| `npm run verify:home`             | Contrôles de l'accueil contre Supabase (après build, réseau)                              |
+| `npm run verify:orders`           | Contrôles du parcours de commande sur `dist/` (après build, sans réseau)                  |
+| `npm run test:cart`               | Tests unitaires du panier local (Node, sans navigateur)                                   |
+| `npm run lab:groupings`           | Rafraîchit l'instantané des regroupements Mode (lecture admin, CLI Supabase authentifiée) |
+| `npm run ci`                      | Tout, dans l'ordre de la CI                                                               |
 
 ## Variables d'environnement
 
 Copier `site/.env.example` en `site/.env` (ignoré par Git).
 
-| Variable | Valeurs | Rôle |
-|---|---|---|
-| `DAR_NUR_ENV` | `development` (défaut) · `preprod` · `production` | **Seule `production` autorise l'indexation.** Toute autre valeur : meta `noindex, nofollow`, `robots.txt` « Disallow: / », en-tête `X-Robots-Tag`. |
-| `SITE_URL` | URL absolue | Canonical, Open Graph, JSON-LD, sitemap. **`https://dar-nur.fr` en préproduction Netlify et en CI** (URL définitives dès maintenant ; la préproduction reste noindex). À défaut : `DEPLOY_PRIME_URL` / `URL` (Netlify), puis `http://localhost:4321`. |
-| `SUPABASE_URL`, `SUPABASE_ANON_KEY` | URL du projet, clé `sb_publishable_…` | Lecture publique sous RLS (valeurs déjà publiques sur l'ancien site). Toute autre clé est refusée par le code. Sans elles, le build passe et les pages l'indiquent. |
+| Variable                            | Valeurs                                           | Rôle                                                                                                                                                                                                                                                  |
+| ----------------------------------- | ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DAR_NUR_ENV`                       | `development` (défaut) · `preprod` · `production` | **Seule `production` autorise l'indexation.** Toute autre valeur : meta `noindex, nofollow`, `robots.txt` « Disallow: / », en-tête `X-Robots-Tag`.                                                                                                    |
+| `SITE_URL`                          | URL absolue                                       | Canonical, Open Graph, JSON-LD, sitemap. **`https://dar-nur.fr` en préproduction Netlify et en CI** (URL définitives dès maintenant ; la préproduction reste noindex). À défaut : `DEPLOY_PRIME_URL` / `URL` (Netlify), puis `http://localhost:4321`. |
+| `SUPABASE_URL`, `SUPABASE_ANON_KEY` | URL du projet, clé `sb_publishable_…`             | Lecture publique sous RLS (valeurs déjà publiques sur l'ancien site). Toute autre clé est refusée par le code. Sans elles, le build passe et les pages l'indiquent.                                                                                   |
 
 ## Préproduction Netlify
 
@@ -105,18 +105,19 @@ compteur ou « best seller » sans données ; aucune photo générée à la plac
 
 ## Statut de la migration
 
-| Fait (étape 5) | À venir |
-|---|---|
-| Socle, tokens, polices, logo, header, méga-menu, menu mobile 2 niveaux, bandeau, recherche (visuelle), mini-panier (visuel), footer, réassurance, ProductCard, UniverseCard, CollectionCard, VariantSelector, guide des tailles (repli), primitives UI, pages `/demo/`, `/design-system/`, `/lab/supabase/`, Netlify, CI | Puis panier métier, recherche, SEO (301 depuis `redirects`), shooting photo, bascule. |
-| **Étape 6** (2026-10-02) : migration additive Supabase (9 migrations, `docs/SCHEMA_SUPABASE.md`), lecture du nouveau schéma dans `catalog.ts`, `/lab/supabase/` affiche l'arbre des collections, banc `scripts/test/schema` + CI `schema-ci.yml` | |
-| **Étape 7** (2026-10-02) : 3 univers, 15 collections, 2 transverses, 4 pages marque, filtres/tri, fil d'Ariane, JSON-LD, sitemap (production), 404, `verify-catalog` — section ci-dessous | |
-| **Étape 8** (2026-10-02) : 245 fiches `/{slug}/`, galerie, variantes réelles, prix au kg/L, disponibilité, commande WhatsApp, accordéons conditionnels, similaires, offres, JSON-LD Product/ProductGroup, sitemap avec `lastmod`, LAB des regroupements Mode, `verify-products` — section ci-dessous | |
-| **Étape 8B** (2026-10-03) : build à froid 21 min 39 s → 6 min 55 s (CI), préréglages d'images, mesure reproductible — section « Build et images » | |
-| **Étape 9** (2026-10-03) : accueil final `/`, configuration éditoriale, `verify-home` — section « Accueil (étape 9) » | |
-| **Étape 10** (2026-10-03) : panier, demande de commande, suivi, administration des commandes, tables et fonctions Supabase, `verify-orders`, `test:cart` — section « Commande, paiement, livraison (étape 10) » | Paiement via Shopify (étape dédiée), CGV et confidentialité révisées (bloquant production), recherche, redirections, shooting |
-| **Étape 11, phase 1** (2026-10-03) : e-mails transactionnels Brevo — outbox, Edge Functions, gabarits, bloc admin « Notifications », bancs hors ligne ; **rien de déployé** — section « E-mails transactionnels (étape 11) » | Phase 2 après configuration Brevo par le propriétaire |
-| **Étape 12** (2026-10-09) : pages internes `/cgv/`, `/confidentialite/`, `/mentions-legales/`, faits juridiques centralisés (`config/legal.ts`), liens repointés, `verify-legal` — section « Pages juridiques (étape 12) » | Informations obligatoires manquantes (SIREN/SIRET, médiateur, téléphones, suivi Brevo) : production fermée |
-| **Étape 13** (2026-10-28) : synchronisation avec `main` (PR #41–#43), réparation du build (miel archivé sur l'accueil), préproduction mise à jour — section « Synchronisation (étape 13) » | Raccordement des achats à Shopify (mission dédiée) |
+| Fait (étape 5)                                                                                                                                                                                                                                                                                                           | À venir                                                                                                                       |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| Socle, tokens, polices, logo, header, méga-menu, menu mobile 2 niveaux, bandeau, recherche (visuelle), mini-panier (visuel), footer, réassurance, ProductCard, UniverseCard, CollectionCard, VariantSelector, guide des tailles (repli), primitives UI, pages `/demo/`, `/design-system/`, `/lab/supabase/`, Netlify, CI | Puis panier métier, recherche, SEO (301 depuis `redirects`), shooting photo, bascule.                                         |
+| **Étape 6** (2026-10-02) : migration additive Supabase (9 migrations, `docs/SCHEMA_SUPABASE.md`), lecture du nouveau schéma dans `catalog.ts`, `/lab/supabase/` affiche l'arbre des collections, banc `scripts/test/schema` + CI `schema-ci.yml`                                                                         |                                                                                                                               |
+| **Étape 7** (2026-10-02) : 3 univers, 15 collections, 2 transverses, 4 pages marque, filtres/tri, fil d'Ariane, JSON-LD, sitemap (production), 404, `verify-catalog` — section ci-dessous                                                                                                                                |                                                                                                                               |
+| **Étape 8** (2026-10-02) : 245 fiches `/{slug}/`, galerie, variantes réelles, prix au kg/L, disponibilité, commande WhatsApp, accordéons conditionnels, similaires, offres, JSON-LD Product/ProductGroup, sitemap avec `lastmod`, LAB des regroupements Mode, `verify-products` — section ci-dessous                     |                                                                                                                               |
+| **Étape 8B** (2026-10-03) : build à froid 21 min 39 s → 6 min 55 s (CI), préréglages d'images, mesure reproductible — section « Build et images »                                                                                                                                                                        |                                                                                                                               |
+| **Étape 9** (2026-10-03) : accueil final `/`, configuration éditoriale, `verify-home` — section « Accueil (étape 9) »                                                                                                                                                                                                    |                                                                                                                               |
+| **Étape 10** (2026-10-03) : panier, demande de commande, suivi, administration des commandes, tables et fonctions Supabase, `verify-orders`, `test:cart` — section « Commande, paiement, livraison (étape 10) »                                                                                                          | Paiement via Shopify (étape dédiée), CGV et confidentialité révisées (bloquant production), recherche, redirections, shooting |
+| **Étape 11, phase 1** (2026-10-03) : e-mails transactionnels Brevo — outbox, Edge Functions, gabarits, bloc admin « Notifications », bancs hors ligne ; **rien de déployé** — section « E-mails transactionnels (étape 11) »                                                                                             | Phase 2 après configuration Brevo par le propriétaire                                                                         |
+| **Étape 12** (2026-10-09) : pages internes `/cgv/`, `/confidentialite/`, `/mentions-legales/`, faits juridiques centralisés (`config/legal.ts`), liens repointés, `verify-legal` — section « Pages juridiques (étape 12) »                                                                                               | Informations obligatoires manquantes (SIREN/SIRET, médiateur, téléphones, suivi Brevo) : production fermée                    |
+| **Étape 13** (2026-10-28) : synchronisation avec `main` (PR #41–#43), réparation du build (miel archivé sur l'accueil), préproduction mise à jour — section « Synchronisation (étape 13) »                                                                                                                               | Raccordement des achats à Shopify (mission dédiée)                                                                            |
+| **Étape 14** (2026-10-28) : préparation technique du raccordement Shopify, modes, correspondance et liens purs, scripts de lecture et tests hors ligne — section « Raccordement Shopify (étape 14) »                                                                                                                     | Générer les données actuelles, résoudre les anomalies, brancher l'interface puis approuver explicitement la production        |
 
 ## Pages catalogue (étape 7)
 
@@ -127,18 +128,18 @@ moins un parfum publié. Toute autre adresse → `404.html` (statut 404, aucune 
 
 **Données** (`src/lib/catalog-store.ts`, 5 requêtes par build, mémoïsées) :
 
-| Règle | Source |
-|---|---|
-| Classement | `collections` + `product_collections`. `category_id` n'est jamais lu. Une page contient les produits rattachés (principale **ou** secondaire) à la collection **et à ses descendantes** (`/miels/` = Miels + Miels gourmands ; `/mode-homme/` = qamis, sandales, accessoires). |
-| Ordre « Sélection » | Ordre de l'arbre de la collection principale (la collection avant ses sous-collections), puis `sort_order`, puis slug. |
-| Produits | `status = published` filtré explicitement (pas seulement par la RLS). Le build échoue si un produit n'a pas exactement une principale publiée. |
-| Disponibilité | `availability` ; NULL → repli sur `coming_soon` (jamais converti en `available`). |
-| Images | `product_media` (hors images de variante), sinon `images[]`. Les 3 premières de chaque produit sont vérifiées (HEAD) : une image inaccessible est écartée et signalée, le produit passe à la suivante ou au repli « Photo à venir ». |
-| Prix | « À partir de X € » seulement si plusieurs prix **différents** existent parmi les variantes actives. |
-| Badges | Bientôt disponible · Épuisé · **Offre** (produit d'une offre `product_promo` active, dans sa fenêtre de dates). « Nouveau » non calculé (§G.2 à confirmer). |
-| Offres (`/offres/`) | Offres actives + produits de la collection Offres & packs. Prix barré **uniquement s'il est prouvé** : promotion produit dont le prix de référence est le prix fixe réel de chaque produit. Aucune économie pour les packs (formats inclus non renseignés). |
-| Marques | Indexable si ≥ `settings.brand_min_models_indexable` (4) parfums publiés **et** `brands.description` renseignée. |
-| Intro | `collections.description`, sinon `seo_description` (validée à l'étape 3). Aucun champ « contenu long » en base : rien après la grille hormis le maillage. |
+| Règle               | Source                                                                                                                                                                                                                                                                         |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Classement          | `collections` + `product_collections`. `category_id` n'est jamais lu. Une page contient les produits rattachés (principale **ou** secondaire) à la collection **et à ses descendantes** (`/miels/` = Miels + Miels gourmands ; `/mode-homme/` = qamis, sandales, accessoires). |
+| Ordre « Sélection » | Ordre de l'arbre de la collection principale (la collection avant ses sous-collections), puis `sort_order`, puis slug.                                                                                                                                                         |
+| Produits            | `status = published` filtré explicitement (pas seulement par la RLS). Le build échoue si un produit n'a pas exactement une principale publiée.                                                                                                                                 |
+| Disponibilité       | `availability` ; NULL → repli sur `coming_soon` (jamais converti en `available`).                                                                                                                                                                                              |
+| Images              | `product_media` (hors images de variante), sinon `images[]`. Les 3 premières de chaque produit sont vérifiées (HEAD) : une image inaccessible est écartée et signalée, le produit passe à la suivante ou au repli « Photo à venir ».                                           |
+| Prix                | « À partir de X € » seulement si plusieurs prix **différents** existent parmi les variantes actives.                                                                                                                                                                           |
+| Badges              | Bientôt disponible · Épuisé · **Offre** (produit d'une offre `product_promo` active, dans sa fenêtre de dates). « Nouveau » non calculé (§G.2 à confirmer).                                                                                                                    |
+| Offres (`/offres/`) | Offres actives + produits de la collection Offres & packs. Prix barré **uniquement s'il est prouvé** : promotion produit dont le prix de référence est le prix fixe réel de chaque produit. Aucune économie pour les packs (formats inclus non renseignés).                    |
+| Marques             | Indexable si ≥ `settings.brand_min_models_indexable` (4) parfums publiés **et** `brands.description` renseignée.                                                                                                                                                               |
+| Intro               | `collections.description`, sinon `seo_description` (validée à l'étape 3). Aucun champ « contenu long » en base : rien après la grille hormis le maillage.                                                                                                                      |
 
 **Indexation.** Préproduction : tout est `noindex, nofollow`. Production : univers / collection / transverse
 indexables si `is_indexable` **et** au moins un produit ; une collection vide garde sa page (les liens du menu
@@ -162,8 +163,7 @@ pages marque, liens internes, pages indexables vides, JSON-LD). Lancé en CI (`s
 ## Fiches produit (étape 8)
 
 **Route.** La même route `src/pages/[...path].astro` génère une fiche par produit **publié** à l'URL plate
-`/{slug}/` (décision figée : changer de collection ne change pas l'URL). Un brouillon n'a pas de page →
-404. Le build échoue si deux pages visent la même URL ou si un produit occupe `/demo/`, `/lab/`… Les slugs
+`/{slug}/` (décision figée : changer de collection ne change pas l'URL). Un brouillon n'a pas de page → 404. Le build échoue si deux pages visent la même URL ou si un produit occupe `/demo/`, `/lab/`… Les slugs
 actuels sont conservés (Khamrah reste à son URL longue ; `/khamrah/` n'existe pas).
 
 **Gabarit unique** `src/components/templates/ProductTemplate.astro` + `components/product/ProductGallery.astro`
@@ -175,18 +175,18 @@ collante**.
 
 **Sources et replis** (nouveau schéma d'abord ; ancien champ seulement s'il est vide) :
 
-| Donnée | Source | Repli |
-|---|---|---|
-| Galerie | `product_media` sans variante (ordre `sort_order`) | `images[]` (aucun cas aujourd'hui) ; aucune image → « Photo à venir » |
-| Médias de variante | `product_media.variant_id` | format sans photo → photo du format précédent (repli 300 g → 200 g validé, §M.2) |
-| Options | `product_variant_options` → `option_values` | `options` jsonb, puis nom de variante (aucun cas : 115/115 normalisées) |
-| Prix au kg / L | `option_values.numeric_value` + `unit`, ou `net_quantity` + `net_unit` | aucun (« 100 », « 200 » sans unité → rien) |
-| Composition / origine | `product_food_details` / `product_apparel_details` (vides) | `products.composition` / `products.provenance` |
-| Disponibilité | `availability` | NULL → `coming_soon` (jamais `available`) |
-| Title | `seo_title` (vide partout) | `{Nom} – {concentration} {marque}` (parfums, vocabulaire fermé) ; nom seul sinon |
-| Meta | `seo_description` (vide partout) | accroche + début de la description ; jamais prix / livraison / WhatsApp |
-| Alt | `alt_text` (vide partout) | nom du produit (+ « – 200 g » pour une image de variante) |
-| `lastmod` | max(`products.updated_at`, `product_variants.updated_at`) | — (`product_media.updated_at` = date du remplissage de l'étape 6, ignorée) |
+| Donnée                | Source                                                                 | Repli                                                                            |
+| --------------------- | ---------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| Galerie               | `product_media` sans variante (ordre `sort_order`)                     | `images[]` (aucun cas aujourd'hui) ; aucune image → « Photo à venir »            |
+| Médias de variante    | `product_media.variant_id`                                             | format sans photo → photo du format précédent (repli 300 g → 200 g validé, §M.2) |
+| Options               | `product_variant_options` → `option_values`                            | `options` jsonb, puis nom de variante (aucun cas : 115/115 normalisées)          |
+| Prix au kg / L        | `option_values.numeric_value` + `unit`, ou `net_quantity` + `net_unit` | aucun (« 100 », « 200 » sans unité → rien)                                       |
+| Composition / origine | `product_food_details` / `product_apparel_details` (vides)             | `products.composition` / `products.provenance`                                   |
+| Disponibilité         | `availability`                                                         | NULL → `coming_soon` (jamais `available`)                                        |
+| Title                 | `seo_title` (vide partout)                                             | `{Nom} – {concentration} {marque}` (parfums, vocabulaire fermé) ; nom seul sinon |
+| Meta                  | `seo_description` (vide partout)                                       | accroche + début de la description ; jamais prix / livraison / WhatsApp          |
+| Alt                   | `alt_text` (vide partout)                                              | nom du produit (+ « – 200 g » pour une image de variante)                        |
+| `lastmod`             | max(`products.updated_at`, `product_variants.updated_at`)              | — (`product_media.updated_at` = date du remplissage de l'étape 6, ignorée)       |
 
 **Contenus volontairement non rendus** (aucune modification en base) :
 
@@ -251,12 +251,12 @@ génération des images (21 min 29 s), et 93 % de celle-ci est l'**encodage AVIF
 
 **Ce qui a été fait.**
 
-| Mesure | Effet |
-|---|---|
-| AVIF `effort: 3` (`astro.config.mjs`, `sharpImageService`) | Encodage 3,6–3,8× plus rapide, poids +1 à +3 %, SSIM −0,001, aucune différence visible agrandie ×2 (banc de 24 vraies sources). Qualités par défaut conservées : AVIF 50, WebP 80. Effort 2 écarté (+10 % de poids). |
-| Préréglages partagés `src/config/images.ts` | `GALLERY` 1200×1500 `inside` [480, 800, 1200] · `PRODUCT_CARD` 600×750 [200, 400, 600] · `THUMBNAIL` 128×160 [64, 128] · `COLLECTION_CARD`, `UNIVERSE_CARD`, `OFFER_CARD`, `HERO`. Une même photo dans un même cadre = un seul fichier. |
-| Miniature unique | Rail de galerie (64 px), sélecteur de couleur (48 px), recherche (48 px) et LAB (96 px) utilisent `THUMBNAIL` : le LAB n'a presque plus de fichiers propres (814 → 250). |
-| Rail de miniatures seulement à partir de 2 images | Le rail était masqué mais rendu (4 fichiers par photo) sur 78 % des fiches. |
+| Mesure                                                     | Effet                                                                                                                                                                                                                                   |
+| ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| AVIF `effort: 3` (`astro.config.mjs`, `sharpImageService`) | Encodage 3,6–3,8× plus rapide, poids +1 à +3 %, SSIM −0,001, aucune différence visible agrandie ×2 (banc de 24 vraies sources). Qualités par défaut conservées : AVIF 50, WebP 80. Effort 2 écarté (+10 % de poids).                    |
+| Préréglages partagés `src/config/images.ts`                | `GALLERY` 1200×1500 `inside` [480, 800, 1200] · `PRODUCT_CARD` 600×750 [200, 400, 600] · `THUMBNAIL` 128×160 [64, 128] · `COLLECTION_CARD`, `UNIVERSE_CARD`, `OFFER_CARD`, `HERO`. Une même photo dans un même cadre = un seul fichier. |
+| Miniature unique                                           | Rail de galerie (64 px), sélecteur de couleur (48 px), recherche (48 px) et LAB (96 px) utilisent `THUMBNAIL` : le LAB n'a presque plus de fichiers propres (814 → 250).                                                                |
+| Rail de miniatures seulement à partir de 2 images          | Le rail était masqué mais rendu (4 fichiers par photo) sur 78 % des fiches.                                                                                                                                                             |
 
 Largeurs conservées : la galerie sert 1200 px aux mobiles DPR 2–3 (430 × 2,6) et aux portables Retina ; les
 cartes 600 px au DPR 2 desktop (302 px). AVIF conservé partout (−45 % de poids par rapport au WebP).
@@ -264,14 +264,14 @@ cartes 600 px au DPR 2 desktop (302 px). AVIF conservé partout (−45 % de poid
 **Temps mesurés** (`node scripts/measure-build.mjs --cold | --warm` depuis `site/` : `--cold` supprime
 `dist/`, `node_modules/.astro` et `node_modules/.vite`, ce qu'efface `npm ci`) :
 
-| | Avant | Après |
-|---|---|---|
-| CI à froid, 4 vCPU (étape « Build statique ») | 21 min 39 s | **6 min 55 s** |
-| CI à froid, job complet (install, types, build, 3 contrôles) | 22 min 18 s | **7 min 34 s** |
-| Local à froid (12 threads) | 12 min 39 s | 4 min 24 s |
-| Local à chaud (cache valide) | 23 s | 16 s |
-| Fichiers image | 6 461 | 5 141 |
-| CPU AVIF / WebP (CI) | 4 780 s / 359 s | 1 275 s / 331 s |
+|                                                              | Avant           | Après           |
+| ------------------------------------------------------------ | --------------- | --------------- |
+| CI à froid, 4 vCPU (étape « Build statique »)                | 21 min 39 s     | **6 min 55 s**  |
+| CI à froid, job complet (install, types, build, 3 contrôles) | 22 min 18 s     | **7 min 34 s**  |
+| Local à froid (12 threads)                                   | 12 min 39 s     | 4 min 24 s      |
+| Local à chaud (cache valide)                                 | 23 s            | 16 s            |
+| Fichiers image                                               | 6 461           | 5 141           |
+| CPU AVIF / WebP (CI)                                         | 4 780 s / 359 s | 1 275 s / 331 s |
 
 **Cache.** Le cache d'Astro (`node_modules/.astro`) n'accélère que tant que les sources n'ont pas bougé :
 les images de `dar-nur.fr` sont servies par GitHub Pages avec `max-age=600` et un `ETag` qui change à
@@ -341,15 +341,15 @@ internationale **visée** : exigence de la future étape commande/livraison (pay
 n'est encore implémenté. En attendant, aucun texte public ne décrit de zone, de tarif, de délai ni de moyen de
 paiement (`config/commerce.ts`) :
 
-| Texte | Avant | Après |
-|---|---|---|
-| Bandeau (toutes pages) | Paiement à la réception · Livraison en Île-de-France | Commande et conseil sur WhatsApp |
-| Réassurance (toutes pages) | 4 faits : commande / paiement à la réception / livraison IDF / conseil | 2 faits : Commande sur WhatsApp (depuis la fiche, message prérempli) · Conseil personnalisé ; colonnes desktop = nombre de faits |
-| Meta de l'accueil | … paiement à la réception. | … Commande et conseil sur WhatsApp. |
-| Fiche : ligne livraison | Livraison en Île-de-France · paiement à la réception | Livraison et paiement : modalités confirmées sur WhatsApp |
-| Fiche : note sous le bouton | … vous payez à la réception. | La commande se fait sur WhatsApp : rien n'est à payer sur le site. |
-| Fiche : accordéon Livraison & paiement | paiement à la réception, remise gratuite Chelles / Lognes | Commande sur WhatsApp · Modalités confirmées sur WhatsApp · lien CGV |
-| Message WhatsApp prérempli | « Paiement à la réception : Revolut / Espèces » | ligne retirée |
+| Texte                                  | Avant                                                                  | Après                                                                                                                            |
+| -------------------------------------- | ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Bandeau (toutes pages)                 | Paiement à la réception · Livraison en Île-de-France                   | Commande et conseil sur WhatsApp                                                                                                 |
+| Réassurance (toutes pages)             | 4 faits : commande / paiement à la réception / livraison IDF / conseil | 2 faits : Commande sur WhatsApp (depuis la fiche, message prérempli) · Conseil personnalisé ; colonnes desktop = nombre de faits |
+| Meta de l'accueil                      | … paiement à la réception.                                             | … Commande et conseil sur WhatsApp.                                                                                              |
+| Fiche : ligne livraison                | Livraison en Île-de-France · paiement à la réception                   | Livraison et paiement : modalités confirmées sur WhatsApp                                                                        |
+| Fiche : note sous le bouton            | … vous payez à la réception.                                           | La commande se fait sur WhatsApp : rien n'est à payer sur le site.                                                               |
+| Fiche : accordéon Livraison & paiement | paiement à la réception, remise gratuite Chelles / Lognes              | Commande sur WhatsApp · Modalités confirmées sur WhatsApp · lien CGV                                                             |
+| Message WhatsApp prérempli             | « Paiement à la réception : Revolut / Espèces »                        | ligne retirée                                                                                                                    |
 
 `verify-home` et `verify-products` refusent désormais « paiement à la réception / à la livraison » et toute
 zone Île-de-France (Chelles, Lognes) dans tout le HTML, message WhatsApp encodé compris (contrôle négatif fait).
@@ -379,8 +379,7 @@ affiche servent déjà au bloc Miels (printemps) et à la carte d'univers (lavan
 **Parcours.** 1. Le client ajoute des produits au panier. 2. Il envoie une **demande de commande** (aucun
 paiement). 3. Dar Nūr vérifie la disponibilité et prépare. 4. Dar Nūr fixe la livraison (et une remise
 éventuelle) : le total final est confirmé. 5. Le client voit le total et le lien / les instructions de
-paiement. 6. Il paie. 7. Dar Nūr confirme le paiement. 8. Expédition, **jamais avant le paiement confirmé**.
-9. Le client voit le suivi. Aucun tarif, délai, seuil de gratuité ni pays « desservi » n'est annoncé.
+paiement. 6. Il paie. 7. Dar Nūr confirme le paiement. 8. Expédition, **jamais avant le paiement confirmé**. 9. Le client voit le suivi. Aucun tarif, délai, seuil de gratuité ni pays « desservi » n'est annoncé.
 
 **Architecture.** Le site reste 100 % statique (aucun SSR, aucune Netlify Function) : le navigateur appelle,
 avec la clé PUBLIQUE, quatre fonctions Postgres `SECURITY DEFINER` (même mécanisme que `check_promo_code`,
@@ -393,14 +392,14 @@ vivent mieux en base (où ils protègent aussi l'admin et la CLI). Schéma, stat
 `components/order/ApiConfig.astro` (URL + clé `sb_publishable_`, environnement, commande ouverte ou non),
 seulement sur les 4 pages qui l'utilisent.
 
-| Élément | Fichiers | Points clés |
-|---|---|---|
-| Panier | `scripts/cart-store.ts`, `cart-view.ts`, `cart-sync.ts`, `components/cart/MiniCart.astro`, `pages/panier.astro` | `localStorage` (`dn-cart-v1`) : produit, variante, libellé d'option, prix affiché (centimes), image, lien, quantité 1–99, 30 lignes. Lecture défensive (prix, UUID, liens `javascript:`, images `http:` écartés). Rendu DOM sans HTML interprété. Revérification `check_cart` au chargement : prix changé → mis à jour ET signalé ; article indisponible → signalé, envoi bloqué. Pas de compte. |
-| Fiche | `components/product/ProductPurchase.astro`, `lib/product-page.ts` (`cartOf`) | « Ajouter au panier » si `available` / `on_demand` et prix ; option obligatoire (message + focus). `on_demand` : « disponibilité confirmée après votre demande ». `coming_soon` / `out_of_stock` : aucun ajout. WhatsApp = lien secondaire « Une question ? » (produit seul). Vignette WebP 128 × 160 générée au build (+100 fichiers ≈ 2 Ko). |
-| Offres | `lib/catalog-store.ts` (`provenPromos`), SQL `resolve_lines` | Promotion produit **prouvée** (offre `product_promo` en cours, produit sans variante, prix réel = prix de référence) : appliquée à la fiche (prix barré), au panier ET par le serveur — Nissah 59,99 € → 40 €. Les packs (table `offers`) ne sont pas commandables en ligne. Aucune économie douteuse réintroduite. |
-| Demande | `pages/commande.astro` | Récapitulatif, Coordonnées (prénom, nom, e-mail, téléphone international), Livraison (pays ISO 3166-1 alpha-2, France en tête, noms par `Intl.DisplayNames` ; adresse 1/2, code postal obligatoire à 5 chiffres pour la France seulement, ville, région, instructions), explication du parcours, CGV, pot de miel. CTA « Envoyer ma demande de commande ». Validation navigateur = serveur ; erreurs reliées aux champs + résumé focalisé ; saisie jamais vidée. Clé d'idempotence par envoi. Panier vidé seulement après la réponse `ok`. Confirmation : numéro `DN-AAAA-XXXXXX`, articles, « Commande reçue », prochaine étape, lien de suivi (mémorisé sur l'appareil), WhatsApp avec le seul numéro de commande. |
-| Suivi | `pages/suivi.astro` | `/suivi/#<jeton>` : jeton de 256 bits dans le **fragment** (jamais envoyé au serveur web ni dans le Referer). Frise Commande reçue → Vérification → Paiement demandé → Paiement reçu → Expédiée. Total montré seulement une fois confirmé. « Payer ma commande » seulement si une vraie URL `https://` existe, sinon « Les instructions de paiement vous seront transmises par Dar Nūr. » ; « paiement en cours de vérification » si déjà réglé. Transporteur et suivi une fois expédiée. Jamais d'adresse, d'e-mail, de téléphone, de note ou de référence interne. |
-| Administration | `pages/admin/commandes.astro` | Connexion par le compte admin existant (Supabase Auth, session `sessionStorage`). Liste filtrée (environnement, statut), détail (client, adresse, lignes, journal), disponibilités par ligne, livraison (montant, transporteur, service, délai indicatif), remise motivée, demande de paiement (prestataire, URL, référence), confirmation manuelle du paiement, préparation, suivi (transporteur, numéro, URL), expédition, livraison, annulation motivée (remboursement dû si payée), remboursement marqué, note interne, notifications « client à prévenir » (copier le lien de suivi, préparer un e-mail). Chaque action envoie le statut affiché (concurrence). |
+| Élément        | Fichiers                                                                                                        | Points clés                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| -------------- | --------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Panier         | `scripts/cart-store.ts`, `cart-view.ts`, `cart-sync.ts`, `components/cart/MiniCart.astro`, `pages/panier.astro` | `localStorage` (`dn-cart-v1`) : produit, variante, libellé d'option, prix affiché (centimes), image, lien, quantité 1–99, 30 lignes. Lecture défensive (prix, UUID, liens `javascript:`, images `http:` écartés). Rendu DOM sans HTML interprété. Revérification `check_cart` au chargement : prix changé → mis à jour ET signalé ; article indisponible → signalé, envoi bloqué. Pas de compte.                                                                                                                                                                                                                                                                                                                     |
+| Fiche          | `components/product/ProductPurchase.astro`, `lib/product-page.ts` (`cartOf`)                                    | « Ajouter au panier » si `available` / `on_demand` et prix ; option obligatoire (message + focus). `on_demand` : « disponibilité confirmée après votre demande ». `coming_soon` / `out_of_stock` : aucun ajout. WhatsApp = lien secondaire « Une question ? » (produit seul). Vignette WebP 128 × 160 générée au build (+100 fichiers ≈ 2 Ko).                                                                                                                                                                                                                                                                                                                                                                       |
+| Offres         | `lib/catalog-store.ts` (`provenPromos`), SQL `resolve_lines`                                                    | Promotion produit **prouvée** (offre `product_promo` en cours, produit sans variante, prix réel = prix de référence) : appliquée à la fiche (prix barré), au panier ET par le serveur — Nissah 59,99 € → 40 €. Les packs (table `offers`) ne sont pas commandables en ligne. Aucune économie douteuse réintroduite.                                                                                                                                                                                                                                                                                                                                                                                                  |
+| Demande        | `pages/commande.astro`                                                                                          | Récapitulatif, Coordonnées (prénom, nom, e-mail, téléphone international), Livraison (pays ISO 3166-1 alpha-2, France en tête, noms par `Intl.DisplayNames` ; adresse 1/2, code postal obligatoire à 5 chiffres pour la France seulement, ville, région, instructions), explication du parcours, CGV, pot de miel. CTA « Envoyer ma demande de commande ». Validation navigateur = serveur ; erreurs reliées aux champs + résumé focalisé ; saisie jamais vidée. Clé d'idempotence par envoi. Panier vidé seulement après la réponse `ok`. Confirmation : numéro `DN-AAAA-XXXXXX`, articles, « Commande reçue », prochaine étape, lien de suivi (mémorisé sur l'appareil), WhatsApp avec le seul numéro de commande. |
+| Suivi          | `pages/suivi.astro`                                                                                             | `/suivi/#<jeton>` : jeton de 256 bits dans le **fragment** (jamais envoyé au serveur web ni dans le Referer). Frise Commande reçue → Vérification → Paiement demandé → Paiement reçu → Expédiée. Total montré seulement une fois confirmé. « Payer ma commande » seulement si une vraie URL `https://` existe, sinon « Les instructions de paiement vous seront transmises par Dar Nūr. » ; « paiement en cours de vérification » si déjà réglé. Transporteur et suivi une fois expédiée. Jamais d'adresse, d'e-mail, de téléphone, de note ou de référence interne.                                                                                                                                                 |
+| Administration | `pages/admin/commandes.astro`                                                                                   | Connexion par le compte admin existant (Supabase Auth, session `sessionStorage`). Liste filtrée (environnement, statut), détail (client, adresse, lignes, journal), disponibilités par ligne, livraison (montant, transporteur, service, délai indicatif), remise motivée, demande de paiement (prestataire, URL, référence), confirmation manuelle du paiement, préparation, suivi (transporteur, numéro, URL), expédition, livraison, annulation motivée (remboursement dû si payée), remboursement marqué, note interne, notifications « client à prévenir » (copier le lien de suivi, préparer un e-mail). Chaque action envoie le statut affiché (concurrence).                                                 |
 
 **Garde-fous vérifiés en production (2026-10-03, commande de test DN-2026-6R7JG9).** Demande depuis le
 navigateur (adresse belge) → admin : vérification, disponibilités, livraison 12,90 €, demande de paiement
@@ -460,7 +459,6 @@ gratuite ou sans frais de douane.
 **Limites.** Aucun prestataire de paiement ni e-mail ; clients prévenus à la main ; CGV et confidentialité
 obsolètes (production fermée) ; pas de compte client ; pas de modification d'adresse par l'admin (figée,
 note interne possible) ; pas de multi-devise, de tarifs transporteur, de droits de douane ni de facture.
-
 
 ## E-mails transactionnels (étape 11)
 
@@ -593,6 +591,7 @@ fonctions et tâche cron ; ne touche à aucune commande (testé : schéma identi
 `v=spf1 include:mx.ovh.com -all` (SPF unique) + `google-site-verification` ; **aucun DMARC** ; aucun DKIM Brevo.
 
 **À faire par le propriétaire** (aucun secret dans la conversation) :
+
 1. Compte Brevo (offre gratuite suffisante : 300 e-mails/jour).
 2. Brevo → Paramètres → Expéditeurs, domaines, IP dédiées → **Domaines** → ajouter `dar-nur.fr`,
    configuration manuelle → Brevo affiche ses enregistrements.
@@ -627,11 +626,11 @@ de test vers l'adresse validée seulement, vérification du rendu, de l'idempote
 Pages internes de la refonte (l'ancien dar-nur.fr n'est pas modifié ; ses `*.html` et leurs redirections
 relèvent de la bascule) :
 
-| Page | Fichier | Contenu |
-|---|---|---|
-| `/cgv/` | `pages/cgv.astro` | Parcours réel : demande sans obligation de payer → vérification → total final → demande de paiement (48 h) → contrat conclu au paiement → expédition sous 3 à 5 jours ; France + international sans pays ni tarif ; douanes ; rétractation 14 jours (frais de retour client, sauf erreur/défaut/non-conformité ; exceptions L. 221-28 seulement si réellement applicables, signalées avant paiement) ; encadré officiel des garanties (annexe D. 211-2, JO du 30 juin 2022, **ne pas reformuler**) ; médiation ; formulaire de rétractation |
-| `/confidentialite/` | `pages/confidentialite.astro` | Uniquement les traitements réels : commande (téléphone obligatoire), statuts de remise Brevo (ouvertures/clics jamais enregistrés), empreinte d'IP 48 h, `localStorage` (panier, 10 dernières commandes), lien de suivi ; Supabase (Paris), Brevo (Paris), Netlify (États-Unis, DPF + CCT) ; fidélité future non active ; 3 ans / jusqu'à 10 ans ; droits, CNIL |
-| `/mentions-legales/` | `pages/mentions-legales.astro` | Éditeur (EI, micro-entreprise), adresse, e-mail, téléphone professionnel, SIREN/SIRET, immatriculation RNE (2 octobre 2026), TVA 293 B, directeur de la publication, hébergeur Netlify (téléphone en attente) |
+| Page                 | Fichier                        | Contenu                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| -------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/cgv/`              | `pages/cgv.astro`              | Parcours réel : demande sans obligation de payer → vérification → total final → demande de paiement (48 h) → contrat conclu au paiement → expédition sous 3 à 5 jours ; France + international sans pays ni tarif ; douanes ; rétractation 14 jours (frais de retour client, sauf erreur/défaut/non-conformité ; exceptions L. 221-28 seulement si réellement applicables, signalées avant paiement) ; encadré officiel des garanties (annexe D. 211-2, JO du 30 juin 2022, **ne pas reformuler**) ; médiation ; formulaire de rétractation |
+| `/confidentialite/`  | `pages/confidentialite.astro`  | Uniquement les traitements réels : commande (téléphone obligatoire), statuts de remise Brevo (ouvertures/clics jamais enregistrés), empreinte d'IP 48 h, `localStorage` (panier, 10 dernières commandes), lien de suivi ; Supabase (Paris), Brevo (Paris), Netlify (États-Unis, DPF + CCT) ; fidélité future non active ; 3 ans / jusqu'à 10 ans ; droits, CNIL                                                                                                                                                                             |
+| `/mentions-legales/` | `pages/mentions-legales.astro` | Éditeur (EI, micro-entreprise), adresse, e-mail, téléphone professionnel, SIREN/SIRET, immatriculation RNE (2 octobre 2026), TVA 293 B, directeur de la publication, hébergeur Netlify (téléphone en attente)                                                                                                                                                                                                                                                                                                                               |
 
 - **Source unique** : `site/src/config/legal.ts`. Toute information inconnue vaut `null` et s'affiche
   « information en attente » ; `legalBlockers()` liste ce qui manque.
@@ -695,3 +694,134 @@ Branche `refonte/etape-13-synchronisation`, créée depuis `refonte/etape-12-jur
 - **Retour arrière** : Netlify → Deploys → republier un déploiement antérieur (`6ae1b1bcdfba655efa16f7cd` :
   même contenu, envoyé par la CLI ; `6ac4c05e6037fabece39779c` : étape 11) ; pour la branche, Site
   configuration → Build & deploy → Branches → remettre `refonte/etape-11-paiement-emails`.
+
+## Raccordement Shopify (étape 14)
+
+**Périmètre.** Préparation technique uniquement : Astro reste en `legacy`, avec son panier et sa demande
+de commande de l'étape 10. Aucun composant, page, script de commande, RPC ou migration Supabase n'est
+modifié. Aucun raccordement visible ni paiement n'est activé. Les fichiers du dépôt Shopify voisin
+sont périmés : seule leur forme et leur logique d'import ont servi de référence ; aucune donnée réelle
+ni aucun identifiant n'en est repris.
+
+**Données générées le 2026-10-28** (`site/src/data/shopify/`, scripts ci-dessous) : instantané public
+Shopify de 240 produits / 302 variantes ; 235 produits Supabase publiés ; **228 produits rapprochés
+(290 variantes), 0 écart de prix, 0 variante orpheline ou ambiguë, 0 exclu**. 7 anomalies bloquantes
+`supabase-only`, toutes des **brouillons Shopify** (contrôle Admin en lecture) : 6 produits à 0,00 €
+(`chantilly-karite-moninga`, `chantilly-karite-nila`, `gommage-hibiscus-nigelle`, `gommage-khamare-citron`,
+`gommage-louban`, `gommage-louban-lavande`) et `miel-myrtille` (mention de test). 12 avertissements
+`shopify-only` : produits venus de SumUp, absents de Supabase (dont les 2 « La Rose Bleue Massimo »).
+Échantillon de variantes contrôlé dans l'Admin Shopify : produit, option et prix identiques.
+
+**Architecture et modes.** `src/lib/commerce/mode.ts` centralise `CommerceMode`, la valeur explicitement
+configurée `legacy`, la constante `shopifyProductionApproved = false`, le domaine unique de la boutique
+et les décisions pures `isLegacyCartEnabled`, `isOrderSubmissionEnabled`, `purchaseActionFor`.
+`DAR_NUR_COMMERCE_MODE` remplace la valeur configurée ; seules les valeurs exactes `legacy`, `shopify`,
+`disabled` sont acceptées (une chaîne vide est une erreur). Le schéma Astro valide la variable et
+`config/commerce.ts` expose le mode résolu avec l'environnement `DAR_NUR_ENV` de `config/site.ts`.
+Le hook `astro:build:start` applique aussi le même garde-fou avant génération des pages.
+
+| Mode       | Décision panier Astro | Décision demande Astro                                                     | Décision achat future |
+| ---------- | --------------------- | -------------------------------------------------------------------------- | --------------------- |
+| `legacy`   | Autorisée             | Autorisée hors production ; en production, exigences juridiques existantes | Panier actuel         |
+| `shopify`  | Désactivée            | Désactivée                                                                 | Lien Shopify validé   |
+| `disabled` | Désactivée            | Désactivée                                                                 | Aucun achat           |
+
+Ces décisions sont préparées, **pas encore branchées à l'interface** : changer le mode ne constitue
+donc pas une bascule commerciale à cette étape. Tout build `shopify` exige une table générée, non vide,
+structurellement valide et sans anomalie bloquante. En `DAR_NUR_ENV=production`, il exige en plus
+l'approbation versionnée explicite ; une variable d'environnement ne peut pas approuver la production.
+
+**Acquisition en lecture seule.** `scripts/shopify/fetch-shopify-catalog.mjs` parcourt les GET publics
+`https://shop.dar-nur.fr/products.json?limit=250&page=N` jusqu'à une page vide. Il conserve les seuls
+ID numériques positifs sûrs fournis par Shopify, handles, titres et variantes (options, prix chaîne,
+disponibilité booléenne), puis trie produits par handle/ID et variantes par ID. Les doublons d'ID,
+réponses invalides et paginations répétées provoquent une erreur avant écriture de l'instantané.
+`scripts/shopify/build-product-map.mjs` lit PostgREST avec `SUPABASE_URL` et `SUPABASE_ANON_KEY`
+(préfixe `sb_publishable_` obligatoire comme dans `lib/supabase.ts`, toute autre clé refusée).
+Colonnes explicitement listées, GET uniquement, filtre `status=published`, pagination jusqu'à une page
+vide. Les variantes inactives sont lues uniquement pour distinguer un produit sans variantes d'un
+produit dont toutes les variantes sont inactives ; seules les actives sont rapprochées. Aucune donnée
+client, clé privée, écriture Supabase ou authentification Shopify n'est nécessaire.
+
+**Correspondance et validation.** `src/lib/commerce/product-map.ts` est pur et importable par Astro
+ou Node avec `--experimental-strip-types`. La table contient la projection publique source Supabase,
+les dates de génération/instantané, les entrées produit (statuts de publication et présence publique,
+exclusion, statut de correspondance), variantes et anomalies. Le rapport Markdown rend les anomalies
+lisibles. Les règles sont les suivantes :
+
+- Produit : égalité **exacte** slug Supabase = handle Shopify ; aucun rapprochement par titre ou prix,
+  aucune table de remplacement manuelle. Un handle différent reste à résoudre dans les données.
+- Variantes : axes `variant_axes`, sinon clés des options historiques comme dans l'import ; valeurs
+  jsonb, sinon libellés normalisés `product_variant_options` (alias `format` → `contenance`). La fonction
+  `norm` de l'import est reprise : minuscules, NFD, suppression des diacritiques U+0300–U+036F,
+  caractères hors a–z/0–9 remplacés par des espaces, trim. La comparaison porte sur le tuple des valeurs
+  d'options dans l'ordre des axes, jamais sur la position de la variante, son titre ou son prix.
+- Produit Supabase sans variante : exige exactement une variante Shopify. Un produit dont toutes les
+  variantes sont inactives n'utilise pas cette règle. Options manquantes ou plusieurs candidats : aucun
+  choix, ID de correspondance nul, anomalie bloquante.
+- Bloquants : produit Supabase sans Shopify public, plusieurs produits pour le même slug/handle,
+  variantes orphelines de chaque côté, ambiguïté, absence de variante active/Shopify, prix absent,
+  non positif ou différent au centime, référence exclue présente dans une source.
+- Exclusions permanentes : `miel-blanc-kirghizistan`, `miel-rose-siberie`, `miel-fraise-russie`,
+  `miel-lavande`, `miel-shilajit`. Les cinq titres exacts de l'import sont également refusés côté Shopify
+  pour détecter un éventuel handle renommé. Aucun lien n'est produit pour ces références.
+- Avertissements : produit Shopify sans Supabase publié (origine inconnue : SumUp, brouillon ou archive
+  possibles), disponibilité divergente. `available` et `on_demand` sont commandables côté Supabase,
+  `null`, `coming_soon`, `out_of_stock` ne le sont pas. Un lien exige la disponibilité des deux sources.
+
+`scripts/verify-shopify-map.mjs` relit uniquement les fichiers versionnés. Il recalcule les entrées et
+anomalies depuis la projection Supabase et l'instantané Shopify : ID inventé, rattaché au mauvais
+produit, UUID à la place d'un ID Shopify, doublon d'ID, entrée omise/dupliquée ou métadonnées divergentes
+sont des erreurs structurelles (code 1 dans tous les modes). En `legacy` et `disabled`, les anomalies
+métier sont rapportées avec code 0, y compris les structures vides d'attente. `--strict` et le mode
+`shopify` retournent 1 pour toute anomalie bloquante. Cette validation vérifie la cohérence des fichiers,
+pas la fraîcheur ni la véracité d'une source modifiée conjointement avec la table.
+
+**Liens d'achat préparés.** `src/lib/commerce/purchase.ts` expose `shopifyPurchaseLink` : résultat typé
+`ok/url` ou `ok: false/reason`. Il exige le mode Shopify et revalide la table contre l'instantané.
+Sans variante Supabase : `/products/<handle>`. Avec variante Supabase sélectionnée :
+`/products/<handle>?variant=<ID Shopify>`. Le paramètre facultatif de quantité produit
+`/cart/<ID Shopify>:<quantité>` (entier 1–99, aucune correction silencieuse). Aucun ID Shopify n'est
+accepté en entrée utilisateur ou calculé depuis un UUID ; une variante Supabase doit être résolue dans
+la table. Produit absent, variante requise/non rapprochée, exclusion, incohérence ou indisponibilité :
+aucune URL d'achat.
+
+**Commandes (depuis `site/`, Node ≥ 22.12).** Les scripts réseau ne chargent aucun fichier `.env` ;
+fournir les variables dans le processus avec les valeurs publiques réelles :
+
+```powershell
+$env:SUPABASE_URL = 'https://<projet>.supabase.co'
+$env:SUPABASE_ANON_KEY = 'sb_publishable_<cle-publique>'
+node --experimental-strip-types scripts/shopify/fetch-shopify-catalog.mjs
+node --experimental-strip-types scripts/shopify/build-product-map.mjs
+npx prettier --write src/data/shopify/shopify-catalog.json src/data/shopify/product-map.json src/data/shopify/product-map-report.md
+npm run verify:shopify-map
+npm run verify:shopify-map -- --strict
+npm run test:commerce
+```
+
+Les tests commerce sont hors ligne, avec des données explicitement fictives ; ils couvrent les
+correspondances, refus et URLs, les trois modes et le garde-fou de production. Ils exécutent aussi le
+vérificateur sur les fichiers versionnés en legacy/strict/shopify. La CI inclut `test:commerce` après
+`test:cart` et `verify:shopify-map` à la fin. Les scripts réseau ne sont jamais exécutés par la CI.
+
+**Avant activation.** Générer les deux fichiers actuels, lire le rapport et résoudre tous les blocages ;
+examiner aussi les avertissements et les produits uniquement Shopify. Tester les liens réels, stocks,
+prix, taxes, livraison et parcours Shopify. Brancher ensuite les décisions centralisées dans
+`ProductPurchase.astro` (sélecteur et lien), `MiniCart.astro`, Header et Footer (accès panier),
+`panier.astro`, `commande.astro` et `components/order/ApiConfig.astro` (affichage et autorisation
+d'envoi), ainsi que les points d'entrée des scripts panier/commande ; adapter les textes commerciaux.
+Préserver le suivi des anciennes commandes et fermer explicitement la soumission côté serveur dans une
+mission dédiée avant bascule (une fonction pure côté Astro ne ferme pas une RPC). Valider en
+préproduction avant toute approbation versionnée et configuration de production.
+
+**Limites et retour arrière.** Le catalogue public ignore les brouillons Shopify, ne fournit ni
+l'historique ni les statuts privés, et les disponibilités peuvent évoluer après l'instantané. Aucun
+webhook ni synchronisation continue ; le paiement et le stock définitifs restent du ressort de Shopify :
+régénérer l'instantané et la table avant toute activation. Vérifié le 2026-10-28 : `npm run ci` vert
+(preprod) ; HTML du build identique à l'étape 13 (288/289 fichiers octet pour octet, seul l'horodatage
+de `/lab/supabase/` diffère) ; builds `shopify`+`production`, `shopify`+`preprod` et mode invalide
+refusés par le hook avant génération. À cette étape, revenir à `DAR_NUR_COMMERCE_MODE=legacy` (ou retirer l'override) restaure les
+décisions initiales ; les fonctions et données de commande existantes restent intactes. Après le futur
+branchement de l'interface, revalider les garde-fous juridiques et serveur de l'étape 10 avant toute
+réouverture legacy ; `disabled` constituera le mode de fermeture des nouveaux achats.
