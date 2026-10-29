@@ -1685,6 +1685,13 @@ function renderBrands() {
   }
   tbody.innerHTML = allBrands.map(b => {
     const used = allProducts.filter(p => p.brand_slug === b.id).length;
+    // Même règle que scripts/generate-parfums.mjs : une marque n'est publiée
+    // (hub /parfums/, page /parfums/<slug>/, sitemap) que si elle est active
+    // ET qu'au moins un parfum actif lui est rattaché.
+    const activeParfums = allProducts.filter(p => p.brand_slug === b.id && p.active && p.category_id === 'parfums').length;
+    const hiddenBadge = b.active && activeParfums === 0
+      ? ` <span class="badge badge-lvl-attention" title="Aucun parfum actif rattaché : la marque n'apparaît pas sur le site (ni sur /parfums/, ni en page marque). Elle apparaîtra dès qu'un parfum actif lui sera associé.">Non visible sur le site · aucun parfum actif</span>`
+      : '';
     const safeImg = safeImageSrc(b.image_url);
     // Pas d'image de marque : logo Dar Nūr sur fond crème plutôt qu'un
     // carré vide — jamais un simple bloc gris sans identité.
@@ -1695,9 +1702,9 @@ function renderBrands() {
       <td>${thumb}</td>
       <td>${esc(b.name)}</td>
       <td><code>${esc(b.id)}</code></td>
-      <td>${used}</td>
+      <td>${used}${used !== activeParfums ? ` <span style="color:var(--muted);font-size:.82rem">(${activeParfums} actif${activeParfums > 1 ? 's' : ''})</span>` : ''}</td>
       <td>${b.sort_order}</td>
-      <td><span class="badge ${b.active?'badge-ok':'badge-off'}">${b.active?'Active':'Inactive'}</span></td>
+      <td><span class="badge ${b.active?'badge-ok':'badge-off'}">${b.active?'Active':'Inactive'}</span>${hiddenBadge}</td>
       <td><div class="actions">
         <button class="btn btn-outline btn-small btn-edit-brand" data-id="${esc(b.id)}">Éditer</button>
         <button class="btn btn-danger btn-small btn-delete-brand" data-id="${esc(b.id)}" data-name="${esc(b.name)}" data-used="${used}">Suppr.</button>
@@ -1801,7 +1808,9 @@ async function saveBrandModal() {
     }
 
     const saved = await saveBrand(brand);
-    showToast(isNew ? 'Marque créée ✓' : 'Marque modifiée ✓', 'ok');
+    showToast(isNew
+      ? 'Marque créée ✓ — elle apparaîtra sur le site dès qu’un parfum actif lui sera associé.'
+      : 'Marque modifiée ✓', 'ok');
 
     const fromProduct = _brandModalFromProduct; // lire avant closeBrandModal() qui remet à false
     closeBrandModal();

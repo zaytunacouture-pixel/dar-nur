@@ -8,6 +8,16 @@
 // ajouter une marque = créer des produits dans Supabase avec brand/brand_slug
 // renseignés (voir admin.html), rien d'autre.
 //
+// Règle de publication d'une marque (voir groupByBrand) : une marque n'est
+// publiée — carte sur le hub, page parfums/<slug>/, entrée sitemap, lien dans
+// le menu des pages marque — que si elle est ACTIVE dans `brands` ET qu'au
+// moins un produit ACTIF de category_id = 'parfums' lui est rattaché
+// (brand_slug). Un seul parfum actif suffit. Une marque créée sans parfum
+// actif reste donc invisible sur le site (mais visible dans admin.html, qui la
+// signale « Non visible sur le site ») ; elle apparaît à la régénération qui
+// suit l'activation de son premier parfum. Une marque qui perd son dernier
+// parfum actif voit sa page supprimée (voir updateSitemap).
+//
 // Ne dépend PAS de js/config.js — utilise des variables d'environnement dédiées
 // au pipeline (PARFUMS_SUPABASE_URL / PARFUMS_SUPABASE_KEY).
 //
