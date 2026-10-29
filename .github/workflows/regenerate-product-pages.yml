@@ -1,64 +1,58 @@
-name: Régénère les fiches produit (Supabase → HTML statique)
+name: Régénère le site (Supabase → HTML statique)
 
-# Régénère à la fois les fiches produit (/{slug}/) ET les blocs marqués
-# <!-- AUTO:CATEGORY_*:START/END --> des pages catégories couvertes par
-# scripts/generate-category-pages.mjs (Miels Gourmands pour l'instant) — les
-# deux générateurs dépendent exactement des mêmes événements (tout produit,
-# tout changement de catégorie), inutile de dupliquer les triggers Postgres
-# pour ça.
+# Workflow UNIQUE de régénération automatique du site statique. Il exécute, dans
+# un ordre fixe et en un seul commit, tous les générateurs (scripts/regenerer-site.sh) :
+# fiches produit /{slug}/, pages catégories (blocs AUTO), idées cadeaux, collection
+# Parfums (hub + pages marque), index de recherche.
 #
-# Déclenchement à la demande (plus un cron de rattrapage, voir plus bas) :
-#   - repository_dispatch "regenerate-product-pages" : envoyé automatiquement
-#     par les triggers Postgres Supabase sur `products` (tout produit,
-#     n'importe quelle catégorie) et `categories` (le label d'une catégorie
-#     apparaît sur chaque fiche produit) — voir supabase/sql/webhook_automation.sql.
-#   - workflow_dispatch : bouton manuel "Run workflow" dans l'onglet Actions,
-#     de secours si besoin d'une republication immédiate.
-#   - push sur main touchant index.html à la racine : index.html est le
-#     GABARIT des 237 fiches (scripts/generate-product-pages.mjs le lit tel
-#     quel et n'en réécrit que le <head> et #productView). Sans ce trigger,
-#     toute modification de index.html désynchronisait silencieusement les
-#     237 fiches jusqu'au prochain événement Supabase sans rapport.
-#     Restreint à main : la boucle de publication ci-dessous rebase en dur
-#     sur origin/main, elle serait incorrecte sur une branche de travail.
+# Pourquoi un seul workflow (29/10/2026) : regenerate-parfums.yml tournait en
+# parallèle de celui-ci dans un autre groupe de concurrence ; les deux réécrivaient
+# les fiches et sitemap.xml à partir d'états différents de la base, et le rebase de
+# publication a échoué sur un conflit de sitemap.xml (exécution 40858402018).
+# regenerate-parfums.yml n'est plus qu'un secours manuel qui lance le même script
+# dans le même groupe.
 #
-# Protection anti-boucle — deux barrières indépendantes :
-#   1. Le filtre `paths` ne retient que "index.html" à la racine. Les motifs
-#      `paths` de GitHub sont ancrés à la racine du dépôt : "index.html" ne
-#      matche QUE ce fichier, jamais "<slug>/index.html" ni
-#      "<catégorie>/index.html" (il faudrait "**/index.html" pour cela).
-#      Or le commit de ce workflow ne peut contenir que : <slug>/index.html,
-#      <catégorie>/index.html, idees-cadeaux/index.html, sitemap.xml,
-#      scripts/.generated-product-slugs.json et data/search-index.json — ce
-#      sont les seules cibles d'écriture des générateurs, index.html racine
-#      n'y étant ouvert qu'en LECTURE. Son propre commit ne peut donc pas le redéclencher.
-#   2. Le commit reste marqué [skip ci] : même si la barrière 1 cédait un
-#      jour, GitHub n'ouvrirait aucun run pour ce push.
+# Déclenchement :
+#   - repository_dispatch "regenerate-product-pages" ET "regenerate-parfums" :
+#     envoyés par les triggers Postgres Supabase (products, categories, brands —
+#     voir supabase/sql/webhook_automation.sql et parfums_webhook_trigger.sql),
+#     inchangés : les deux types aboutissent ici.
+#   - workflow_dispatch : bouton manuel "Run workflow".
+#   - push sur main touchant index.html à la racine : index.html est le GABARIT des
+#     fiches (scripts/generate-product-pages.mjs le lit tel quel).
+#   - schedule : filet de sécurité, aux horaires des deux anciens workflows (8×/jour).
+#     Le webhook Supabase → GitHub (PAT dans Vault + net.http_post) échoue en silence
+#     quand le jeton expire ; un run planifié sans dérive ne committe rien, avec
+#     dérive il committe ET le signale (message et résumé de l'exécution).
 #
-# Filet de sécurité planifié (ajouté le 2026-09-18) : le webhook Supabase →
-# GitHub repose sur un PAT stocké dans Vault et sur net.http_post(), qui ne
-# remonte JAMAIS une erreur (un 401 « jeton expiré » est avalé en silence).
-# Constat : plus aucun repository_dispatch reçu après le 2026-08-12, et les
-# 10 parfums Gulf Collection créés les 17–18/09 ne sont jamais arrivés sur le
-# site. Ce cron rejoue la génération 4×/jour : les générateurs étant
-# idempotents et le commit conditionnel, un run planifié sans dérive ne
-# produit rien ; s'il produit un commit, c'est la preuve que le webhook a
-# manqué un événement (le message de commit le dit, voir plus bas).
-# Décalé de 30 min par rapport au cron de regenerate-parfums.yml pour que
-# les deux workflows ne poussent jamais sur main en même temps.
+# Concurrence : un seul groupe « regenerate-site », sans annulation de l'exécution en
+# cours. GitHub garde au plus une exécution en attente par groupe (une nouvelle
+# demande remplace l'ancienne en attente). Aucune demande n'est perdue : chaque
+# exécution régénère TOUT depuis l'état de la base au moment où elle démarre, et
+# l'exécution en attente démarre forcément après la dernière demande reçue.
+# Le checkout prend le dernier main au démarrage (ref: main), pas le commit de
+# l'événement, qui peut être antérieur au commit de l'exécution précédente.
+#
+# Protection anti-boucle — trois barrières indépendantes :
+#   1. Le filtre `paths` ne retient que "index.html" à la racine (motifs ancrés à la
+#      racine : jamais "<slug>/index.html"). Les générateurs n'écrivent jamais
+#      index.html racine (lecture seule).
+#   2. Le commit est marqué [skip ci].
+#   3. Un push fait avec GITHUB_TOKEN ne déclenche aucun workflow.
 on:
   push:
     branches: [main]
     paths:
       - index.html
   repository_dispatch:
-    types: [regenerate-product-pages]
+    types: [regenerate-product-pages, regenerate-parfums]
   workflow_dispatch: {}
   schedule:
     - cron: '7 0,6,12,18 * * *'
+    - cron: '37 3,9,15,21 * * *'
 
 concurrency:
-  group: regenerate-product-pages
+  group: regenerate-site
   cancel-in-progress: false
 
 permissions:
@@ -68,85 +62,21 @@ jobs:
   regenerate:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout du dépôt
+      - name: Checkout du dernier main
         uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: Configurer Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: Générer les fiches produit depuis Supabase
-        run: node scripts/generate-product-pages.mjs
-
-      - name: Générer les pages catégories (blocs marqués) depuis Supabase
-        run: node scripts/generate-category-pages.mjs
-
-      # Blocs marqués AUTO:GIFT_* de idees-cadeaux/index.html. Même source
-      # d'événements que les deux générateurs ci-dessus (tout changement
-      # produit). Si les colonnes gift_* n'existent pas encore en base
-      # (migration supabase/sql/gift_ideas_migration.sql non passée), le script
-      # journalise une notice et sort en 0 sans toucher au fichier — il ne doit
-      # pas faire échouer la régénération des 237 fiches.
-      #
-      # idees-cadeaux/index.html n'est PAS ajouté au filtre `paths` du
-      # déclencheur `push` : ce fichier est une SORTIE de ce workflow, l'y
-      # inscrire rendrait son propre commit capable de se redéclencher.
-      - name: Générer la page Idées cadeaux (blocs marqués) depuis Supabase
-        run: node scripts/generate-gift-page.mjs
-
-      # Index de la recherche publique (data/search-index.json), lu par
-      # js/search.js. Généré ici, avec les fiches, pour qu'un résultat de
-      # recherche pointe toujours vers une page /{slug}/ qui existe. Sortie
-      # déterministe (aucune date) : sans changement de catalogue, le fichier
-      # est identique et le commit conditionnel ci-dessous ne se déclenche pas.
-      - name: Générer l'index de recherche depuis Supabase
-        run: node scripts/generate-search-index.mjs
-
-      - name: Vérifier si le contenu généré a réellement changé
-        id: diff
-        run: |
-          # git add -A sans restriction de chemin : sans risque ici, le
-          # checkout de ce job est toujours neuf (aucun fichier étranger ne
-          # peut être présent), contrairement à un poste de travail persistant.
-          git add -A
-          if git diff --cached --quiet; then
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::Contenu identique au précédent — aucun commit créé."
-          else
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-            echo "::notice::Contenu modifié — commit à venir."
-            if [ "${{ github.event_name }}" = "schedule" ]; then
-              echo "::warning::Dérive rattrapée par le run planifié : le webhook Supabase → GitHub a manqué au moins un événement. Vérifier le PAT (supabase/sql/webhook_rotate_pat.sql)."
-              echo "⚠️ **Dérive rattrapée par le run planifié** — le webhook Supabase → GitHub n'a pas déclenché la régénération. Vérifier le PAT GitHub stocké dans Vault (\`supabase/sql/webhook_rotate_pat.sql\`)." >> "$GITHUB_STEP_SUMMARY"
-            fi
-          fi
-
-      - name: Committer et publier uniquement si changement réel
-        if: steps.diff.outputs.changed == 'true'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          # Le message distingue un rattrapage planifié d'un déclenchement
-          # normal : un « rattrapage » dans l'historique = webhook défaillant.
-          if [ "${{ github.event_name }}" = "schedule" ]; then
-            git commit -m "chore: régénère les fiches produit depuis Supabase (rattrapage planifié, webhook manqué) [skip ci]"
-          else
-            git commit -m "chore: régénère les fiches produit depuis Supabase [skip ci]"
-          fi
-
-          # main peut avancer entre le checkout et ce push (autre commit
-          # poussé pendant l'exécution du job) : on rebase sur le dernier
-          # main et on retente plusieurs fois avant d'abandonner.
-          for i in 1 2 3 4 5; do
-            if git push; then
-              exit 0
-            fi
-            echo "::warning::Push refusé (main a avancé) — tentative $i/5, rebase sur origin/main et nouvel essai."
-            git fetch origin main
-            git rebase origin/main
-            sleep $((i * 3))
-          done
-
-          echo "::error::Échec du push après 5 tentatives (main avance plus vite que le rebase)."
-          exit 1
+      # Génère, committe si changement réel et publie ; en cas de push refusé,
+      # repart du dernier main et régénère (voir scripts/regenerer-site.sh).
+      - name: Régénérer et publier
+        env:
+          EVENEMENT: ${{ github.event_name }}
+          PARFUMS_SUPABASE_URL: ${{ secrets.PARFUMS_SUPABASE_URL }}
+          PARFUMS_SUPABASE_KEY: ${{ secrets.PARFUMS_SUPABASE_KEY }}
+        run: bash scripts/regenerer-site.sh

@@ -1,46 +1,22 @@
-name: Régénère la page Parfums (Supabase → HTML statique)
+name: Régénère le site — secours manuel (ancien « Régénère la page Parfums »)
 
-# Déclenchement à la demande (plus un cron de rattrapage, voir plus bas) :
-#   - repository_dispatch "regenerate-parfums" : envoyé automatiquement par le
-#     trigger Postgres Supabase, filtré sur category_id = 'parfums' (voir
-#     supabase/sql/parfums_webhook_trigger.sql).
-#   - workflow_dispatch : bouton manuel "Run workflow" dans l'onglet Actions,
-#     de secours si besoin d'une republication immédiate.
+# Secours MANUEL uniquement (bouton "Run workflow"). Depuis le 29/10/2026, toute la
+# régénération automatique — y compris la collection Parfums et le signal Supabase
+# "regenerate-parfums" — passe par regenerate-product-pages.yml.
 #
-# Protection anti-boucle : ce workflow n'écoute jamais "push" — son propre
-# commit ne peut donc jamais se re-déclencher lui-même. Le commit est en plus
-# marqué [skip ci] par défense en profondeur.
+# Ce workflow lance exactement le même script (scripts/regenerer-site.sh : fiches,
+# catégories, cadeaux, parfums, recherche) dans le MÊME groupe de concurrence
+# « regenerate-site » : il ne peut jamais tourner en même temps qu'une régénération
+# automatique. Comme chaque exécution régénère tout, peu importe laquelle GitHub
+# garde en attente : aucune demande n'est perdue.
 #
-# Ordre imposé (cartes parfums -> fiches produit) : depuis que les cartes de
-# /parfums/<marque>/ sont des liens vers les vraies fiches /{slug}/, une page
-# marque ne doit JAMAIS être publiée avant la fiche qu'elle référence, sinon
-# le visiteur tombe sur un 404. Or "regenerate-parfums" et
-# "regenerate-product-pages" sont deux workflows indépendants, déclenchés
-# simultanément par deux triggers Postgres distincts sur `products`
-# (webhook_automation.sql, triggers 4a et 5) : rien ne garantit lequel
-# committe en premier.
-# La garantie est donc obtenue ici, à l'intérieur du job : on génère les
-# fiches AVANT les pages marque et on committe les deux ENSEMBLE, dans le même
-# commit atomique. Quel que soit l'ordre réel des deux workflows, tout commit
-# qui publie une carte publie aussi la fiche vers laquelle elle pointe.
-# Ce choix couvre aussi le trigger `brands` (trigger 6), qui déclenche
-# "regenerate-parfums" seul, sans aucun "regenerate-product-pages" en face.
-#
-# Filet de sécurité planifié (ajouté le 2026-09-18) : même constat et même
-# logique que dans regenerate-product-pages.yml — le webhook Supabase → GitHub
-# (PAT dans Vault + net.http_post silencieux) a cessé de déclencher quoi que
-# ce soit après le 2026-08-12, sans aucune erreur visible. Ce cron rejoue la
-# génération 4×/jour, décalé de 30 min par rapport à l'autre workflow ; sans
-# dérive il ne commit rien, avec dérive il commit ET le signale.
+# Pas de repository_dispatch ni de schedule ici : sinon deux workflows recevraient
+# le même signal.
 on:
-  repository_dispatch:
-    types: [regenerate-parfums]
   workflow_dispatch: {}
-  schedule:
-    - cron: '37 3,9,15,21 * * *'
 
 concurrency:
-  group: regenerate-parfums
+  group: regenerate-site
   cancel-in-progress: false
 
 permissions:
@@ -50,75 +26,19 @@ jobs:
   regenerate:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout du dépôt
+      - name: Checkout du dernier main
         uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: Configurer Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      # Prérequis des cartes parfums : chaque carte pointe vers /{slug}/.
-      # Même script que le workflow "regenerate-product-pages" — aucun code
-      # dupliqué, on réutilise le générateur existant. Il ne demande aucun
-      # secret (il lit la clé anon publique depuis js/config.js) et il est
-      # idempotent : si les fiches sont déjà à jour, cette étape ne produit
-      # aucune modification et ne crée donc aucun commit.
-      - name: Générer les fiches produit (prérequis des cartes parfums)
-        run: node scripts/generate-product-pages.mjs
-
-      - name: Générer la collection Parfums (hub + pages marque) depuis Supabase
+      - name: Régénérer et publier
         env:
+          EVENEMENT: ${{ github.event_name }}
           PARFUMS_SUPABASE_URL: ${{ secrets.PARFUMS_SUPABASE_URL }}
           PARFUMS_SUPABASE_KEY: ${{ secrets.PARFUMS_SUPABASE_KEY }}
-        run: node scripts/generate-parfums.mjs
-
-      - name: Vérifier si le contenu généré a réellement changé
-        id: diff
-        run: |
-          # Portée élargie aux fiches produit (/{slug}/) : elles doivent partir
-          # dans le MÊME commit que les pages marque qui les référencent.
-          # git add -A sans restriction de chemin, comme dans le workflow
-          # regenerate-product-pages : le checkout de ce job est toujours neuf,
-          # aucun fichier étranger ne peut s'y trouver.
-          git add -A
-          if git diff --cached --quiet; then
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::Contenu identique au précédent — aucun commit créé."
-          else
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-            echo "::notice::Contenu modifié — commit à venir."
-            if [ "${{ github.event_name }}" = "schedule" ]; then
-              echo "::warning::Dérive rattrapée par le run planifié : le webhook Supabase → GitHub a manqué au moins un événement. Vérifier le PAT (supabase/sql/webhook_rotate_pat.sql)."
-              echo "⚠️ **Dérive rattrapée par le run planifié** — le webhook Supabase → GitHub n'a pas déclenché la régénération. Vérifier le PAT GitHub stocké dans Vault (\`supabase/sql/webhook_rotate_pat.sql\`)." >> "$GITHUB_STEP_SUMMARY"
-            fi
-          fi
-
-      - name: Committer et publier uniquement si changement réel
-        if: steps.diff.outputs.changed == 'true'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          if [ "${{ github.event_name }}" = "schedule" ]; then
-            git commit -m "chore: régénère la collection Parfums depuis Supabase (rattrapage planifié, webhook manqué) [skip ci]"
-          else
-            git commit -m "chore: régénère la collection Parfums (fiches + hub + pages marque) depuis Supabase [skip ci]"
-          fi
-
-          # Ce commit porte désormais les fiches produit ET les pages marque :
-          # le perdre sur un push refusé republierait des cartes sans leurs
-          # fiches au prochain déclenchement. Même stratégie que le workflow
-          # regenerate-product-pages, qui pousse sur la même branche et peut
-          # faire avancer main pendant ce job.
-          for i in 1 2 3 4 5; do
-            if git push; then
-              exit 0
-            fi
-            echo "::warning::Push refusé (main a avancé) — tentative $i/5, rebase sur origin/main et nouvel essai."
-            git fetch origin main
-            git rebase origin/main
-            sleep $((i * 3))
-          done
-
-          echo "::error::Échec du push après 5 tentatives (main avance plus vite que le rebase)."
-          exit 1
+        run: bash scripts/regenerer-site.sh
