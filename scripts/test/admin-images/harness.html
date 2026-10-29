@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Banc — optimisation des images de l'admin</title>
+</head>
+<body>
+<h1>Banc — js/admin-images.js et uploadImage</h1>
+<pre id="out">Lancer : await runBanc()</pre>
+<script>
+// Faux client Supabase : js/supabase-client.js appelle supabase.createClient au chargement.
+// Le stockage simulé refuse le premier envoi sur un chemin déjà « occupé » (409).
+window.__envois = [];
+window.__occupes = new Set(['products/test/occupe.webp']);
+window.supabase = {
+  createClient: () => ({
+    auth: {},
+    storage: {
+      from: (bucket) => ({
+        upload: async (path, file, options) => {
+          window.__envois.push({ bucket, path, options, size: file.size, type: file.type });
+          if (window.__occupes.has(path)) return { error: { statusCode: '409', message: 'The resource already exists' } };
+          window.__occupes.add(path);
+          return { data: { path }, error: null };
+        },
+        getPublicUrl: (path) => ({ data: { publicUrl: `https://exemple.supabase.co/storage/v1/object/public/${bucket}/${path}` } }),
+      }),
+    },
+  }),
+};
+window.SUPABASE_URL = 'https://exemple.supabase.co';
+window.SUPABASE_ANON = 'cle-factice';
+</script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/admin-images.js"></script>
+<script>
+const FIXTURES = '/fixtures/';
+const TYPES = { png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', webp: 'image/webp', gif: 'image/gif', heic: 'image/heic' };
+
+async function fixture(name) {
+  const res = await fetch(FIXTURES + name);
+  if (!res.ok) throw new Error(`fixture absente : ${name}`);
+  const ext = name.split('.').pop().toLowerCase();
+  return new File([await res.blob()], name, { type: TYPES[ext] || '' });
+}
+
+async function bitmapOf(blob) {
+  return createImageBitmap(blob, { imageOrientation: 'from-image' });
+}
+
+function lumaOf(source, w, h) {
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, w, h);
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(source, 0, 0, w, h);
+  const d = ctx.getImageData(0, 0, w, h).data;
+  const y = new Float64Array(w * h);
+  for (let i = 0, j = 0; i < d.length; i += 4, j++) y[j] = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+  return y;
+}
+
+// SSIM sur luminance, fenêtres 8×8 sans recouvrement : la référence est l'original
+// redimensionné aux dimensions de sortie par la même chaîne de réduction (drawScaled),
+// pour ne mesurer que la perte due à l'encodage.
+function ssim(a, b, w, h) {
+  const C1 = (0.01 * 255) ** 2, C2 = (0.03 * 255) ** 2;
+  let s = 0, n = 0, min = 1;
+  for (let y = 0; y + 8 <= h; y += 8) for (let x = 0; x + 8 <= w; x += 8) {
+    let ma = 0, mb = 0;
+    for (let j = 0; j < 8; j++) for (let i = 0; i < 8; i++) { const k = (y + j) * w + x + i; ma += a[k]; mb += b[k]; }
+    ma /= 64; mb /= 64;
+    let va = 0, vb = 0, cv = 0;
+    for (let j = 0; j < 8; j++) for (let i = 0; i < 8; i++) { const k = (y + j) * w + x + i; const da = a[k] - ma, db = b[k] - mb; va += da * da; vb += db * db; cv += da * db; }
+    va /= 63; vb /= 63; cv /= 63;
+    const v = ((2 * ma * mb + C1) * (2 * cv + C2)) / ((ma * ma + mb * mb + C1) * (va + vb + C2));
+    s += v; n++; if (v < min) min = v;
+  }
+  return { moyenne: +(s / n).toFixed(4), pire_bloc: +min.toFixed(4) };
+}
+
+function alphaStats(canvasOrBitmap, w, h) {
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  c.getContext('2d').drawImage(canvasOrBitmap, 0, 0, w, h);
+  const d = c.getContext('2d').getImageData(0, 0, w, h).data;
+  let transparent = 0;
+  for (let i = 3; i < d.length; i += 4) if (d[i] < 255) transparent++;
+  return transparent / (w * h);
+}
+
+async function cas(name, attendu) {
+  const file = await fixture(name);
+  const t0 = performance.now();
+  try {
+    const { file: out, info } = await optimizeImage(file);
+    const ms = Math.round(performance.now() - t0);
+    const bOut = await bitmapOf(out);
+    const r = { cas: name, resultat: 'accepte', type: out.type, nom: out.name, ko_avant: Math.round(file.size / 1024),
+      ko_apres: Math.round(out.size / 1024), dim_avant: `${info.from.width}x${info.from.height}`, dim_apres: `${bOut.width}x${bOut.height}`,
+      qualite: info.quality, garde: info.kept, ms };
+    if (!info.kept) {
+      const bIn = await bitmapOf(file);
+      const ref = drawScaled(bIn, bOut.width, bOut.height);
+      r.ssim = ssim(lumaOf(ref, bOut.width, bOut.height), lumaOf(bOut, bOut.width, bOut.height), bOut.width, bOut.height);
+      r.transparence_avant = +alphaStats(bIn, bOut.width, bOut.height).toFixed(4);
+      r.transparence_apres = +alphaStats(bOut, bOut.width, bOut.height).toFixed(4);
+    }
+    r.conforme = attendu(r);
+    return r;
+  } catch (e) {
+    const r = { cas: name, resultat: e instanceof ImageRejectedError ? 'refuse' : 'erreur', message: e.message };
+    r.conforme = attendu(r);
+    return r;
+  }
+}
+
+async function casSafari(name, attendu) {
+  // Simulation d'un navigateur incapable d'encoder le WebP : toBlob renvoie du PNG.
+  const orig = HTMLCanvasElement.prototype.toBlob;
+  HTMLCanvasElement.prototype.toBlob = function (cb, type, q) {
+    return orig.call(this, cb, type === 'image/webp' ? 'image/png' : type, q);
+  };
+  try { const r = await cas(name, attendu); r.cas = `[sans WebP] ${name}`; return r; }
+  finally { HTMLCanvasElement.prototype.toBlob = orig; }
+}
+
+async function casEnvoi() {
+  const out = [];
+  const f = new File([new Uint8Array(1000)], 'x.webp', { type: 'image/webp' });
+  window.__envois = [];
+  const url1 = await uploadImage(f, `products/test/neuf-${Date.now()}.webp`);
+  const e1 = window.__envois[0];
+  out.push({ cas: 'envoi nouveau chemin', url: url1, options: e1.options,
+    conforme: e1.options.upsert === false && e1.options.cacheControl === '31536000' && e1.options.contentType === 'image/webp' && window.__envois.length === 1 });
+  window.__envois = [];
+  const url2 = await uploadImage(f, 'products/test/occupe.webp');
+  out.push({ cas: 'envoi chemin occupé (409) → nouveau chemin', chemins: window.__envois.map(e => e.path), url: url2,
+    conforme: window.__envois.length === 2 && /products\/test\/occupe-[a-z0-9]{1,6}\.webp$/.test(window.__envois[1].path) && url2.endsWith(window.__envois[1].path) });
+  window.__envois = [];
+  window.__occupes.add('products/test/bloque.webp');
+  let erreur = null;
+  try {
+    // Deux conflits de suite : erreur explicite, aucune boucle infinie.
+    const tous = window.__occupes;
+    const origHas = tous.has.bind(tous);
+    tous.has = () => true;
+    try { await uploadImage(f, 'products/test/bloque.webp'); } finally { tous.has = origHas; }
+  } catch (e) { erreur = e.message; }
+  out.push({ cas: 'deux conflits de suite', envois: window.__envois.length, erreur,
+    conforme: window.__envois.length === 2 && /Envoi de l'image impossible/.test(erreur || '') });
+  return out;
+}
+
+async function runBanc() {
+  const ok = (r) => r.resultat === 'accepte';
+  const resultats = [
+    await cas('etiquette-synthetique.png', r => ok(r) && r.type === 'image/webp' && r.dim_apres === '1200x800' && r.ssim.moyenne >= 0.97 && r.ko_apres <= 800),
+    await cas('etiquette-reelle.png', r => ok(r) && r.type === 'image/webp' && r.ssim.moyenne >= 0.97 && r.ko_apres <= 400),
+    await cas('parfum-ambre-nomade.png', r => ok(r) && r.type === 'image/webp' && r.ssim.moyenne >= 0.97 && r.ko_apres <= 400),
+    await cas('parfum-ambre-nomade.jpeg', r => ok(r) && r.garde === true),
+    await cas('logo-transparent.png', r => ok(r) && r.type === 'image/webp' && r.transparence_apres > 0.3 && Math.abs(r.transparence_apres - r.transparence_avant) < 0.01),
+    await cas('photo-telephone-exif6.jpg', r => ok(r) && r.dim_apres === '1200x1600' && r.dim_avant === '3000x4000'),
+    await cas('deja-optimisee.webp', r => ok(r) && r.garde === true && r.type === 'image/webp'),
+    await cas('bruit-incompressible.png', r => r.resultat === 'refuse' && /après optimisation/.test(r.message)),
+    await cas('anime.gif', r => r.resultat === 'refuse' && /GIF non accepté/.test(r.message)),
+    await cas('photo.heic', r => r.resultat === 'refuse' && /HEIC non accepté/.test(r.message)),
+    await cas('endommagee.jpg', r => r.resultat === 'refuse' && /illisible/.test(r.message)),
+    await cas('trop-lourde.jpg', r => r.resultat === 'refuse' && /trop lourd/.test(r.message)),
+    await casSafari('etiquette-reelle.png', r => ok(r) && r.type === 'image/jpeg' && r.nom.endsWith('.jpg') && r.ssim.moyenne >= 0.97),
+    await casSafari('logo-transparent.png', r => r.resultat === 'refuse' && /transparence/.test(r.message)),
+    ...(await casEnvoi()),
+  ];
+  const bilan = { conformes: resultats.filter(r => r.conforme).length, total: resultats.length };
+  document.getElementById('out').textContent = JSON.stringify({ bilan, resultats }, null, 2);
+  return { bilan, resultats };
+}
+</script>
+</body>
+</html>

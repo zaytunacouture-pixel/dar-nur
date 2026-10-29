@@ -220,11 +220,25 @@ async function saveOfferProducts(offerId, slugs) {
 
 // ── Storage photos ────────────────────────────────────────────────────────────
 
+// Jamais d'écrasement (upsert: false) : si le chemin existe déjà, un seul nouvel
+// essai sur un chemin suffixé. Les noms étant uniques, un fichier envoyé ne change
+// plus jamais : cache d'un an.
+const IMAGE_CACHE_SECONDS = '31536000';
+
+function isStorageConflict(error) {
+  return String(error?.statusCode) === '409' || /already exists|duplicate/i.test(error?.message || '');
+}
+
 async function uploadImage(file, path) {
-  const { data, error } = await _supa.storage
-    .from('product-images')
-    .upload(path, file, { upsert: true });
-  if (error) throw error;
-  const { data: { publicUrl } } = _supa.storage.from('product-images').getPublicUrl(path);
+  const bucket = _supa.storage.from('product-images');
+  const options = { upsert: false, cacheControl: IMAGE_CACHE_SECONDS, contentType: file.type || undefined };
+  let { error } = await bucket.upload(path, file, options);
+  if (error && isStorageConflict(error)) {
+    const suffix = Math.random().toString(36).slice(2, 8);
+    path = path.replace(/(\.[a-z0-9]+)?$/i, (ext) => `-${suffix}${ext}`);
+    ({ error } = await bucket.upload(path, file, options));
+  }
+  if (error) throw new Error(`Envoi de l'image impossible : ${error.message || error}`);
+  const { data: { publicUrl } } = bucket.getPublicUrl(path);
   return publicUrl;
 }

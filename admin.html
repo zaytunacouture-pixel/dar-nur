@@ -8,6 +8,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js"></script>
 <script src="js/config.js"></script>
 <script src="js/supabase-client.js"></script>
+<script src="js/admin-images.js"></script>
 <script src="js/admin-supply.js" defer></script>
 <style>
 :root {
@@ -705,7 +706,7 @@ tr.supply-actions-row td { background: #fcfbf7; border-bottom: 2px solid var(--b
         </button>
         <div class="img-status" id="img-status"></div>
       </div>
-      <input type="file" id="img-file-input" accept="image/jpeg,image/png,image/webp,image/gif"
+      <input type="file" id="img-file-input" accept="image/jpeg,image/png,image/webp"
              multiple style="display:none" onchange="handleImageSelect(this.files)"/>
     </div>
 
@@ -854,7 +855,7 @@ tr.supply-actions-row td { background: #fcfbf7; border-bottom: 2px solid var(--b
           <div class="img-status" id="offer-img-status"></div>
         </div>
       </div>
-      <input type="file" id="offer-img-file" accept="image/*" style="display:none" onchange="handleOfferImageSelect(this.files[0])"/>
+      <input type="file" id="offer-img-file" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="handleOfferImageSelect(this.files[0])"/>
     </div>
 
     <div class="form-grid">
@@ -973,7 +974,7 @@ tr.supply-actions-row td { background: #fcfbf7; border-bottom: 2px solid var(--b
           <div class="img-status" id="brand-img-status"></div>
         </div>
       </div>
-      <input type="file" id="brand-img-file-input" accept="image/jpeg,image/png,image/webp,image/gif" style="display:none" onchange="handleBrandImageSelect(this.files[0])"/>
+      <input type="file" id="brand-img-file-input" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="handleBrandImageSelect(this.files[0])"/>
     </div>
 
     <div class="form-grid" style="grid-template-columns:1fr; gap:14px">
@@ -1203,24 +1204,30 @@ function galleryRemove(i) {
 }
 
 // Sélection de fichiers — accepte plusieurs images d'un coup, et sur téléphone
-// ouvre directement la photothèque (accept="image/*" + multiple).
+// ouvre directement la photothèque (accept JPEG/PNG/WebP + multiple).
 async function handleImageSelect(fileList) {
   const files = [...(fileList || [])];
   if (!files.length) return;
 
-  const MAX_MO = 12;
+  // Optimisation obligatoire (js/admin-images.js) : une image qui ne peut pas
+  // être optimisée est refusée avec sa raison, jamais envoyée telle quelle.
   const rejets = [];
+  setGalleryStatus(`Optimisation de ${files.length} image(s)…`);
   for (const file of files) {
-    if (!/^image\//.test(file.type)) { rejets.push(`${file.name} (pas une image)`); continue; }
-    if (file.size > MAX_MO * 1024 * 1024) { rejets.push(`${file.name} (> ${MAX_MO} Mo)`); continue; }
-    const prepared = await prepareImageForUpload(file);
+    let prepared;
+    try {
+      prepared = await optimizeImage(file);
+    } catch (e) {
+      rejets.push(e instanceof ImageRejectedError ? e.message : `${file.name} : optimisation impossible`);
+      continue;
+    }
     galleryItems.push({
       kind: 'file',
       file: prepared.file,
       previewUrl: URL.createObjectURL(prepared.file),
       name: file.name,
       size: prepared.file.size,
-      resized: prepared.resized,
+      resized: !prepared.info.kept,
     });
   }
   document.getElementById('img-file-input').value = '';
@@ -1235,42 +1242,9 @@ async function handleImageSelect(fileList) {
   let msg = attente.length
     ? `${attente.length} image(s) en attente (${Math.round(poids / 1024)} Ko) — envoyées à l'enregistrement`
     : '';
-  if (allegees) msg += ` · ${allegees} redimensionnée(s)`;
-  if (rejets.length) msg += (msg ? ' · ' : '') + `Ignoré : ${rejets.join(', ')}`;
+  if (allegees) msg += ` · ${allegees} optimisée(s)`;
+  if (rejets.length) msg += (msg ? ' · ' : '') + `Refusé : ${rejets.join(' ; ')}`;
   setGalleryStatus(msg, rejets.length ? 'err' : null);
-}
-
-// Redimensionnement/conversion côté navigateur avant envoi. Volontairement
-// minimal : pas de dépendance, pas de service externe, pas de traitement
-// serveur. Objectif unique — qu'une photo prise au téléphone (souvent 3 à 5 Mo,
-// 4000 px de large) n'arrive pas telle quelle sur une carte produit et n'annule
-// pas le travail d'optimisation d'images déjà fait sur le site.
-// En cas d'échec ou de résultat plus lourd, on garde le fichier d'origine :
-// cette étape ne doit jamais empêcher un envoi.
-const UPLOAD_MAX_PX = 1600;
-async function prepareImageForUpload(file) {
-  try {
-    if (file.type === 'image/gif') return { file, resized: false };
-    const bitmap = await createImageBitmap(file);
-    const scale  = Math.min(1, UPLOAD_MAX_PX / Math.max(bitmap.width, bitmap.height));
-    const needed = scale < 1 || file.size > 400 * 1024;
-    if (!needed) { bitmap.close?.(); return { file, resized: false }; }
-
-    const w = Math.round(bitmap.width * scale);
-    const h = Math.round(bitmap.height * scale);
-    const canvas = document.createElement('canvas');
-    canvas.width = w; canvas.height = h;
-    canvas.getContext('2d').drawImage(bitmap, 0, 0, w, h);
-    bitmap.close?.();
-
-    const blob = await new Promise(res => canvas.toBlob(res, 'image/webp', 0.82));
-    if (!blob || blob.size >= file.size) return { file, resized: false };
-
-    const base = file.name.replace(/\.[^.]+$/, '');
-    return { file: new File([blob], `${base}.webp`, { type: 'image/webp' }), resized: true };
-  } catch {
-    return { file, resized: false };   // navigateur récalcitrant : on envoie l'original
-  }
 }
 
 // Glisser-déposer, desktop uniquement (la poignée est masquée au tactile).
@@ -1337,16 +1311,25 @@ function resetBrandImageState() {
 
 async function handleBrandImageSelect(file) {
   if (!file) return;
-  // Même redimensionnement/compression que les images produit : sans cela un
-  // logo de marque partait tel quel (constat : Gulf Collection, PNG de 1,8 Mo
-  // affiché dans un rond de 128 px sur chaque page de la marque).
-  const prepared = await prepareImageForUpload(file);
+  // Même optimisation que les images produit : sans cela un logo de marque
+  // partait tel quel (constat : Gulf Collection, PNG de 1,8 Mo affiché dans un
+  // rond de 128 px sur chaque page de la marque).
+  const status = document.getElementById('brand-img-status');
+  document.getElementById('brand-img-file-input').value = '';
+  status.textContent = 'Optimisation…';
+  let prepared;
+  try {
+    prepared = await optimizeImage(file);
+  } catch (e) {
+    status.textContent = e instanceof ImageRejectedError ? `Refusé — ${e.message}` : `${file.name} : optimisation impossible`;
+    return;
+  }
   brandPendingFile = prepared.file;
   brandImageRemoved = false;
   showBrandImgPreview(URL.createObjectURL(prepared.file));
   const kb = (prepared.file.size / 1024).toFixed(0);
-  document.getElementById('brand-img-status').textContent =
-    `${file.name} (${kb} Ko${prepared.resized ? ', optimisée' : ''}) — sera uploadé à l'enregistrement`;
+  status.textContent =
+    `${file.name} (${kb} Ko${prepared.info.kept ? '' : ', optimisée'}) — sera uploadé à l'enregistrement`;
 }
 
 function removeBrandImage() {
@@ -2426,13 +2409,25 @@ function hideOfferImgPreview() {
   document.getElementById('offer-img-placeholder').style.display = 'flex';
   document.getElementById('offer-img-remove-btn').style.display  = 'none';
 }
-function handleOfferImageSelect(file) {
+async function handleOfferImageSelect(file) {
   if (!file) return;
-  offerPendingFile  = file;
+  // Les images d'offre passaient sans aucune optimisation : même traitement
+  // que les images produit et les logos de marque.
+  const status = document.getElementById('offer-img-status');
+  document.getElementById('offer-img-file').value = '';
+  status.textContent = 'Optimisation…';
+  let prepared;
+  try {
+    prepared = await optimizeImage(file);
+  } catch (e) {
+    status.textContent = e instanceof ImageRejectedError ? `Refusé — ${e.message}` : `${file.name} : optimisation impossible`;
+    return;
+  }
+  offerPendingFile  = prepared.file;
   offerImageRemoved = false;
-  showOfferImgPreview(URL.createObjectURL(file));
-  document.getElementById('offer-img-status').textContent =
-    `${file.name} (${(file.size/1024).toFixed(0)} Ko) — sera uploadé à l'enregistrement`;
+  showOfferImgPreview(URL.createObjectURL(prepared.file));
+  status.textContent =
+    `${file.name} (${(prepared.file.size/1024).toFixed(0)} Ko${prepared.info.kept ? '' : ', optimisée'}) — sera uploadé à l'enregistrement`;
 }
 function removeOfferImage() {
   offerPendingFile  = null;
