@@ -293,12 +293,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://dar-nur.fr/miel-printemps/</loc>
-    <lastmod>2026-10-29</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://dar-nur.fr/khamrah-qahwa/</loc>
     <lastmod>2026-10-29</lastmod>
     <changefreq>monthly</changefreq>
@@ -491,6 +485,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://dar-nur.fr/miel-printemps/</loc>
+    <lastmod>2026-10-29</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://dar-nur.fr/mg-papaye/</loc>
     <lastmod>2026-10-29</lastmod>
     <changefreq>monthly</changefreq>
@@ -551,13 +551,13 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://dar-nur.fr/mg-mangue-fraise/</loc>
+    <loc>https://dar-nur.fr/miel-gingembre-fenugrec/</loc>
     <lastmod>2026-10-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://dar-nur.fr/miel-gingembre-fenugrec/</loc>
+    <loc>https://dar-nur.fr/mg-mangue-fraise/</loc>
     <lastmod>2026-10-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
