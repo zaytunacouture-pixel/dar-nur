@@ -258,7 +258,7 @@ async function main() {
   let products;
   try {
     products = await fetchJson(
-      `${creds.url}/rest/v1/products?select=*,product_variants(*)&active=eq.true&gift_idea=is.true&order=sort_order.asc`,
+      `${creds.url}/rest/v1/products?select=*,product_variants(*)&active=eq.true&gift_idea=is.true&order=sort_order.asc,created_at.asc,slug.asc`,
       creds
     );
   } catch (e) {

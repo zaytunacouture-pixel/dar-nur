@@ -23,7 +23,9 @@ async function getSession() {
 // ── Produits (lecture publique) ───────────────────────────────────────────────
 
 async function fetchProducts({ categoryId, activeOnly = true } = {}) {
-  let q = _supa.from('products').select('*, product_variants(*)').order('sort_order');
+  // Ordre stable : à sort_order égal, ordre d'ajout puis slug (jamais l'ordre physique de la base).
+  let q = _supa.from('products').select('*, product_variants(*)')
+    .order('sort_order').order('created_at').order('slug');
   if (activeOnly) q = q.eq('active', true);
   if (categoryId)  q = q.eq('category_id', categoryId);
   const { data, error } = await q;
@@ -79,7 +81,8 @@ async function fetchAllBrands() {
   const { data, error } = await _supa
     .from('brands')
     .select('*')
-    .order('sort_order');
+    .order('sort_order')
+    .order('name');
   if (error) throw error;
   return data;
 }

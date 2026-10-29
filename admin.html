@@ -1809,7 +1809,7 @@ async function saveBrandModal() {
     if (fromProduct && isNew) {
       // Mise à jour légère : le modal produit reste ouvert, aucune saisie perdue
       allBrands.push(saved);
-      allBrands.sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+      allBrands.sort((a, b) => ((a.sort_order ?? 0) - (b.sort_order ?? 0)) || (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
       buildBrandSelectOptions();
       document.getElementById('p-brand-slug').value = saved.id;
       document.getElementById('stat-brands').textContent = allBrands.length;
@@ -2071,9 +2071,11 @@ function renderVariantRows(variants) {
   list.innerHTML = '';
   // Affichage dans l'ordre réel du site : Supabase ne garantit aucun ordre sur
   // une relation imbriquée, et c'est ce sort_order qui décide du prix
-  // « à partir de » affiché sur les cartes.
+  // « à partir de » affiché sur les cartes. À sort_order égal : name, puis id,
+  // comme sur le site.
+  const cmpTxt = (x, y) => (x < y ? -1 : x > y ? 1 : 0);
   [...variants]
-    .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+    .sort((a, b) => ((a.sort_order ?? 0) - (b.sort_order ?? 0)) || cmpTxt(a.name ?? '', b.name ?? '') || cmpTxt(String(a.id), String(b.id)))
     .forEach(v => addVariantRow(v));
 }
 

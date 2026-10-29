@@ -3650,11 +3650,13 @@ obs.observe(document.getElementById("productView"),{attributes:true,attributeFil
 syncBar();
 
 /* ── Supabase : source principale — fallback hardcodé uniquement en cas d'erreur ── */
+// Départage stable des variantes à sort_order égal : name, puis id.
+function cmpTxt(x, y){ return x < y ? -1 : x > y ? 1 : 0; }
 function adaptPrice(p){
   const axes = p.variant_axes || [];
   const variants = (p.product_variants || [])
     .filter(v => v.active !== false)
-    .sort((a,b) => a.sort_order - b.sort_order);
+    .sort((a,b) => (a.sort_order - b.sort_order) || cmpTxt(a.name ?? '', b.name ?? '') || cmpTxt(String(a.id), String(b.id)));
   if(!variants.length) return {type:'fixed', value: p.price_value};
   if(axes.includes('format') || axes.includes('contenance'))
     return {type:'format', options: variants.map(v=>[v.name, v.price])};
@@ -3708,7 +3710,7 @@ function productFromRow(p){
     /* Chargement parallèle : catégories actives + produits actifs — zéro latence ajoutée */
     const [catRes, prodRes] = await Promise.all([
       _sb.from('categories').select('*').eq('active', true).order('sort_order'),
-      _sb.from('products').select('*, product_variants(*)').eq('active', true).order('sort_order'),
+      _sb.from('products').select('*, product_variants(*)').eq('active', true).order('sort_order').order('created_at').order('slug'),
     ]);
 
     /* Appliquer les catégories Supabase avant tout rendu */

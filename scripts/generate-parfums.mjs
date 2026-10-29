@@ -164,7 +164,7 @@ async function fetchParfumsProducts() {
   }
   // product_variants : nécessaire pour les parfums vendus en plusieurs contenances
   // (variant_axes contient 'contenance'), voir productFormats().
-  const url = `${SUPABASE_URL}/rest/v1/products?select=*,product_variants(*)&category_id=eq.parfums&active=eq.true&order=sort_order.asc`;
+  const url = `${SUPABASE_URL}/rest/v1/products?select=*,product_variants(*)&category_id=eq.parfums&active=eq.true&order=sort_order.asc,created_at.asc,slug.asc`;
   const res = await fetch(url, {
     headers: {
       apikey: SUPABASE_KEY,
@@ -182,7 +182,7 @@ async function fetchParfumsProducts() {
 // d'affichage d'une marque. Une marque désactivée ici n'est simplement pas
 // retournée, donc jamais publiée, même si elle a encore des produits actifs.
 async function fetchActiveBrands() {
-  const url = `${SUPABASE_URL}/rest/v1/brands?select=*&active=eq.true&order=sort_order.asc`;
+  const url = `${SUPABASE_URL}/rest/v1/brands?select=*&active=eq.true&order=sort_order.asc,name.asc`;
   const res = await fetch(url, {
     headers: {
       apikey: SUPABASE_KEY,
@@ -213,9 +213,12 @@ function assertAllProductsHaveBrand(products) {
 // Un produit dont le brand_slug ne correspond à aucune marque ACTIVE (marque
 // désactivée, ou supprimée) est silencieusement exclu des pages publiques —
 // c'est l'effet attendu de la désactivation d'une marque, pas une erreur.
-// L'ordre des groupes (et donc des pages/menus) suit sort_order de la marque.
+// L'ordre des groupes (et donc des pages/menus) suit l'ordre des marques
+// actives, déjà trié par la requête (sort_order, puis name) : à sort_order égal,
+// il ne dépend plus de l'ordre d'apparition des produits.
 function groupByBrand(products, activeBrands) {
   const brandById = new Map(activeBrands.map(b => [b.id, b]));
+  const brandRank = new Map(activeBrands.map((b, i) => [b.id, i]));
   const groups = new Map();
   for (const p of products) {
     const brand = brandById.get(p.brand_slug);
@@ -232,7 +235,14 @@ function groupByBrand(products, activeBrands) {
     }
     groups.get(p.brand_slug).products.push(p);
   }
-  return [...groups.values()].sort((a, b) => a.sortOrder - b.sortOrder);
+  return [...groups.values()].sort((a, b) => brandRank.get(a.brandSlug) - brandRank.get(b.brandSlug));
+}
+
+// Ordre stable des variantes : sort_order, puis name, puis id (une égalité de
+// sort_order ne doit jamais dépendre de l'ordre renvoyé par la base).
+function compareVariants(a, b) {
+  const cmp = (x, y) => (x < y ? -1 : x > y ? 1 : 0);
+  return (a.sort_order - b.sort_order) || cmp(a.name ?? '', b.name ?? '') || cmp(String(a.id), String(b.id));
 }
 
 // Formats d'un parfum : ses variantes de contenance actives (nom de variante,
@@ -245,7 +255,7 @@ function productFormats(p) {
   const axes = Array.isArray(p.variant_axes) ? p.variant_axes : [];
   const variants = (p.product_variants || [])
     .filter(v => v.active !== false)
-    .sort((a, b) => a.sort_order - b.sort_order);
+    .sort(compareVariants);
   if (axes.includes('contenance') && variants.length) {
     const names = variants.map(v => (v.options && v.options.contenance) || v.name).filter(Boolean);
     if (names.length) return [...new Set(names)];

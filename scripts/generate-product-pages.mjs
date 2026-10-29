@@ -76,7 +76,7 @@ async function fetchJson(url, creds) {
 }
 
 async function fetchActiveProducts(creds) {
-  const url = `${creds.url}/rest/v1/products?select=*,product_variants(*)&active=eq.true&order=sort_order.asc`;
+  const url = `${creds.url}/rest/v1/products?select=*,product_variants(*)&active=eq.true&order=sort_order.asc,created_at.asc,slug.asc`;
   return fetchJson(url, creds);
 }
 
@@ -89,11 +89,18 @@ async function fetchCategoryLabels(creds) {
 // Même logique que adaptPrice() dans index.html — dupliquée volontairement
 // (pas d'import partagé) pour ne créer aucun couplage de code entre le
 // runtime navigateur et ce script de génération, comme scripts/generate-parfums.mjs.
+// Ordre stable des variantes : sort_order, puis name, puis id (une égalité de
+// sort_order ne doit jamais dépendre de l'ordre renvoyé par la base).
+function compareVariants(a, b) {
+  const cmp = (x, y) => (x < y ? -1 : x > y ? 1 : 0);
+  return (a.sort_order - b.sort_order) || cmp(a.name ?? '', b.name ?? '') || cmp(String(a.id), String(b.id));
+}
+
 function adaptPrice(p) {
   const axes = p.variant_axes || [];
   const variants = (p.product_variants || [])
     .filter(v => v.active !== false)
-    .sort((a, b) => a.sort_order - b.sort_order);
+    .sort(compareVariants);
   if (!variants.length) return { type: 'fixed', value: p.price_value };
   if (axes.includes('format') || axes.includes('contenance'))
     return { type: 'format', options: variants.map(v => [v.name, v.price]) };

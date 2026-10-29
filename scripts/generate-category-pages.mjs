@@ -733,7 +733,7 @@ async function generateCategoryPage(cfg, creds) {
   let html = await readFile(pagePath, 'utf8');
 
   const [products, categoryRows] = await Promise.all([
-    fetchJson(`${creds.url}/rest/v1/products?select=*,product_variants(*)&category_id=eq.${cfg.categoryId}&active=eq.true&order=sort_order.asc`, creds),
+    fetchJson(`${creds.url}/rest/v1/products?select=*,product_variants(*)&category_id=eq.${cfg.categoryId}&active=eq.true&order=sort_order.asc,created_at.asc,slug.asc`, creds),
     fetchJson(`${creds.url}/rest/v1/categories?select=label&id=eq.${cfg.categoryId}`, creds),
   ]);
 
