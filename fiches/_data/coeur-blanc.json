@@ -1,0 +1,153 @@
+{
+  "_doc": "Contenu éditorial de la fiche. Le nom, l'accroche, le prix, la disponibilité, la contenance, la description, la pyramide, les conseils et les précautions viennent de Supabase (voir scripts/lib/fiche-editoriale.mjs). kind : \"photo\" = photographie réelle du flacon ; \"scene\" = flacon photographié, décor composé par la marque ; \"ambiance\" = mise en scène de la marque dont la nature n'est pas vérifiable.",
+  "brandLabel": "Maison Fragranza Paris",
+  "typeLabel": "Extrait de parfum",
+  "genderLabel": "Unisexe",
+  "shopUrl": "https://shop.dar-nur.fr/products/coeur-blanc",
+  "seo": {
+    "title": "Cœur Blanc, extrait de parfum Maison Fragranza | Dar Nūr",
+    "description": "Cœur Blanc de Maison Fragranza Paris : extrait de parfum unisexe {{VOLUME}}. Vanille de Madagascar, coco de Tahiti, muscs blancs et cèdre. {{PRICE}}."
+  },
+  "hero": {
+    "image": {
+      "src": "/assets/coeur-blanc/coeur-blanc-ouverture-ambiance.jpg",
+      "w": 1080,
+      "h": 1350,
+      "kind": "scene",
+      "alt": "Flacon Cœur Blanc de Maison Fragranza Paris, de face, contre un mur champagne"
+    }
+  },
+  "perfume": {
+    "eyebrow": "Le parfum",
+    "title": "Une douceur lumineuse",
+    "lead": "Une élégance enveloppante, entre gourmandise lactée, muscs poudrés et bois chaleureux.",
+    "descriptionIndexes": [
+      0
+    ],
+    "image": {
+      "src": "/assets/coeur-blanc/coeur-blanc-travertin-ambiance.jpg",
+      "w": 1080,
+      "h": 1920,
+      "kind": "ambiance",
+      "alt": "Flacon Cœur Blanc posé sur un socle de travertin, logo Maison Fragranza"
+    }
+  },
+  "gallery": {
+    "eyebrow": "Le flacon",
+    "title": "Verre strié, or tressé",
+    "lead": "Touchez une image pour l'agrandir.",
+    "items": [
+      {
+        "src": "/assets/coeur-blanc/coeur-blanc-main-photographie.jpg",
+        "w": 1080,
+        "h": 1920,
+        "kind": "photo",
+        "caption": "En main",
+        "alt": "Flacon Cœur Blanc tenu en main, lys en arrière-plan"
+      },
+      {
+        "src": "/assets/coeur-blanc/coeur-blanc-profil-ambiance.jpg",
+        "w": 1066,
+        "h": 1600,
+        "kind": "ambiance",
+        "caption": "De profil",
+        "alt": "Flacon Cœur Blanc vu en contre-plongée à travers une plaque de verre"
+      },
+      {
+        "src": "/assets/coeur-blanc/coeur-blanc-verre-photographie.jpg",
+        "w": 1080,
+        "h": 1920,
+        "kind": "photo",
+        "caption": "Le verre strié",
+        "alt": "Gros plan sur le verre strié du flacon et le parfum ambré"
+      }
+    ]
+  },
+  "film": {
+    "_doc": "published:false : le film n'est pas diffusé sur la fiche tant que la marque n'a pas confirmé par écrit la version réencodée (sd/hd). La photographie « poster » est affichée seule avec les textes « still ». Passer published à true rétablit le lecteur.",
+    "published": false,
+    "still": {
+      "eyebrow": "Le tournage",
+      "text": "Une photographie du tournage de la maison : le flacon de face, devant un lys blanc.",
+      "credit": "Photographie : Maison Fragranza Paris"
+    },
+    "eyebrow": "Le film",
+    "title": "Le lys, le verre, la lumière",
+    "text": "Dix-huit secondes au plus près du flacon, filmées par la maison.",
+    "credit": "Film et photographie : Maison Fragranza Paris",
+    "play": "Voir le film",
+    "label": "Cœur Blanc, film officiel Maison Fragranza Paris",
+    "duration": "PT18S",
+    "uploadDate": "2026-11-24T12:00:00+01:00",
+    "poster": {
+      "src": "/assets/coeur-blanc/coeur-blanc-lys-photographie.jpg",
+      "w": 1080,
+      "h": 1920,
+      "alt": "Flacon Cœur Blanc de face devant un lys blanc, photographie du tournage"
+    },
+    "sd": "https://cdn.shopify.com/videos/c/vp/abef4f8274a8444093aa326d27ea57ac/abef4f8274a8444093aa326d27ea57ac.HD-720p-4.5Mbps-102543292.mp4",
+    "hd": "https://cdn.shopify.com/videos/c/vp/abef4f8274a8444093aa326d27ea57ac/abef4f8274a8444093aa326d27ea57ac.HD-1080p-7.2Mbps-102543292.mp4"
+  },
+  "pyramid": {
+    "eyebrow": "La pyramide olfactive",
+    "title": "Trois temps, quatre matières",
+    "notes": {
+      "vanille de madagascar": {
+        "text": "Ronde, dorée, veloutée.",
+        "src": "/assets/coeur-blanc/note-vanille.jpg",
+        "w": 1122,
+        "h": 1402,
+        "alt": "Fleur et gousses de vanille"
+      },
+      "noix de coco de tahiti": {
+        "text": "Lactée, crémeuse, satinée.",
+        "src": "/assets/coeur-blanc/note-coco.jpg",
+        "w": 1122,
+        "h": 1402,
+        "alt": "Noix de coco ouverte"
+      },
+      "muscs blancs": {
+        "text": "Poudrés, soyeux, lumineux.",
+        "src": "/assets/coeur-blanc/note-fleurs-blanches.jpg",
+        "w": 1122,
+        "h": 1402,
+        "alt": "Bouquet de fleurs blanches, évocation des muscs blancs"
+      },
+      "bois de cèdre": {
+        "text": "Chaleureux, profond, élégant.",
+        "src": "/assets/coeur-blanc/note-cedre.jpg",
+        "w": 1122,
+        "h": 1402,
+        "alt": "Éclats de bois de cèdre"
+      }
+    }
+  },
+  "details": {
+    "eyebrow": "L'essentiel",
+    "title": "Avant de vous décider",
+    "making": "Fabriqué et mis en bouteille en France",
+    "lasting": "24 à 48 heures, selon la marque",
+    "lastingNote": "Indication du fabricant, et non une garantie : la tenue varie selon la peau, les conditions d'utilisation et le support.",
+    "sensoryNote": "Ces lignes traduisent une impression olfactive, pas une mesure. Projection, sillage et tenue varient selon la peau, le support et les conditions d'utilisation."
+  },
+  "house": {
+    "eyebrow": "Maison Fragranza Paris",
+    "title": "Du Rif à Grasse",
+    "paragraphs": [
+      "Née en 2024, la maison défend une parfumerie de niche française, exigeante et accessible. Son film relie deux paysages, le Rif et Grasse : l'attachement aux matières et le savoir-faire français.",
+      "Ses extraits sont unisexes, fabriqués et mis en bouteille en France."
+    ],
+    "image": {
+      "src": "/assets/coeur-blanc/coeur-blanc-geste-ambiance.jpg",
+      "w": 900,
+      "h": 1600,
+      "kind": "ambiance",
+      "alt": "Deux mains autour du flacon Cœur Blanc"
+    },
+    "link": "/parfums/maison-fragranza/",
+    "linkLabel": "Découvrir la maison et ses six parfums"
+  },
+  "final": {
+    "title": "Cœur Blanc, chez vous"
+  }
+}

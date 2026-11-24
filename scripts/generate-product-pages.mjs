@@ -18,6 +18,8 @@
 // Aucune dépendance npm : fetch natif de Node (>=18).
 
 import { readFile, writeFile, mkdir, rm, readdir } from 'node:fs/promises';
+import { loadEditorialFiches, renderEditorialFiche, extractDeliveryBlock } from './lib/fiche-editoriale.mjs';
+import { buildEditorialNav } from './lib/fiche-nav.mjs';
 
 const ROOT = new URL('../', import.meta.url);
 const INDEX_PATH = new URL('index.html', ROOT);
@@ -552,6 +554,19 @@ async function main() {
   }
 
   const indexTemplate = await readFile(INDEX_PATH, 'utf8');
+  // Fiches éditoriales (fiches/_data/<slug>.json) : présentation premium opt-in.
+  let editorial, editorialTemplate, deliveryHtml, brands;
+  try {
+    editorial = await loadEditorialFiches(ROOT);
+    if (editorial.size) {
+      editorialTemplate = (await readFile(new URL('fiches/_editorial.html', ROOT), 'utf8')).replace(/\r\n/g, '\n');
+      deliveryHtml = extractDeliveryBlock(indexTemplate.replace(/\r\n/g, '\n'));
+      brands = await fetchJson(`${creds.url}/rest/v1/brands?select=id,name&active=eq.true&order=sort_order.asc,name.asc`, creds);
+    }
+  } catch (e) {
+    log(`::warning::Fiches éditoriales désactivées pour ce passage : ${e.message}`);
+    editorial = new Map();
+  }
   const manifestSlugs = await loadManifest();
   const redirectManifest = await loadManifest(REDIRECT_MANIFEST_PATH);
   // Les dossiers écrits par ce script (fiches ET pages de redirection) ne
@@ -588,7 +603,20 @@ async function main() {
     const meta = computeMeta(p, catLabel, siblingTaglines);
     let html;
     try {
-      html = injectProductHead(indexTemplate, p, meta, catLabel, adaptPrice(p));
+      // Une erreur dans le contenu éditorial ne doit jamais faire disparaître la
+      // fiche : on la signale et on publie le rendu standard.
+      if (editorial.has(slug)) {
+        try {
+          html = renderEditorialFiche({
+            template: editorialTemplate, data: editorial.get(slug), product: p, price: adaptPrice(p), catLabel, deliveryHtml,
+            navHtml: await buildEditorialNav(ROOT, brands, products, p.brand_slug),
+            related: products.filter(x => x.brand_slug && x.brand_slug === p.brand_slug && x.slug !== slug).slice(0, 5),
+          });
+        } catch (e) {
+          log(`::warning::Fiche éditoriale ${slug} : ${e.message} — rendu standard publié à la place.`);
+        }
+      }
+      if (!html) html = injectProductHead(indexTemplate, p, meta, catLabel, adaptPrice(p));
     } catch (e) {
       skipped.push({ slug, reason: e.message });
       continue;

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="fr" data-fiche="editoriale">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>{{TITLE}}</title>
+<meta name="description" content="{{DESCRIPTION}}" />
+<link rel="canonical" href="{{URL}}" />
+<meta property="og:type" content="product" />
+<meta property="og:title" content="{{TITLE}}" />
+<meta property="og:description" content="{{DESCRIPTION}}" />
+<meta property="og:url" content="{{URL}}" />
+<meta property="og:image" content="{{OG_IMAGE}}" />
+<meta property="og:image:width" content="{{OG_W}}" />
+<meta property="og:image:height" content="{{OG_H}}" />
+<meta property="og:image:alt" content="{{OG_ALT}}" />
+<meta property="og:site_name" content="Dar Nūr" />
+<meta property="og:locale" content="fr_FR" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="{{TITLE}}" />
+<meta name="twitter:description" content="{{DESCRIPTION}}" />
+<meta name="twitter:image" content="{{OG_IMAGE}}" />
+<meta name="theme-color" content="#0d1f16" />
+<link rel="icon" type="image/png" href="/favicon.png" sizes="192x192" />
+<link rel="apple-touch-icon" href="/favicon.png" />
+{{HERO_PRELOAD}}
+<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/cormorant.woff2" crossorigin />
+<link rel="stylesheet" href="/fiche-editoriale.css" />
+<link rel="stylesheet" href="/nav.css" />
+<noscript><style>img[data-src]{display:none!important}</style></noscript>
+{{LD}}
+</head>
+<body class="fe">
+<a class="fe-skip" href="#productView">Aller au contenu</a>
+{{NAV}}
+
+<main>
+<div id="productView" style="display:block">
+
+<section class="fe-hero" id="haut">
+  <nav class="fe-crumb" aria-label="Fil d'Ariane"><a href="/">Dar Nūr</a><span aria-hidden="true">›</span><a href="/parfums/">Parfums</a><span aria-hidden="true">›</span><a href="{{BRAND_URL}}">{{BRAND}}</a><span aria-hidden="true">›</span><strong aria-current="page">{{NAME}}</strong></nav>
+      {{HERO_FIGURE}}
+  <div class="fe-hero-title">
+    <a class="fe-brand" href="{{BRAND_URL}}">{{BRAND}}</a>
+    <h1>{{NAME}}</h1>
+    <ul class="fe-facts">{{FACTS}}</ul>
+    <p class="fe-scene-price"><strong data-price>{{PRICE}}</strong><span class="fe-stock" data-stock{{STOCK_HIDDEN}}>{{STOCK}}</span></p>
+  </div>
+  <div class="fe-hero-buy">
+    <p class="fe-tagline">{{TAGLINE}}</p>
+        {{BUY}}
+  </div>
+</section>
+
+<nav class="fe-anchors" aria-label="Dans cette page"><div><a href="#parfum">Le parfum</a><a href="#galerie">Le flacon</a><a href="#film">{{FILM_EYEBROW}}</a><a href="#notes">Les notes</a><a href="#details">L’essentiel</a><a href="#livraison">Livraison</a></div></nav>
+
+<section class="fe-perfume" id="parfum" aria-labelledby="t-parfum">
+      {{PERFUME_FIGURE}}
+  <div class="fe-perfume-head" data-reveal>
+    <p class="fe-eyebrow">{{PERFUME_EYEBROW}}</p>
+    <h2 id="t-parfum">{{PERFUME_TITLE}}</h2>
+  </div>
+  <div class="fe-perfume-txt" data-reveal>
+    <p class="fe-lead">{{PERFUME_LEAD}}</p>
+        {{PERFUME_TEXT}}
+  </div>
+</section>
+
+<section class="fe-gallery" id="galerie" aria-labelledby="t-galerie">
+  <div class="fe-gallery-in">
+  <div class="fe-gallery-head" data-reveal><p class="fe-eyebrow">{{GALLERY_EYEBROW}}</p><h2 id="t-galerie">{{GALLERY_TITLE}}</h2><p>{{GALLERY_LEAD}}</p></div>
+  <ul class="fe-strip" id="feStrip" tabindex="0" aria-label="Galerie de {{NAME}}">
+        {{GALLERY}}
+  </ul>
+  </div>
+</section>
+
+<section class="fe-film" id="film" aria-labelledby="t-film">
+  <div class="fe-film-in">
+    <div class="fe-film-txt" data-reveal>
+      <p class="fe-eyebrow">{{FILM_EYEBROW}}</p>
+      <h2 id="t-film">{{FILM_TITLE}}</h2>
+      <p>{{FILM_TEXT}}</p>
+      <p class="fe-credit">{{FILM_CREDIT}}</p>
+    </div>
+    {{FILM_MEDIA}}
+  </div>
+</section>
+
+<section class="fe-pyramid" id="notes" aria-labelledby="t-notes">
+  <div class="fe-pyr-head" data-reveal><p class="fe-eyebrow">{{PYR_EYEBROW}}</p><h2 id="t-notes">{{PYR_TITLE}}</h2><p class="fe-families">Famille olfactive : {{FAMILIES}}</p></div>
+  <ol class="fe-steps">
+        {{PYRAMID}}
+  </ol>
+  <p class="fe-disclaim">Illustrations de la marque évoquant chaque matière, et non photographies des ingrédients de la composition.</p>
+</section>
+
+<section class="fe-details" id="details" aria-labelledby="t-spec">
+  <div class="fe-details-head"><p class="fe-eyebrow">{{SPEC_EYEBROW}}</p><h2 id="t-spec">{{SPEC_TITLE}}</h2></div>
+  <div class="fe-folds">
+    <details open id="caracteristiques"><summary><h3>Caractéristiques</h3></summary><div><dl>{{SPECS}}</dl></div></details>
+    <details><summary><h3>Description sensorielle</h3></summary><div>{{DESCRIPTION_FULL}}<p class="fe-disclaim">{{SENSORY_NOTE}}</p></div></details>
+    <details><summary><h3>Conseils d’application</h3></summary><div>{{USAGE}}{{TIP}}</div></details>
+    <details><summary><h3>Précautions d’utilisation</h3></summary><div><ul class="fe-dots">{{PRECAUTIONS}}</ul></div></details>
+    <details id="livraison"><summary><h3>Livraison et remise</h3></summary><div><p class="fe-scope">Pour les commandes passées par WhatsApp. Sur shop.dar-nur.fr, la livraison et ses frais sont indiqués au moment de la commande.</p>{{DELIVERY}}</div></details>
+    <details id="paiement"><summary><h3>Moyens de paiement</h3></summary><div class="fe-pay"><div><h4>En ligne, sur shop.dar-nur.fr</h4><p>Commandez et réglez directement en ligne.</p><p><a class="fe-link" href="{{SHOP_URL}}">Ouvrir la fiche en ligne</a></p></div><div><h4>Par WhatsApp, avec un lien sécurisé SumUp</h4>{{PAYMENT}}</div></div></details>
+  </div>
+</section>
+
+<section class="fe-house" aria-labelledby="t-maison">
+      {{HOUSE_FIGURE}}
+  <div class="fe-house-txt" data-reveal><p class="fe-eyebrow">{{HOUSE_EYEBROW}}</p><h2 id="t-maison">{{HOUSE_TITLE}}</h2>{{HOUSE_TEXT}}<p><a class="fe-link" href="{{HOUSE_LINK}}">{{HOUSE_LABEL}}</a></p></div>
+</section>
+
+<section class="fe-final" aria-labelledby="t-final">
+  <h2 id="t-final">{{FINAL_TITLE}}</h2>
+        {{BUY}}
+</section>
+
+<section class="fe-related" aria-labelledby="t-rel">
+  <h2 id="t-rel">De la même maison</h2>
+  <ul>
+        {{RELATED}}
+  </ul>
+</section>
+
+</div>
+
+<!-- ============ MOBILE BAR ============ -->
+</main>
+<div class="mbar is-off" id="mbar" role="region" aria-label="Commande rapide">
+  <div><strong data-price>{{PRICE}}</strong><small data-stock{{STOCK_HIDDEN}}>{{STOCK}}</small></div>
+  <button type="button" class="fe-btn fe-btn-main" data-add{{MBAR_DISABLED}}>{{MBAR_LABEL}}</button>
+</div>
+
+<dialog class="fe-box" id="feBox" aria-label="Image agrandie">
+  <button type="button" class="fe-box-close" data-box="close" aria-label="Fermer">×</button>
+  <button type="button" class="fe-box-nav fe-box-prev" data-box="-1" aria-label="Image précédente"></button>
+  <figure><img id="feBoxImg" alt="" /><figcaption id="feBoxCap"></figcaption></figure>
+  <button type="button" class="fe-box-nav fe-box-next" data-box="1" aria-label="Image suivante"></button>
+</dialog>
+
+<footer>
+  <div class="foot-inner">
+    <img src="/logo-dar-nur.png" alt="Logo Dar Nūr" class="footer-logo-img" width="52" height="52" loading="lazy"/>
+    <div class="foot-cols">
+      <div class="foot-col"><h2>Boutique</h2><a href="/idees-cadeaux/">Idées cadeaux</a><a href="/miels/">Miels</a><a href="/huiles/">Huiles</a><a href="/parfums/">Parfums &amp; Muscs</a><a href="/bakhour/">Bakhour &amp; Encens</a><a href="/abayas/">Qamis &amp; Abayas</a></div>
+      <div class="foot-col"><h2>Aide</h2><a href="https://dar-nur.fr/#commande-livraison">Livraison &amp; commande</a><a href="https://dar-nur.fr/#faq">FAQ</a><a href="https://dar-nur.fr/#avis-clients">Avis clients</a></div>
+      <div class="foot-col"><h2>Maison</h2><a href="https://dar-nur.fr/#histoire">Notre histoire</a><a href="https://dar-nur.fr/#qui-sommes-nous">Qui sommes-nous</a><a href="https://wa.me/33769253375" target="_blank" rel="noopener">Contact</a></div>
+    </div>
+    <div class="foot-contact">Nous joindre : +33 7 69 25 33 75 · dar_nur_001@outlook.com</div>
+    <div class="foot-channels"><a href="https://instagram.com/dar.nur.officiel" target="_blank" rel="noopener">Instagram</a><span>·</span><a href="https://www.tiktok.com/@darnur.officiel" target="_blank" rel="noopener">TikTok</a></div>
+    <div class="foot-copy">© 2026 Dar Nūr — Tous droits réservés<br><a href="/mentions-legales.html">Mentions légales</a> · <a href="/confidentialite.html">Politique de confidentialité</a> · <a href="/cgv.html">CGV</a></div>
+    <div class="foot-blessing" lang="ar" dir="rtl">بارك الله فيكم</div>
+  </div>
+</footer>
+
+<script>
+/* Images hors écran. 1) celles déjà visibles, après la photo principale ; 2) dès le premier
+   défilement, un écran d'avance ; 3) après deux écrans parcourus, les dernières une à une,
+   en priorité basse : aucune n'apparaît en retard et un export PDF les contient. Chaque image
+   garde data-src tant qu'elle n'est pas arrivée ; un échec est retenté deux fois. */
+(function(){var L=[].slice.call(document.querySelectorAll('img[data-src]'));
+function go(i,f){var s=i.getAttribute('data-src'),n=0;if(!s||i._g){if(f)f();return}i._g=1;
+i.onload=function(){if(i.src.slice(0,5)==='data:')return;i.removeAttribute('data-src');i.onload=i.onerror=null;if(f)f()};
+i.onerror=function(){if(n++<2)setTimeout(function(){i.src=s+(s.indexOf('?')<0?'?':'&')+'r='+n},900*n);else{i.onload=i.onerror=null;if(f)f()}};
+i.src=s}
+function all(){L.forEach(function(i){go(i)})}
+window.addEventListener('beforeprint',all);
+if(!('IntersectionObserver'in window)){all();return}
+function ob(m){var o=new IntersectionObserver(function(e){e.forEach(function(x){if(x.isIntersecting){go(x.target);o.unobserve(x.target)}})},{rootMargin:m});L.forEach(function(i){if(!i._g)o.observe(i)})}
+var c=navigator.connection,thrifty=c&&(c.saveData||/2g|3g/.test(c.effectiveType||''));
+function rest(){if(document.hidden){document.addEventListener('visibilitychange',rest,{once:true});return}
+var i=L.filter(function(x){return!x._g})[0];if(i){i.fetchPriority='low';go(i,rest)}}
+function past(){if(window.scrollY>innerHeight*1.8){window.removeEventListener('scroll',past);setTimeout(rest,2000)}}
+function arm(){ob('0px');window.addEventListener('scroll',function(){ob('700px 60px')},{once:true,passive:true});if(window.scrollY>4)ob('700px 60px');if(!thrifty){window.addEventListener('scroll',past,{passive:true});past()}}
+if(document.readyState==='complete')arm();else window.addEventListener('load',arm)})();
+</script>
+<script type="application/json" id="feConfig">{{CONFIG}}</script>
+<script src="/js/nav.js" defer></script>
+<script src="/js/config.js" defer></script>
+<script src="/js/fiche-editoriale.js" defer></script>
+</body>
+</html>
