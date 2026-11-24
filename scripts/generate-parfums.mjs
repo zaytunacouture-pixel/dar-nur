@@ -352,6 +352,34 @@ function buildParfumsNavBlock(groups, currentBrandSlug) {
   return lines.join('\n');
 }
 
+// Présentation éditoriale optionnelle d'une marque : parfums/_editorial/<slug>.html
+// (fragments EDITORIAL_HEAD / EDITORIAL_BEFORE / EDITORIAL_AFTER) et <slug>.json
+// (h1, title, ogTitle, metaDescription). Aucune marque codée en dur : sans ces
+// fichiers, la page garde son rendu standard. {{PRICE:<slug produit>}} est
+// remplacé par le prix Supabase ; un slug inconnu fait échouer la génération
+// plutôt que de publier un prix figé ou un lien mort.
+async function loadEditorial(brandSlug, products) {
+  const read = async ext => {
+    try { return (await readFile(new URL(`parfums/_editorial/${brandSlug}.${ext}`, ROOT), 'utf8')).replace(/\r\n/g, '\n'); }
+    catch (e) { if (e.code === 'ENOENT') return null; throw e; }
+  };
+  const html = await read('html');
+  if (html === null) return { head: '', before: '', after: '', meta: {} };
+  const label = `parfums/_editorial/${brandSlug}.html`;
+  const bySlug = new Map(products.map(p => [p.slug, p]));
+  const filled = html.replace(/\{\{PRICE:([a-z0-9-]+)\}\}/g, (m, slug) => {
+    if (!bySlug.has(slug)) throw new Error(`${label} : produit inactif ou inconnu "${slug}"`);
+    return esc(formatPriceLabel(bySlug.get(slug).price_value).replace(',00 €', ' €'));
+  });
+  const metaRaw = await read('json');
+  return {
+    head: extractNamedFragment(filled, 'EDITORIAL_HEAD', label),
+    before: extractNamedFragment(filled, 'EDITORIAL_BEFORE', label),
+    after: extractNamedFragment(filled, 'EDITORIAL_AFTER', label),
+    meta: metaRaw ? JSON.parse(metaRaw) : {},
+  };
+}
+
 async function renderBrandPage(group, allGroups, commonNav) {
   const { brandSlug, brandName, brandDescription, brandImageUrl, products } = group;
   const imgPrefix = '../../';
@@ -386,13 +414,20 @@ async function renderBrandPage(group, allGroups, commonNav) {
     : `La collection Parfum ${brandName} — disponible en ${formatsText}.`;
 
   const template = await readFile(BRAND_TEMPLATE_PATH, 'utf8');
+  const editorial = await loadEditorial(brandSlug, products);
+  const editorialMeta = editorial.meta.metaDescription
+    ? editorial.meta.metaDescription
+        .replace('{{COUNT}}', String(products.length))
+        .replace('{{MIN_PRICE}}', minPrice != null ? `${minPrice.toFixed(0)} €` : '')
+    : null;
   const cardsHtml = products.map(p => buildCardHtml(p, brandName, imgPrefix)).join('\n\n');
   const jsonLdItems = products.map((p, i) => buildJsonLdItem(p, i, brandName)).join(',\n');
 
   const html = template
-    .replaceAll('{{TITLE}}', esc(`Parfum ${brandName} — ${countLabel} | Dar Nūr`))
-    .replaceAll('{{OG_TITLE}}', esc(`Parfum ${brandName} — Dar Nūr`))
-    .replaceAll('{{META_DESCRIPTION}}', esc(metaDescription))
+    .replaceAll('{{TITLE}}', esc(editorial.meta.title || `Parfum ${brandName} — ${countLabel} | Dar Nūr`))
+    .replaceAll('{{OG_TITLE}}', esc(editorial.meta.ogTitle || `Parfum ${brandName} — Dar Nūr`))
+    .replaceAll('{{META_DESCRIPTION}}', esc(editorialMeta || metaDescription))
+    .replaceAll('{{H1}}', esc(editorial.meta.h1 || `Parfum ${brandName}`))
     .replaceAll('{{CANONICAL_URL}}', esc(canonicalUrl))
     .replaceAll('{{HERO_IMAGE_URL}}', esc(heroImageRelative))
     .replaceAll('{{HERO_IMAGE_ABSOLUTE_URL}}', esc(heroImageAbsolute))
@@ -411,7 +446,10 @@ async function renderBrandPage(group, allGroups, commonNav) {
     .replace('{{PARFUMS_NAV_BLOCK}}', buildParfumsNavBlock(allGroups, brandSlug))
     .replace('{{COMMON_NAV_AFTER_PARFUMS}}', commonNav.after)
     .replace('{{JSONLD_ITEMS}}', jsonLdItems)
-    .replace('{{PRODUCT_CARDS}}', cardsHtml);
+    .replace('{{PRODUCT_CARDS}}', cardsHtml)
+    .replace('{{EDITORIAL_HEAD}}', () => editorial.head)
+    .replace('{{EDITORIAL_BEFORE}}', () => editorial.before)
+    .replace('{{EDITORIAL_AFTER}}', () => editorial.after);
 
   assertNoLeftoverTokens(html, `parfums/${brandSlug}/index.html`);
 
