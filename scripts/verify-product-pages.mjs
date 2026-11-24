@@ -61,7 +61,8 @@ function checkPageHtml(slug, html, errors) {
     errors.push('contenu produit quasi vide dans le HTML statique (hors JS)');
   }
 
-  if (!/<main id="homeView" style="display:none">/.test(html)) {
+  // Fiche éditoriale (fiches/_data/) : page sans moteur SPA, donc sans #homeView.
+  if (!/<html lang="fr" data-fiche="editoriale">/.test(html) && !/<main id="homeView" style="display:none">/.test(html)) {
     errors.push('#homeView pas masqué par défaut (flash de la page d\'accueil avant JS)');
   }
 }
