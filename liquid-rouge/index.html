@@ -324,7 +324,7 @@ section{padding:15px 28px}
 .step-simple .step-num{font-family:'Cinzel';font-size:.75rem;letter-spacing:.2em;color:var(--gold)}
 .step-simple h3{font-size:.86rem;color:var(--green);margin:8px 0 6px}
 .step-simple p{font-size:.94rem;color:var(--muted);margin:0}
-/* --- Livraison a domicile / remise sur rendez-vous + paiement une fois la commande prete --- */
+/* --- Livraison a domicile / remise sur rendez-vous + paiement par lien securise SumUp --- */
 .delivery-block{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:18px;align-items:stretch}
 .delivery-card{background:#fff;border:1px solid var(--line);border-radius:4px;padding:26px 22px;display:flex;flex-direction:column;align-items:center;text-align:center}
 .dc-free{border-color:var(--gold);box-shadow:0 0 0 1px rgba(200,168,75,.22)}
@@ -1041,7 +1041,7 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
   <div class="trust-bar" aria-label="Engagements Dar Nūr">
     <div class="trust-grid">
       <div class="trust-item"><span class="trust-num">01</span><span>Livraison<br>en Île-de-France</span></div>
-      <div class="trust-item"><span class="trust-num">02</span><span>Paiement une fois<br>la commande prête</span></div>
+      <div class="trust-item"><span class="trust-num">02</span><span>Paiement en ligne<br>sécurisé</span></div>
       <div class="trust-item"><span class="trust-num">03</span><span>Réponse WhatsApp<br>en moins d'1h</span></div>
       <div class="trust-item"><span class="trust-num">04</span><span>Produits sélectionnés<br>avec soin</span></div>
     </div>
@@ -1203,7 +1203,7 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
       <div class="steps-simple">
         <div class="step-simple"><span class="step-num">01</span><h3>Choisissez votre produit</h3><p>Parcourez nos collections et trouvez l'article qui vous intéresse.</p></div>
         <div class="step-simple"><span class="step-num">02</span><h3>Envoyez votre demande</h3><p>Le bouton WhatsApp prérempli le message — il ne reste qu'à l'envoyer.</p></div>
-        <div class="step-simple"><span class="step-num">03</span><h3>Paiement & livraison</h3><p>Dar Nūr prépare votre commande ; vous la réglez une fois prête, puis elle vous est livrée à domicile ou remise sur rendez-vous.</p></div>
+        <div class="step-simple"><span class="step-num">03</span><h3>Paiement & livraison</h3><p>Dar Nūr confirme la disponibilité et le montant total, puis vous envoie un lien de paiement sécurisé SumUp. Votre commande est préparée dès le paiement confirmé.</p></div>
       </div>
 
       <div class="delivery-block" id="deliveryBlock">
@@ -1239,10 +1239,10 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
         <div class="delivery-card dc-pay">
           <div class="dc-head">
             <svg class="dc-icon" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0-7-9-13-9-13S3 3 3 10a9 9 0 0018 0z"/><path d="M9 10l2 2 4-4"/></svg>
-            <h3>Paiement avant livraison</h3>
+            <h3>Paiement sécurisé SumUp</h3>
           </div>
-          <p class="dc-lead">Vous payez une fois votre commande prête.</p>
-          <p class="dc-sub">Dar Nūr vous prévient sur WhatsApp dès que votre commande est prête. Vous la réglez par Revolut, puis elle vous est livrée ou remise sur rendez-vous.</p>
+          <p class="dc-lead">Un lien de paiement personnel, envoyé sur WhatsApp.</p>
+          <p class="dc-sub">Après confirmation de la disponibilité et du montant total, vous recevez sur WhatsApp un lien de paiement sécurisé SumUp. Votre commande est préparée puis expédiée ou remise sur rendez-vous après confirmation du paiement.</p>
           <div class="dc-modes">Livraison actuellement disponible uniquement en Île-de-France</div>
         </div>
       </div>
@@ -1259,7 +1259,7 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
       <div class="faq-grid">
         <div class="faq-item"><h3>Comment commander ?</h3><p>Cliquez sur le bouton WhatsApp de la fiche produit — le message est prérempli. Dar Nūr confirme la disponibilité, puis convient avec vous du mode de livraison, du lieu et de l'horaire.</p></div>
         <div class="faq-item"><h3>Où et comment suis-je livré ?</h3><p>En Île-de-France uniquement. <b>Gratuit</b> : à Chelles, à domicile ou sur rendez-vous près de la mosquée ; à Lognes, sur rendez-vous au 8 allée des Palombes. <b>10 €</b> : rendez-vous près d'une autre mosquée de votre choix en Île-de-France. <b>20 €</b> : livraison à domicile ailleurs qu'à Chelles. Les deux options payantes sont proposées à partir de 20 € de commande. Le lieu exact et l'horaire sont convenus ensemble sur WhatsApp.</p></div>
-        <div class="faq-item"><h3>Quand dois-je payer ?</h3><p>Une fois votre commande prête : Dar Nūr vous le confirme sur WhatsApp, vous la réglez par Revolut, puis elle vous est livrée ou remise sur rendez-vous.</p></div>
+        <div class="faq-item"><h3>Quand dois-je payer ?</h3><p>Avant la préparation de votre commande. Dar Nūr confirme d'abord sur WhatsApp la disponibilité des produits et le montant total, puis vous transmet un lien de paiement sécurisé SumUp. Dès que le paiement est confirmé, votre commande est préparée, puis expédiée ou remise sur rendez-vous.</p></div>
       </div>
     </div>
   </section>
@@ -1370,7 +1370,7 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
 <div class="mbar" id="mbar">
   <div class="mbar-info">
     <div class="p" id="mbarPrice"></div>
-    <div class="mbar-note">Paiement avant livraison</div>
+    <div class="mbar-note">Paiement sécurisé SumUp</div>
   </div>
   <button type="button" class="btn-wa" id="mbarBtn" onclick="addActiveProductToCart()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 4h2.2l2.3 11.2a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.5L21 8H6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="20" r="1.3" fill="currentColor" stroke="none"/><circle cx="17.5" cy="20" r="1.3" fill="currentColor" stroke="none"/></svg>
@@ -1410,7 +1410,7 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
       <span class="foot-email">dar_nur_001@outlook.com</span>
     </div>
     <div class="foot-channels">
-      <a href="https://instagram.com/dar.nur.officiel" target="_blank" rel="noopener" aria-label="Voir sur Instagram @dar.nur.officiel">Instagram</a><span>·</span><a href="https://www.tiktok.com/@darnur.officiel" target="_blank" rel="noopener">TikTok</a><span>·</span><a href="https://revolut.me/youcefkir" target="_blank" rel="noopener">Revolut</a>
+      <a href="https://instagram.com/dar.nur.officiel" target="_blank" rel="noopener" aria-label="Voir sur Instagram @dar.nur.officiel">Instagram</a><span>·</span><a href="https://www.tiktok.com/@darnur.officiel" target="_blank" rel="noopener">TikTok</a>
     </div>
     <div class="foot-copy">© 2026 Dar Nūr — Tous droits réservés<br><a href="mentions-legales.html">Mentions légales</a> · <a href="confidentialite.html">Politique de confidentialité</a> · <a href="cgv.html">CGV</a></div>
     <div class="foot-blessing">بارك الله فيكم</div>
@@ -3204,7 +3204,7 @@ function deliverySectionHTML(){
         <div class="section-head">
           <div class="eyebrow">Livraison &amp; paiement</div>
           <h2>Commandez, réglez, recevez</h2>
-          <p>Livraison à domicile ou remise sur rendez-vous, en Île-de-France, une fois votre commande prête et réglée.</p>
+          <p>Livraison à domicile ou remise sur rendez-vous, en Île-de-France, après confirmation de votre paiement sécurisé.</p>
         </div>
         ${block.outerHTML.replace(' id="deliveryBlock"','')}
       </div>
@@ -3337,7 +3337,7 @@ function showProduct(id){
     <div class="pp-value-strip">
       <div class="pp-value-grid">
         <div><span></span>Livraison en Île-de-France</div>
-        <div><span></span>Paiement avant livraison</div>
+        <div><span></span>Paiement en ligne sécurisé</div>
         <div><span></span>Réponse WhatsApp en moins d'1h</div>
         <div><span></span>Produits sélectionnés avec soin</div>
       </div>
@@ -3372,7 +3372,7 @@ function showProduct(id){
           </button>`}
         </div>
         <div class="order-reassurance">
-          <span><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M21 10c0-7-9-13-9-13S3 3 3 10a9 9 0 0018 0z"/><path d="M9 10l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>Paiement avant livraison</span>
+          <span><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M21 10c0-7-9-13-9-13S3 3 3 10a9 9 0 0018 0z"/><path d="M9 10l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>Lien de paiement sécurisé SumUp</span>
           <span><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="10" r="3"/></svg>Domicile ou rendez-vous — Île-de-France</span>
           <span><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke-linecap="round" stroke-linejoin="round"/></svg>Service client WhatsApp</span>
         </div>
@@ -3520,7 +3520,7 @@ function updateMobileBar(){
     : hasOpt ? (chosen ? fmtPrice(p.price.options[activeOption][1])
                        : "dès "+fmtPrice(startPrice(p)))
     : fmtPrice(p.price.value);
-  // La note "Paiement avant livraison" n'a de sens qu'à côté d'un bouton
+  // La note "Paiement sécurisé SumUp" n'a de sens qu'à côté d'un bouton
   // réellement commandable — masquée sur un produit à venir ou sans prix.
   if(note) note.hidden = (p.coming_soon===true || !hasUsablePrice(p));
   if(!btn) return;
@@ -4166,7 +4166,7 @@ function updateColorWA() {
     + `• Taille : ${_selectedSize}\n\n`
     + `Mes informations :\n`
     + `• Nom :\n• Ville :\n`
-    + `• Paiement : Revolut, une fois la commande prête\n\n`
+    + `• Paiement : lien sécurisé SumUp, envoyé par Dar Nūr après confirmation\n\n`
     + `Merci.`
   );
   window._colorWAHref = `https://wa.me/33769253375?text=${msg}`;
