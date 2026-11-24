@@ -323,7 +323,7 @@ section{padding:15px 28px}
 .step-simple .step-num{font-family:'Cinzel';font-size:.75rem;letter-spacing:.2em;color:var(--gold)}
 .step-simple h3{font-size:.86rem;color:var(--green);margin:8px 0 6px}
 .step-simple p{font-size:.94rem;color:var(--muted);margin:0}
-/* --- Livraison a domicile / remise sur rendez-vous + paiement a la reception --- */
+/* --- Livraison a domicile / remise sur rendez-vous + paiement une fois la commande prete --- */
 .delivery-block{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:18px;align-items:stretch}
 .delivery-card{background:#fff;border:1px solid var(--line);border-radius:4px;padding:26px 22px;display:flex;flex-direction:column;align-items:center;text-align:center}
 .dc-free{border-color:var(--gold);box-shadow:0 0 0 1px rgba(200,168,75,.22)}
@@ -1040,7 +1040,7 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
   <div class="trust-bar" aria-label="Engagements Dar Nūr">
     <div class="trust-grid">
       <div class="trust-item"><span class="trust-num">01</span><span>Livraison<br>en Île-de-France</span></div>
-      <div class="trust-item"><span class="trust-num">02</span><span>Paiement<br>à la réception</span></div>
+      <div class="trust-item"><span class="trust-num">02</span><span>Paiement une fois<br>la commande prête</span></div>
       <div class="trust-item"><span class="trust-num">03</span><span>Réponse WhatsApp<br>en moins d'1h</span></div>
       <div class="trust-item"><span class="trust-num">04</span><span>Produits sélectionnés<br>avec soin</span></div>
     </div>
@@ -1202,7 +1202,7 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
       <div class="steps-simple">
         <div class="step-simple"><span class="step-num">01</span><h3>Choisissez votre produit</h3><p>Parcourez nos collections et trouvez l'article qui vous intéresse.</p></div>
         <div class="step-simple"><span class="step-num">02</span><h3>Envoyez votre demande</h3><p>Le bouton WhatsApp prérempli le message — il ne reste qu'à l'envoyer.</p></div>
-        <div class="step-simple"><span class="step-num">03</span><h3>Livraison & paiement</h3><p>Vous choisissez la livraison à domicile ou une remise sur rendez-vous, puis vous réglez à la réception.</p></div>
+        <div class="step-simple"><span class="step-num">03</span><h3>Paiement & livraison</h3><p>Dar Nūr prépare votre commande ; vous la réglez une fois prête, puis elle vous est livrée à domicile ou remise sur rendez-vous.</p></div>
       </div>
 
       <div class="delivery-block" id="deliveryBlock">
@@ -1238,10 +1238,10 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
         <div class="delivery-card dc-pay">
           <div class="dc-head">
             <svg class="dc-icon" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0-7-9-13-9-13S3 3 3 10a9 9 0 0018 0z"/><path d="M9 10l2 2 4-4"/></svg>
-            <h3>Paiement à la réception</h3>
+            <h3>Paiement avant livraison</h3>
           </div>
-          <p class="dc-lead">Aucun paiement à l'avance.</p>
-          <p class="dc-sub">Recevez votre commande, vérifiez-la, puis payez sur place — par Revolut ou en espèces, selon votre préférence.</p>
+          <p class="dc-lead">Vous payez une fois votre commande prête.</p>
+          <p class="dc-sub">Dar Nūr vous prévient sur WhatsApp dès que votre commande est prête. Vous la réglez par Revolut, puis elle vous est livrée ou remise sur rendez-vous.</p>
           <div class="dc-modes">Livraison actuellement disponible uniquement en Île-de-France</div>
         </div>
       </div>
@@ -1258,7 +1258,7 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
       <div class="faq-grid">
         <div class="faq-item"><h3>Comment commander ?</h3><p>Cliquez sur le bouton WhatsApp de la fiche produit — le message est prérempli. Dar Nūr confirme la disponibilité, puis convient avec vous du mode de livraison, du lieu et de l'horaire.</p></div>
         <div class="faq-item"><h3>Où et comment suis-je livré ?</h3><p>En Île-de-France uniquement. <b>Gratuit</b> : à Chelles, à domicile ou sur rendez-vous près de la mosquée ; à Lognes, sur rendez-vous au 8 allée des Palombes. <b>10 €</b> : rendez-vous près d'une autre mosquée de votre choix en Île-de-France. <b>20 €</b> : livraison à domicile ailleurs qu'à Chelles. Les deux options payantes sont proposées à partir de 20 € de commande. Le lieu exact et l'horaire sont convenus ensemble sur WhatsApp.</p></div>
-        <div class="faq-item"><h3>Quand dois-je payer ?</h3><p>Aucun paiement à l'avance : vous réglez uniquement après avoir reçu vos produits, par Revolut ou en espèces, selon votre préférence.</p></div>
+        <div class="faq-item"><h3>Quand dois-je payer ?</h3><p>Une fois votre commande prête : Dar Nūr vous le confirme sur WhatsApp, vous la réglez par Revolut, puis elle vous est livrée ou remise sur rendez-vous.</p></div>
       </div>
     </div>
   </section>
@@ -1339,7 +1339,7 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
 <div class="mbar" id="mbar">
   <div class="mbar-info">
     <div class="p" id="mbarPrice"></div>
-    <div class="mbar-note">Paiement à la réception</div>
+    <div class="mbar-note">Paiement avant livraison</div>
   </div>
   <button type="button" class="btn-wa" id="mbarBtn" onclick="addActiveProductToCart()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 4h2.2l2.3 11.2a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.5L21 8H6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="20" r="1.3" fill="currentColor" stroke="none"/><circle cx="17.5" cy="20" r="1.3" fill="currentColor" stroke="none"/></svg>
@@ -3172,8 +3172,8 @@ function deliverySectionHTML(){
       <div class="wrap">
         <div class="section-head">
           <div class="eyebrow">Livraison &amp; paiement</div>
-          <h2>Recevez, puis payez</h2>
-          <p>Livraison à domicile ou remise sur rendez-vous, en Île-de-France, sans aucun paiement à l'avance.</p>
+          <h2>Commandez, réglez, recevez</h2>
+          <p>Livraison à domicile ou remise sur rendez-vous, en Île-de-France, une fois votre commande prête et réglée.</p>
         </div>
         ${block.outerHTML.replace(' id="deliveryBlock"','')}
       </div>
@@ -3306,7 +3306,7 @@ function showProduct(id){
     <div class="pp-value-strip">
       <div class="pp-value-grid">
         <div><span></span>Livraison en Île-de-France</div>
-        <div><span></span>Paiement à la réception</div>
+        <div><span></span>Paiement avant livraison</div>
         <div><span></span>Réponse WhatsApp en moins d'1h</div>
         <div><span></span>Produits sélectionnés avec soin</div>
       </div>
@@ -3341,7 +3341,7 @@ function showProduct(id){
           </button>`}
         </div>
         <div class="order-reassurance">
-          <span><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M21 10c0-7-9-13-9-13S3 3 3 10a9 9 0 0018 0z"/><path d="M9 10l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>Paiement à la réception</span>
+          <span><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M21 10c0-7-9-13-9-13S3 3 3 10a9 9 0 0018 0z"/><path d="M9 10l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>Paiement avant livraison</span>
           <span><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="10" r="3"/></svg>Domicile ou rendez-vous — Île-de-France</span>
           <span><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke-linecap="round" stroke-linejoin="round"/></svg>Service client WhatsApp</span>
         </div>
@@ -3489,7 +3489,7 @@ function updateMobileBar(){
     : hasOpt ? (chosen ? fmtPrice(p.price.options[activeOption][1])
                        : "dès "+fmtPrice(startPrice(p)))
     : fmtPrice(p.price.value);
-  // La note "Paiement à la réception" n'a de sens qu'à côté d'un bouton
+  // La note "Paiement avant livraison" n'a de sens qu'à côté d'un bouton
   // réellement commandable — masquée sur un produit à venir ou sans prix.
   if(note) note.hidden = (p.coming_soon===true || !hasUsablePrice(p));
   if(!btn) return;
@@ -4135,7 +4135,7 @@ function updateColorWA() {
     + `• Taille : ${_selectedSize}\n\n`
     + `Mes informations :\n`
     + `• Nom :\n• Ville :\n`
-    + `• Paiement à la réception : Revolut / Espèces\n\n`
+    + `• Paiement : Revolut, une fois la commande prête\n\n`
     + `Merci.`
   );
   window._colorWAHref = `https://wa.me/33769253375?text=${msg}`;
