@@ -208,6 +208,7 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
   .card-price{font-size:1.05rem}
 }
 </style>
+{{EDITORIAL_HEAD}}
 </head>
 <body>
 
@@ -256,7 +257,7 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
 <section class="cat-hero">
   <div class="cat-badge">Collection de parfums</div>
   <div class="hero-ring"><img src="{{HERO_IMAGE_URL}}" alt="{{HERO_IMAGE_ALT}}" width="128" height="128" decoding="async"/></div>
-  <h1>Parfum {{BRAND_NAME}}</h1>
+  <h1>{{H1}}</h1>
   <p class="cat-hero-sub">{{HERO_SUBTITLE}}</p>
   <div class="divider" aria-hidden="true"><span class="line"></span><span class="dot"></span><span class="line r"></span></div>
 </section>
@@ -270,6 +271,8 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
     <div class="vs-item">Produits sélectionnés avec soin</div>
   </div>
 </div>
+
+{{EDITORIAL_BEFORE}}
 
 <!-- ===== INTRO ===== -->
 <section class="intro-section">
@@ -308,6 +311,8 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
 {{PRODUCT_CARDS}}
   </div>
 </section>
+
+{{EDITORIAL_AFTER}}
 
 <!-- ===== FOOTER — reprise exacte du composant homepage ===== -->
 <footer>

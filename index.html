@@ -810,6 +810,22 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
 .pp-thumb{aspect-ratio:1;border:1px solid var(--line);border-radius:4px;background:#f6f0e3;padding:4px;cursor:pointer}
 .pp-thumb img{width:100%;height:100%;object-fit:cover;object-position:center;border-radius:3px;display:block}
 .pp-thumb.active{border-color:var(--gold)}
+.pp-thumb-video{position:relative}
+.pp-play{position:absolute;inset:0;margin:auto;width:30px;height:30px;border-radius:50%;background:rgba(13,31,22,.82);border:1px solid var(--gold)}
+.pp-play::after{content:"";position:absolute;left:11px;top:8px;border-style:solid;border-width:6px 0 6px 9px;border-color:transparent transparent transparent var(--gold-light)}
+.pp-feature{background:var(--green);color:var(--cream);padding:56px 24px;margin-top:48px}
+.pp-feature-inner{max-width:1160px;margin:0 auto;display:grid;grid-template-columns:1.25fr 1fr;gap:44px;align-items:center}
+.pp-feature-video video{display:block;width:100%;height:auto;aspect-ratio:4096/2160;object-fit:contain;background:#000;border-radius:4px}
+.pp-feature .eyebrow{color:var(--gold-light)}
+.pp-feature h2{color:var(--cream);margin:8px 0 12px}
+.pp-feature p{font-size:1rem;line-height:1.75;color:rgba(250,247,240,.86);margin:0 0 14px}
+.pp-feature .pp-feature-lead{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.4rem;line-height:1.35;color:var(--gold-light)}
+.pp-feature dl{margin:20px 0 14px;border-top:1px solid rgba(200,168,75,.35)}
+.pp-feature dl>div{display:flex;justify-content:space-between;gap:18px;padding:10px 0;border-bottom:1px solid rgba(200,168,75,.2)}
+.pp-feature dt{font-size:.94rem;color:rgba(250,247,240,.75)}
+.pp-feature dd{margin:0;text-align:right;font-size:1rem;color:var(--cream)}
+.pp-feature .pp-feature-credit{font-size:.85rem;color:rgba(250,247,240,.65);margin:0}
+@media(max-width:900px){.pp-feature{padding:40px 18px}.pp-feature-inner{grid-template-columns:minmax(0,1fr);gap:26px}}
 
 /* ============ RESPONSIVE ============ */
 @media(max-width:1024px){
@@ -818,7 +834,12 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
   .pp-body{display:flex;flex-direction:column;align-items:center;gap:36px}
   .pp-gallery{width:100%;max-width:420px;margin:0 auto;gap:12px}
   .pp-visual{aspect-ratio:1;padding:38px;width:100%;margin:0 auto}
+  .pp-visual.is-video{aspect-ratio:9/16}
 }
+.pp-visual.is-video{padding:0;background:var(--green);overflow:hidden}
+.pp-visual video{display:block;width:100%;height:100%;min-height:0;object-fit:contain;background:var(--green)}
+.pp-product-img[hidden]{display:none}
+@media(min-width:1025px){.pp-gallery:has(.is-video){position:static;max-height:none}.pp-visual.is-video{flex:none;aspect-ratio:auto;height:min(72vh,680px)}}
 /* Seuil de bascule desktop -> mobile de la NAVIGATION uniquement, porte de
    768px a 1239px. La rangee de liens desktop (.nav-links, 9 items) a une
    largeur intrinseque de ~874px qui, ajoutee au lockup de marque (155px) et
@@ -1389,6 +1410,8 @@ footer{background:var(--green);color:rgba(250,247,240,.7);padding:44px 24px 28px
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js"></script>
 <script src="js/config.js"></script>
 <script src="/js/nav.js"></script>
+<!-- Vidéos officielles des fiches parfum (données + balise) -->
+<script src="/js/product-videos.js"></script>
 <script>
 /* ============================================================
    DAR NŪR — données produits + logique SPA
@@ -2941,6 +2964,7 @@ function goCat(f){showHome();document.getElementById("boutique").style.display="
 function setProductGalleryImage(btn, src){
   const img = document.getElementById("ppGalleryMain");
   if(!img) return;
+  clearProductGalleryVideo(img);
   img.src = src || btn.dataset.src;
   btn.parentElement.querySelectorAll(".pp-thumb").forEach(x=>{
     x.classList.remove("active");
@@ -2948,6 +2972,51 @@ function setProductGalleryImage(btn, src){
   });
   btn.classList.add("active");
   btn.setAttribute("aria-pressed","true");
+}
+
+/* Vidéo officielle dans la galerie : la balise n'est créée qu'au clic, et
+   retirée dès que le visiteur revient à une photo. */
+function clearProductGalleryVideo(img){
+  const visual = img.closest(".pp-visual");
+  const old = visual && visual.querySelector("video");
+  if(old){ old.pause(); old.remove(); }
+  if(visual) visual.classList.remove("is-video");
+  img.hidden = false;
+}
+function setProductGalleryVideo(btn){
+  const img = document.getElementById("ppGalleryMain");
+  const list = activeProduct && window.DN_PRODUCT_VIDEOS && window.DN_PRODUCT_VIDEOS[activeProduct.id];
+  const vid = list && list[Number(btn.dataset.video)];
+  if(!img || !vid) return;
+  clearProductGalleryVideo(img);
+  const visual = img.closest(".pp-visual");
+  img.hidden = true;
+  visual.classList.add("is-video");
+  visual.insertAdjacentHTML("beforeend", dnVideoTag(vid));
+  btn.parentElement.querySelectorAll(".pp-thumb").forEach(x=>{
+    x.classList.toggle("active", x===btn);
+    x.setAttribute("aria-pressed", x===btn ? "true" : "false");
+  });
+  const started = visual.querySelector("video").play();
+  if(started && started.catch) started.catch(()=>{});
+}
+/* Bloc « édition limitée » (DN_PRODUCT_FEATURES) : vide pour les autres fiches. */
+function productFeatureHTML(p){
+  const f = window.DN_PRODUCT_FEATURES && window.DN_PRODUCT_FEATURES[p.id];
+  if(!f) return "";
+  return `<section class="pp-feature" aria-label="${escHtml(f.title)}">
+      <div class="pp-feature-inner">
+        <div class="pp-feature-video">${dnVideoTag(f.video)}</div>
+        <div class="pp-feature-text">
+          <div class="eyebrow">${escHtml(f.eyebrow)}</div>
+          <h2>${escHtml(f.title)}</h2>
+          <p class="pp-feature-lead">${escHtml(f.lead)}</p>
+          <p>${escHtml(f.text)}</p>
+          <dl>${f.facts.map(([k,v])=>`<div><dt>${escHtml(k)}</dt><dd>${escHtml(v)}</dd></div>`).join("")}<div><dt>Prix Dar Nūr</dt><dd>${priceHeadline(p)}</dd></div></dl>
+          <p class="pp-feature-credit">Film : Maison Fragranza Paris.</p>
+        </div>
+      </div>
+    </section>`;
 }
 
 /* ============ RENDER PRODUCT PAGE ============ */
@@ -3228,8 +3297,11 @@ function showProduct(id){
      images secondaires.)
      Le chemin passe par data-src plutôt que par une chaîne interpolée dans un
      onclick : une apostrophe dans un nom de fichier cassait le gestionnaire. */
+  /* Vidéos officielles : vignettes ajoutées après les photos, lues au clic. */
+  const productVideos = (window.DN_PRODUCT_VIDEOS && window.DN_PRODUCT_VIDEOS[p.id]) || [];
+  const videoThumbs = productVideos.map((v,i)=>`<button class="pp-thumb pp-thumb-video" type="button" data-video="${i}" aria-label="Voir la vidéo : ${escHtml(v.title)}" aria-pressed="false" onclick="setProductGalleryVideo(this)"><img src="${v.poster}" alt="" width="72" height="72" loading="lazy"/><span class="pp-play" aria-hidden="true"></span></button>`).join("");
   const galleryThumbs = (!isFormatDrivenImage && productImages.length > 1)
-    ? `<div class="pp-thumbs" role="group" aria-label="Autres images du produit">${productImages.map((img,i)=>`<button class="pp-thumb ${i===activeImgIdx?'active':''}" type="button" data-src="${img}" aria-label="Voir l'image ${i+1} sur ${productImages.length}" aria-pressed="${i===activeImgIdx}" onclick="setProductGalleryImage(this)"><img src="${img}" alt="${p.name} — image ${i+1}" width="72" height="72" loading="lazy"/></button>`).join("")}</div>`
+    ? `<div class="pp-thumbs" role="group" aria-label="Autres images du produit">${productImages.map((img,i)=>`<button class="pp-thumb ${i===activeImgIdx?'active':''}" type="button" data-src="${img}" aria-label="Voir l'image ${i+1} sur ${productImages.length}" aria-pressed="${i===activeImgIdx}" onclick="setProductGalleryImage(this)"><img src="${img}" alt="${p.name} — image ${i+1}" width="72" height="72" loading="lazy"/></button>`).join("")}${videoThumbs}</div>`
     : "";
 
   // Qualité panel (left) — varies slightly by type
@@ -3380,6 +3452,7 @@ function showProduct(id){
       </div>
     </div>
 
+    ${productFeatureHTML(p)}
     ${deliverySectionHTML()}
 
     <section class="engage">
