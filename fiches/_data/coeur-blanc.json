@@ -64,8 +64,8 @@
     ]
   },
   "film": {
-    "_doc": "published:false : le film n'est pas diffusé sur la fiche tant que la marque n'a pas confirmé par écrit la version réencodée (sd/hd). La photographie « poster » est affichée seule avec les textes « still ». Passer published à true rétablit le lecteur.",
-    "published": false,
+    "_doc": "published:true : le propriétaire a confirmé le 2026-11-25 disposer des autorisations de Maison Fragranza Paris (films officiels, réencodage Shopify, diffusion sur dar-nur.fr). Passer published à false retire le lecteur : la photographie « poster » est alors affichée seule avec les textes « still ».",
+    "published": true,
     "still": {
       "eyebrow": "Le tournage",
       "text": "Une photographie du tournage de la maison : le flacon de face, devant un lys blanc.",
