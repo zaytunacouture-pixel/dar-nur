@@ -1,0 +1,298 @@
+{
+  "_doc": "Santal Gourmand V1, « La table et la crème » (fiches/_art/santal-gourmand.css). Images extraites des deux films officiels du Media Kit (2026 et 2025, kind « film ») et photographies Sony du Media Kit (kind « photo »), cadrées et réduites, sans retouche ; provenance dans fiches/_sources/santal-gourmand.json. La barbe à papa, faute de photographie officielle, est un dessin calculé par Dar Nūr (kind « dessin »). Crédits regroupés en fin de page. scripts : « print » signifie demandé après le chargement. Notes, famille, concentration et genre : site officiel et catalogue 2026 ; tenue et fabrication : catalogue 2026 ; rituel : site officiel.",
+  "brandLabel": "Maison Fragranza Paris",
+  "typeLabel": "Extrait de parfum",
+  "genderLabel": "Unisexe",
+  "shopUrl": "https://shop.dar-nur.fr/products/santal-gourmand",
+  "themeColor": "#0d1f16",
+  "fonts": [
+    "/assets/fonts/fraunces-soft.woff2",
+    "/assets/fonts/jost.woff2"
+  ],
+  "sections": [
+    "ouverture",
+    "reperes",
+    "parfum",
+    "notes",
+    "galerie",
+    "film",
+    "planche:rituel",
+    "essentiel",
+    "maison",
+    "conclusion",
+    "meme-maison",
+    "credits"
+  ],
+  "seo": {
+    "title": "Santal Gourmand, extrait de parfum Maison Fragranza | Dar Nūr",
+    "description": "Santal Gourmand de Maison Fragranza Paris : extrait de parfum unisexe {{VOLUME}}, pistache, framboise, barbe à papa et bois de santal. Fabriqué en France. {{PRICE}}.",
+    "image": {
+      "src": "/assets/santal-gourmand/v1-og.webp",
+      "w": 1800,
+      "h": 1200,
+      "alt": "Flacon Santal Gourmand de Maison Fragranza Paris, étiquette dorée, posé sur un socle blanc"
+    }
+  },
+  "hero": {
+    "image": {
+      "src": "/assets/santal-gourmand/v1-table.webp",
+      "w": 960,
+      "h": 1451,
+      "kind": "film",
+      "alt": "Flacon Santal Gourmand vu d'en haut, étiquette dorée, entouré de framboises, de pistaches et d'éclats de bois de santal dans un rai de lumière",
+      "srcset": "/assets/santal-gourmand/v1-table-740.webp 740w, /assets/santal-gourmand/v1-table.webp 960w",
+      "sizes": "(max-width:540px) 100vw, (max-width:760px) and (max-aspect-ratio:7/10) 100vw, 44vw"
+    }
+  },
+  "perfume": {
+    "eyebrow": "Le parfum",
+    "title": "Une gourmandise boisée",
+    "lead": "Une douceur qui a du caractère, portée par le bois.",
+    "descriptionIndexes": [
+      0,
+      1
+    ],
+    "image": {
+      "src": "/assets/santal-gourmand/v1-mains.webp",
+      "w": 844,
+      "h": 1054,
+      "kind": "film",
+      "alt": "Deux mains tiennent le flacon Santal Gourmand dans une lumière ambrée, l'étiquette dorée en pleine lumière"
+    }
+  },
+  "pyramid": {
+    "eyebrow": "La pyramide olfactive",
+    "title": "Trois niveaux, quatre notes",
+    "disclaim": "Gros plans du film officiel et dessin de Dar Nūr : ils évoquent les notes olfactives, sans représenter les ingrédients du parfum.",
+    "notes": {
+      "pistache": {
+        "text": "Ronde, veloutée, généreuse.",
+        "src": "/assets/santal-gourmand/v1-pistache.webp",
+        "w": 720,
+        "h": 900,
+        "kind": "film",
+        "alt": "Crème de pistache tournée, éclats de pistache en surface"
+      },
+      "framboise": {
+        "text": "Vive, juteuse, éclatante.",
+        "src": "/assets/santal-gourmand/v1-framboise.webp",
+        "w": 720,
+        "h": 900,
+        "kind": "film",
+        "alt": "Framboises serrées, vues de très près"
+      },
+      "barbe à papa": {
+        "text": "Légère, vaporeuse, fondante.",
+        "src": "/assets/santal-gourmand/v1-barbe.webp",
+        "w": 720,
+        "h": 900,
+        "kind": "dessin",
+        "alt": "Nuage de barbe à papa rose, fils de sucre enroulés, dessin calculé par Dar Nūr"
+      },
+      "bois de santal": {
+        "text": "Boisé, profond, soyeux.",
+        "src": "/assets/santal-gourmand/v1-santal.webp",
+        "w": 720,
+        "h": 900,
+        "kind": "film",
+        "alt": "Éclat de bois de santal dans une lumière dorée, fibres du bois en relief"
+      }
+    }
+  },
+  "planches": {
+    "rituel": {
+      "eyebrow": "Le rituel de la maison",
+      "title": "Sur la peau, sans frotter",
+      "paragraphs": [
+        "Une peau propre, légèrement hydratée : elle retient mieux les notes.",
+        "Une quinzaine de centimètres, sur les points de chaleur : cou, poignets, creux du coude.",
+        "Laisser sécher sans frotter. Pour un sillage plus marqué, un nuage léger sur l'écharpe, après un essai sur une zone discrète."
+      ],
+      "images": [
+        {
+          "src": "/assets/santal-gourmand/v1-geste.webp",
+          "w": 1080,
+          "h": 1080,
+          "kind": "film",
+          "alt": "Une main baguée vaporise Santal Gourmand, chemise blanche en arrière-plan"
+        },
+        {
+          "src": "/assets/santal-gourmand/v1-coupe.webp",
+          "w": 880,
+          "h": 1100,
+          "kind": "film",
+          "alt": "Une coupe de framboises posée sur le capuchon doré du flacon, tenue par une main"
+        }
+      ]
+    }
+  },
+  "gallery": {
+    "eyebrow": "Le flacon",
+    "title": "L'or, le verre, la lumière",
+    "lead": "Six vues, du capuchon à la base.",
+    "items": [
+      {
+        "src": "/assets/santal-gourmand/v1-etiquette.webp",
+        "w": 1080,
+        "h": 1920,
+        "kind": "film",
+        "alt": "L'étiquette dorée de Santal Gourmand, vue en biais, et le capuchon guilloché",
+        "caption": "L'étiquette d'or"
+      },
+      {
+        "src": "/assets/santal-gourmand/v1-studio.webp",
+        "w": 1080,
+        "h": 1859,
+        "kind": "photo",
+        "alt": "Flacon Santal Gourmand de trois quarts sur fond clair, verre ondulé et jus pâle",
+        "caption": "De trois quarts"
+      },
+      {
+        "src": "/assets/santal-gourmand/v1-bouchon.webp",
+        "w": 1080,
+        "h": 1920,
+        "kind": "film",
+        "alt": "Le capuchon doré, motif en relief, au-dessus du verre",
+        "caption": "Le capuchon"
+      },
+      {
+        "src": "/assets/santal-gourmand/v1-verre.webp",
+        "w": 1080,
+        "h": 1920,
+        "kind": "film",
+        "alt": "Le flanc du flacon, verre taillé en ondes, traversé par la lumière",
+        "caption": "Le verre ondulé"
+      },
+      {
+        "src": "/assets/santal-gourmand/v1-base.webp",
+        "w": 1080,
+        "h": 1920,
+        "kind": "film",
+        "alt": "Le bas de l'étiquette, « Extrait de parfum, Paris », et le monogramme de la maison dans le verre",
+        "caption": "Le monogramme"
+      },
+      {
+        "src": "/assets/santal-gourmand/v1-socle.webp",
+        "w": 1080,
+        "h": 1920,
+        "kind": "film",
+        "alt": "Le flacon Santal Gourmand posé sur un socle blanc, en pleine lumière",
+        "caption": "Sur le socle"
+      }
+    ]
+  },
+  "film": {
+    "published": true,
+    "eyebrow": "Le film",
+    "title": "Les matières, de près",
+    "text": "Framboises, pistaches, éclats de santal, crème de pistache : la maison filme les matières au plus près, puis le flacon dans la lumière.",
+    "credit": "Film : Maison Fragranza Paris",
+    "play": "Voir le film",
+    "label": "Santal Gourmand, film officiel Maison Fragranza Paris",
+    "duration": "PT25S",
+    "uploadDate": "2026-11-24T12:00:00+01:00",
+    "poster": {
+      "src": "/assets/santal-gourmand/v1-affiche.webp",
+      "w": 1080,
+      "h": 1920,
+      "kind": "film",
+      "alt": "Le flacon Santal Gourmand sur un socle blanc, image du film officiel"
+    },
+    "sd": "https://cdn.shopify.com/videos/c/vp/164a68fa0b584b8f8dabd6c348c2a410/164a68fa0b584b8f8dabd6c348c2a410.HD-720p-4.5Mbps-102543325.mp4",
+    "hd": "https://cdn.shopify.com/videos/c/vp/164a68fa0b584b8f8dabd6c348c2a410/164a68fa0b584b8f8dabd6c348c2a410.HD-1080p-7.2Mbps-102543325.mp4"
+  },
+  "details": {
+    "eyebrow": "L'essentiel",
+    "title": "Santal Gourmand en détail",
+    "making": "Fabriqué et mis en bouteille en France",
+    "lasting": "24 à 48 heures",
+    "lastingNote": "Selon le fabricant, à titre indicatif.",
+    "sensoryNote": "Le sillage et la tenue peuvent varier selon la peau et les conditions d'utilisation.",
+    "sentenceCase": true,
+    "delivery": "trio"
+  },
+  "house": {
+    "eyebrow": "Maison Fragranza Paris",
+    "title": "Une maison, des signatures singulières",
+    "paragraphs": [
+      "Née à Paris en 2024, Maison Fragranza Paris compose des extraits de parfum unisexes, façonnés et mis en bouteille en France.",
+      "Santal Gourmand y côtoie Cœur Blanc, BLVD Haussmann, Rosa Vento, Fragamour et l'édition limitée Charnel Absolu."
+    ],
+    "image": {
+      "src": "/assets/santal-gourmand/v1-collection.webp",
+      "w": 880,
+      "h": 1100,
+      "kind": "photo",
+      "alt": "Santal Gourmand entre Cœur Blanc et Fragamour, trois flacons de la maison côte à côte"
+    },
+    "link": "/parfums/maison-fragranza/",
+    "linkLabel": "Découvrir la maison et ses six parfums"
+  },
+  "final": {
+    "title": "Laissez-vous envelopper"
+  },
+  "_test": {
+    "enteteOpaque": true,
+    "texteHorsImage": true,
+    "achatPremierEcran": [
+      [375, 667],
+      [390, 664],
+      [390, 844],
+      [393, 660],
+      [430, 739],
+      [430, 932]
+    ],
+    "flacons": [
+      [0.155, 0.775, 0.15, 0.795]
+    ],
+    "absent": [
+      "Image générée",
+      "visuel officiel",
+      "sirupeux",
+      "Trois strates",
+      "deux façons de la vivre",
+      "écueil",
+      "addictif",
+      "addictive",
+      "irrésistible",
+      "derniers exemplaires",
+      "stock limité",
+      "Joshua Brown",
+      "non une garantie"
+    ],
+    "enteteCompact": [60, 90],
+    "barreFin": true,
+    "filmCentre": true,
+    "decor": 0,
+    "present": [
+      "Une gourmandise boisée",
+      "Trois niveaux, quatre notes",
+      "L'or, le verre, la lumière",
+      "Les matières, de près",
+      "Sur la peau, sans frotter",
+      "Une maison, des signatures singulières",
+      "Laissez-vous envelopper"
+    ]
+  },
+  "credits": {
+    "lines": [
+      "Images des films officiels et photographies : Maison Fragranza Paris. Dessin de la barbe à papa : Dar Nūr. Rituel d'application : d'après le site officiel de Maison Fragranza Paris."
+    ]
+  },
+  "related": {
+    "coeur-blanc": { "src": "/assets/santal-gourmand/v1-coeur-blanc.webp", "w": 560, "h": 840, "kind": "photo", "alt": "" },
+    "blvd-haussmann": { "src": "/assets/santal-gourmand/v1-blvd-haussmann.webp", "w": 560, "h": 840, "kind": "photo", "alt": "" },
+    "rosa-vento": { "src": "/assets/santal-gourmand/v1-rosa-vento.webp", "w": 560, "h": 840, "kind": "photo", "alt": "" },
+    "fragamour": { "src": "/assets/santal-gourmand/v1-fragamour.webp", "w": 560, "h": 840, "kind": "photo", "alt": "" },
+    "charnel-absolu": { "src": "/assets/santal-gourmand/v1-charnel-absolu.webp", "w": 560, "h": 840, "kind": "photo", "alt": "" }
+  },
+  "styles": [
+    { "href": "/assets/santal-gourmand/ordinateur.css", "media": "(min-width:861px)" },
+    { "href": "/assets/santal-gourmand/entete.css", "media": "(min-width:1240px)" },
+    { "href": "/assets/santal-gourmand/impression.css", "media": "print" }
+  ],
+  "scripts": [
+    { "src": "/assets/santal-gourmand/entete.js", "media": "(min-width:1240px)" },
+    { "src": "/assets/santal-gourmand/barre.js", "media": "print" }
+  ]
+}

@@ -1,0 +1,30 @@
+/* Santal Gourmand, ordinateur (dès 1240 px, voir data.styles) : l'en-tête s'arrête à la rangée de navigation, puis le logo et la recherche y reparaissent
+   (entete.js). Sa hauteur dans la page ne change pas : aucun décalage du contenu. */
+.fe-repere{position:absolute;left:0;top:0;width:1px;height:var(--identite,98px);pointer-events:none}
+  html{scroll-padding-top:96px}
+  .fe header{top:calc(var(--identite,98px)*-1)}
+  .fe .row-nav{transition:background-color .35s}
+  .fe .is-compact{padding-top:var(--identite,98px);border-bottom-color:rgba(200,168,75,.5)}
+  .fe .is-compact .row-nav{background:#0d1f16}
+  .fe .is-compact .row-identity{position:absolute;left:0;right:0;bottom:0;height:var(--barre,74px);padding:0 clamp(20px,2.4vw,44px);background:none;pointer-events:none}
+  .fe .is-compact .row-identity::after{display:none}
+  .fe .is-compact .row-identity>*{pointer-events:auto}
+  .fe .is-compact .brand-logo{width:44px;height:44px}
+  .fe .is-compact .brand-text{display:none}
+  .fe .is-bascule .row-identity,.fe .is-bascule .nav-links{visibility:hidden}
+  .fe .is-compact .nav-links{gap:20px}
+  .fe .is-compact .nav-dropdown{top:6px}
+@media(min-width:1340px){
+  .fe .is-compact .nav-links{gap:clamp(16px,calc((100vw - 1194px)/8),36px);margin-inline:178px 66px}
+  .fe .is-compact .brand{gap:10px}
+  .fe .is-compact .brand-text{display:flex;padding-left:12px}
+  .fe .is-compact .brand .name{font-size:1rem;letter-spacing:.18em}
+  .fe .is-compact .brand .ar{font-size:.875rem;margin-top:3px}
+}
+@media(min-width:1600px){.fe .is-compact .nav-links{margin-inline:178px}}
+@media(prefers-reduced-motion:no-preference){
+  .fe .is-compact .row-identity,.fe .is-compact .nav-links{animation:fe-barre .32s ease-out}
+  .fe .is-plein .nav-links{animation:fe-plein .32s ease-out}
+}
+@keyframes fe-barre{from{opacity:0}}
+@keyframes fe-plein{from{opacity:0}}
