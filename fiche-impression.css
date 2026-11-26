@@ -1,0 +1,23 @@
+/* Impression et export PDF, toutes fiches : rien de sombre, rien de coupé, aucun emplacement vide. */
+@media print{
+  html,body.fe{background:#fff}
+  header{position:static!important}
+  /* sans cela, l'export saisit les textes au milieu de leur apparition */
+  .fe-wait,[data-reveal]{opacity:1!important;transform:none!important;transition:none!important}
+  .mbar,.fe-anchors,.fe-play,.fe-arrow,.fe-skip,[class*=dn-cart],[class*=dn-search]{display:none!important}
+  .fe main img[data-src]{display:none}
+  .fe-hero{break-inside:avoid}
+  .fe-film-in{grid-template-columns:1fr 300px!important;break-inside:avoid}
+  .fe-player{height:auto;width:300px;background:none}
+  .fe-player video{display:none}
+  .fe-player:has(.fe-poster[data-src]){display:none}
+  .fe-player .fe-poster:not([data-src]){display:block!important;position:static;height:auto}
+  .fe-gallery-in{display:block}
+  .fe-strip{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:16px;overflow:visible;padding:0 20px;align-items:end}
+  .fe-strip li,.fe-strip li:nth-child(n){grid-area:auto;width:auto!important;margin:0}
+  .fe-related ul{display:grid!important;grid-template-columns:repeat(5,1fr)!important;gap:12px;overflow:visible}
+  .fe-related li{flex:none}
+  figure,.fe-step,.fe-strip li,.fe-related li,.fe-buy,.fe-folds details{break-inside:avoid}
+  .fe h2,.fe h3{break-after:avoid}
+  .fe *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}

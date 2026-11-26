@@ -1,0 +1,342 @@
+{
+ "_doc": "Provenance de chaque visuel de la fiche Santal Gourmand V1. Images de film : instant exact du film officiel (Media Kit de Maison Fragranza Paris), recadré et réduit ; photographies : fichiers Sony du Media Kit, recadrés et réduits. Aucune retouche, aucune couleur modifiée. Le dessin de la barbe à papa est calculé par Dar Nūr (aucun modèle génératif, aucune image tierce).",
+ "visuels": [
+  {
+   "fichier": "/assets/santal-gourmand/v1-table.webp",
+   "cadre_px": [
+    0,
+    288,
+    2160,
+    3552
+   ],
+   "taille_source": [
+    2160,
+    3840
+   ],
+   "origine": "Media Kit, VIDEOS_OFFICIELLES/2026/Santal Gourmand.mp4",
+   "seconde": 1.5,
+   "film_sha256": "aacf9f4fa315db43866dd93bc2a6ab653fe209d0be691a4126c699c03be50f2a",
+   "extraction": "image du film lue par le navigateur intégré (HEVC 2160 × 3840), canvas, JPEG 92 %",
+   "webp_sha256": "5a586c763a236acd04a5698fffbcb37566563506caad4f08ac443c536535407e"
+  },
+  {
+   "fichier": "/assets/santal-gourmand/v1-table-740.webp",
+   "origine": "réduction de /assets/santal-gourmand/v1-table.webp",
+   "webp_sha256": "d68937fe01c53580d5891c6c21065f729e72d219ec05284169b3a4a6d5ebf395"
+  },
+  {
+   "fichier": "/assets/santal-gourmand/v1-mains.webp",
+   "cadre_px": [
+    0,
+    230,
+    2160,
+    2928
+   ],
+   "taille_source": [
+    2160,
+    3840
+   ],
+   "origine": "Media Kit, VIDEOS_OFFICIELLES/2025/SANTAL GOURMAND.mov",
+   "seconde": 9.3,
+   "film_sha256": "d6708665944a066830e07c526df6bf4f37d7f0a5c6cc43d642e4aa137dbf8e29",
+   "extraction": "image du film lue par le navigateur intégré (HEVC 2160 × 3840), canvas, JPEG 92 %",
+   "webp_sha256": "06a381562d426b9cdd7e57634630af0bcde0ded882d0500572dbddaec9759fa2"
+  },
+  {
+   "fichier": "/assets/santal-gourmand/v1-framboise.webp",
+   "cadre_px": [
+    0,
+    576,
+    2160,
+    3276
+   ],
+   "taille_source": [
+    2160,
+    3840
+   ],
+   "origine": "Media Kit, VIDEOS_OFFICIELLES/2026/Santal Gourmand.mp4",
+   "seconde": 3.3,
+   "film_sha256": "aacf9f4fa315db43866dd93bc2a6ab653fe209d0be691a4126c699c03be50f2a",
+   "extraction": "image du film lue par le navigateur intégré (HEVC 2160 × 3840), canvas, JPEG 92 %",
+   "webp_sha256": "eea0364941397eccc7ce4631293720f3c0c9ce4cb3a249e27467ea05bf2924bb"
+  },
+  {
+   "fichier": "/assets/santal-gourmand/v1-pistache.webp",
+   "cadre_px": [
+    0,
+    576,
+    2160,
+    3276
+   ],
+   "taille_source": [
+    2160,
+    3840
+   ],
+   "origine": "Media Kit, VIDEOS_OFFICIELLES/2026/Santal Gourmand.mp4",
+   "seconde": 4.8,
+   "film_sha256": "aacf9f4fa315db43866dd93bc2a6ab653fe209d0be691a4126c699c03be50f2a",
+   "extraction": "image du film lue par le navigateur intégré (HEVC 2160 × 3840), canvas, JPEG 92 %",
+   "webp_sha256": "5375d10746ab7b17266c856643b7abbf6c6a4d09905817a6d6d0fbeb9a0100f7"
+  },
+  {
+   "fichier": "/assets/santal-gourmand/v1-santal.webp",
+   "cadre_px": [
+    1037,
+    2150,
+    2160,
+    3554
+   ],
+   "taille_source": [
+    2160,
+    3840
+   ],
+   "origine": "Media Kit, VIDEOS_OFFICIELLES/2026/Santal Gourmand.mp4",
+   "seconde": 6.8,
+   "film_sha256": "aacf9f4fa315db43866dd93bc2a6ab653fe209d0be691a4126c699c03be50f2a",
+   "extraction": "image du film lue par le navigateur intégré (HEVC 2160 × 3840), canvas, JPEG 92 %",
+   "webp_sha256": "59ad93471973570d474e06c2a4b1d908b8536a486907f4215162e452512af53c"
+  },
+  {
+   "fichier": "/assets/santal-gourmand/v1-etiquette.webp",
+   "cadre_px": [
+    0,
+    0,
+    2160,
+    3840
+   ],
+   "taille_source": [
+    2160,
+    3840
+   ],
+   "origine": "Media Kit, VIDEOS_OFFICIELLES/2026/Santal Gourmand.mp4",
+   "seconde": 9.8,
+   "film_sha256": "aacf9f4fa315db43866dd93bc2a6ab653fe209d0be691a4126c699c03be50f2a",
+   "extraction": "image du film lue par le navigateur intégré (HEVC 2160 × 3840), canvas, JPEG 92 %",
+   "webp_sha256": "2ea6687dd1b1e17e330ca9931898b9df4e4597de92204caf51b0786d4ba977c4"
+  },
+  {
+   "fichier": "/assets/santal-gourmand/v1-bouchon.webp",
+   "cadre_px": [
+    0,
+    0,
+    2160,
+    3840
+   ],
+   "taille_source": [
+    2160,
+    3840
+   ],
+   "origine": "Media Kit, VIDEOS_OFFICIELLES/2026/Santal Gourmand.mp4",
+   "seconde": 11.8,
+   "film_sha256": "aacf9f4fa315db43866dd93bc2a6ab653fe209d0be691a4126c699c03be50f2a",
+   "extraction": "image du film lue par le navigateur intégré (HEVC 2160 × 3840), canvas, JPEG 92 %",
+   "webp_sha256": "72289e2f5d505043f8e39bd98f962ff47c77ca1df954942fb3443624460c4a97"
+  },
+  {
+   "fichier": "/assets/santal-gourmand/v1-verre.webp",
+   "cadre_px": [
+    0,
+    0,
+    2160,
+    3840
+   ],
+   "taille_source": [
+    2160,
+    3840
+   ],
+   "origine": "Media Kit, VIDEOS_OFFICIELLES/2026/Santal Gourmand.mp4",
+   "seconde": 14.5,
+   "film_sha256": "aacf9f4fa315db43866dd93bc2a6ab653fe209d0be691a4126c699c03be50f2a",
+   "extraction": "image du film lue par le navigateur intégré (HEVC 2160 × 3840), canvas, JPEG 92 %",
+   "webp_sha256": "87ee21e1d11420c5a8ab660db046eba2e57d579f6eff865e02bc93fb9e34fb8d"
+  },
+  {
+   "fichier": "/assets/santal-gourmand/v1-base.webp",
+   "cadre_px": [
+    0,
+    0,
+    2160,
+    3840
+   ],
+   "taille_source": [
+    2160,
+    3840
+   ],
+   "origine": "Media Kit, VIDEOS_OFFICIELLES/2026/Santal Gourmand.mp4",
+   "seconde": 16.8,
+   "film_sha256": "aacf9f4fa315db43866dd93bc2a6ab653fe209d0be691a4126c699c03be50f2a",
+   "extraction": "image du film lue par le navigateur intégré (HEVC 2160 × 3840), canvas, JPEG 92 %",
+   "webp_sha256": "47529c24b9ce8fbc9201131fc07e5b7003d81f18f2179377ce399d641aea5b35"
+  },
+  {
+   "fichier": "/assets/santal-gourmand/v1-socle.webp",
+   "cadre_px": [
+    0,
+    0,
+    2160,
+    3840
+   ],
+   "taille_source": [
+    2160,
+    3840
+   ],
+   "origine": "Media Kit, VIDEOS_OFFICIELLES/2026/Santal Gourmand.mp4",
+   "seconde": 20.3,
+   "film_sha256": "aacf9f4fa315db43866dd93bc2a6ab653fe209d0be691a4126c699c03be50f2a",
+   "extraction": "image du film lue par le navigateur intégré (HEVC 2160 × 3840), canvas, JPEG 92 %",
+   "webp_sha256": "2ccbc577e45d3c6b26fc76ae77c8f08e80bf0dba64684ae2f36b0579ef2f368a"
+  },
+  {
+   "fichier": "/assets/santal-gourmand/v1-studio.webp",
+   "cadre_px": [
+    561,
+    420,
+    4111,
+    6529
+   ],
+   "taille_source": [
+    4672,
+    7008
+   ],
+   "origine": "Media Kit, PACKSHOTS_PARFUMS/SANTAL GOURMAND/PHOTOS/DSC09134.jpg",
+   "source_sha256": "d4b9acd24fae21ce46370ac6f6aae232006990f3efc4fdf0f0fe8e66fb4557f4",
+   "appareil": "SONY ILCE-7M4",
+   "webp_sha256": "2f007ae244bd535d26007746528d5a023a889200ef7a637fb28eaac41a50a3d6"
+  },
+  {
+   "fichier": "/assets/santal-gourmand/v1-affiche.webp",
+   "cadre_px": [
+    0,
+    0,
+    2160,
+    3840
+   ],
+   "taille_source": [
+    2160,
+    3840
+   ],
+   "origine": "Media Kit, VIDEOS_OFFICIELLES/2026/Santal Gourmand.mp4",
+   "seconde": 19.8,
+   "film_sha256": "aacf9f4fa315db43866dd93bc2a6ab653fe209d0be691a4126c699c03be50f2a",
+   "extraction": "image du film lue par le navigateur intégré (HEVC 2160 × 3840), canvas, JPEG 92 %",
+   "webp_sha256": "189c17f0a48aa400f64e8cf955a58ed37566678be5aacab36dd64474dcdd4ec9"
+  },
+  {
+   "fichier": "/assets/santal-gourmand/v1-geste.webp",
+   "cadre_px": [
+    0,
+    1680,
+    2160,
+    3840
+   ],
+   "taille_source": [
+    2160,
+    3840
+   ],
+   "origine": "Media Kit, VIDEOS_OFFICIELLES/2025/SANTAL GOURMAND.mov",
+   "seconde": 18.3,
+   "film_sha256": "d6708665944a066830e07c526df6bf4f37d7f0a5c6cc43d642e4aa137dbf8e29",
+   "extraction": "image du film lue par le navigateur intégré (HEVC 2160 × 3840), canvas, JPEG 92 %",
+   "webp_sha256": "7ad45380b2b141c19dc1eedc9815a54a99c92eb73a6c6d10e67e5a7efec6d0c8"
+  },
+  {
+   "fichier": "/assets/santal-gourmand/v1-coupe.webp",
+   "cadre_px": [
+    0,
+    0,
+    2160,
+    2700
+   ],
+   "taille_source": [
+    2160,
+    3840
+   ],
+   "origine": "Media Kit, VIDEOS_OFFICIELLES/2025/SANTAL GOURMAND.mov",
+   "seconde": 12.5,
+   "film_sha256": "d6708665944a066830e07c526df6bf4f37d7f0a5c6cc43d642e4aa137dbf8e29",
+   "extraction": "image du film lue par le navigateur intégré (HEVC 2160 × 3840), canvas, JPEG 92 %",
+   "webp_sha256": "27fd5e64e8305d6bcd07d0d8ac8be1d480f2ef37ed62c532909493753a7f65c7"
+  },
+  {
+   "fichier": "/assets/santal-gourmand/v1-collection.webp",
+   "cadre_px": [
+    0,
+    557,
+    4643,
+    6360
+   ],
+   "taille_source": [
+    4643,
+    6964
+   ],
+   "origine": "Media Kit, PACKSHOTS_PARFUMS/SANTAL GOURMAND/PHOTOS/DSC09201.jpg",
+   "source_sha256": "f30f1424310b13ffbf857596425c0a3ca7d30ca55ad376ad6ba619bb8e60c3b9",
+   "appareil": "SONY ILCE-7M4",
+   "webp_sha256": "a3c2bc9e0adab66a2e6cf5fb56a9e7fd680aa372bf729dd7c49eb5187b6571d8"
+  },
+  {
+   "fichier": "/assets/santal-gourmand/v1-og.webp",
+   "cadre_px": [
+    0,
+    883,
+    2160,
+    2323
+   ],
+   "taille_source": [
+    2160,
+    3840
+   ],
+   "origine": "Media Kit, VIDEOS_OFFICIELLES/2026/Santal Gourmand.mp4",
+   "seconde": 21.8,
+   "film_sha256": "aacf9f4fa315db43866dd93bc2a6ab653fe209d0be691a4126c699c03be50f2a",
+   "extraction": "image du film lue par le navigateur intégré (HEVC 2160 × 3840), canvas, JPEG 92 %",
+   "webp_sha256": "366188eadba086b8d26d00538ccd99b4568ba60d571edfb931f0da17ecddf179"
+  },
+  {
+   "fichier": "/assets/santal-gourmand/v1-charnel-absolu.webp",
+   "origine": "Media Kit, CHARNEL ABSOLU/65.jpg",
+   "source_sha256": "1328aa4c1e4e8569caf31488d46536b3ae95c1d9382647ac70e9a1c209757a9e",
+   "cadre_px": [
+    65,
+    192,
+    1015,
+    1618
+   ],
+   "taille_source": [
+    1080,
+    1920
+   ],
+   "webp_sha256": "20e68f3d0d55e1ae3cd63005bc6a5406661e9467bcd40d62ed4aa6128ab21b68"
+  },
+  {
+   "fichier": "/assets/santal-gourmand/v1-coeur-blanc.webp",
+   "origine": "copie à l'identique de /assets/charnel-absolu/v1-coeur-blanc.webp (photographie Sony du Media Kit, voir fiches/_sources/charnel-absolu.json)",
+   "webp_sha256": "4dd1982950f33e5340d2a9e93a04a5141d741a42c99506fdc102f7d0df691c2c"
+  },
+  {
+   "fichier": "/assets/santal-gourmand/v1-blvd-haussmann.webp",
+   "origine": "copie à l'identique de /assets/charnel-absolu/v1-blvd-haussmann.webp (photographie Sony du Media Kit, voir fiches/_sources/charnel-absolu.json)",
+   "webp_sha256": "f6f9d4d281636987519db4ffa9fd1d5e5f2a8b06df00b35510c58c0377aa0b08"
+  },
+  {
+   "fichier": "/assets/santal-gourmand/v1-rosa-vento.webp",
+   "origine": "copie à l'identique de /assets/charnel-absolu/v1-rosa-vento.webp (photographie Sony du Media Kit, voir fiches/_sources/charnel-absolu.json)",
+   "webp_sha256": "534178d825c6d35fd95b56c098f3dfc51676ad546baccc1573b8ffa7d19b7cf7"
+  },
+  {
+   "fichier": "/assets/santal-gourmand/v1-fragamour.webp",
+   "origine": "copie à l'identique de /assets/charnel-absolu/v1-fragamour.webp (photographie Sony du Media Kit, voir fiches/_sources/charnel-absolu.json)",
+   "webp_sha256": "43eb1ccee908cad659ad7cad38efa6cdff4effad0d564d3e057e474e4cd75bf4"
+  },
+  {
+   "fichier": "/assets/santal-gourmand/v1-barbe.webp",
+   "origine": "Dar Nūr, dessin calculé (fils de sucre suivant un champ de tourbillons), programme barbe.py, graine 7, 720 × 900",
+   "webp_sha256": "d9c6ec8407fedaac98ef0df45cb2343a72e78df3e54cb094406fa1e1e934f3bf"
+  }
+ ],
+ "film": {
+  "diffuse": "https://cdn.shopify.com/videos/c/vp/164a68fa0b584b8f8dabd6c348c2a410/ (version déjà hébergée par shop.dar-nur.fr, 24,5 s, 9:16)",
+  "origine": "Media Kit, VIDEOS_OFFICIELLES/2026/Santal Gourmand.mp4",
+  "nouvelle_mise_en_ligne": false
+ }
+}

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="fr" data-fiche="editoriale">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>{{TITLE}}</title>
+<meta name="description" content="{{DESCRIPTION}}" />
+<link rel="canonical" href="{{URL}}" />
+<meta property="og:type" content="product" />
+<meta property="og:title" content="{{TITLE}}" />
+<meta property="og:description" content="{{DESCRIPTION}}" />
+<meta property="og:url" content="{{URL}}" />
+<meta property="og:image" content="{{OG_IMAGE}}" />
+<meta property="og:image:width" content="{{OG_W}}" />
+<meta property="og:image:height" content="{{OG_H}}" />
+<meta property="og:image:alt" content="{{OG_ALT}}" />
+<meta property="og:site_name" content="Dar Nūr" />
+<meta property="og:locale" content="fr_FR" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="{{TITLE}}" />
+<meta name="twitter:description" content="{{DESCRIPTION}}" />
+<meta name="twitter:image" content="{{OG_IMAGE}}" />
+<meta name="theme-color" content="{{THEME_COLOR}}" />
+<link rel="icon" type="image/png" href="/favicon.png" sizes="192x192" />
+<link rel="apple-touch-icon" href="/favicon.png" />
+{{HERO_PRELOAD}}
+{{FONT_PRELOADS}}
+<link rel="stylesheet" href="/fiche-premium.css" />
+<style>{{ART}}</style>
+<link rel="stylesheet" href="/nav.css" />
+<link rel="stylesheet" href="/fiche-impression.css" media="print" />
+<noscript><style>img[data-src]{display:none!important}</style></noscript>
+{{LD}}
+</head>
+<body class="fe">
+<a class="fe-skip" href="#productView">Aller au contenu</a>
+{{NAV}}
+
+<main>
+<div id="productView" style="display:block">
+
+{{SECTIONS}}
+
+</div>
+
+<!-- ============ MOBILE BAR ============ -->
+</main>
+<div class="mbar is-off" id="mbar" role="region" aria-label="Commande rapide">
+  <div><strong data-price>{{PRICE}}</strong><small data-stock{{STOCK_HIDDEN}}>{{STOCK}}</small></div>
+  <button type="button" class="fe-btn fe-btn-main" data-add{{MBAR_DISABLED}}>{{MBAR_LABEL}}</button>
+</div>
+
+<dialog class="fe-box" id="feBox" aria-label="Image agrandie">
+  <button type="button" class="fe-box-close" data-box="close" aria-label="Fermer">×</button>
+  <button type="button" class="fe-box-nav fe-box-prev" data-box="-1" aria-label="Image précédente"></button>
+  <figure><img id="feBoxImg" alt="" /><figcaption id="feBoxCap"></figcaption></figure>
+  <button type="button" class="fe-box-nav fe-box-next" data-box="1" aria-label="Image suivante"></button>
+</dialog>
+
+<footer>
+  <div class="foot-inner">
+    <img src="/logo-dar-nur.png" alt="Logo Dar Nūr" class="footer-logo-img" width="52" height="52" loading="lazy"/>
+    <div class="foot-cols">
+      <div class="foot-col"><h2>Boutique</h2><a href="/idees-cadeaux/">Idées cadeaux</a><a href="/miels/">Miels</a><a href="/huiles/">Huiles</a><a href="/parfums/">Parfums &amp; Muscs</a><a href="/bakhour/">Bakhour &amp; Encens</a><a href="/abayas/">Qamis &amp; Abayas</a></div>
+      <div class="foot-col"><h2>Aide</h2><a href="https://dar-nur.fr/#commande-livraison">Livraison &amp; commande</a><a href="https://dar-nur.fr/#faq">FAQ</a><a href="https://dar-nur.fr/#avis-clients">Avis clients</a></div>
+      <div class="foot-col"><h2>Maison</h2><a href="https://dar-nur.fr/#histoire">Notre histoire</a><a href="https://dar-nur.fr/#qui-sommes-nous">Qui sommes-nous</a><a href="https://wa.me/33769253375" target="_blank" rel="noopener">Contact</a></div>
+    </div>
+    <div class="foot-contact">Nous joindre : +33 7 69 25 33 75 · dar_nur_001@outlook.com</div>
+    <div class="foot-channels"><a href="https://instagram.com/dar.nur.officiel" target="_blank" rel="noopener">Instagram</a><span>·</span><a href="https://www.tiktok.com/@darnur.officiel" target="_blank" rel="noopener">TikTok</a></div>
+    <div class="foot-copy">© 2026 Dar Nūr — Tous droits réservés<br><a href="/mentions-legales.html">Mentions légales</a> · <a href="/confidentialite.html">Politique de confidentialité</a> · <a href="/cgv.html">CGV</a></div>
+    <div class="foot-blessing" lang="ar" dir="rtl">بارك الله فيكم</div>
+  </div>
+</footer>
+
+<script>
+/* Images hors écran. 1) celles déjà visibles, après la photo principale ; 2) dès le premier
+   défilement, un écran d'avance ; 3) après deux écrans parcourus, les dernières une à une,
+   en priorité basse : aucune n'apparaît en retard et un export PDF les contient. Chaque image
+   garde data-src tant qu'elle n'est pas arrivée ; un échec est retenté deux fois. */
+(function(){var L=[].slice.call(document.querySelectorAll('img[data-src]'));
+function go(i,f){var s=i.getAttribute('data-src'),n=0;if(!s||i._g){if(f)f();return}i._g=1;
+i.onload=function(){if(i.src.slice(0,5)==='data:')return;i.removeAttribute('data-src');i.onload=i.onerror=null;if(f)f()};
+i.onerror=function(){if(n++<2)setTimeout(function(){i.src=s+(s.indexOf('?')<0?'?':'&')+'r='+n},900*n);else{i.onload=i.onerror=null;if(f)f()}};
+i.src=s}
+function all(){L.forEach(function(i){go(i)})}
+window.addEventListener('beforeprint',all);
+if(!('IntersectionObserver'in window)){all();return}
+function ob(m){var o=new IntersectionObserver(function(e){e.forEach(function(x){if(x.isIntersecting){go(x.target);o.unobserve(x.target)}})},{rootMargin:m});L.forEach(function(i){if(!i._g)o.observe(i)})}
+var c=navigator.connection,thrifty=c&&(c.saveData||/2g|3g/.test(c.effectiveType||''));
+function rest(){if(document.hidden){document.addEventListener('visibilitychange',rest,{once:true});return}
+var i=L.filter(function(x){return!x._g})[0];if(i){i.fetchPriority='low';go(i,rest)}}
+function past(){if(window.scrollY>innerHeight*1.8){window.removeEventListener('scroll',past);setTimeout(rest,2000)}}
+function arm(){ob('0px');window.addEventListener('scroll',function(){ob('700px 60px')},{once:true,passive:true});if(window.scrollY>4)ob('700px 60px');if(!thrifty){window.addEventListener('scroll',past,{passive:true});past()}}
+if(document.readyState==='complete')arm();else window.addEventListener('load',arm)})();
+</script>
+<script type="application/json" id="feConfig">{{CONFIG}}</script>
+<script src="/js/nav.js" defer></script>
+<script src="/js/config.js" defer></script>
+<script src="/js/fiche-editoriale.js" defer></script>{{EXTRAS}}
+</body>
+</html>

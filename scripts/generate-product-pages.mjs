@@ -19,6 +19,7 @@
 
 import { readFile, writeFile, mkdir, rm, readdir } from 'node:fs/promises';
 import { loadEditorialFiches, renderEditorialFiche, extractDeliveryBlock } from './lib/fiche-editoriale.mjs';
+import { loadEditorialFiches as loadPremiumFiches, renderEditorialFiche as renderPremiumFiche } from './lib/fiche-premium.mjs';
 import { buildEditorialNav } from './lib/fiche-nav.mjs';
 
 const ROOT = new URL('../', import.meta.url);
@@ -567,6 +568,19 @@ async function main() {
     log(`::warning::Fiches éditoriales désactivées pour ce passage : ${e.message}`);
     editorial = new Map();
   }
+  // Fiches premium (fiches/premium/_data/<slug>.json, gabarit généralisé) : même principe, gabarit séparé ;
+  // une fiche en erreur garde le rendu standard, les autres ne sont pas touchées.
+  let premium = { fiches: new Map() };
+  try {
+    premium = await loadPremiumFiches(ROOT, m => log(`::warning::${m}`));
+    if (premium.fiches.size) {
+      deliveryHtml ||= extractDeliveryBlock(indexTemplate.replace(/\r\n/g, '\n'));
+      brands ||= await fetchJson(`${creds.url}/rest/v1/brands?select=id,name&active=eq.true&order=sort_order.asc,name.asc`, creds);
+    }
+  } catch (e) {
+    log(`::warning::Fiches premium désactivées pour ce passage : ${e.message}`);
+    premium = { fiches: new Map() };
+  }
   const manifestSlugs = await loadManifest();
   const redirectManifest = await loadManifest(REDIRECT_MANIFEST_PATH);
   // Les dossiers écrits par ce script (fiches ET pages de redirection) ne
@@ -605,7 +619,17 @@ async function main() {
     try {
       // Une erreur dans le contenu éditorial ne doit jamais faire disparaître la
       // fiche : on la signale et on publie le rendu standard.
-      if (editorial.has(slug)) {
+      if (premium.fiches.has(slug)) {
+        try {
+          html = renderPremiumFiche({
+            template: premium.template, sections: premium.sections, ...premium.fiches.get(slug), product: p, price: adaptPrice(p), catLabel, deliveryHtml,
+            navHtml: await buildEditorialNav(ROOT, brands, products, p.brand_slug),
+            related: products.filter(x => x.brand_slug && x.brand_slug === p.brand_slug && x.slug !== slug).slice(0, 5),
+          });
+        } catch (e) {
+          log(`::warning::Fiche premium ${slug} : ${e.message} — rendu standard publié à la place.`);
+        }
+      } else if (editorial.has(slug)) {
         try {
           html = renderEditorialFiche({
             template: editorialTemplate, data: editorial.get(slug), product: p, price: adaptPrice(p), catLabel, deliveryHtml,

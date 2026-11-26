@@ -12,15 +12,17 @@ document.getElementById('burger').addEventListener('click', () => {
 
 /* Fiches éditoriales : pages statiques sans moteur SPA. Depuis l'accueil ou une
    autre fiche, on les ouvre par leur vraie URL au lieu de les redessiner.
-   Liste contrôlée par scripts/lib/fiche-editoriale.mjs (= fiches/_data/). */
+   Liste contrôlée par scripts/lib/fiche-editoriale.mjs (= fiches/_data/) ;
+   FICHES_PREMIUM par scripts/lib/fiche-premium.mjs (= fiches/premium/_data/). */
 (function () {
   var FICHES_EDITORIALES = ['coeur-blanc'];
+  var FICHES_PREMIUM = ['santal-gourmand'];
   document.addEventListener('DOMContentLoaded', function () {
     if (typeof window.showProduct !== 'function') return;
     var original = window.showProduct;
     window.showProduct = function (id) {
       /* Déjà sur l'URL : rendu standard de repli, on ne recharge pas en boucle. */
-      if (FICHES_EDITORIALES.indexOf(id) >= 0 && location.pathname !== '/' + id + '/') { location.href = '/' + id + '/'; return; }
+      if ((FICHES_EDITORIALES.indexOf(id) >= 0 || FICHES_PREMIUM.indexOf(id) >= 0) && location.pathname !== '/' + id + '/') { location.href = '/' + id + '/'; return; }
       return original.apply(this, arguments);
     };
   });

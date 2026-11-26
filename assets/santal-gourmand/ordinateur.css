@@ -1,0 +1,71 @@
+/* Santal Gourmand, ordinateur et tablette large (dès 861 px, voir data.styles) : sections sous l'ouverture.
+   Lien ajouté par la page elle-même ; sans JavaScript, il est dans <noscript>. */
+/* 2. Le parfum : la chaleur des mains à gauche, le texte sur la crème */
+.fe-perfume{display:grid;grid-template-columns:minmax(0,44fr) minmax(0,56fr);grid-template-rows:auto 1fr;column-gap:clamp(40px,6vw,110px);align-items:start;padding:var(--gap) var(--side)}
+.fe-perfume-fig{grid-area:1/1/3/2;margin:0}
+.fe-perfume-head{grid-area:1/2;padding:clamp(10px,4vw,70px) 0 0}
+.fe-perfume-head h2{font-size:clamp(3rem,6.6vw,6.6rem);line-height:.96;max-width:6.4em}
+.fe-perfume-txt{grid-area:2/2;padding:34px 0 0;max-width:34em}
+.fe-perfume-fig img,.fe-house-fig img,.fe-planche-fig img{border-radius:40px}
+/* 3. Les strates : chaque matière sur toute la largeur, nappée sur la précédente */
+.fe-pyr-head{display:grid;grid-template-columns:1fr auto;align-items:baseline;gap:0 40px;padding:var(--gap) var(--side) clamp(50px,5vw,80px)}
+.fe-pyr-head .fe-eyebrow{grid-column:1/-1}
+.fe-families{margin:0}
+.fe-step{display:grid;grid-template-columns:minmax(0,26fr) minmax(0,74fr);align-items:start;gap:0 clamp(30px,4vw,70px);padding:clamp(48px,5vw,84px) var(--side)}
+.fe-step::before{height:34px;top:-33px}
+.fe-step h3{display:block;padding:clamp(6px,1vw,16px) 0 0}
+.fe-step h3 span{display:block;margin-bottom:8px}
+.fe-step h3 em{display:block;font-size:clamp(3rem,5.4vw,5.6rem)}
+.fe-notes{gap:0 clamp(20px,2.6vw,44px)}
+.fe-step-2 .fe-notes{grid-template-columns:repeat(2,minmax(0,min(28vw,420px)))}
+.fe-step-1 .fe-note,.fe-step:nth-child(3) .fe-note{grid-template-columns:minmax(0,min(28vw,420px)) minmax(0,1fr);gap:0 clamp(24px,3.4vw,60px)}
+.fe-step:nth-child(3) .fe-note img{grid-column:1}
+.fe-step:nth-child(3) .fe-note :not(img){grid-column:2}
+.fe-note img{border-radius:32px}
+.fe-note h4{font-size:clamp(1.8rem,2.5vw,2.6rem);padding-top:18px}
+.fe-step-1 .fe-note h4{font-size:clamp(2.2rem,3.6vw,3.6rem)}
+.fe-note p{font-size:1.1rem}
+.fe-pyramid>.fe-disclaim{padding:4px var(--side) clamp(36px,3.6vw,56px)}
+/* 4. Le flacon : six vues alignées */
+.fe-gallery{padding-top:var(--gap)}
+.fe-gallery-head{padding:0 var(--side) clamp(24px,2.8vw,42px);display:grid;grid-template-columns:1fr auto;align-items:baseline;column-gap:40px}
+.fe-gallery-head .fe-eyebrow{grid-column:1/-1}
+.fe-gallery-head>p:last-child{margin:0}
+.fe-strip{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:clamp(10px,1.3vw,22px);padding:0 var(--side);overflow:visible;align-items:end}
+.fe-strip .fe-shot{border-radius:clamp(16px,1.8vw,30px)}
+.fe-strip p{padding:12px 0 4px}
+/* 5. Le film : le texte à gauche, le film debout à droite */
+.fe-film{margin-top:var(--gap);padding:var(--gap) var(--side)}
+.fe-film-in{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:0 clamp(40px,6vw,120px);max-width:1400px;margin:0 auto}
+.fe-film-txt{padding:0;max-width:30em}
+.fe-film h2{font-size:clamp(3rem,5.4vw,5.8rem)}
+.fe-film .fe-player{width:auto;height:clamp(520px,calc(100svh - 140px),860px);margin:0;border-radius:36px}
+.fe-play-pill{min-height:48px;padding:4px 24px 4px 5px;gap:12px}
+/* 6. Le rituel : le geste, le texte, la coupe */
+.fe-planche-rituel{grid-template-columns:minmax(0,34fr) minmax(0,38fr) minmax(0,28fr);gap:0 clamp(28px,3.6vw,64px);align-items:center;padding:var(--gap) var(--side)}
+.fe-planche-rituel .fe-planche-fig:nth-of-type(1){grid-area:1/1}
+.fe-planche-rituel .fe-planche-fig:nth-of-type(2){grid-area:1/3;margin:0;align-self:end}
+.fe-planche-txt{grid-area:1/2;padding:0}
+.fe-planche-txt h2{font-size:clamp(2.8rem,4.6vw,4.8rem)}
+/* 7. L'essentiel */
+.fe-details-head{text-align:center;margin-bottom:clamp(26px,3.4vw,50px)}
+.fe-folds{max-width:980px;margin-inline:auto}
+.fe-folds dl{grid-template-columns:repeat(4,1fr);gap:6px 32px}
+.fe-folds summary h3{font-size:1.6rem}
+/* 8. La maison */
+.fe-house{display:grid;grid-template-columns:minmax(0,40fr) minmax(0,60fr);align-items:center;gap:0 clamp(40px,6vw,110px);padding:var(--gap) var(--side)}
+.fe-house-txt{padding:0;max-width:34em}
+.fe-house-txt>p:not(.fe-eyebrow){margin-top:18px}
+.fe-house-fig img{max-height:min(84vh,820px);width:auto;margin-left:auto}
+/* 9. Conclusion */
+.fe-final{margin-top:40px;padding:clamp(80px,8vw,130px) var(--side) clamp(80px,8vw,130px)}
+.fe-final::before{height:34px;top:-33px}
+.fe-final h2{font-size:clamp(3rem,7vw,6.6rem)}
+@media(max-width:1100px){
+  .fe-step{grid-template-columns:1fr}
+  .fe-step h3{padding-bottom:26px}
+  .fe-strip{grid-template-columns:repeat(3,minmax(0,1fr));row-gap:18px}
+  .fe-planche-rituel{grid-template-columns:1fr 1fr}
+  .fe-planche-rituel .fe-planche-fig:nth-of-type(2){grid-area:1/2}
+  .fe-planche-txt{grid-area:2/1/3/3;padding-top:40px;max-width:40em}
+}
